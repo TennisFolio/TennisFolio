@@ -15,4 +15,9 @@ public class CountryDTO {
     private String alpha;
     @JsonProperty("name")
     private String name;
+
+    public CountryDTO(String alpha, String name){
+        this.alpha = alpha;
+        this.name = name;
+    }
 }

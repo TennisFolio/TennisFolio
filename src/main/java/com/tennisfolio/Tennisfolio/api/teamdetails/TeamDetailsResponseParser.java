@@ -40,14 +40,16 @@ public class TeamDetailsResponseParser implements ResponseParser<TeamDetailsApiD
 
             String cur = curNode.asText();
 
-            if(cur.equals("EUR")){
-                Long prizeCurrent = team.getPrizeCurrent() != null? team.getPrizeCurrent() : 0L;
-                Long prizeTotal = team.getPrizeTotal() != null? team.getPrizeTotal() : 0L;
+            Long prizeCurrent = team.getPrizeCurrent() != null? team.getPrizeCurrent() : 0L;
+            Long prizeTotal = team.getPrizeTotal() != null? team.getPrizeTotal() : 0L;
 
-                // USD로 저장
-                team.setPrizeCurrent(eurToUsd(prizeCurrent));
-                team.setPrizeTotal(eurToUsd(prizeTotal));
-            }
+            // USD로 저장
+            team.setPrizeCurrent(eurToUsd(prizeCurrent, cur));
+            team.setPrizeTotal(eurToUsd(prizeTotal, cur));
+
+
+
+
         }catch(Exception e){
             e.printStackTrace();
         }
@@ -73,9 +75,11 @@ public class TeamDetailsResponseParser implements ResponseParser<TeamDetailsApiD
         return kstDateTime.format(formatter);
     }
 
-    public Long eurToUsd(Long eur){
-        if(eur == 0L || eur == null) return 0L;
-        Long usd = Math.round(eur*0.95);
+    public Long eurToUsd(Long value, String cur){
+        if(!cur.equals("EUR")) return value;
+
+        if(value == 0L || value == null) return 0L;
+        Long usd = Math.round(value*0.95);
         return usd;
     }
 }
