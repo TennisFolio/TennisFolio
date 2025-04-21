@@ -3,6 +3,7 @@ package com.tennisfolio.Tennisfolio.api.atpranking;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tennisfolio.Tennisfolio.api.base.ResponseParser;
+import com.tennisfolio.Tennisfolio.util.ConversionUtil;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -20,10 +21,10 @@ public class AtpRankingResponseParser implements ResponseParser<List<AtpRankingA
             JsonNode dataArrayNode = rootNode.path("rankings");
             JsonNode updateTime = rootNode.path("updatedAtTimestamp");
             String updateDate = updateTime.toString();
+            String yyyyMMdd = ConversionUtil.timestampToYyyyMMdd(updateDate);
             for(JsonNode dataNode : dataArrayNode){
                 AtpRankingApiDTO rankingApiDTO = objectMapper.treeToValue(dataNode, AtpRankingApiDTO.class);
-                String id = dataNode.path("team").path("id").toString();
-                rankingApiDTO.setUpdateTime(updateDate);
+                rankingApiDTO.setUpdateTime(yyyyMMdd);
                 list.add(rankingApiDTO);
             }
             return list;

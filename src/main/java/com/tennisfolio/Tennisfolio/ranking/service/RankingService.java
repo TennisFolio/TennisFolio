@@ -1,5 +1,5 @@
 package com.tennisfolio.Tennisfolio.ranking.service;
 
 public interface RankingService {
-    public void atpRanking();
+    public void saveAtpRanking();
 }

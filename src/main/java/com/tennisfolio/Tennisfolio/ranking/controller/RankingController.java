@@ -20,8 +20,8 @@ public class RankingController {
     }
 
     @PostMapping("/ranking")
-    public ResponseEntity atpRankings(){
-        rankingService.atpRanking();
+    public ResponseEntity saveAtpRankings(){
+        rankingService.saveAtpRanking();
         return new ResponseEntity(HttpStatus.OK);
     }
 }

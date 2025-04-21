@@ -3,6 +3,7 @@ package com.tennisfolio.Tennisfolio.api.teamdetails;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tennisfolio.Tennisfolio.api.base.ResponseParser;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.tennisfolio.Tennisfolio.util.ConversionUtil;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
@@ -14,7 +15,7 @@ import java.time.format.DateTimeFormatter;
 public class TeamDetailsResponseParser implements ResponseParser<TeamDetailsApiDTO> {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    // transTimeStamp, eurToUsd 정리
+
     // exception 정리
 
     @Override
@@ -29,7 +30,7 @@ public class TeamDetailsResponseParser implements ResponseParser<TeamDetailsApiD
             team = objectMapper.treeToValue(playerNode, TeamDetailsApiDTO.class);
             country = objectMapper.treeToValue(countryNode, CountryDTO.class);
             team.setCountry(country);
-            team.setBirthDate(transTimeStamp(team.getBirthDate()));
+            team.setBirthDate(ConversionUtil.timestampToYyyyMMdd(team.getBirthDate()));
             // 이름
             JsonNode name= teamNode.path("fullName");
             team.setPlayerName(name.asText());
@@ -44,11 +45,8 @@ public class TeamDetailsResponseParser implements ResponseParser<TeamDetailsApiD
             Long prizeTotal = team.getPrizeTotal() != null? team.getPrizeTotal() : 0L;
 
             // USD로 저장
-            team.setPrizeCurrent(eurToUsd(prizeCurrent, cur));
-            team.setPrizeTotal(eurToUsd(prizeTotal, cur));
-
-
-
+            team.setPrizeCurrent(ConversionUtil.eurToUsd(prizeCurrent, cur));
+            team.setPrizeTotal(ConversionUtil.eurToUsd(prizeTotal, cur));
 
         }catch(Exception e){
             e.printStackTrace();
@@ -58,28 +56,6 @@ public class TeamDetailsResponseParser implements ResponseParser<TeamDetailsApiD
         return team;
     }
 
-    public String transTimeStamp(String timeStamp){
-        // Unix 타임스탬프 예제 (초 단위)
-        long unixTimestamp = Long.parseLong(timeStamp);
-
-        // 타임스탬프를 Instant로 변환
-        Instant instant = Instant.ofEpochSecond(unixTimestamp);
-
-        // 대한민국 표준시 (KST)로 ZonedDateTime 변환
-        ZonedDateTime kstDateTime = instant.atZone(ZoneId.of("Asia/Seoul"));
-
-        // 포맷 설정 (yyyy-MM-dd HH:mm:ss)
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
 
 
-        return kstDateTime.format(formatter);
-    }
-
-    public Long eurToUsd(Long value, String cur){
-        if(!cur.equals("EUR")) return value;
-
-        if(value == 0L || value == null) return 0L;
-        Long usd = Math.round(value*0.95);
-        return usd;
-    }
 }

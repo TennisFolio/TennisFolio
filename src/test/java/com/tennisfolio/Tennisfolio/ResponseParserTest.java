@@ -7,6 +7,7 @@ import com.tennisfolio.Tennisfolio.api.teamdetails.CountryDTO;
 import com.tennisfolio.Tennisfolio.api.teamdetails.TeamDetailsApiDTO;
 import com.tennisfolio.Tennisfolio.api.teamdetails.TeamDetailsResponseParser;
 import com.tennisfolio.Tennisfolio.api.teamdetails.TeamDetailsTemplate;
+import com.tennisfolio.Tennisfolio.util.ConversionUtil;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -72,13 +73,13 @@ public class ResponseParserTest {
         expected.setPlayerName(teamNode.path("fullName").asText(null));
         expected.setHeight(playerInfoNode.path("height").asText());
         expected.setWeight(playerInfoNode.path("weight").asText());
-        expected.setBirthDate(parser.transTimeStamp(playerInfoNode.path("birthDateTimestamp").asText()));
+        expected.setBirthDate(ConversionUtil.timestampToYyyyMMdd(playerInfoNode.path("birthDateTimestamp").asText()));
         expected.setPlays(playerInfoNode.path("plays").asText(null));
         expected.setTurnedPro(playerInfoNode.path("turnedPro").asText(null));
         expected.setCountry(new CountryDTO(teamNode.path("country").path("alpha").asText(null),
                 teamNode.path("country").path("name").asText(null)));
-        expected.setPrizeCurrent(parser.eurToUsd(playerInfoNode.path("prizeCurrentRaw").path("value").asLong(), playerInfoNode.path("prizeCurrentRaw").path("currency").asText(null)));
-        expected.setPrizeTotal(parser.eurToUsd(playerInfoNode.path("prizeTotalRaw").path("value").asLong(), playerInfoNode.path("prizeTotalRaw").path("currency").asText(null)));
+        expected.setPrizeCurrent(ConversionUtil.eurToUsd(playerInfoNode.path("prizeCurrentRaw").path("value").asLong(), playerInfoNode.path("prizeCurrentRaw").path("currency").asText(null)));
+        expected.setPrizeTotal(ConversionUtil.eurToUsd(playerInfoNode.path("prizeTotalRaw").path("value").asLong(), playerInfoNode.path("prizeTotalRaw").path("currency").asText(null)));
 
         // When
         TeamDetailsApiDTO actual = parser.parse(response);
