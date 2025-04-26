@@ -35,6 +35,15 @@ public abstract class AbstractApiTemplate<T, E> {
         return toEntity(responseDto);
     }
 
+    public T executeWithoutSave(String params){
+        // api 호출
+        String response = callApi(params);
+        // response to DTO
+        T responseDto = toDTO(response);
+
+        return responseDto;
+    }
+
     // response To dto
     public abstract T toDTO(String response);
 

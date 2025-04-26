@@ -1,0 +1,86 @@
+
+.hamburger{
+  display : none;
+}
+.sidebar{
+  flex-shrink: 0;
+  min-width: 50px; 
+  background-color: #1e2e48;
+  color: white;
+  padding: 24px;
+  border-radius: 12px;
+  
+}
+.nav-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  font-size: 14px;
+  padding-bottom: 4px;
+  
+  margin-bottom: 8px;
+  user-select: none;
+}
+
+.nav-sublist {
+  list-style: none;
+  padding-left: 0;
+  font-size: 10px;
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: max-height 0.3s ease, opacity 0.3s ease;
+  margin-bottom: 16px;
+}
+
+.nav-sublist.open {
+  max-height: 300px; /* 충분히 큰 값으로 */
+  opacity: 1;
+}
+
+.nav-sublist li {
+  padding-left: 8px;
+  font-size: 13px;
+  margin-bottom: 6px;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.nav-sublist li:hover {
+  color: #ffd700;
+}
+
+@media (max-width: 768px) {
+  .hamburger{
+    display: block;
+    position: fixed;
+    top: 10px;
+    left: 20px;
+    font-size: 28px;
+    background: none;
+    border: none;
+    color: #fff;
+    z-index: 1000;
+    cursor: pointer;
+  }
+  .sidebar {
+    position: fixed;
+    width: 10%;
+    top : 54px;
+    left: -300px;
+    height: 100vh;
+    z-index: 999;
+    transition: left 0.3s ease;
+    border-radius: 0;
+   
+  }
+  .nav-title{
+    font-size : 14px;
+  }
+
+  .sidebar.show {
+    left: 8px;
+  }
+
+}
