@@ -16,7 +16,7 @@ public class Ranking {
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     @Column(name="RANKING_ID")
     private Long rankingId;
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "PLAYER_ID")
     private Player player;
     @Column(name = "CUR_RANKING")
