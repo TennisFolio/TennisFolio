@@ -14,7 +14,7 @@ const NAV_ITEMS = [
   {
     title: '랭킹',
     children: [
-      { label: '실시간', path: '/ranking/live' },
+      { label: '실시간', path: '/ranking' },
       { label: '연도별', path: '/ranking/yearly' },
     ],
   },
