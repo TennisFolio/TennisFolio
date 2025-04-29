@@ -5,10 +5,7 @@ import com.tennisfolio.Tennisfolio.ranking.service.RankingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -30,8 +27,8 @@ public class RankingController {
     }
 
     @GetMapping("/ranking")
-    public ResponseEntity<List<RankingResponse>> getAtpRankings(){
-        List<RankingResponse> res = rankingService.getRanking();
+    public ResponseEntity<List<RankingResponse>> getAtpRankings(@RequestParam("type") String type){
+        List<RankingResponse> res = rankingService.getRanking(type);
         return new ResponseEntity(res, HttpStatus.OK);
     }
 }

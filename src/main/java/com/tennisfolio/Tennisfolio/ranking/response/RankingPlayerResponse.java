@@ -17,6 +17,7 @@ public class RankingPlayerResponse {
     private String weight;
     private String height;
     private String image;
+    private String country;
 
     public RankingPlayerResponse(Player player){
         this.playerId = player.getPlayerId();
@@ -27,6 +28,7 @@ public class RankingPlayerResponse {
         this.weight = player.getWeight();
         this.height = player.getHeight();
         this.image = player.getImage();
+        this.country = player.getCountry();
 
     }
 }

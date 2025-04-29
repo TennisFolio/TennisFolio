@@ -16,6 +16,8 @@ public class RankingResponse {
     private Long bestRanking;
     private Long curPoints;
     private Long prePoints;
+    private Long gapRanking;
+    private Long gapPoints;
     private String rankingLastUpdated;
 
     public RankingResponse(Ranking ranking){
@@ -23,9 +25,11 @@ public class RankingResponse {
         this.player = new RankingPlayerResponse(ranking.getPlayer());
         this.curRanking = ranking.getCurRank();
         this.preRanking = ranking.getPreRank();
+        this.gapRanking = ranking.getCurRank() - ranking.getPreRank();
         this.bestRanking = ranking.getBestRank();
         this.curPoints = ranking.getCurPoints();
         this.prePoints = ranking.getPrePoints();
+        this.gapPoints = ranking.getCurPoints() - ranking.getPrePoints();
         this.rankingLastUpdated = ranking.getLastUpdate();
 
     }

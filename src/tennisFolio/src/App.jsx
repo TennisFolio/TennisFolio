@@ -6,6 +6,7 @@ import Main from './page/Main'
 import Ranking from './page/Ranking'
 import Layout from './Layout'
 
+export const base_server_url = "http://localhost:8080";
 
 function App() {
   

@@ -6,5 +6,5 @@ import java.util.List;
 
 public interface RankingService {
     public void saveAtpRanking();
-    public List<RankingResponse> getRanking();
+    public List<RankingResponse> getRanking(String type);
 }

@@ -4,8 +4,11 @@ import com.tennisfolio.Tennisfolio.api.atpranking.AtpRankingTemplate;
 import com.tennisfolio.Tennisfolio.ranking.domain.Ranking;
 import com.tennisfolio.Tennisfolio.ranking.repository.RankingRepository;
 import com.tennisfolio.Tennisfolio.ranking.response.RankingResponse;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -27,12 +30,14 @@ public class RankingServiceImpl implements RankingService {
     }
 
     @Override
-    public List<RankingResponse> getRanking() {
-        List<Ranking> rankings = rankingRepository.findLatestRankings();
+    public List<RankingResponse> getRanking(String type) {
+        List<Ranking> rankings = "init".equalsIgnoreCase(type)
+                ? rankingRepository.findLatestRankings(PageRequest.of(0, 20))
+                : rankingRepository.findLatestRankings();
 
-        return rankings.stream().map(p -> {
-           return new RankingResponse(p);
-        }).collect(Collectors.toList());
+        return rankings.stream()
+                       .map(RankingResponse::new)
+                       .collect(Collectors.toList());
 
     }
 }
