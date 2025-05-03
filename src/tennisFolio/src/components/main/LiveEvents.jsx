@@ -6,20 +6,20 @@ function LiveEvents({liveEvents}) {
     <div className="live-events">
         <h1>Live Events</h1>
         {liveEvents.map((event) => (
-            <div key = {event.id} className="eventCard">
+            <div key = {event.rapidId} className="eventCard">
               <div className="tournamentInfo">
                 {event.tournamentName} - {event.roundName}
               </div>
               <div className="eventHeader">
                 <div className="teamBlock">
-                  <img src={event.homePlayer.plaeyrImage} className="playerImg" />
+                  <img src={event.homePlayer.playerImage} className="playerImg" />
                   <div className="teamName">{event.homePlayer.playerName}({event.homePlayer.playerRanking})</div>
                 </div>
 
                 <div className="setScore">{event.homeScore.current} : {event.awayScore.current}</div>
 
                 <div className="teamBlock">
-                  <img src={event.awayPlayer.plaeyrImage} className="playerImg" />
+                  <img src={event.awayPlayer.playerImage} className="playerImg" />
                   <div className="teamName">{event.awayPlayer.playerName}({event.awayPlayer.playerRanking})</div>
                 </div>
               </div>

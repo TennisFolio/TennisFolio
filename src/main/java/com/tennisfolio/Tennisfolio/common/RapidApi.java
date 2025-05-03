@@ -3,7 +3,8 @@ package com.tennisfolio.Tennisfolio.common;
 public enum RapidApi {
     ATPRANKINGS("atpRankings", "/tennis/rankings/atp"),
     TEAMDETAILS("teamDetails", "/tennis/team/%s"),
-    LIVEEVENTS("liveEvents", "/tennis/events/live");
+    LIVEEVENTS("liveEvents", "/tennis/events/live"),
+    TEAMIMAGE("teamImage", "/tennis/team/%s/image");
 
     private final String methodName;
     private final String param;

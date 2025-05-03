@@ -25,7 +25,7 @@ public abstract class AbstractApiTemplate<T, E> {
         this.decompressorUtil = decompressorUtil;
     }
 
-    // 템플릿 실행
+    // api 조회 후 DB 저장
     public E execute(String params){
         // api 호출
         String response = callApi(params);
@@ -38,6 +38,7 @@ public abstract class AbstractApiTemplate<T, E> {
 
     }
 
+    // api 조회 후 화면에 응답
     public T executeWithoutSave(String params){
         // api 호출
         String response = callApi(params);

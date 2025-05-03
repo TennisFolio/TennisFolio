@@ -31,9 +31,9 @@ public class LiveEventsResponseParser implements ResponseParser<List<LiveEventsA
 
                 dto.scoreNullToZero();
                 // ATP만 저장
-//                if("atp".equals(dto.getTournament().getCategory().getSlug())){
+               if("atp".equals(dto.getTournament().getCategory().getSlug())){
                     eventList.add(dto);
-//                }
+               }
             }
             return eventList;
 
