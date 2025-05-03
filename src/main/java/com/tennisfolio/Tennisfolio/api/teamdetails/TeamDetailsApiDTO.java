@@ -26,10 +26,10 @@ public class TeamDetailsApiDTO {
     private String plays;
     @JsonProperty("turnedPro")
     private String turnedPro;
-    @JsonProperty("prizeCurrent")
-    private Long prizeCurrent;
-    @JsonProperty("prizeTotal")
-    private Long prizeTotal;
+    @JsonProperty("prizeCurrentRaw")
+    private PrizeDTO prizeCurrent;
+    @JsonProperty("prizeTotalRaw")
+    private PrizeDTO prizeTotal;
     @JsonProperty("birthDateTimestamp")
     private String birthDate;
 }

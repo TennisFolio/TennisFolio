@@ -12,7 +12,7 @@ function Ranking() {
   const [visibleCount, setVisibleCount] = useState(20);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [isAllLoaded, setIsAllLoaded] = useState(false);
-
+  const [isLive, setIsLive] = useState(false);
   useEffect(() => {
     const fetchInitial = async () =>{
       try{
@@ -53,7 +53,13 @@ function Ranking() {
   return (
     <div>
       <RankingHeader lastUpdated = {rankings[0].rankingLastUpdated}/>
-      <RankingTable rankings = {rankings}/>
+      {isLive && (
+        <RankingTable rankings = {rankings}/>
+      )}
+      {!isLive && (
+        <RankingTable rankings = {rankings}/>
+      )}
+      
       {!isAllLoaded && (
         <button className= "load-more-button" onClick={handleLoadMore}>더 보기</button>
       )}

@@ -22,7 +22,7 @@ public class TeamDetailsResponseParser implements ResponseParser<TeamDetailsApiD
     public TeamDetailsApiDTO parse(String response) {
         TeamDetailsApiDTO team = new TeamDetailsApiDTO();
         try{
-            CountryDTO country = new CountryDTO();
+
             JsonNode rootNode = objectMapper.readTree(response);
             JsonNode teamNode = rootNode.path("team");
             JsonNode playerNode = teamNode.path("playerTeamInfo");
@@ -31,27 +31,15 @@ public class TeamDetailsResponseParser implements ResponseParser<TeamDetailsApiD
             JsonNode name= teamNode.path("fullName");
 
             // 복식의 경우 없을 수 있음.
-            if(playerNode == null || playerNode.isMissingNode() || playerNode.asText().isEmpty()){
+            if(playerNode == null || playerNode.isMissingNode()){
                 team.setPlayerRapidId(teamNode.path("id").asText());
             }else{
                 team = objectMapper.treeToValue(playerNode, TeamDetailsApiDTO.class);
-                country = objectMapper.treeToValue(countryNode, CountryDTO.class);
+                CountryDTO country = objectMapper.treeToValue(countryNode, CountryDTO.class);
                 team.setCountry(country);
                 team.setBirthDate(ConversionUtil.timestampToYyyyMMdd(team.getBirthDate()));
 
                 team.setPlayerRapidId(teamNode.path("id").toString());
-                // 상금
-                JsonNode prizeNode = playerNode.path("prizeTotalRaw");
-                JsonNode curNode = prizeNode.path("currency");
-
-                String cur = curNode.asText();
-
-                Long prizeCurrent = team.getPrizeCurrent() != null? team.getPrizeCurrent() : 0L;
-                Long prizeTotal = team.getPrizeTotal() != null? team.getPrizeTotal() : 0L;
-
-                // USD로 저장
-                team.setPrizeCurrent(ConversionUtil.eurToUsd(prizeCurrent, cur));
-                team.setPrizeTotal(ConversionUtil.eurToUsd(prizeTotal, cur));
             }
 
             team.setPlayerName(name.asText());

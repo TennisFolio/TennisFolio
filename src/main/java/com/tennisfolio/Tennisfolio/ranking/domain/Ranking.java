@@ -1,16 +1,19 @@
 package com.tennisfolio.Tennisfolio.ranking.domain;
 
 import com.tennisfolio.Tennisfolio.api.atpranking.AtpRankingApiDTO;
+import com.tennisfolio.Tennisfolio.common.Entity.BaseTimeEntity;
 import com.tennisfolio.Tennisfolio.player.domain.Player;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "tb_ranking")
 @Getter
+@Setter
 @NoArgsConstructor
-public class Ranking {
+public class Ranking extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)

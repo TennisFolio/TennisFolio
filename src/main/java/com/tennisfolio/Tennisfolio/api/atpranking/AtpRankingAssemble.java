@@ -12,10 +12,9 @@ import java.util.stream.Collectors;
 
 @Component
 public class AtpRankingAssemble implements EntityAssembler<List<AtpRankingApiDTO>, List<Ranking>> {
-    private final PlayerRepository playerRepository;
+
     private final PlayerService playerService;
-    public AtpRankingAssemble(PlayerRepository playerRepository, PlayerService playerService){
-        this.playerRepository = playerRepository;
+    public AtpRankingAssemble(PlayerService playerService){
         this.playerService = playerService;
     }
     @Override

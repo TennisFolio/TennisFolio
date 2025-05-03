@@ -1,5 +1,6 @@
 package com.tennisfolio.Tennisfolio.match.service;
 
+import com.tennisfolio.Tennisfolio.api.base.AbstractApiTemplate;
 import com.tennisfolio.Tennisfolio.api.liveEvents.LiveEventsApiDTO;
 import com.tennisfolio.Tennisfolio.api.liveEvents.LiveEventsTemplate;
 import com.tennisfolio.Tennisfolio.match.response.LiveMatchResponse;
@@ -14,10 +15,10 @@ import java.util.stream.Collectors;
 @Service
 public class MatchServiceImpl implements MatchService{
 
-    private final LiveEventsTemplate liveEventsTemplate;
+    private final AbstractApiTemplate<List<LiveEventsApiDTO>, Void> liveEventsTemplate;
     private final PlayerService playerService;
 
-    public MatchServiceImpl(LiveEventsTemplate liveEventsTemplate, PlayerService playerService){
+    public MatchServiceImpl(AbstractApiTemplate<List<LiveEventsApiDTO>, Void> liveEventsTemplate, PlayerService playerService){
         this.liveEventsTemplate = liveEventsTemplate;
         this.playerService = playerService;
     }

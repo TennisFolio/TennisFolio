@@ -32,7 +32,10 @@ public abstract class AbstractApiTemplate<T, E> {
         // response to DTO
         T responseDto = toDTO(response);
         // DTO to Entity
-        return toEntity(responseDto);
+        E entity = toEntity(responseDto);
+        // Entity DB에 저장
+        return saveEntity(entity);
+
     }
 
     public T executeWithoutSave(String params){
@@ -52,6 +55,8 @@ public abstract class AbstractApiTemplate<T, E> {
 
     // url을 가져옵니다.
     public abstract String getEndpointUrl(Object... params);
+
+    public abstract E saveEntity(E entity);
 
     // api 호출
     public String callApi(String params){

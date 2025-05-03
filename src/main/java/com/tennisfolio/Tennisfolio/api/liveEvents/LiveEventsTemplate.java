@@ -13,7 +13,7 @@ import java.util.List;
 @Component
 public class LiveEventsTemplate extends AbstractApiTemplate<List<LiveEventsApiDTO>, Void> {
 
-    private final ResponseParser parser;
+    private final ResponseParser<List<LiveEventsApiDTO>> parser;
     public LiveEventsTemplate(DecompressorUtil decompressorUtil,
                               @Qualifier("liveEventsResponseParser") LiveEventsResponseParser parser) {
         super(decompressorUtil);
@@ -22,7 +22,7 @@ public class LiveEventsTemplate extends AbstractApiTemplate<List<LiveEventsApiDT
 
     @Override
     public List<LiveEventsApiDTO> toDTO(String response) {
-        return (List<LiveEventsApiDTO>) parser.parse(response);
+        return parser.parse(response);
     }
 
     @Override
@@ -33,5 +33,10 @@ public class LiveEventsTemplate extends AbstractApiTemplate<List<LiveEventsApiDT
     @Override
     public String getEndpointUrl(Object... params) {
         return RapidApi.LIVEEVENTS.getParam(params);
+    }
+
+    @Override
+    public Void saveEntity(Void entity) {
+        return null;
     }
 }

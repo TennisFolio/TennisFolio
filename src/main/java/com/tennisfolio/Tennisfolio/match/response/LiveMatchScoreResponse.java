@@ -1,8 +1,6 @@
 package com.tennisfolio.Tennisfolio.match.response;
 
-import com.tennisfolio.Tennisfolio.api.liveEvents.LiveEventsApiDTO;
 import com.tennisfolio.Tennisfolio.api.liveEvents.ScoreDTO;
-import com.tennisfolio.Tennisfolio.common.PlayerSide;
 import lombok.Getter;
 import lombok.Setter;
 

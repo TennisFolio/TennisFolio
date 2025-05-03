@@ -1,6 +1,7 @@
 package com.tennisfolio.Tennisfolio.player.domain;
 
 import com.tennisfolio.Tennisfolio.api.teamdetails.TeamDetailsApiDTO;
+import com.tennisfolio.Tennisfolio.common.Entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,7 +12,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class Player{
+public class Player extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,10 +34,6 @@ public class Player{
     private String height;
     @Column(name="PLAYS")
     private String plays;
-    @Column(name="PRIZE_CURRENT")
-    private Long prizeCurrent;
-    @Column(name="PRIZE_TOTAL")
-    private Long prizeTotal;
     @Column(name="IMAGE")
     private String image;
 
@@ -49,7 +46,5 @@ public class Player{
         this.weight = rapidDTO.getWeight();
         this.height = rapidDTO.getHeight();
         this.plays = rapidDTO.getPlays();
-        this.prizeCurrent = rapidDTO.getPrizeCurrent();
-        this.prizeTotal = rapidDTO.getPrizeTotal();
     }
 }
