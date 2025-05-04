@@ -11,9 +11,12 @@ function Main() {
   useEffect(() => {
     axios.get(`${base_server_url}/api/liveEvents`)
       .then((response) => {
-        console.log("response : ", response);
-        setLiveEvents(response.data);
-        console.log("responseData : ", response.data);
+        if(response.data.code !== '0000'){
+          console.error('데이터 조회 실패!', response.data.message);
+          return;
+        }
+        setLiveEvents(response.data.data);
+        
       })
       .catch((error) => {
         console.error('Error fetching live events:', error);

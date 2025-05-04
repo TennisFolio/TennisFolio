@@ -1,7 +1,9 @@
 package com.tennisfolio.Tennisfolio.api.teamImage;
 
+import com.tennisfolio.Tennisfolio.common.ExceptionCode;
 import com.tennisfolio.Tennisfolio.common.ImageDirectory;
 import com.tennisfolio.Tennisfolio.common.RapidApi;
+import com.tennisfolio.Tennisfolio.exception.ParserException;
 import com.tennisfolio.Tennisfolio.player.repository.PlayerRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Value;
@@ -74,7 +76,7 @@ public class TeamImage {
             imageData = inputStream.readAllBytes();
 
         }catch(Exception e){
-            e.printStackTrace();
+            throw new ParserException(ExceptionCode.PARSER_ERROR);
         }
 
         return imageData;

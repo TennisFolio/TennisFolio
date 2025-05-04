@@ -3,6 +3,8 @@ package com.tennisfolio.Tennisfolio.api.categories;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tennisfolio.Tennisfolio.api.base.ResponseParser;
+import com.tennisfolio.Tennisfolio.common.ExceptionCode;
+import com.tennisfolio.Tennisfolio.exception.ParserException;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -28,7 +30,7 @@ public class CategoriesResponseParser implements ResponseParser<List<CategoryDTO
             }
             return categories;
         }catch(Exception e){
-            throw new RuntimeException("카테고리 응답 파싱 실패 : " + e.getMessage(), e);
+            throw new ParserException(ExceptionCode.PARSER_ERROR);
         }
 
     }

@@ -1,6 +1,7 @@
 package com.tennisfolio.Tennisfolio.match.controller;
 
 import com.tennisfolio.Tennisfolio.api.liveEvents.LiveEventsApiDTO;
+import com.tennisfolio.Tennisfolio.common.response.ResponseDTO;
 import com.tennisfolio.Tennisfolio.match.response.LiveMatchResponse;
 import com.tennisfolio.Tennisfolio.match.service.MatchService;
 import org.springframework.http.HttpStatus;
@@ -20,9 +21,9 @@ public class MatchController {
         this.matchService = matchService;
     }
     @GetMapping("/liveEvents")
-    public ResponseEntity<List<LiveMatchResponse>> getLiveEvents(){
+    public ResponseEntity<ResponseDTO<List<LiveMatchResponse>>> getLiveEvents(){
         List<LiveMatchResponse> events = matchService.getLiveEvents();
 
-        return new ResponseEntity<>(events, HttpStatus.OK);
+        return new ResponseEntity<>(ResponseDTO.success(events), HttpStatus.OK);
     }
 }

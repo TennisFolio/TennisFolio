@@ -21,7 +21,12 @@ function Ranking() {
             type: 'init'
           }
           });
-        setRankings(res.data);
+
+          if(res.data.code !== '0000'){
+            console.error('초기 데이터 조회 실패', res.data.message);
+            return;
+          }
+        setRankings(res.data.data);
       }catch(error){
         console.error('초기 데이터 조회 실패', error);
       }finally{

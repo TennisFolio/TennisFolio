@@ -1,5 +1,6 @@
 package com.tennisfolio.Tennisfolio.player.controller;
 
+import com.tennisfolio.Tennisfolio.common.response.ResponseDTO;
 import com.tennisfolio.Tennisfolio.player.service.PlayerService;
 import org.apache.coyote.Response;
 import org.springframework.http.HttpStatus;
@@ -16,10 +17,10 @@ public class PlayerController {
         this.playerService = playerService;
     }
     @PostMapping("/{rapidId}/image")
-    public ResponseEntity savePlayerImage(@PathVariable("rapidId") String rapidId){
+    public ResponseEntity<ResponseDTO<String>> savePlayerImage(@PathVariable("rapidId") String rapidId){
 
         String answer = playerService.saveTeamImage(rapidId);
 
-        return new ResponseEntity(answer, HttpStatus.OK);
+        return new ResponseEntity(ResponseDTO.success(answer), HttpStatus.OK);
     }
 }

@@ -1,5 +1,6 @@
 package com.tennisfolio.Tennisfolio.ranking.controller;
 
+import com.tennisfolio.Tennisfolio.common.response.ResponseDTO;
 import com.tennisfolio.Tennisfolio.ranking.response.RankingResponse;
 import com.tennisfolio.Tennisfolio.ranking.service.RankingService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,14 +22,14 @@ public class RankingController {
     }
 
     @PostMapping("/ranking")
-    public ResponseEntity saveAtpRankings(){
+    public ResponseEntity<ResponseDTO> saveAtpRankings(){
         rankingService.saveAtpRanking();
-        return new ResponseEntity(HttpStatus.OK);
+        return new ResponseEntity(ResponseDTO.success(),HttpStatus.OK);
     }
 
     @GetMapping("/ranking")
-    public ResponseEntity<List<RankingResponse>> getAtpRankings(@RequestParam("type") String type){
+    public ResponseEntity<ResponseDTO<List<RankingResponse>>> getAtpRankings(@RequestParam("type") String type){
         List<RankingResponse> res = rankingService.getRanking(type);
-        return new ResponseEntity(res, HttpStatus.OK);
+        return new ResponseEntity(ResponseDTO.success(res), HttpStatus.OK);
     }
 }

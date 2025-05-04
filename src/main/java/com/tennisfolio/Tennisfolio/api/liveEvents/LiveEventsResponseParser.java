@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tennisfolio.Tennisfolio.api.atpranking.AtpRankingApiDTO;
 import com.tennisfolio.Tennisfolio.api.base.ResponseParser;
+import com.tennisfolio.Tennisfolio.common.ExceptionCode;
+import com.tennisfolio.Tennisfolio.exception.ParserException;
 import com.tennisfolio.Tennisfolio.util.ConversionUtil;
 import org.springframework.stereotype.Component;
 
@@ -42,7 +44,7 @@ public class LiveEventsResponseParser implements ResponseParser<List<LiveEventsA
             return eventList;
 
         }catch(Exception e){
-            throw new RuntimeException("Parsing error", e);
+            throw new ParserException(ExceptionCode.PARSER_ERROR);
         }
 
     }

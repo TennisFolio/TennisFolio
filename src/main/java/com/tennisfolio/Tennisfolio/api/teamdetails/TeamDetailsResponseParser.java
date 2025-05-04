@@ -3,6 +3,8 @@ package com.tennisfolio.Tennisfolio.api.teamdetails;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tennisfolio.Tennisfolio.api.base.ResponseParser;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.tennisfolio.Tennisfolio.common.ExceptionCode;
+import com.tennisfolio.Tennisfolio.exception.ParserException;
 import com.tennisfolio.Tennisfolio.util.ConversionUtil;
 import org.springframework.stereotype.Component;
 
@@ -48,7 +50,7 @@ public class TeamDetailsResponseParser implements ResponseParser<TeamDetailsApiD
             team.setPlayerName(name.asText());
 
         }catch(Exception e){
-            e.printStackTrace();
+            throw new ParserException(ExceptionCode.PARSER_ERROR);
         }
 
 

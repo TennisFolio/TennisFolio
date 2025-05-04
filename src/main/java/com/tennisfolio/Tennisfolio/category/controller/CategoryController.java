@@ -1,6 +1,7 @@
 package com.tennisfolio.Tennisfolio.category.controller;
 
 import com.tennisfolio.Tennisfolio.category.service.CategoryService;
+import com.tennisfolio.Tennisfolio.common.response.ResponseDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,9 +18,9 @@ public class CategoryController {
         this.categoryService = categoryService;
     }
 
-    @PostMapping("/")
-    public ResponseEntity saveCategory(){
+    @PostMapping("")
+    public ResponseEntity<ResponseDTO> saveCategory(){
         categoryService.saveCategory();
-        return new ResponseEntity(HttpStatus.OK);
+        return new ResponseEntity(ResponseDTO.success(), HttpStatus.OK);
     }
 }

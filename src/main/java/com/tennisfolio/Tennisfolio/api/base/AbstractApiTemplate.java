@@ -1,5 +1,7 @@
 package com.tennisfolio.Tennisfolio.api.base;
 
+import com.tennisfolio.Tennisfolio.common.ExceptionCode;
+import com.tennisfolio.Tennisfolio.exception.RapidApiException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -99,7 +101,7 @@ public abstract class AbstractApiTemplate<T, E> {
             // UTF-8로 변환
             System.out.println("응답 텍스트: " + responseText);
         }catch(Exception e){
-            e.printStackTrace();
+            throw new RapidApiException(ExceptionCode.RAPID_ERROR);
         }
 
         return responseText;
