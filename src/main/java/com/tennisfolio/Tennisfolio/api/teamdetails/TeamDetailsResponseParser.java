@@ -13,8 +13,11 @@ import java.time.format.DateTimeFormatter;
 
 @Component
 public class TeamDetailsResponseParser implements ResponseParser<TeamDetailsApiDTO> {
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper;
 
+    public TeamDetailsResponseParser(ObjectMapper objectMapper){
+        this.objectMapper = objectMapper;
+    }
 
     // exception 정리
 

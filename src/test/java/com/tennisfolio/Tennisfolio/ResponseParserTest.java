@@ -3,6 +3,9 @@ package com.tennisfolio.Tennisfolio;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.tennisfolio.Tennisfolio.api.categories.CategoriesResponseParser;
+import com.tennisfolio.Tennisfolio.api.categories.CategoriesTemplate;
+import com.tennisfolio.Tennisfolio.api.categories.CategoryDTO;
 import com.tennisfolio.Tennisfolio.api.teamdetails.CountryDTO;
 import com.tennisfolio.Tennisfolio.api.teamdetails.TeamDetailsApiDTO;
 import com.tennisfolio.Tennisfolio.api.teamdetails.TeamDetailsResponseParser;
@@ -16,6 +19,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -29,6 +34,12 @@ public class ResponseParserTest {
 
     @Autowired
     TeamDetailsResponseParser parser;
+
+    @Autowired
+    CategoriesTemplate categoriesTemplate;
+
+    @Autowired
+    CategoriesResponseParser categoriesResponseParser;
     //TeamDetails
     @Test
     void api응답저장1() throws Exception{
@@ -78,8 +89,6 @@ public class ResponseParserTest {
         expected.setTurnedPro(playerInfoNode.path("turnedPro").asText(null));
         expected.setCountry(new CountryDTO(teamNode.path("country").path("alpha").asText(null),
                 teamNode.path("country").path("name").asText(null)));
-        expected.setPrizeCurrent(ConversionUtil.eurToUsd(playerInfoNode.path("prizeCurrentRaw").path("value").asLong(), playerInfoNode.path("prizeCurrentRaw").path("currency").asText(null)));
-        expected.setPrizeTotal(ConversionUtil.eurToUsd(playerInfoNode.path("prizeTotalRaw").path("value").asLong(), playerInfoNode.path("prizeTotalRaw").path("currency").asText(null)));
 
         // When
         TeamDetailsApiDTO actual = parser.parse(response);
@@ -95,6 +104,29 @@ public class ResponseParserTest {
         assertThat(actual.getPrizeTotal()).isEqualTo(expected.getPrizeTotal());
         assertThat(actual.getCountry().getName()).isEqualTo(expected.getCountry().getName());
 
+    }
 
+    @Test
+    public void 카테고리파싱테스트() throws Exception{
+        String response = categoriesTemplate.callApi("");
+
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode rootNode = mapper.readTree(response);
+        JsonNode categories = rootNode.path("categories");
+        List<CategoryDTO> expect = new ArrayList<>();
+        for(JsonNode category : categories){
+            CategoryDTO dto = new CategoryDTO();
+            dto.setRapidId(category.path("id").asText());
+            dto.setName(category.path("name").asText());
+            dto.setSlug(category.path("slug").asText());
+
+            expect.add(dto);
+        }
+
+        List<CategoryDTO> results = categoriesResponseParser.parse(response);
+
+        assertThat(results)
+                .usingRecursiveFieldByFieldElementComparator()
+                .containsExactlyInAnyOrderElementsOf(expect);
     }
 }

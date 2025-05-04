@@ -14,7 +14,11 @@ import java.util.stream.Collectors;
 
 @Component
 public class LiveEventsResponseParser implements ResponseParser<List<LiveEventsApiDTO>> {
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper;
+
+    public LiveEventsResponseParser(ObjectMapper objectMapper){
+        this.objectMapper = objectMapper;
+    }
     @Override
     public List<LiveEventsApiDTO> parse(String response) {
         try{

@@ -1,4 +1,4 @@
-package com.tennisfolio.Tennisfolio.api.liveEvents;
+package com.tennisfolio.Tennisfolio.api.categories;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;

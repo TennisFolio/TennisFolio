@@ -4,7 +4,8 @@ public enum RapidApi {
     ATPRANKINGS("atpRankings", "/tennis/rankings/atp"),
     TEAMDETAILS("teamDetails", "/tennis/team/%s"),
     LIVEEVENTS("liveEvents", "/tennis/events/live"),
-    TEAMIMAGE("teamImage", "/tennis/team/%s/image");
+    TEAMIMAGE("teamImage", "/tennis/team/%s/image"),
+    CATEGORIES("categories", "/tennis/tournament/categories");
 
     private final String methodName;
     private final String param;
