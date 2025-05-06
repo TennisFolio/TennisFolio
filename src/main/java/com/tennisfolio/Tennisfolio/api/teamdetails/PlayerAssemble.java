@@ -1,12 +1,12 @@
 package com.tennisfolio.Tennisfolio.api.teamdetails;
 
-import com.tennisfolio.Tennisfolio.api.base.EntityAssembler;
+import com.tennisfolio.Tennisfolio.api.base.EntityAssemble;
 import com.tennisfolio.Tennisfolio.player.domain.Player;
 import com.tennisfolio.Tennisfolio.player.domain.PlayerPrize;
 import org.springframework.stereotype.Component;
 
 @Component
-public class PlayerAssemble implements EntityAssembler<TeamDetailsApiDTO, PlayerAggregate> {
+public class PlayerAssemble implements EntityAssemble<TeamDetailsApiDTO, PlayerAggregate> {
     @Override
     public PlayerAggregate assemble(TeamDetailsApiDTO dto) {
         Player player = new Player(dto);

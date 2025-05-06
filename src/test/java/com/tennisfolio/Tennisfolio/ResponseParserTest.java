@@ -17,6 +17,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.net.http.HttpResponse;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -43,23 +44,29 @@ public class ResponseParserTest {
     //TeamDetails
     @Test
     void api응답저장1() throws Exception{
-        String response = teamDetailsTemplate.callApi("250857");
+        HttpResponse<byte[]> response = teamDetailsTemplate.callApi("250857");
 
-        Files.writeString(Path.of("src/test/resources/teamDetails_250857.json"), response);
+        String responseStr = teamDetailsTemplate.decodeResponse(response);
+
+        Files.writeString(Path.of("src/test/resources/teamDetails_250857.json"), responseStr);
     }
 
     @Test
     void api응답저장2() throws Exception{
-        String response = teamDetailsTemplate.callApi("206570");
+        HttpResponse<byte[]> response = teamDetailsTemplate.callApi("206570");
 
-        Files.writeString(Path.of("src/test/resources/teamDetails_206570.json"), response);
+        String responseStr = teamDetailsTemplate.decodeResponse(response);
+
+        Files.writeString(Path.of("src/test/resources/teamDetails_206570.json"), responseStr);
     }
 
     @Test
     void api응답저장3() throws Exception{
-        String response = teamDetailsTemplate.callApi("57163");
+        HttpResponse<byte[]> response = teamDetailsTemplate.callApi("57163");
 
-        Files.writeString(Path.of("src/test/resources/teamDetails_57163.json"), response);
+        String responseStr = teamDetailsTemplate.decodeResponse(response);
+
+        Files.writeString(Path.of("src/test/resources/teamDetails_57163.json"), responseStr);
     }
 
     @ParameterizedTest
@@ -108,10 +115,12 @@ public class ResponseParserTest {
 
     @Test
     public void 카테고리파싱테스트() throws Exception{
-        String response = categoriesTemplate.callApi("");
+        HttpResponse<byte[]> response = categoriesTemplate.callApi("");
+
+        String responseStr = categoriesTemplate.decodeResponse(response);
 
         ObjectMapper mapper = new ObjectMapper();
-        JsonNode rootNode = mapper.readTree(response);
+        JsonNode rootNode = mapper.readTree(responseStr);
         JsonNode categories = rootNode.path("categories");
         List<CategoryDTO> expect = new ArrayList<>();
         for(JsonNode category : categories){
@@ -123,7 +132,7 @@ public class ResponseParserTest {
             expect.add(dto);
         }
 
-        List<CategoryDTO> results = categoriesResponseParser.parse(response);
+        List<CategoryDTO> results = categoriesResponseParser.parse(responseStr);
 
         assertThat(results)
                 .usingRecursiveFieldByFieldElementComparator()

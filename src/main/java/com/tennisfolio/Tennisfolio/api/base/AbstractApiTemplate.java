@@ -22,6 +22,7 @@ public abstract class AbstractApiTemplate<T, E> {
     // gzip, deflate 방식 처리
     protected final DecompressorUtil decompressorUtil;
 
+
     // 생성자
     public AbstractApiTemplate(DecompressorUtil decompressorUtil){
         this.decompressorUtil = decompressorUtil;
@@ -30,9 +31,15 @@ public abstract class AbstractApiTemplate<T, E> {
     // api 조회 후 DB 저장
     public E execute(String params){
         // api 호출
-        String response = callApi(params);
+        HttpResponse<byte[]> response = callApi(params);
+
+        if(response.statusCode() != 200){
+            return null;
+        }
+        // response to Str
+        String responseStr = decodeResponse(response);
         // response to DTO
-        T responseDto = toDTO(response);
+        T responseDto = toDTO(responseStr);
         // DTO to Entity
         E entity = toEntity(responseDto);
         // Entity DB에 저장
@@ -43,9 +50,14 @@ public abstract class AbstractApiTemplate<T, E> {
     // api 조회 후 화면에 응답
     public T executeWithoutSave(String params){
         // api 호출
-        String response = callApi(params);
+        HttpResponse<byte[]> response = callApi(params);
+        if(response.statusCode() != 200){
+            return null;
+        }
+        // response to Str
+        String responseStr = decodeResponse(response);
         // response to DTO
-        T responseDto = toDTO(response);
+        T responseDto = toDTO(responseStr);
 
         return responseDto;
     }
@@ -62,7 +74,7 @@ public abstract class AbstractApiTemplate<T, E> {
     public abstract E saveEntity(E entity);
 
     // api 호출
-    public String callApi(String params){
+    public HttpResponse<byte[]> callApi(String params){
         String responseText = "";
         try{
             HttpClient client = HttpClient.newHttpClient();
@@ -82,12 +94,20 @@ public abstract class AbstractApiTemplate<T, E> {
 
             HttpResponse<byte[]> response = client.send(request, HttpResponse.BodyHandlers.ofByteArray());
 
+            return response;
+        }catch(Exception e){
+            throw new RapidApiException(ExceptionCode.RAPID_ERROR);
+        }
+
+    }
+
+    public String decodeResponse(HttpResponse<byte[]> response){
+        String responseText = "";
+        byte[] responseBody = response.body();
+        try{
             //Content-Encoding 확인
             Optional<String> contentEncoding = response.headers().firstValue("Content-Encoding");
             System.out.println("Content-Encoding: " + contentEncoding.orElse("None"));
-
-            byte[] responseBody = response.body();
-
             if(contentEncoding.isPresent() && "gzip".equalsIgnoreCase(contentEncoding.get())){
                 // GZIP 압축 해제
                 responseText = decompressorUtil.decompressGzip(responseBody);
@@ -98,12 +118,10 @@ public abstract class AbstractApiTemplate<T, E> {
                 responseText = new String(responseBody, "UTF-8");
             }
 
-            // UTF-8로 변환
-            System.out.println("응답 텍스트: " + responseText);
+            return responseText;
         }catch(Exception e){
             throw new RapidApiException(ExceptionCode.RAPID_ERROR);
         }
 
-        return responseText;
     }
 }

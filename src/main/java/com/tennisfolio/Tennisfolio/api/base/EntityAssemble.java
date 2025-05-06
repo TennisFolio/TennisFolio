@@ -1,5 +1,5 @@
 package com.tennisfolio.Tennisfolio.api.base;
 
-public interface EntityAssembler<T,E>{
+public interface EntityAssemble<T,E>{
     E assemble(T dto);
 }

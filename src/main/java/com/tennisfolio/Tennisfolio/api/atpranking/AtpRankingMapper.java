@@ -1,6 +1,6 @@
 package com.tennisfolio.Tennisfolio.api.atpranking;
 
-import com.tennisfolio.Tennisfolio.api.base.EntityAssembler;
+import com.tennisfolio.Tennisfolio.api.base.EntityAssemble;
 import com.tennisfolio.Tennisfolio.api.base.Mapper;
 import com.tennisfolio.Tennisfolio.ranking.domain.Ranking;
 import org.springframework.stereotype.Component;
@@ -9,9 +9,9 @@ import java.util.List;
 @Component
 public class AtpRankingMapper implements Mapper<List<AtpRankingApiDTO>, List<Ranking>>{
 
-    private final EntityAssembler<List<AtpRankingApiDTO>, List<Ranking>> assembler;
+    private final EntityAssemble<List<AtpRankingApiDTO>, List<Ranking>> assembler;
 
-    public AtpRankingMapper(EntityAssembler<List<AtpRankingApiDTO>, List<Ranking>> assembler){
+    public AtpRankingMapper(EntityAssemble<List<AtpRankingApiDTO>, List<Ranking>> assembler){
         this.assembler = assembler;
     }
     @Override

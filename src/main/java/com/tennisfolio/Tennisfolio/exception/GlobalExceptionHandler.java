@@ -27,6 +27,6 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ResponseDTO<Void>> handleException(Exception e){
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ResponseDTO.error(e.getMessage(), e.getCause().toString()));
+                .body(ResponseDTO.error(e.getMessage(), "ERROR"));
     }
 }
