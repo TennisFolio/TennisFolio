@@ -30,8 +30,8 @@ public class CategoryTournamentsTemplate extends AbstractApiTemplate<List<Catego
     }
 
     @Override
-    public List<Tournament> toEntity(List<CategoryTournamentsDTO> dto) {
-        return categoryTournamentMapper.map(dto);
+    public List<Tournament> toEntity(List<CategoryTournamentsDTO> dto, Object... params) {
+        return categoryTournamentMapper.map(dto, params);
     }
 
     @Override

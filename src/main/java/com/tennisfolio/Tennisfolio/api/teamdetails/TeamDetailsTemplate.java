@@ -32,8 +32,8 @@ public class TeamDetailsTemplate extends AbstractApiTemplate<TeamDetailsApiDTO, 
     }
 
     @Override
-    public PlayerAggregate toEntity(TeamDetailsApiDTO dto) {
-        return (PlayerAggregate)mapper.map(dto);
+    public PlayerAggregate toEntity(TeamDetailsApiDTO dto, Object... params) {
+        return (PlayerAggregate)mapper.map(dto, params);
     }
 
     @Override

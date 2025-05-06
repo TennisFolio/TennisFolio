@@ -17,7 +17,7 @@ public class CategoryTournamentsMapper implements Mapper<List<CategoryTournament
     }
 
     @Override
-    public List<Tournament> map(List<CategoryTournamentsDTO> dto) {
+    public List<Tournament> map(List<CategoryTournamentsDTO> dto, Object... parmas) {
         return categoryTournamentsAssemble.assemble(dto);
     }
 }

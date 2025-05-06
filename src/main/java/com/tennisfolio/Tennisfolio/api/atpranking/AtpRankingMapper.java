@@ -15,7 +15,7 @@ public class AtpRankingMapper implements Mapper<List<AtpRankingApiDTO>, List<Ran
         this.assembler = assembler;
     }
     @Override
-    public List<Ranking> map(List<AtpRankingApiDTO> dto) {
-        return assembler.assemble(dto);
+    public List<Ranking> map(List<AtpRankingApiDTO> dto, Object... params) {
+        return assembler.assemble(dto, params);
     }
 }

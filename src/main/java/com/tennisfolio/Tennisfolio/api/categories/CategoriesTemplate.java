@@ -32,8 +32,8 @@ public class CategoriesTemplate extends AbstractApiTemplate<List<CategoryDTO>, L
     }
 
     @Override
-    public List<Category> toEntity(List<CategoryDTO> dto) {
-        return categoriesMapper.map(dto);
+    public List<Category> toEntity(List<CategoryDTO> dto, Object... params) {
+        return categoriesMapper.map(dto, params);
     }
 
     @Override

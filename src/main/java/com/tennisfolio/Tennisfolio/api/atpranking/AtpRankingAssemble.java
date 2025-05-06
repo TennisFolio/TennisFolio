@@ -17,7 +17,7 @@ public class AtpRankingAssemble implements EntityAssemble<List<AtpRankingApiDTO>
         this.playerService = playerService;
     }
     @Override
-    public List<Ranking> assemble(List<AtpRankingApiDTO> dto) {
+    public List<Ranking> assemble(List<AtpRankingApiDTO> dto, Object... params) {
         List<Ranking> rankList = dto.stream().map(rank -> {
             Player player = playerService.getOrCreatePlayerByRapidId(rank.getTeam().getPlayerRapidId());
             return new Ranking(rank, player);

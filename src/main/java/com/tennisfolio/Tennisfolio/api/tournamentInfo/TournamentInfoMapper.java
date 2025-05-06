@@ -14,7 +14,7 @@ public class TournamentInfoMapper implements Mapper<TournamentInfoDTO, Tournamen
     }
 
     @Override
-    public Tournament map(TournamentInfoDTO dto) {
+    public Tournament map(TournamentInfoDTO dto, Object... params) {
         return tournamentInfoAssemble.assemble(dto);
     }
 }

@@ -27,8 +27,8 @@ public class LeagueDetailsTemplate extends AbstractApiTemplate<LeagueDetailsDTO,
     }
 
     @Override
-    public Tournament toEntity(LeagueDetailsDTO dto) {
-        return leagueDetailsMapper.map(dto);
+    public Tournament toEntity(LeagueDetailsDTO dto, Object... params) {
+        return leagueDetailsMapper.map(dto, params);
     }
 
     @Override

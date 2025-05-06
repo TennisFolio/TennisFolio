@@ -14,7 +14,7 @@ public class TeamDetailsMapper implements Mapper<TeamDetailsApiDTO, PlayerAggreg
     }
 
     @Override
-    public PlayerAggregate map(TeamDetailsApiDTO dto) {
+    public PlayerAggregate map(TeamDetailsApiDTO dto, Object... params) {
         return assembler.assemble(dto);
     }
 }

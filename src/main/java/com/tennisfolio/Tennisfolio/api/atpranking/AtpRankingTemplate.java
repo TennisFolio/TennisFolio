@@ -34,7 +34,7 @@ public class AtpRankingTemplate extends AbstractApiTemplate<List<AtpRankingApiDT
     }
 
     @Override
-    public List<Ranking> toEntity(List<AtpRankingApiDTO> dto) {
+    public List<Ranking> toEntity(List<AtpRankingApiDTO> dto, Object... params) {
         return atpRankingMapper.map(dto);
     }
 

@@ -22,7 +22,7 @@ public class Tournament extends BaseTimeEntity {
     @Column(name="TOURNAMENT_ID")
     private Long tournamentId;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "CATEGORY_ID")
     private Category category;
 
@@ -47,11 +47,11 @@ public class Tournament extends BaseTimeEntity {
     @Column(name="MOST_TITLES")
     private String mostTitles;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="MOST_TITLE_PLAYER_ID", nullable = true)
     private Player mostTitlePlayer;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="TITLE_HOLDER_ID")
     private Player titleHolder;
 

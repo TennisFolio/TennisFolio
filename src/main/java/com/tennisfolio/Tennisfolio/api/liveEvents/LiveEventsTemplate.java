@@ -26,7 +26,7 @@ public class LiveEventsTemplate extends AbstractApiTemplate<List<LiveEventsApiDT
     }
 
     @Override
-    public Void toEntity(List<LiveEventsApiDTO> dto) {
+    public Void toEntity(List<LiveEventsApiDTO> dto, Object... params) {
         return null;
     }
 

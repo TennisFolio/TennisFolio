@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 public class CategoriesMapper implements Mapper<List<CategoryDTO>, List<Category>> {
 
     @Override
-    public List<Category> map(List<CategoryDTO> dto) {
+    public List<Category> map(List<CategoryDTO> dto, Object... params) {
         return dto.stream().map(Category::new)
                 .collect(Collectors.toList());
     }

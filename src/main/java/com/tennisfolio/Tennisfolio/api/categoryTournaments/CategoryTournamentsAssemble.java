@@ -22,7 +22,7 @@ public class CategoryTournamentsAssemble implements EntityAssemble<List<Category
     }
 
     @Override
-    public List<Tournament> assemble(List<CategoryTournamentsDTO> dto) {
+    public List<Tournament> assemble(List<CategoryTournamentsDTO> dto, Object... params) {
         return dto.stream()
                 .map(tournament -> {
                     Optional<Category> findCategory = categoryRepository.findByRapidCategoryId(tournament.getCategory().getRapidId());

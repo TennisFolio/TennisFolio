@@ -14,7 +14,7 @@ public class LeagueDetailsMapper implements Mapper<LeagueDetailsDTO, Tournament>
     }
 
     @Override
-    public Tournament map(LeagueDetailsDTO dto) {
+    public Tournament map(LeagueDetailsDTO dto, Object... params) {
         return leagueDetailsAssemble.assemble(dto);
     }
 }

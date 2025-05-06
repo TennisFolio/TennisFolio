@@ -29,7 +29,7 @@ public abstract class AbstractApiTemplate<T, E> {
     }
 
     // api 조회 후 DB 저장
-    public E execute(String params){
+    public E execute(Object... params){
         // api 호출
         HttpResponse<byte[]> response = callApi(params);
 
@@ -41,7 +41,7 @@ public abstract class AbstractApiTemplate<T, E> {
         // response to DTO
         T responseDto = toDTO(responseStr);
         // DTO to Entity
-        E entity = toEntity(responseDto);
+        E entity = toEntity(responseDto, params);
         // Entity DB에 저장
         return saveEntity(entity);
 
@@ -66,7 +66,7 @@ public abstract class AbstractApiTemplate<T, E> {
     public abstract T toDTO(String response);
 
     // dto To Entity
-    public abstract E toEntity(T dto);
+    public abstract E toEntity(T dto, Object... params);
 
     // url을 가져옵니다.
     public abstract String getEndpointUrl(Object... params);
@@ -74,7 +74,7 @@ public abstract class AbstractApiTemplate<T, E> {
     public abstract E saveEntity(E entity);
 
     // api 호출
-    public HttpResponse<byte[]> callApi(String params){
+    public HttpResponse<byte[]> callApi(Object... params){
         String responseText = "";
         try{
             HttpClient client = HttpClient.newHttpClient();

@@ -14,7 +14,7 @@ public class TournamentInfoAssemble implements EntityAssemble<TournamentInfoDTO,
     }
 
     @Override
-    public Tournament assemble(TournamentInfoDTO dto) {
+    public Tournament assemble(TournamentInfoDTO dto, Object... params) {
         return tournamentRepository.findByRapidTournamentId(dto.getTournament().getRapidId())
                 .map(
                 tournament -> {

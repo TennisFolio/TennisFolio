@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class PlayerAssemble implements EntityAssemble<TeamDetailsApiDTO, PlayerAggregate> {
     @Override
-    public PlayerAggregate assemble(TeamDetailsApiDTO dto) {
+    public PlayerAggregate assemble(TeamDetailsApiDTO dto, Object... params) {
         Player player = new Player(dto);
         PlayerPrize playerPrize = null;
 

@@ -29,4 +29,11 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(ResponseDTO.error(e.getMessage(), "ERROR"));
     }
+
+    @ExceptionHandler(InvalidRequestException.class)
+    public ResponseEntity<ResponseDTO<Void>> handleIllegalArgumentException(InvalidRequestException e){
+        ExceptionCode illegalArgumentException = ExceptionCode.INVALID_REQUEST;
+        return ResponseEntity.status(illegalArgumentException.getHttpStatus())
+                .body(ResponseDTO.error(e.getExceptionCode().getCode(), e.getExceptionCode().getMessage()));
+    }
 }
