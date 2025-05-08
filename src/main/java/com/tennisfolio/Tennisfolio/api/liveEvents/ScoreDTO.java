@@ -27,6 +27,16 @@ public class ScoreDTO {
     private Long period5;
     @JsonProperty("point")
     private String point;
+    @JsonProperty("period1TieBreak")
+    private Long period1TieBreak;
+    @JsonProperty("period2TieBreak")
+    private Long period2TieBreak;
+    @JsonProperty("period3TieBreak")
+    private Long period3TieBreak;
+    @JsonProperty("period4TieBreak")
+    private Long period4TieBreak;
+    @JsonProperty("period5TieBreak")
+    private Long period5TieBreak;
 
     public void nullToZero(){
         if(this.period1 == null) this.period1 = 0L;
@@ -34,5 +44,10 @@ public class ScoreDTO {
         if(this.period3 == null) this.period3 = 0L;
         if(this.period4 == null) this.period4 = 0L;
         if(this.period5 == null) this.period5 = 0L;
+        if(this.period1TieBreak == null) this.period1TieBreak = 0L;
+        if(this.period2TieBreak == null) this.period2TieBreak = 0L;
+        if(this.period3TieBreak == null) this.period3TieBreak = 0L;
+        if(this.period4TieBreak == null) this.period4TieBreak = 0L;
+        if(this.period5TieBreak == null) this.period5TieBreak = 0L;
     }
 }

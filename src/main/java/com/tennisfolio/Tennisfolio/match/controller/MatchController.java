@@ -7,6 +7,7 @@ import com.tennisfolio.Tennisfolio.match.service.MatchService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -25,5 +26,11 @@ public class MatchController {
         List<LiveMatchResponse> events = matchService.getLiveEvents();
 
         return new ResponseEntity<>(ResponseDTO.success(events), HttpStatus.OK);
+    }
+
+    @PostMapping("/match")
+    public ResponseEntity<ResponseDTO> saveMatch(){
+        matchService.saveMatchList();
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }
