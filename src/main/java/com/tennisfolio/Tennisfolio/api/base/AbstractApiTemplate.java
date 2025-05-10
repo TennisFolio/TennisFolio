@@ -117,7 +117,7 @@ public abstract class AbstractApiTemplate<T, E> {
             else{
                 responseText = new String(responseBody, "UTF-8");
             }
-
+            System.out.println(responseText);
             return responseText;
         }catch(Exception e){
             throw new RapidApiException(ExceptionCode.RAPID_ERROR);

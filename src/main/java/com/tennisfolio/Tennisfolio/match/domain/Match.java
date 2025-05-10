@@ -18,7 +18,7 @@ public class Match {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name="MATCH_ID")
     private Long matchId;
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="ROUND_ID")
     private Round round;
     @Column(name="RAPID_MATCH_ID")
@@ -31,10 +31,10 @@ public class Match {
     private Long homeScore;
     @Column(name="AWAY_SCORE")
     private Long awayScore;
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="HOME_PLAYER", nullable = true)
     private Player homePlayer;
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="AWAY_PLAYER", nullable = true)
     private Player awayPlayer;
     @Embedded

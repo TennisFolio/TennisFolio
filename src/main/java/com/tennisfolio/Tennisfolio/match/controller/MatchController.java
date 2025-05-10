@@ -33,4 +33,10 @@ public class MatchController {
         matchService.saveMatchList();
         return new ResponseEntity<>(HttpStatus.OK);
     }
+
+    @PostMapping("/statistic")
+    public ResponseEntity<ResponseDTO> saveStatistic(){
+        matchService.saveStatisticList();
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 }
