@@ -1,27 +1,51 @@
 import React from 'react'
 import { useState } from 'react'
-import { useEffect } from 'react'
+import { useEffect, useRef} from 'react'
 import LiveEvents from '../components/main/LiveEvents';
-import axios from 'axios';
-import {LIVEEVENTS} from '../data/LIVEEVENTS';
+import {Client} from '@stomp/stompjs';
+import SockJS from 'sockjs-client';
 import { base_server_url } from '../App';
+import axios from 'axios';
 function Main() {
   const [liveEvents, setLiveEvents] = useState([]);
+  const clientRef = useRef(null);
 
+  // 초기 데이터 요청
   useEffect(() => {
     axios.get(`${base_server_url}/api/liveEvents`)
-      .then((response) => {
-        if(response.data.code !== '0000'){
-          console.error('데이터 조회 실패!', response.data.message);
-          return;
-        }
-        setLiveEvents(response.data.data);
-        
-      })
-      .catch((error) => {
-        console.error('Error fetching live events:', error);
-      });
+    .then((res => setLiveEvents(res.data.data)))
+    .catch((err) => console.log(err));
+  }, []);
 
+  // 웹소켓 연결 및 구독
+  useEffect(() => {
+    const socket = new SockJS("http://localhost:8080/ws");
+    const stompClient = new Client({
+      webSocketFactory: () => socket,
+      reconnectDelay : 30000,
+      onConnect: () => {
+        console.log('STOMP connected');
+
+        stompClient.subscribe("/topic/liveMatches", (message) => {
+        const matchList = JSON.parse(message.body);
+        console.log("Received message", matchList);
+        setLiveEvents(matchList);
+        });
+      },
+      onStompError: (frame) => {
+        console.error('Broker reported error:', frame.headers['message']);
+        console.error('Additional details:', frame.body);
+      },
+    });
+
+    clientRef.current = stompClient;
+    stompClient.activate();
+
+    return () => {
+      if (clientRef.current && clientRef.current.active) {
+        clientRef.current.deactivate();
+      }
+    };
     //setLiveEvents(LIVEEVENTS);
   },[])
   return (

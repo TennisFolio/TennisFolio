@@ -1,37 +1,30 @@
 import React from 'react'
-import './liveEvents.css';
-import { useNavigate } from 'react-router-dom';
-import { useState } from 'react';
-import axios from 'axios';
-function LiveEvents({liveEvents}) {
-    console.log("LiveEvents : ", liveEvents);
-    const navigate = useNavigate();
-    const OnClickDetailButton = (event) => {
-        navigate(`/liveEvents/${event.rapidId}`);
-    }
+import { useState } from 'react'
+import { useLocation } from 'react-router-dom';
+function EventCard({event}) {
+    const location = useLocation();
+     if (!event) return null;
+     console.log(event);
   return (
-    <div className="live-events">
-        <h1>Live Events</h1>
-        {liveEvents.map((event) => (
-            <div key = {event.rapidId} className="eventCard">
+      <div key = {event.rapidId} className="eventCard">
               <div className="tournamentInfo">
                 {event.tournamentName} - {event.roundName}
               </div>
               <div className="eventHeader">
                 <div className="teamBlock">
-                  <img src={event.homePlayer.playerImage} className="playerImg" />
-                  <div className="teamName">{event.homePlayer.playerName}({event.homePlayer.playerRanking})</div>
+                  <img src={event?.homePlayer?.playerImage} className="playerImg" />
+                  <div className="teamName">{event?.homePlayer?.playerName}({event?.homePlayer?.playerRanking})</div>
                 </div>
 
-                <div className="setScore">{event.homeScore.current} : {event.awayScore.current}</div>
+                <div className="setScore">{event?.homeScore?.current} : {event?.awayScore?.current}</div>
 
                 <div className="teamBlock">
-                  <img src={event.awayPlayer.playerImage} className="playerImg" />
-                  <div className="teamName">{event.awayPlayer.playerName}({event.awayPlayer.playerRanking})</div>
+                  <img src={event?.awayPlayer?.playerImage} className="playerImg" />
+                  <div className="teamName">{event?.awayPlayer?.playerName}({event?.awayPlayer?.playerRanking})</div>
                 </div>
               </div>
 
-              <div className="pointScore">{event.homeScore.point} : {event.awayScore.point}</div>
+              <div className="pointScore">{event?.homeScore?.point} : {event?.awayScore?.point}</div>
 
               <div className="eventTable">
                 <table>
@@ -61,12 +54,9 @@ function LiveEvents({liveEvents}) {
                   </tbody>
                 </table>
               </div>
-              <button className="eventButton" onClick={() => OnClickDetailButton(event)}>채팅방 입장</button>
+              
          </div>
-        ))}
-    </div>
-    
   )
 }
 
-export default LiveEvents
+export default EventCard

@@ -1,15 +1,15 @@
 package com.tennisfolio.Tennisfolio.match.controller;
 
 import com.tennisfolio.Tennisfolio.api.liveEvents.LiveEventsApiDTO;
+import com.tennisfolio.Tennisfolio.common.ChatMessage;
 import com.tennisfolio.Tennisfolio.common.response.ResponseDTO;
 import com.tennisfolio.Tennisfolio.match.response.LiveMatchResponse;
 import com.tennisfolio.Tennisfolio.match.service.MatchService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -17,15 +17,38 @@ import java.util.List;
 @RequestMapping("/api")
 public class MatchController {
     private final MatchService matchService;
+    private final SimpMessagingTemplate messagingTemplate;
 
-    public MatchController(MatchService matchService){
+    public MatchController(MatchService matchService, SimpMessagingTemplate messagingTemplate){
         this.matchService = matchService;
+        this.messagingTemplate = messagingTemplate;
     }
     @GetMapping("/liveEvents")
     public ResponseEntity<ResponseDTO<List<LiveMatchResponse>>> getLiveEvents(){
         List<LiveMatchResponse> events = matchService.getLiveEvents();
 
         return new ResponseEntity<>(ResponseDTO.success(events), HttpStatus.OK);
+    }
+    @Scheduled(fixedRate = 30000)
+    public void getLiveEventsSchedule(){
+        List<LiveMatchResponse> events = matchService.getLiveEvents();
+
+        messagingTemplate.convertAndSend("/topic/liveMatches", events);
+    }
+
+    @GetMapping("/liveEvents/{matchId}")
+    public ResponseEntity<ResponseDTO<LiveMatchResponse>> getLiveEvent(@PathVariable("matchId") String matchId){
+        LiveMatchResponse event = matchService.getLiveEvent(matchId);
+
+        return new ResponseEntity<>(ResponseDTO.success(event), HttpStatus.OK);
+    }
+
+    @Scheduled(fixedRate = 10000)
+    public void getLiveEventSchedule(){
+        List<LiveMatchResponse> events = matchService.getLiveEvents();
+        events.stream().forEach( event -> {
+            messagingTemplate.convertAndSend("/topic/liveMatch/" + event.getRapidId(), event);
+        });
     }
 
     @PostMapping("/match")
@@ -39,4 +62,5 @@ public class MatchController {
         matchService.saveStatisticList();
         return new ResponseEntity<>(HttpStatus.OK);
     }
+
 }

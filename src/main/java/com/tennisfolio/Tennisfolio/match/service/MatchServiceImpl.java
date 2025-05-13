@@ -51,7 +51,18 @@ public class MatchServiceImpl implements MatchService{
             Player awayPlayer = playerService.getOrCreatePlayerByRapidId(dto.getAwayTeam().getRapidPlayerId());
             return new LiveMatchResponse(dto, homePlayer, awayPlayer);
         }).collect(Collectors.toList());
+    }
 
+    @Override
+    public LiveMatchResponse getLiveEvent(String rapidMatchId) {
+        List<LiveEventsApiDTO> apiDTO = liveEventsTemplate.executeWithoutSave("");
+
+        return apiDTO.stream().map(dto -> {
+            Player homePlayer = playerService.getOrCreatePlayerByRapidId(dto.getHomeTeam().getRapidPlayerId());
+            Player awayPlayer = playerService.getOrCreatePlayerByRapidId(dto.getAwayTeam().getRapidPlayerId());
+            return new LiveMatchResponse(dto, homePlayer, awayPlayer);
+        }).filter(event -> rapidMatchId.equals(event.getRapidId()))
+                .findFirst().get();
     }
 
     @Override

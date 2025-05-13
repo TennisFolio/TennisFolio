@@ -9,6 +9,7 @@ import java.util.List;
 
 public interface MatchService {
     List<LiveMatchResponse> getLiveEvents();
+    LiveMatchResponse getLiveEvent(String rapidMatchId);
     List<Match> saveMatchList();
     List<Statistic> saveStatisticList();
 }

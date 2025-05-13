@@ -25,7 +25,7 @@ public class Season extends BaseTimeEntity {
     private String seasonName;
     @Column(name = "RAPID_SEASON_ID")
     private String rapidSeasonId;
-    @Column(name="YEAR")
+    @Column(name="SEASON_YEAR")
     private String year;
     @Column(name="TOTAL_PRIZE")
     private Long totalPrize;
