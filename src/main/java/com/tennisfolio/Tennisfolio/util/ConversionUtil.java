@@ -1,6 +1,7 @@
 package com.tennisfolio.Tennisfolio.util;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
@@ -23,5 +24,14 @@ public class ConversionUtil {
         int minutes = totalSeconds / 60;
         int seconds = totalSeconds % 60;
         return String.format("%d:%02d", minutes, seconds);
+    }
+
+    public static String timestampToHHmm(LocalDateTime timestamp){
+        DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("HH:mm");
+        
+        String formattedTime = timestamp.format(outputFormatter);
+
+        return formattedTime;
+
     }
 }

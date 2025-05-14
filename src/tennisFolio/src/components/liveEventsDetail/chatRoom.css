@@ -1,0 +1,126 @@
+.chat-container {
+  width: 100%;
+  max-width: 600px;
+  margin: auto;
+  border: 1px solid #ccc;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  height: 400px;
+  font-family: sans-serif;
+}
+
+.chat-header {
+  background-color: #4CAF50;
+  color: white;
+  padding: 10px;
+  text-align: center;
+  font-weight: bold;
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+}
+
+.chat-box {
+  flex: 1;
+  padding: 10px;
+  overflow-y: auto;
+  background-color: #f9f9f9;
+}
+
+.chat-message {
+  display: flex;
+  flex-direction: column;
+  padding: 8px 12px;
+  margin: 6px 12px;
+  border-radius: 16px;
+  font-size: 14px;
+  line-height: 1.4;
+  word-wrap: break-word;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.chat-input-area {
+  display: flex;
+  border-top: 1px solid #ddd;
+}
+
+.chat-input {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  outline: none;
+  font-size: 14px;
+}
+
+.chat-button {
+  padding: 10px 15px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.chat-meta {
+  font-size: 12px;
+  color: #555;
+  margin-bottom: 4px;
+  font-weight: 500;
+}
+
+.sender {
+  font-weight: bold;
+  color: #333;
+  font-size: 13px;
+}
+.chat-bubble-container {
+  display: flex;
+  margin: 8px;
+}
+
+.chat-bubble-container.mine {
+  justify-content: flex-end;
+}
+
+.chat-bubble-container.theirs {
+  justify-content: flex-start;
+}
+
+.chat-bubble {
+  display: inline-block;
+  max-width: 60%;
+  padding: 10px 14px;
+  border-radius: 16px;
+  font-size: 14px;
+  line-height: 1.4;
+  position: relative;
+  word-break: break-word;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.chat-bubble.mine {
+  background-color: #dcf8c6;
+  border-bottom-right-radius: 4px;
+}
+
+.chat-bubble.theirs {
+  background-color: #f1f0f0;
+  border-bottom-left-radius: 4px;
+}
+
+.chat-text {
+  margin-bottom: 6px;
+}
+
+.chat-time {
+  font-size: 11px;
+  color: #666;
+  text-align: right;
+}
+
+.chat-length-indicator {
+  font-size: 12px;
+  color: #888;
+  text-align: right;
+  margin-right: 6px;
+}

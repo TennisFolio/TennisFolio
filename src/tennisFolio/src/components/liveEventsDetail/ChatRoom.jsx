@@ -5,6 +5,7 @@ import './ChatRoom.css';
 import { base_server_url } from '../../App';
 import axios from 'axios';
 
+const MAX_LENGTH = 200;
 
 function ChatRoom({ matchId = 'default-room' }) {
   const [messages, setMessages] = useState([]);
@@ -21,6 +22,10 @@ function ChatRoom({ matchId = 'default-room' }) {
     }
   }
 
+  function formatToMinuteSecond(isoString){
+    const date = new Date(isoString);
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  }
   useEffect(() => {
     const socket = new SockJS(`${base_server_url}/ws`);
     const client = Stomp.over(socket);
@@ -32,7 +37,6 @@ function ChatRoom({ matchId = 'default-room' }) {
           console.error('데이터 조회 실패!', response.data.message);
           return;
         }
-        console.log("aaa" ,response.data.data);
         
         const myChat = response.data.data.find((item) => item.userId === localStorage.getItem('chatUserId'));
         if (myChat) {
@@ -74,7 +78,7 @@ function ChatRoom({ matchId = 'default-room' }) {
       matchId,
       sender: nickname,
       userId : userId,
-      timestamp: new Date().toISOString(),
+      timestamp: formatToMinuteSecond(new Date().toISOString()),
       message: input,
       type: 'TALK',
     };
@@ -87,25 +91,50 @@ function ChatRoom({ matchId = 'default-room' }) {
     
   }, [messages]);
 
+  function formatTime(isoString) {
+  const date = new Date(isoString);
+  return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
+
   return (
     <div className="chat-container">
-      <div className="chat-header">🗨️ Live Chat - {matchId}</div>
+      <div className="chat-header">🗨️ Live Chat</div>
       <div className="chat-box">
-        {messages.map((msg, idx) => (
-          <div key={idx} className="chat-message">
-            <strong>{msg.sender}:</strong> {msg.message}
-          </div>
-        ))}
+        {messages.map((msg, idx) => {
+          const isMine = msg.userId === localStorage.getItem('chatUserId');
+          return(
+            <div key={idx} 
+                  className={`chat-bubble-container ${isMine ? 'mine' : 'theirs'}`}>
+              <div className={`chat-bubble ${isMine ? 'mine' : 'theirs'}`}>
+                <div className="chat-meta">
+                  <span className="sender">{msg.sender}</span>
+                </div>
+                <div className="chat-text">{msg.message}</div>
+                <div className="chat-time">{msg.timestamp}</div>
+              </div>
+            </div>
+          )
+        }
+          
+          
+        )}
         <div ref={bottomRef}></div>
       </div>
       <div className="chat-input-area">
         <input
           className="chat-input"
           value={input}
-          onChange={(e) => setInput(e.target.value)}
+          onChange={(e) => {
+            if(e.target.value.length <= MAX_LENGTH){
+              setInput(e.target.value)
+            }
+          }}
           placeholder="메시지를 입력하세요"
           onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
         />
+        <div className="chat-length-indicator">
+          {input.length} / {MAX_LENGTH}
+        </div>
         <button onClick={sendMessage} className="chat-button">전송</button>
       </div>
     </div>
