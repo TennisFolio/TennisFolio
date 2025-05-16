@@ -19,10 +19,11 @@ const NAV_ITEMS = [
     ],
   },
   {
-    title: '게임',
+    title: '테스트',
     children: [
-      { label: 'KDK', path: '/game/kdk' },
-      { label: '토너먼트', path: '/game/tournament' },
+      { label: '라켓테스트', path: '/test/racketTest' },
+      { label: '스트링테스트', path: '/test/tournament' },
+      { label: 'ATP선수테스트', path: '/test/ATPPlayer' },
     ],
   },
 ];

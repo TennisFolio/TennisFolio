@@ -8,6 +8,7 @@ import Layout from './Layout'
 import LiveEventsDetail from './page/LiveEventsDetail'
 import {Buffer} from 'buffer';
 import process from 'process';
+import RacketTest from './page/RacketTest.jsx'
 
 window.global ||= window;
 window.Buffer ||= Buffer;
@@ -25,6 +26,7 @@ function App() {
         <Route path="/" element={<Main />} />
         <Route path="/ranking" element={<Ranking />} />
         <Route path="/liveEvents/:matchId" element={<LiveEventsDetail />}/>
+        <Route path="/test/racketTest" element={<RacketTest />} />
       </Routes>
     </Layout>
    </BrowserRouter>
