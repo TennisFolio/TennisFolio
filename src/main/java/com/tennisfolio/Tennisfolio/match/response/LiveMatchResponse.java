@@ -14,6 +14,7 @@ public class LiveMatchResponse {
     private String tournamentName;
     private String seasonName;
     private String roundName;
+    private String status;
     private LiveMatchPlayerResponse homePlayer;
     private LiveMatchPlayerResponse awayPlayer;
     private LiveMatchScoreResponse homeScore;
@@ -21,11 +22,13 @@ public class LiveMatchResponse {
     private LiveMatchTimeResponse time;
 
 
+
     public LiveMatchResponse(LiveEventsApiDTO dto, Player homePlayer, Player awayPlayer){
         this.rapidId = dto.getRapidId();
         this.tournamentName = dto.getTournament().getName();
         this.seasonName = dto.getSeason().getName();
         this.roundName = dto.getRound().getName();
+        this.status = dto.getStatus().getDescription();
         this.homePlayer = new LiveMatchPlayerResponse(dto.getHomeTeam(), homePlayer);
         this.awayPlayer = new LiveMatchPlayerResponse(dto.getAwayTeam(), awayPlayer);
         this.homeScore = new LiveMatchScoreResponse(dto.getHomeScore());

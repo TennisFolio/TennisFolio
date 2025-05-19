@@ -1,14 +1,20 @@
 import React from 'react'
 import { useState } from 'react'
 import { useLocation } from 'react-router-dom';
+import Flag from 'react-world-flags';
 function EventCard({event}) {
     const location = useLocation();
      if (!event) return null;
      console.log(event);
   return (
       <div key = {event.rapidId} className="eventCard">
-              <div className="tournamentInfo">
-                {event.tournamentName} - {event.roundName}
+              <div className="tournamentHeader">
+                <div className="tournamentName">
+                {event.tournamentName}
+                </div>
+                <div className="roundName">
+                  {event.roundName}
+                </div>
               </div>
               <div className="eventHeader">
                 <div className="teamBlock">
@@ -40,16 +46,32 @@ function EventCard({event}) {
                   </thead>
                   <tbody>
                     <tr>
-                      <td>{event.homePlayer.playerName}</td>
-                      {event.homeScore.periodScore.map((score, index) => (
-                        <td key={index}>{score}</td>
-                      ))}
-                    </tr>
-                    <tr>
-                      <td>{event.awayPlayer.playerName}</td>
-                      {event.awayScore.periodScore.map((score, index) => (
-                        <td key={index}>{score}</td>
-                      ))}
+                      <td>
+                                                <span style={{ verticalAlign: 'middle' }}>
+                                                  {event.homePlayer.playerName}
+                                                </span>
+                                                <Flag
+                                                  code={event.homePlayer.playerCountryAlpha}
+                                                  style={{ width: '24px', height: '16px', verticalAlign: 'middle', marginLeft: '4px' }}
+                                                />
+                                            </td>
+                                            {event.homeScore.periodScore.map((score, index) => (
+                                              <td key={index}>{score}</td>
+                                            ))}
+                                          </tr>
+                                          <tr>
+                                            <td>
+                                              <span style={{ verticalAlign: 'middle' }}>
+                                                  {event.awayPlayer.playerName}
+                                                </span>
+                                                <Flag
+                                                  code={event.awayPlayer.playerCountryAlpha}
+                                                  style={{ width: '24px', height: '16px', verticalAlign: 'middle', marginLeft: '4px' }}
+                                                />
+                                            </td>
+                                            {event.awayScore.periodScore.map((score, index) => (
+                                              <td key={index}>{score}</td>
+                                            ))}
                     </tr>
                   </tbody>
                 </table>

@@ -1,10 +1,12 @@
 import React from 'react';
 import './layout.css';
 import Navigation from './Navigation.jsx';
+import { useNavigate } from 'react-router-dom';
 function Layout({ children }) {
+  const navigate = useNavigate();
   return (
     <div className="layout">
-      <header className="header">TennisFolio</header>
+      <header className="header" onClick={() => navigate("/")}>TennisFolio</header>
 
       <div className="main">
           <Navigation />

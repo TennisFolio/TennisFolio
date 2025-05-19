@@ -36,4 +36,10 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(illegalArgumentException.getHttpStatus())
                 .body(ResponseDTO.error(e.getExceptionCode().getCode(), e.getExceptionCode().getMessage()));
     }
+    @ExceptionHandler(LiveMatchNotFoundException.class)
+    public ResponseEntity<ResponseDTO<Void>> handleLiveMatchNotFoundException(LiveMatchNotFoundException e){
+        ExceptionCode liveMatchNotFoundException = ExceptionCode.NOT_FOUND;
+        return ResponseEntity.status(liveMatchNotFoundException.getHttpStatus())
+                .body(ResponseDTO.error(e.getExceptionCode().getCode(), e.getExceptionCode().getMessage()));
+    }
 }

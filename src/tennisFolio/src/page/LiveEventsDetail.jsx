@@ -7,21 +7,27 @@ import {Client} from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import { base_server_url } from '../App';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 function LiveEventsDetail() {
     
     const { matchId } = useParams();
     const [liveEvent, setLiveEvent] = useState(null);
+    const navigate = useNavigate();
     useEffect(() => {
       const fetchData = async () => {
         try {    
           const response = await axios.get(`${base_server_url}/api/liveEvents/${matchId}`);
           if (response.data.code !== '0000') {
             console.error('데이터 조회 실패!', response.data.message);
-            return;
           }
           setLiveEvent(response.data.data);
         } catch (error) {
           console.error('Error fetching live events:', error);
+          if(error.response.data.code === '9200'){
+            alert('해당 경기는 현재 진행중이지 않습니다!');
+            navigate('/');
+            return;
+          }
         }
       };
 
@@ -37,6 +43,7 @@ function LiveEventsDetail() {
           console.log("디테일 WebSocket 연결됨");
 
           client.subscribe(`/topic/liveMatch/${matchId}`, (message) => {
+            console.log(message);
             const data = JSON.parse(message.body);
             console.log("디테일 WebSocket 메시지 수신됨", data);
             setLiveEvent(data);

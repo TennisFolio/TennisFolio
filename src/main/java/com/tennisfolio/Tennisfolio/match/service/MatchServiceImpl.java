@@ -5,6 +5,8 @@ import com.tennisfolio.Tennisfolio.api.eventStatistics.EventsStatisticsDTO;
 import com.tennisfolio.Tennisfolio.api.leagueEventsByRound.LeagueEventsByRoundDTO;
 import com.tennisfolio.Tennisfolio.api.liveEvents.LiveEventsApiDTO;
 import com.tennisfolio.Tennisfolio.api.liveEvents.LiveEventsTemplate;
+import com.tennisfolio.Tennisfolio.common.ExceptionCode;
+import com.tennisfolio.Tennisfolio.exception.LiveMatchNotFoundException;
 import com.tennisfolio.Tennisfolio.match.domain.Match;
 import com.tennisfolio.Tennisfolio.match.domain.Statistic;
 import com.tennisfolio.Tennisfolio.match.repository.MatchRepository;
@@ -62,7 +64,9 @@ public class MatchServiceImpl implements MatchService{
             Player awayPlayer = playerService.getOrCreatePlayerByRapidId(dto.getAwayTeam().getRapidPlayerId());
             return new LiveMatchResponse(dto, homePlayer, awayPlayer);
         }).filter(event -> rapidMatchId.equals(event.getRapidId()))
-                .findFirst().get();
+                .findFirst()
+                .orElseThrow(() -> new LiveMatchNotFoundException(ExceptionCode.NOT_FOUND));
+
     }
 
     @Override

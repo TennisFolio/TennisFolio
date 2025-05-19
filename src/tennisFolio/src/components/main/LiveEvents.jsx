@@ -1,8 +1,7 @@
 import React from 'react'
 import './liveEvents.css';
 import { useNavigate } from 'react-router-dom';
-import { useState } from 'react';
-import axios from 'axios';
+import Flag from 'react-world-flags';
 function LiveEvents({liveEvents}) {
     console.log("LiveEvents : ", liveEvents);
     const navigate = useNavigate();
@@ -14,9 +13,18 @@ function LiveEvents({liveEvents}) {
         <h1>Live Events</h1>
         {liveEvents.map((event) => (
             <div key = {event.rapidId} className="eventCard">
-              <div className="tournamentInfo">
-                {event.tournamentName} - {event.roundName}
+              <div className="tournamentHeader">
+                <div className="tournamentName">
+                {event.tournamentName}
+                </div>
+                <div className="roundName">
+                  {event.roundName}
+                </div>
+                <div className="status">
+                  {event.status}
+                </div>
               </div>
+              
               <div className="eventHeader">
                 <div className="teamBlock">
                   <img src={event.homePlayer.playerImage} className="playerImg" />
@@ -47,13 +55,29 @@ function LiveEvents({liveEvents}) {
                   </thead>
                   <tbody>
                     <tr>
-                      <td>{event.homePlayer.playerName}</td>
+                      <td>
+                          <span style={{ verticalAlign: 'middle' }}>
+                            {event.homePlayer.playerName}
+                          </span>
+                          <Flag
+                            code={event.homePlayer.playerCountryAlpha}
+                            style={{ width: '24px', height: '16px', verticalAlign: 'middle', marginLeft: '4px' }}
+                          />
+                      </td>
                       {event.homeScore.periodScore.map((score, index) => (
                         <td key={index}>{score}</td>
                       ))}
                     </tr>
                     <tr>
-                      <td>{event.awayPlayer.playerName}</td>
+                      <td>
+                        <span style={{ verticalAlign: 'middle' }}>
+                            {event.awayPlayer.playerName}
+                          </span>
+                          <Flag
+                            code={event.awayPlayer.playerCountryAlpha}
+                            style={{ width: '24px', height: '16px', verticalAlign: 'middle', marginLeft: '4px' }}
+                          />
+                      </td>
                       {event.awayScore.periodScore.map((score, index) => (
                         <td key={index}>{score}</td>
                       ))}

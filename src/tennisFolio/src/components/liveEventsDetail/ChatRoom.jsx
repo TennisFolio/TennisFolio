@@ -103,14 +103,18 @@ function ChatRoom({ matchId = 'default-room' }) {
         {messages.map((msg, idx) => {
           const isMine = msg.userId === localStorage.getItem('chatUserId');
           return(
-            <div key={idx} 
-                  className={`chat-bubble-container ${isMine ? 'mine' : 'theirs'}`}>
-              <div className={`chat-bubble ${isMine ? 'mine' : 'theirs'}`}>
-                <div className="chat-meta">
-                  <span className="sender">{msg.sender}</span>
+            <div key={idx} className={`chat-bubble-container ${isMine ? 'mine' : 'theirs'}`}>
+              <div className={`bubble-row ${isMine ? 'mine' : 'theirs'}`}>
+                {isMine && <div className="chat-time">{msg.timestamp}</div>}
+
+                <div className={`chat-bubble ${isMine ? 'mine' : 'theirs'}`}>
+                  <div className="chat-meta">
+                    <span className="sender">{msg.sender}</span>
+                  </div>
+                  <div className="chat-text">{msg.message}</div>
                 </div>
-                <div className="chat-text">{msg.message}</div>
-                <div className="chat-time">{msg.timestamp}</div>
+
+                {!isMine && <div className="chat-time">{msg.timestamp}</div>}
               </div>
             </div>
           )

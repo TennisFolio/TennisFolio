@@ -21,6 +21,6 @@ public class TestRacket {
     private String modelName;
     @Column(name="DESCRIPTION")
     private String description;
-    @Column(name="IMAGE_URL")
-    private String imageUrl;
+    @Column(name="IMAGE")
+    private String image;
 }

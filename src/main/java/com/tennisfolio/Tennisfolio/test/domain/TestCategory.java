@@ -19,4 +19,6 @@ public class TestCategory extends BaseTimeEntity {
     private Long testCategoryId;
     @Column(name="TEST_CATEGORY_NAME")
     private String testCategoryName;
+    @Column(name="IMAGE")
+    private String image;
 }
