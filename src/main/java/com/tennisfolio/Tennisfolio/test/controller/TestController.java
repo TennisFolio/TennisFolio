@@ -54,4 +54,15 @@ public class TestController {
 
         return new ResponseEntity<>(ResponseDTO.success(testResult), HttpStatus.OK);
     }
+
+    @GetMapping("/{testType}/result/{query}")
+    public ResponseEntity<ResponseDTO<TestResultResponse>> getTestResultByQuery(
+            @PathVariable("testType")String testType,
+            @PathVariable("query")String query
+    ){
+        TestType test = TestType.fromString(testType);
+        TestResultResponse testResult = testService.getTestResultByQuery(test,query);
+
+        return new ResponseEntity<>(ResponseDTO.success(testResult), HttpStatus.OK);
+    }
 }

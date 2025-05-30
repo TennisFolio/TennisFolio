@@ -2,6 +2,7 @@ import React from 'react';
 import './layout.css';
 import Navigation from './Navigation.jsx';
 import { useNavigate } from 'react-router-dom';
+import Footer from './Footer.jsx';
 function Layout({ children }) {
   const navigate = useNavigate();
   return (
@@ -12,6 +13,7 @@ function Layout({ children }) {
           <Navigation />
         <section className="contents">
           {children}
+          <Footer />
         </section>
 
         <aside className="ad">

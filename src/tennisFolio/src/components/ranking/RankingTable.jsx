@@ -2,7 +2,6 @@ import React from 'react'
 import './rankingTable.css';
 import Flag from 'react-world-flags';
 function RankingTable({rankings}) {
-  console.log(rankings);
   return (
     <div className="ranking-table-container">
       <table className="ranking-table">

@@ -44,7 +44,8 @@ function Ranking() {
           type: 'all'
         }
       });
-      setRankings(res.data);
+
+      setRankings(res.data.data);
       setVisibleCount(res.data.length);
       setIsAllLoaded(true);
     }catch(error){

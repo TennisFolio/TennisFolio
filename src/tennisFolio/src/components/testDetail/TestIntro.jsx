@@ -1,10 +1,7 @@
 import React from 'react'
 import './testIntro.css';
-import { useNavigate } from 'react-router-dom';
 
 function TestIntro({currentTest, setMode}) {
-
-  const navigate = useNavigate();
 
    const handleStart = () => {
     setMode('question');

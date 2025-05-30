@@ -41,7 +41,7 @@
 }
 
 .option-button:hover {
-  background-color: #ebf8ff;
+  background-color: #2980b9;
   color: #2b6cb0;
 }
 
@@ -49,13 +49,6 @@
   background-color: #3182ce;
   color: white;
   box-shadow: 0 0 0 2px #63b3ed inset;
-}
-
-.answer-preview {
-  margin-top: 2rem;
-  text-align: center;
-  font-size: 0.9rem;
-  color: #718096;
 }
 
 .progress-indicator {

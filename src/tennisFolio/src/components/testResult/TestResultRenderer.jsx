@@ -9,7 +9,6 @@ import { useSelector, useDispatch  } from 'react-redux';
 function TestResultRenderer({renderResultInfo}) {
     
     const currentTest = useSelector((state) => state.test.currentTest);
-    console.log("currentTest", currentTest);
     if(!currentTest) return <div>테스트 정보가 없습니다.</div>;
     
     if(currentTest.url === "atpPlayer"){

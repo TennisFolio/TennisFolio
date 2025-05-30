@@ -5,24 +5,21 @@ import './Navigation.css';
 
 const NAV_ITEMS = [
   {
-    title: '선수',
+    title: '라이브',
     children: [
-      { label: 'ATP', path: '/players/atp' },
-      { label: 'WTA', path: '/players/wta' },
+      { label: 'ATP', path: '/' },
     ],
   },
   {
     title: '랭킹',
     children: [
       { label: '실시간', path: '/ranking' },
-      { label: '연도별', path: '/ranking/yearly' },
     ],
   },
   {
     title: '엔터테인먼트',
     children: [
       { label: '테스트', path: '/test' },
-      { label: 'KDK', path: '/test/tournament' },
     ],
   },
 ];

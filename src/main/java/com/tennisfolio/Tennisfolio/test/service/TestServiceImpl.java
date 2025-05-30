@@ -91,4 +91,13 @@ public class TestServiceImpl implements TestService{
                 .getResult(maxTarget);
 
     }
+
+    @Override
+    public TestResultResponse getTestResultByQuery(TestType testType, String query) {
+        return providers.stream()
+                .filter(p -> p.supports(testType))
+                .findFirst()
+                .orElseThrow()
+                .getResultByQuery(query);
+    }
 }

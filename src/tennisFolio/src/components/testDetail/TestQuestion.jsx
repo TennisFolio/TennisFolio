@@ -3,8 +3,6 @@ import { useEffect,useState } from 'react';
 import './testQuestion.css';
 import { arrayShuffler } from '../../tools/tools';
 function TestQuestion({setMode, currentTest, questionList, answerList, setAnswerList}) {
-  console.log("currentTest", currentTest);
-  console.log("questionList", questionList);
 
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -19,8 +17,6 @@ function TestQuestion({setMode, currentTest, questionList, answerList, setAnswer
   };
 
   useEffect(() => {
-    console.log("currentIndex", currentIndex);
-    console.log("questionList.length", questionList.length);
     if( currentIndex === questionList.length) {
       setMode('loading');
     }
@@ -51,11 +47,6 @@ function TestQuestion({setMode, currentTest, questionList, answerList, setAnswer
       <p className="progress-indicator">
         {currentIndex + 1} / {questionList.length}
       </p>
-
-      <div className="answer-preview">
-        <h4>선택된 답변 ID 리스트:</h4>
-        <code>[{answerList.join(', ')}]</code>
-      </div>
     </div>
   )
 }

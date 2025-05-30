@@ -7,8 +7,7 @@ import './testItemList.css';
 function TestItemList({testList}) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-
-  console.log(testList);
+  
   return (
     <div className="test-list-container">
       {testList.map((test) => (

@@ -6,4 +6,5 @@ import com.tennisfolio.Tennisfolio.test.response.TestResultResponse;
 public interface TestResultProvider {
     boolean supports(TestType type);
     TestResultResponse getResult(Long resultId);
+    TestResultResponse getResultByQuery(String query);
 }

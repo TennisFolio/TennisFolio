@@ -14,4 +14,5 @@ public interface TestService {
     TestCategoryResponse getTest(TestType testType);
     List<TestQuestionResponse> getTestQuestion(TestType testType);
     TestResultResponse getResult(List<Long> answerList, TestType testType);
+    TestResultResponse getTestResultByQuery(TestType testType, String query);
 }

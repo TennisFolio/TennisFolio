@@ -3,15 +3,17 @@ import './liveEvents.css';
 import { useNavigate } from 'react-router-dom';
 import Flag from 'react-world-flags';
 function LiveEvents({liveEvents}) {
-    console.log("LiveEvents : ", liveEvents);
     const navigate = useNavigate();
     const OnClickDetailButton = (event) => {
         navigate(`/liveEvents/${event.rapidId}`);
     }
   return (
     <div className="live-events">
-        <h1 className="live-title">Live Events</h1>
-        {liveEvents.map((event) => (
+        <h1 className="live-title">ATP 라이브</h1>
+        {liveEvents.length === 0 ? (
+          <div className="no-events-message">현재 진행 중인 경기가 없습니다.</div>
+        ) :
+        (liveEvents.map((event) => (
             <div key = {event.rapidId} className="eventCard">
               <div className="tournamentHeader">
                 <div className="tournamentName">
@@ -87,7 +89,7 @@ function LiveEvents({liveEvents}) {
               </div>
               <button className="eventButton" onClick={() => OnClickDetailButton(event)}>채팅방 입장</button>
          </div>
-        ))}
+        )))}
     </div>
     
   )

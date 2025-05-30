@@ -5,7 +5,7 @@
     font-size: 16px;
     font-weight: bold;
     color: #ffffff;
-    background-color: #4caf50; /* 테니스 필드 느낌의 초록색 */
+    background-color: #3498db; 
     border: none;
     border-radius: 8px;
     cursor: pointer;
@@ -13,11 +13,11 @@
   }
   
   .load-more-button:hover {
-    background-color: #45a049; /* hover 시 조금 더 진한 초록색 */
+    background-color: #2980b9; /* hover 시 조금 더 진한 초록색 */
     transform: translateY(-2px);
   }
   
   .load-more-button:active {
-    background-color: #3d8b40;
+    background-color: #2980b9;
     transform: translateY(0);
   }

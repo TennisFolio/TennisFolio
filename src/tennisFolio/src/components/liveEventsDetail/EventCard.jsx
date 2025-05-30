@@ -5,7 +5,7 @@ import Flag from 'react-world-flags';
 function EventCard({event}) {
     const location = useLocation();
      if (!event) return null;
-     console.log(event);
+     
   return (
       <div key = {event.rapidId} className="eventCard">
               <div className="tournamentHeader">

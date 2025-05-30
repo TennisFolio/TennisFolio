@@ -56,7 +56,6 @@ function ChatRoom({ matchId = 'default-room' }) {
 
     client.connect({}, () => {
       client.subscribe(`/topic/match.${matchId}`, (msg) => {
-        console.log("Received message", msg.body);
         const received = JSON.parse(msg.body);
         setMessages((prev) => [...prev, received]);
       });

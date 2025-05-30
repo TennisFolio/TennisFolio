@@ -40,12 +40,8 @@ function LiveEventsDetail() {
         webSocketFactory: () => socket,
         reconnectDelay: 10000,
         onConnect: () => {
-          console.log("디테일 WebSocket 연결됨");
-
           client.subscribe(`/topic/liveMatch/${matchId}`, (message) => {
-            console.log(message);
             const data = JSON.parse(message.body);
-            console.log("디테일 WebSocket 메시지 수신됨", data);
             setLiveEvent(data);
           });
         },

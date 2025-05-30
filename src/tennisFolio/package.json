@@ -12,6 +12,8 @@
   "dependencies": {
     "@reduxjs/toolkit": "^2.8.2",
     "@stomp/stompjs": "^7.1.1",
+    "@uidotdev/usehooks": "^2.4.1",
+    "antd": "^5.25.3",
     "axios": "^1.9.0",
     "buffer": "^6.0.3",
     "dayjs": "^1.11.13",
@@ -22,6 +24,7 @@
     "react-dom": "^19.0.0",
     "react-redux": "^9.2.0",
     "react-router-dom": "^7.5.1",
+    "react-share": "^5.2.2",
     "react-world-flags": "^1.6.0",
     "sockjs-client": "^1.6.1"
   },

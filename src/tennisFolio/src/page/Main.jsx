@@ -24,11 +24,9 @@ function Main() {
       webSocketFactory: () => socket,
       reconnectDelay : 30000,
       onConnect: () => {
-        console.log('STOMP connected');
 
         stompClient.subscribe("/topic/liveMatches", (message) => {
         const matchList = JSON.parse(message.body);
-        console.log("Received message", matchList);
         setLiveEvents(matchList);
         });
       },

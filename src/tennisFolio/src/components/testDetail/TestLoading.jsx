@@ -10,7 +10,7 @@ import loadingAnimation from '../../assets/loading-animation.json';
 import Lottie from 'lottie-react';
 
 function TestLoading({currentTest, answerList}) {
-  console.log("TestLoading", currentTest, answerList);
+  
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { category } = useParams();
@@ -26,7 +26,7 @@ function TestLoading({currentTest, answerList}) {
                     console.error('테스트 데이터 조회 실패', res.data.message);
                     return;
                 }
-                console.log("res", res);
+                
                 dispatch(setTestResult(res.data.data));                
             })
     }
@@ -39,7 +39,7 @@ function TestLoading({currentTest, answerList}) {
     
     if (!testResult) return;
     let timeout = setTimeout(() => {
-      console.log("testResult", testResult);
+      
       navigate(`/test/${category}/result/${testResult.query}`);
     }, loadingTime);
     return () => {

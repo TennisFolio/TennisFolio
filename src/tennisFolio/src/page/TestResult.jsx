@@ -4,30 +4,79 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useParams } from 'react-router-dom';
 import TestResultRenderer from '../components/testResult/TestResultRenderer';
+import { setTestResult } from '../store/testSlice';
+import { setCurrentTest } from '../store/testSlice';
+import axios from 'axios';
+import { base_server_url } from '../App';
+import ShareButtonGroup from '../components/testResult/ShareButtonGroup';
+import ResultButtonGroup from '../components/testResult/ResultButtonGroup';
+
+
 function TestResult() {
   const dispatch = useDispatch();
   const testResult = useSelector((state) => state.test.testResult);
+  const currentTest = useSelector((state) => state.test.currentTest);
   const navigate = useNavigate();
   const param = useParams();
 
   useEffect(() => { 
-    console.log(`${param.category}`);
-    console.log(param.query);
+
     if(param.query === undefined || param.query === null || param.query === ""){
       alert("잘못된 접근입니다.");
       navigate(`/test/${param.category}`);
       return;
     }
+    if(!currentTest || currentTest === null || currentTest === undefined){
+            axios.get(`${base_server_url}/api/test/${param.category}`)
+            .then((res) => {
+                if(res.data.code !== '0000'){
+                    alert('해당 테스트는 없습니다.');
+                    navigate('/test');
+                    
+                }
+                dispatch(setCurrentTest(res.data.data));
+            })
+            .catch((err) => {
+                alert('해당 테스트는 없습니다.');
+                navigate('/test');
+            })
+        }
+
     if (!testResult) {
-      alert("테스트를 먼저 완료해주세요.");
-      navigate(`/test/${param.category}`);
+      const fetchResultData = async () => {
+            axios.get(`${base_server_url}/api/test/${param.category}/result/${param.query}`)
+            .then((res) => {
+                if(res.data.code !== '0000'){
+                  alert("해당 결과는 없습니다.");
+                  return;
+                }
+                dispatch(setTestResult(res.data.data));  
+            })
+            .catch((err) => {
+              console.error("Error fetching test result:", err);
+              alert("테스트 결과를 불러오는 데 실패했습니다. 다시 시도해주세요.");
+            })
+        }
+      fetchResultData();
     }
-    // 여기에 결과를 처리하는 로직을 추가할 수 있습니다.
-    // 예를 들어, 결과를 서버에 저장하거나 UI에 표시하는 등의 작업을 할 수 있습니다.
-    console.log("Test Result:", testResult);
+
+    
   },[])
   return (
-    <TestResultRenderer renderResultInfo ={testResult}/>
+    <>
+    {testResult ? (
+      <>
+      <TestResultRenderer renderResultInfo={testResult} />
+      <ShareButtonGroup />
+      <ResultButtonGroup />
+      </>
+    ) : (
+      <div style={{ textAlign: 'center', marginTop: '40px' }}>
+        결과를 불러오는 중입니다...
+      </div>
+    )}
+    
+    </>
   )
 }
 

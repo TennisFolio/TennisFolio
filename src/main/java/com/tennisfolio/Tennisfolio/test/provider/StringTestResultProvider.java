@@ -1,9 +1,14 @@
 package com.tennisfolio.Tennisfolio.test.provider;
 
+import com.tennisfolio.Tennisfolio.common.ExceptionCode;
 import com.tennisfolio.Tennisfolio.common.TestType;
+import com.tennisfolio.Tennisfolio.exception.ResultNotFoundException;
+import com.tennisfolio.Tennisfolio.test.domain.TestRacket;
 import com.tennisfolio.Tennisfolio.test.domain.TestString;
 import com.tennisfolio.Tennisfolio.test.repository.TestStringRepository;
+import com.tennisfolio.Tennisfolio.test.response.RacketTestResultResponse;
 import com.tennisfolio.Tennisfolio.test.response.StringTestResultResponse;
+import com.tennisfolio.Tennisfolio.test.response.TestResultResponse;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -22,8 +27,16 @@ public class StringTestResultProvider implements TestResultProvider{
 
     @Override
     public StringTestResultResponse getResult(Long resultId) {
-        TestString testString = testStringRepository.findById(resultId).get();
+        TestString testString = testStringRepository.findById(resultId)
+                .orElseThrow(() ->new ResultNotFoundException(ExceptionCode.NOT_FOUND));
 
+        return new StringTestResultResponse(testString);
+    }
+
+    @Override
+    public StringTestResultResponse getResultByQuery(String query) {
+        TestString testString = testStringRepository.findByQuery(query)
+                .orElseThrow(() ->new ResultNotFoundException(ExceptionCode.NOT_FOUND));
         return new StringTestResultResponse(testString);
     }
 }

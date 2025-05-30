@@ -12,11 +12,13 @@ import TestDetail from './page/TestDetail.jsx'
 import TestList from './page/TestList.jsx'
 import TestResult from './page/TestResult.jsx'
 import { Navigate } from 'react-router-dom';
+import Privacy from './components/main/Privacy.jsx';
 
 window.global ||= window;
 window.Buffer ||= Buffer;
 window.process ||= process;
 
+export const base_url = import.meta.env.VITE_BASE_URL || "http://localhost:5173";
 export const base_server_url = "http://localhost:8080";
 
 function App() {
@@ -33,6 +35,10 @@ function App() {
         <Route path="/test/:category" element={<TestDetail />} />
         <Route path="/test/:category/result" element={<Navigate to="/test/:category" />} />
         <Route path="/test/:category/result/:query" element={<TestResult />} />
+
+
+
+        <Route path="/privacy" element= {<Privacy />} />
       </Routes>
     </Layout>
    </BrowserRouter>

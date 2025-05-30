@@ -17,6 +17,14 @@
   line-height: 1.4;
 }
 
+.no-events-message {
+  text-align: center;
+  margin-top: 40px;
+  font-size: 18px;
+  color: #7f8c8d;
+  font-style: italic;
+}
+
 .eventCard {
   background: #fff;
   border-radius: 16px;
