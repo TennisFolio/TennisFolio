@@ -21,6 +21,8 @@ public class TestString {
     private String stringType;
     @Column(name="DESCRIPTION")
     private String description;
+    @Column(name="QUERY")
+    private String query;
     @Column(name="IMAGE")
     private String image;
 }

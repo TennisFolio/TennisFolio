@@ -1,6 +1,7 @@
 package com.tennisfolio.Tennisfolio.test.domain;
 
 import com.tennisfolio.Tennisfolio.common.Entity.BaseTimeEntity;
+import com.tennisfolio.Tennisfolio.common.TestType;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,6 +20,12 @@ public class TestCategory extends BaseTimeEntity {
     private Long testCategoryId;
     @Column(name="TEST_CATEGORY_NAME")
     private String testCategoryName;
+    @Enumerated(EnumType.STRING)
+    private TestType testType;
+    @Column(name="URL")
+    private String url;
+    @Column(name="DESCRIPTION")
+    private String description;
     @Column(name="IMAGE")
     private String image;
 }

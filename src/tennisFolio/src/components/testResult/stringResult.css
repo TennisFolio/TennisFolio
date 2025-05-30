@@ -1,0 +1,54 @@
+.string-result-container {
+  max-width: 700px;
+  margin: 50px auto;
+  padding: 30px;
+  text-align: center;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  background-color: #ffffff;
+}
+
+.result-title {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 30px;
+  color: #2c3e50;
+}
+
+.string-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.string-image {
+  width: 200px;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.string-info {
+  text-align: center;
+}
+
+.string-name {
+  font-size: 22px;
+  font-weight: bold;
+  color: #34495e;
+  margin-bottom: 8px;
+}
+
+.string-type {
+  font-size: 16px;
+  color: #7f8c8d;
+  margin-bottom: 10px;
+}
+
+.string-description {
+  font-size: 16px;
+  color: #555;
+  line-height: 1.5;
+}

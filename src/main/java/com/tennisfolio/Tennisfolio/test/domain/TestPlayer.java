@@ -24,6 +24,8 @@ public class TestPlayer {
     private String playerName;
     @Column(name="DESCRIPTION")
     private String description;
+    @Column(name="QUERY")
+    private String query;
     @Column(name="IMAGE")
     private String image;
 }

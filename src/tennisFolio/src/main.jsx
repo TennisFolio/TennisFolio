@@ -1,9 +1,13 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
+import ReactDOM from 'react-dom/client'
 import App from './App.jsx'
-import Layout from './Layout.jsx'
-createRoot(document.getElementById('root')).render(
-   
+import {Provider} from 'react-redux'
+import store from './store/store';
+
+
+const root = ReactDOM.createRoot(document.getElementById('root')).render(
+      <Provider store={store}>
       <App />,
-   
+      </Provider>
 )

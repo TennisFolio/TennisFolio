@@ -1,12 +1,10 @@
 package com.tennisfolio.Tennisfolio.test.domain;
 
-import com.tennisfolio.Tennisfolio.common.TargetType;
+import com.tennisfolio.Tennisfolio.common.TestType;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.lang.annotation.Target;
 
 @Getter
 @Setter
@@ -21,10 +19,11 @@ public class TestOptionMapping {
     @ManyToOne
     @JoinColumn(name="OPTION_ID")
     private TestOption option;
-
     @Enumerated(EnumType.STRING)
-    private TargetType targetType;
-
+    private TestType targetType;
+    @Column(name="TARGET_ID")
     private Long targetId;
+    @Column(name="SCORE")
+    private int score;
 
 }

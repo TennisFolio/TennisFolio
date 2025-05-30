@@ -2,12 +2,15 @@ package com.tennisfolio.Tennisfolio.exception;
 
 import com.tennisfolio.Tennisfolio.common.ExceptionCode;
 import com.tennisfolio.Tennisfolio.common.response.ResponseDTO;
+import io.swagger.v3.oas.annotations.Hidden;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-@RestControllerAdvice
+@RestControllerAdvice(annotations = {RestController.class}, basePackages = {"com.tennisfolio.Tennisfoli.web.controller"})
+@Hidden
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(RapidApiException.class)
@@ -40,6 +43,13 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ResponseDTO<Void>> handleLiveMatchNotFoundException(LiveMatchNotFoundException e){
         ExceptionCode liveMatchNotFoundException = ExceptionCode.NOT_FOUND;
         return ResponseEntity.status(liveMatchNotFoundException.getHttpStatus())
+                .body(ResponseDTO.error(e.getExceptionCode().getCode(), e.getExceptionCode().getMessage()));
+    }
+
+    @ExceptionHandler(TestNotFoundException.class)
+    public ResponseEntity<ResponseDTO<Void>> handleTestNotFoundException(TestNotFoundException e){
+        ExceptionCode testNotFoundException = ExceptionCode.NOT_FOUND;
+        return ResponseEntity.status(testNotFoundException.getHttpStatus())
                 .body(ResponseDTO.error(e.getExceptionCode().getCode(), e.getExceptionCode().getMessage()));
     }
 }

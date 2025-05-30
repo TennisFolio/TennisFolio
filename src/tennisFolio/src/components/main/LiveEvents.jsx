@@ -10,7 +10,7 @@ function LiveEvents({liveEvents}) {
     }
   return (
     <div className="live-events">
-        <h1>Live Events</h1>
+        <h1 className="live-title">Live Events</h1>
         {liveEvents.map((event) => (
             <div key = {event.rapidId} className="eventCard">
               <div className="tournamentHeader">

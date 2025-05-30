@@ -1,10 +1,13 @@
 package com.tennisfolio.Tennisfolio.test.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.tennisfolio.Tennisfolio.common.Entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.util.List;
 
 @Getter
 @Setter
@@ -23,4 +26,7 @@ public class TestQuestion extends BaseTimeEntity {
     private String questionText;
     @Column(name="QUESTION_ORDER")
     private int questionOrder;
+    @OneToMany(mappedBy = "question")
+    @JsonIgnore
+    private List<TestOption> testOptionList;
 }

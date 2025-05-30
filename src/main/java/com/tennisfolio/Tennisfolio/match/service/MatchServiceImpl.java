@@ -48,11 +48,16 @@ public class MatchServiceImpl implements MatchService{
     @Override
     public List<LiveMatchResponse> getLiveEvents() {
         List<LiveEventsApiDTO> apiDTO = liveEventsTemplate.executeWithoutSave("");
+        if(apiDTO == null || apiDTO.isEmpty()){
+            throw new LiveMatchNotFoundException(ExceptionCode.NOT_FOUND);
+        }
+
         return apiDTO.stream().map(dto -> {
             Player homePlayer = playerService.getOrCreatePlayerByRapidId(dto.getHomeTeam().getRapidPlayerId());
             Player awayPlayer = playerService.getOrCreatePlayerByRapidId(dto.getAwayTeam().getRapidPlayerId());
             return new LiveMatchResponse(dto, homePlayer, awayPlayer);
-        }).collect(Collectors.toList());
+        })
+                .collect(Collectors.toList());
     }
 
     @Override

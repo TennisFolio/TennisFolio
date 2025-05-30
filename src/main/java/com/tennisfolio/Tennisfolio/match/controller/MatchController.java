@@ -29,7 +29,7 @@ public class MatchController {
 
         return new ResponseEntity<>(ResponseDTO.success(events), HttpStatus.OK);
     }
-    @Scheduled(fixedRate = 30000)
+//    @Scheduled(fixedRate = 30000)
     public void getLiveEventsSchedule(){
         List<LiveMatchResponse> events = matchService.getLiveEvents();
 
@@ -43,7 +43,7 @@ public class MatchController {
         return new ResponseEntity<>(ResponseDTO.success(event), HttpStatus.OK);
     }
 
-    @Scheduled(fixedRate = 30000)
+//    @Scheduled(fixedRate = 30000)
     public void getLiveEventSchedule(){
         List<LiveMatchResponse> events = matchService.getLiveEvents();
         events.stream().forEach( event -> {

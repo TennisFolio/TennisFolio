@@ -1,0 +1,55 @@
+.test-result-container {
+  max-width: 700px;
+  margin: 50px auto;
+  padding: 30px;
+  text-align: center;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  background-color: #ffffff;
+}
+
+.result-title {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 30px;
+  color: #333;
+}
+
+.player-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.player-image {
+  width: 180px;
+  height: 180px;
+  object-fit: cover;
+  border-radius: 50%;
+  margin-bottom: 20px;
+  border: 4px solid #ddd;
+}
+
+.player-info {
+  text-align: center;
+}
+
+.player-kor-name {
+  font-size: 22px;
+  font-weight: bold;
+  color: #2c3e50;
+  margin-bottom: 8px;
+}
+
+.player-eng-name {
+  font-size: 16px;
+  color: #7f8c8d;
+  margin-bottom: 12px;
+}
+
+.player-description {
+  font-size: 16px;
+  color: #444;
+  line-height: 1.5;
+  padding: 0 10px;
+}
