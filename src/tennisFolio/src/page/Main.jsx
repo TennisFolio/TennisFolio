@@ -15,11 +15,12 @@ function Main() {
     axios.get(`${base_server_url}/api/liveEvents`)
     .then((res => setLiveEvents(res.data.data)))
     .catch((err) => console.log(err));
+    
   }, []);
 
   // 웹소켓 연결 및 구독
   useEffect(() => {
-    const socket = new SockJS("http://localhost:8080/ws");
+    const socket = new SockJS(`${base_server_url}/ws`);
     const stompClient = new Client({
       webSocketFactory: () => socket,
       reconnectDelay : 30000,
