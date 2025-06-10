@@ -13,7 +13,7 @@ function LiveEvents({liveEvents}) {
         {liveEvents && liveEvents.length === 0 ? (
           <div className="no-events-message">현재 진행 중인 경기가 없습니다.</div>
         ) :
-        (liveEvents.map((event) => (
+        (liveEvents && liveEvents.map((event) => (
             <div key = {event.rapidId} className="eventCard">
               <div className="tournamentHeader">
                 <div className="tournamentName">
@@ -88,7 +88,7 @@ function LiveEvents({liveEvents}) {
                 </table>
               </div>
               <button className="eventButton" onClick={() => OnClickDetailButton(event)}>채팅방 입장</button>
-         </div>
+          </div>
         )))}
     </div>
     
