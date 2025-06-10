@@ -18,8 +18,8 @@ window.global ||= window;
 window.Buffer ||= Buffer;
 window.process ||= process;
 
-export const base_url = import.meta.env.VITE_BASE_URL || "http://localhost:5173";
-export const base_server_url = "http://localhost:8080";
+export const base_url = import.meta.env.VITE_BASE_URL || "https://tennisfolio.net";
+export const base_server_url = "https://tennisfolio.net";
 
 function App() {
   
