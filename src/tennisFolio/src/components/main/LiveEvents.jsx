@@ -1,5 +1,5 @@
 import React from 'react'
-import './liveEvents.css';
+import './LiveEvents.css';
 import { useNavigate } from 'react-router-dom';
 import Flag from 'react-world-flags';
 function LiveEvents({liveEvents}) {
