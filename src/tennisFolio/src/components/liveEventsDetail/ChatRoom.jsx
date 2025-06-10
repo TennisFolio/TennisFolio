@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import SockJS from 'sockjs-client';
 import {Stomp} from '@stomp/stompjs';
-import './ChatRoom.css';
+import './chatRoom.css';
 import { base_server_url } from '../../App';
 import axios from 'axios';
 

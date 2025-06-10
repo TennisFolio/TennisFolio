@@ -1,5 +1,5 @@
 import React from 'react'
-
+import './playerResult.css';
 function PlayerResult({renderResultInfo}) {
   return (
         <div className="test-result-container">

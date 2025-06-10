@@ -1,5 +1,5 @@
 import React from 'react'
-import './TestResultRenderer.css';
+import './testResultRenderer.css';
 import PlayerResult from './PlayerResult';
 import StringResult from './StringResult';
 import RacketResult from './RacketResult';

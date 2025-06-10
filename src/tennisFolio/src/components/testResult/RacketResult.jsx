@@ -1,5 +1,5 @@
 import React from 'react'
-import './RacketResult.css';
+import './racketResult.css';
 
 function RacketResult({renderResultInfo}) {
   return (

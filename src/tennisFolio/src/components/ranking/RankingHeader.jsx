@@ -1,5 +1,5 @@
 import React from 'react'
-import './rankingHeader.css';
+import './RankingHeader.css';
 import dayjs from 'dayjs';
 function RankingHeader({lastUpdated}) {
   return (

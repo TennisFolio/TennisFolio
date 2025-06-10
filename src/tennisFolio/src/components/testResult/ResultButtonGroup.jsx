@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useCopyToClipboard } from '@uidotdev/usehooks';
-import './ResultButtonGroup.css';
+import './resultButtonGroup.css';
 import { LinkOutlined , RedoOutlined, HomeOutlined} from '@ant-design/icons';
 
 function ResultButtonGroup() {

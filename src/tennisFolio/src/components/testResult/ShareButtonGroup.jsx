@@ -8,7 +8,7 @@ import {
   TwitterShareButton,
   XIcon,
 } from 'react-share';
-import './ShareButtonGroup.css';
+import './shareButtonGroup.css';
 import { base_url } from '../../App';
 
 function ShareButtonGroup() {

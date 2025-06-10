@@ -1,5 +1,5 @@
 import React from 'react'
-import './rankingTable.css';
+import './RankingTable.css';
 import Flag from 'react-world-flags';
 function RankingTable({rankings}) {
   return (

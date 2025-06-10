@@ -1,5 +1,5 @@
 import React from 'react'
-import './StringResult.css';
+import './stringResult.css';
 function StringResult({renderResultInfo}) {
   return (
     <div className="string-result-container">
