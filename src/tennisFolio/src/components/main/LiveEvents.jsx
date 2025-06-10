@@ -10,7 +10,7 @@ function LiveEvents({liveEvents}) {
   return (
     <div className="live-events">
         <h1 className="live-title">ATP 라이브</h1>
-        {liveEvents.length === 0 ? (
+        {liveEvents && liveEvents.length === 0 ? (
           <div className="no-events-message">현재 진행 중인 경기가 없습니다.</div>
         ) :
         (liveEvents.map((event) => (
