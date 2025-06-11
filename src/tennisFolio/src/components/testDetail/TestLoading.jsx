@@ -22,7 +22,12 @@ function TestLoading({answerList}) {
     const fetchResult = async () => {
       console.log("answerList : ", answerList);
       console.log("base_server_url : ", base_server_url);
-      axios.post(`https://tennisfolio.net/api/test/${category}/result`, answerList)
+      axios.post(`${base_server_url}/api/test/${category}/result`, answerList, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        }
+      })
             .then((res) => {
                 if(res.data.code !== '0000'){
                     console.error('테스트 데이터 조회 실패', res);
