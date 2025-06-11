@@ -20,10 +20,11 @@ function TestLoading({currentTest, answerList}) {
   
   useEffect(() => {
     const fetchResult = async () => {
+      console.log("answerList : ", answerList);
       axios.post(`${base_server_url}/api/test/${category}/result`, answerList)
             .then((res) => {
                 if(res.data.code !== '0000'){
-                    console.error('테스트 데이터 조회 실패', res.data.message);
+                    console.error('테스트 데이터 조회 실패', res);
                     return;
                 }
                 
