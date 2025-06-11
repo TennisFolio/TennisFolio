@@ -49,4 +49,20 @@ public class LiveEventsApiDTO {
         awayScore.nullToZero();
     }
 
+    public int getTotalRanking(){
+        long home = parseRanking(homeTeam.getRanking());
+        long away = parseRanking(awayTeam.getRanking());
+        long sum = home + away;
+
+        return sum > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) sum;
+    }
+
+    private int parseRanking(String ranking){
+        try {
+            return ranking != null ? Integer.parseInt(ranking) : Integer.MAX_VALUE;
+        } catch (NumberFormatException e) {
+            return Integer.MAX_VALUE;
+        }
+    }
+
 }

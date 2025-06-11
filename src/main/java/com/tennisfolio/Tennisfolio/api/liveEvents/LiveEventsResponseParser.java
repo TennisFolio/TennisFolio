@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -41,6 +42,9 @@ public class LiveEventsResponseParser implements ResponseParser<List<LiveEventsA
                     eventList.add(dto);
                }
             }
+
+            eventList.sort(Comparator.comparingInt(LiveEventsApiDTO::getTotalRanking));
+
             return eventList;
 
         }catch(Exception e){
