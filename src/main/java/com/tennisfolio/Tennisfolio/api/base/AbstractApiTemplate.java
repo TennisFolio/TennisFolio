@@ -107,7 +107,7 @@ public abstract class AbstractApiTemplate<T, E> {
         try{
             //Content-Encoding 확인
             Optional<String> contentEncoding = response.headers().firstValue("Content-Encoding");
-            System.out.println("Content-Encoding: " + contentEncoding.orElse("None"));
+
             if(contentEncoding.isPresent() && "gzip".equalsIgnoreCase(contentEncoding.get())){
                 // GZIP 압축 해제
                 responseText = decompressorUtil.decompressGzip(responseBody);
@@ -117,7 +117,7 @@ public abstract class AbstractApiTemplate<T, E> {
             else{
                 responseText = new String(responseBody, "UTF-8");
             }
-            System.out.println(responseText);
+
             return responseText;
         }catch(Exception e){
             throw new RapidApiException(ExceptionCode.RAPID_ERROR);
