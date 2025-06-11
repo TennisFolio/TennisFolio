@@ -18,7 +18,7 @@ function IntroRenderer({currentTest, questionList}) {
                     setAnswerList={setAnswerList}/>
         )
     }else if(mode === 'loading'){
-        return <TestLoading currentTest={currentTest} answerList={answerList}/>
+        return <TestLoading answerList={answerList}/>
     }else{
         return <div> 잘못된 페이지입니다!</div>
     }
