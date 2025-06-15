@@ -1,6 +1,6 @@
 import React from 'react'
 import './testIntro.css';
-
+import { base_image_url } from '../../App';
 function TestIntro({currentTest, setMode}) {
 
    const handleStart = () => {
@@ -10,7 +10,7 @@ function TestIntro({currentTest, setMode}) {
   return (
     <div className="test-detail">
       <h1 className="test-title">{currentTest?.testCategoryName}</h1>
-      <img src={currentTest?.image} alt={currentTest?.testCategoryName} className="test-image" />
+      <img src={`${base_image_url}${currentTest?.image}`} alt={currentTest?.testCategoryName} className="test-image" />
       <p className="test-description">{currentTest?.description}</p>
       <button className="start-button" onClick={handleStart}>퀴즈 시작하기</button>
     </div>

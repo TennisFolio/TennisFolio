@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { setCurrentTest } from '../../store/testSlice';
 import './testItemList.css';
+import { base_image_url } from '../../App';
 
 function TestItemList({testList}) {
   const navigate = useNavigate();
@@ -21,7 +22,7 @@ function TestItemList({testList}) {
         >
           {test.image && (
             <img
-              src={test.image}
+              src={`${base_image_url}${test.image}`}
               alt={test.title}
               className="test-thumbnail"
             />

@@ -18,8 +18,9 @@ window.global ||= window;
 window.Buffer ||= Buffer;
 window.process ||= process;
 
-export const base_url = import.meta.env.VITE_BASE_URL || "https://tennisfolio.net";
+export const base_url = "https://tennisfolio.net";
 export const base_server_url = "https://tennisfolio.net";
+export const base_image_url = "https://tennisfolio.net/img"
 
 function App() {
   

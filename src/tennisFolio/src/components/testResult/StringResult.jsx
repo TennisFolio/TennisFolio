@@ -1,12 +1,13 @@
 import React from 'react'
 import './stringResult.css';
+import { base_image_url } from '../../App';
 function StringResult({renderResultInfo}) {
   return (
     <div className="string-result-container">
       <h2 className="result-title">당신에게 어울리는 테니스 스트링은</h2>
       <div className="string-card">
         <img
-          src={renderResultInfo.image}
+          src={`${base_image_url}${renderResultInfo.image}`}
           alt={renderResultInfo.stringName}
           className="string-image"
         />
