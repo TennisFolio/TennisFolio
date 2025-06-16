@@ -97,6 +97,7 @@
   font-weight: bold;
   color: #0a66c2;
   text-align: center;
+  min-width: 60px;
 }
 
 .pointScore {
@@ -144,4 +145,71 @@
 
 .eventButton:hover {
   background-color: #084d99;
+}
+
+@media (max-width: 600px) {
+  html, body {
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+    overflow-x: hidden;
+  }
+
+  *, *::before, *::after {
+    box-sizing: inherit;
+  }
+
+  .live-events {
+    padding: 0;
+    margin: 0;
+    width: 100%;
+  }
+
+  .eventCard {
+    border: none;
+    box-shadow: none;
+    border-radius: 0;
+    padding: 12px 0;
+    margin: 0;
+    width: 100%; /* ← 100vw 대신 */
+  }
+
+  .playerImg {
+    width: 70px;
+    height: 90px;
+  }
+
+  .teamName {
+    font-size: 14px;
+  }
+
+  .setScore {
+    font-size: 18px;
+    margin: 4px 0;
+  }
+
+  .pointScore {
+    font-size: 16px;
+  }
+
+  .eventButton {
+    width: 100%;
+    font-size: 15px;
+    border-radius: 8px;
+  }
+
+  .eventTable {
+    overflow-x: auto;
+  }
+
+  .eventTable table {
+    font-size: 12px;
+    min-width: 360px;
+  }
+
+  .live-title {
+    font-size: 22px;
+    margin: 12px 0;
+    padding: 8px 0;
+  }
 }

@@ -41,11 +41,11 @@ function RankingTable({rankings}) {
                   <span
                       style={{
                         fontSize: '12px',
-                        color: rank.gapPoints < 0 ? 'red' : 'blue',
+                        color: rank.gapPoints > 0 ? 'red' : 'blue',
                         marginLeft: '5px'
                       }}
                     >
-                    {rank.gapPoints < 0 ? '▲' : '▼'} {Math.abs(rank.gapPoints)}
+                    {rank.gapPoints > 0 ? '▲' : '▼'} {Math.abs(rank.gapPoints)}
                   </span>
               )}</td>
             </tr>
