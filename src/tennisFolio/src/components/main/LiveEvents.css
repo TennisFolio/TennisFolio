@@ -151,51 +151,43 @@
   html, body {
     padding: 0;
     margin: 0;
-    box-sizing: border-box;
+    width: 100%;
     overflow-x: hidden;
+    background-color: #fff;
   }
 
   *, *::before, *::after {
-    box-sizing: inherit;
+    box-sizing: border-box;
   }
 
-  .live-events {
+  #root {
     padding: 0;
     margin: 0;
     width: 100%;
   }
 
+  .live-events {
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100vw;
+    max-width: 100vw;
+    background-color: #fff;
+  }
+
   .eventCard {
-    border: none;
-    box-shadow: none;
-    border-radius: 0;
-    padding: 12px 0;
+    width: 100vw;
     margin: 0;
-    width: 100%; /* ← 100vw 대신 */
-  }
-
-  .playerImg {
-    width: 70px;
-    height: 90px;
-  }
-
-  .teamName {
-    font-size: 14px;
-  }
-
-  .setScore {
-    font-size: 18px;
-    margin: 4px 0;
-  }
-
-  .pointScore {
-    font-size: 16px;
+    padding: 16px 0;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    background-color: #fff;
   }
 
   .eventButton {
     width: 100%;
-    font-size: 15px;
-    border-radius: 8px;
+    max-width: 100%;
+    border-radius: 6px;
   }
 
   .eventTable {
@@ -203,13 +195,7 @@
   }
 
   .eventTable table {
-    font-size: 12px;
     min-width: 360px;
-  }
-
-  .live-title {
-    font-size: 22px;
-    margin: 12px 0;
-    padding: 8px 0;
+    width: 100%;
   }
 }

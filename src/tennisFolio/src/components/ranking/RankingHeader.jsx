@@ -4,7 +4,7 @@ import dayjs from 'dayjs';
 function RankingHeader({lastUpdated}) {
   return (
     <h1 className="ranking-title">
-        ATP 단식 랭킹 (기준 : {dayjs(lastUpdated).format('YYYY.MM.DD')})
+        ATP 단식 랭킹 <br/>({dayjs(lastUpdated).format('YYYY.MM.DD')})
     </h1>
   )
 }
