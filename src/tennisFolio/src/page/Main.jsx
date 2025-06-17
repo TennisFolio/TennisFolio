@@ -6,6 +6,7 @@ import {Client} from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import { base_server_url } from '../App';
 import axios from 'axios';
+import MetatagRenderer from '../components/MetatagRenderer';
 function Main() {
   const [liveEvents, setLiveEvents] = useState([]);
   const clientRef = useRef(null);
@@ -48,7 +49,10 @@ function Main() {
     //setLiveEvents(LIVEEVENTS);
   },[])
   return (
+    <>
+    <MetatagRenderer/>
     <LiveEvents liveEvents={liveEvents} />
+    </>
   )
 }
 
