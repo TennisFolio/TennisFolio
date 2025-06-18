@@ -29,21 +29,22 @@ public class MatchController {
 
         return new ResponseEntity<>(ResponseDTO.success(events), HttpStatus.OK);
     }
-    //@Scheduled(fixedRate = 30000)
+    @Scheduled(fixedRate = 30000)
     public void getLiveEventsSchedule(){
         List<LiveMatchResponse> events = matchService.getLiveEvents();
-
+        System.out.println("getLiveEventsSchedule ============ 배포가 됐다 ================");
         messagingTemplate.convertAndSend("/topic/liveMatches", events);
     }
 
     @GetMapping("/liveEvents/{matchId}")
     public ResponseEntity<ResponseDTO<LiveMatchResponse>> getLiveEvent(@PathVariable("matchId") String matchId){
+        System.out.println("getLiveEvent ============ 배포가 됐다 ================");
         LiveMatchResponse event = matchService.getLiveEvent(matchId);
 
         return new ResponseEntity<>(ResponseDTO.success(event), HttpStatus.OK);
     }
 
-    //@Scheduled(fixedRate = 30000)
+    @Scheduled(fixedRate = 30000)
     public void getLiveEventSchedule(){
         List<LiveMatchResponse> events = matchService.getLiveEvents();
         events.stream().forEach( event -> {
