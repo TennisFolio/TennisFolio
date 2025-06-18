@@ -1,6 +1,6 @@
 import React from 'react'
 import './playerResult.css';
-import { base_image_url } from '../../App';
+import { base_url } from '../../App';
 
 function PlayerResult({renderResultInfo}) {
 
@@ -9,7 +9,7 @@ function PlayerResult({renderResultInfo}) {
       <h2 className="result-title">당신에게 어울리는 선수는</h2>
       <div className="player-card">
         <img
-          src={`${base_image_url}${renderResultInfo.image}`}
+          src={`${base_url}${renderResultInfo.image}`}
           alt={renderResultInfo.playerName}
           className="player-image"
         />

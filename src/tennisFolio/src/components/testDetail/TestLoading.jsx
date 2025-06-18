@@ -20,8 +20,7 @@ function TestLoading({answerList}) {
   
   useEffect(() => {
     const fetchResult = async () => {
-      console.log("answerList : ", answerList);
-      console.log("base_server_url : ", base_server_url);
+
       axios.post(`${base_server_url}/api/test/${category}/result`, answerList, {
         headers: {
           'Content-Type': 'application/json',

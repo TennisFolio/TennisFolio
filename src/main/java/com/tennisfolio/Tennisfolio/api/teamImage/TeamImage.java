@@ -3,6 +3,7 @@ package com.tennisfolio.Tennisfolio.api.teamImage;
 import com.tennisfolio.Tennisfolio.common.ExceptionCode;
 import com.tennisfolio.Tennisfolio.common.ImageDirectory;
 import com.tennisfolio.Tennisfolio.common.RapidApi;
+import com.tennisfolio.Tennisfolio.common.image.S3Uploader;
 import com.tennisfolio.Tennisfolio.exception.ParserException;
 import com.tennisfolio.Tennisfolio.player.repository.PlayerRepository;
 import jakarta.transaction.Transactional;
@@ -37,8 +38,11 @@ public class TeamImage {
 
     private final PlayerRepository playerRepository;
 
-    public TeamImage(PlayerRepository playerRepository){
+    private final S3Uploader s3Uploader;
+
+    public TeamImage(PlayerRepository playerRepository, S3Uploader s3Uploader){
         this.playerRepository = playerRepository;
+        this.s3Uploader = s3Uploader;
     }
 
     // 이미지 저장 프로세스
@@ -71,7 +75,7 @@ public class TeamImage {
                     .method("GET", HttpRequest.BodyPublishers.noBody())
                     .build();
             HttpResponse<InputStream> response = client.send(request, HttpResponse.BodyHandlers.ofInputStream());
-            System.out.println(response.body());
+
             InputStream inputStream = response.body();
             imageData = inputStream.readAllBytes();
 
@@ -85,29 +89,13 @@ public class TeamImage {
     // 이미지 저장
     private String storeImage(byte[] imageData, String fileName) {
 
-        String outputPath = ImageDirectory.PLAYER.getDirectory() + fileName + ".png";
-        Path fullPath = Paths.get(uploadDirectory, outputPath);
+        String keyName = ImageDirectory.PLAYER.getDirectory() + fileName + ".jpg";
 
-        try(ByteArrayInputStream inputStream = new ByteArrayInputStream(imageData)){
-            BufferedImage originalImage = ImageIO.read(inputStream);
-            if(originalImage == null){
-                throw new IOException("이미지 데이터를 읽을 수 없습니다.");
-            }
+        String contentType = "image/jpeg";
 
-            Files.createDirectories(fullPath.getParent());
+        s3Uploader.upload(imageData, keyName, contentType);
 
-            boolean saved = ImageIO.write(originalImage, "png", fullPath.toFile());
-
-            if(!saved){
-                throw new IOException("이미지를 저장하지 못했습니다. 경로 : " + fullPath);
-            }
-
-            System.out.println("이미지 저장 완료! 경로: " + fullPath);
-        }catch(Exception e){
-            e.printStackTrace();
-        }
-
-        return outputPath;
+        return keyName;
     }
 
     // 이미지 Path DB 저장

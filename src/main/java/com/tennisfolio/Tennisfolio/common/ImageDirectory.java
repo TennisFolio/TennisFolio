@@ -1,7 +1,8 @@
 package com.tennisfolio.Tennisfolio.common;
 
+
 public enum ImageDirectory {
-    PLAYER("player", "player/thumbnail/");
+    PLAYER("player", "img/player/");
 
     private final String name;
     private final String directory;
