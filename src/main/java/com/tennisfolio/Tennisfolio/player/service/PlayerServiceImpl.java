@@ -29,7 +29,12 @@ public class PlayerServiceImpl implements PlayerService{
     @Override
     public Player getOrCreatePlayerByRapidId(String rapidId) {
         return playerRepository.findByRapidPlayerId(rapidId)
-                .orElseGet(() -> (teamDetailsTemplate.execute(rapidId)).getPlayer());
+                .orElseGet(() -> {
+                    Player player = teamDetailsTemplate.execute(rapidId).getPlayer();
+                    teamImage.saveImage(rapidId);
+
+                    return player;
+                });
     }
 
     @Override

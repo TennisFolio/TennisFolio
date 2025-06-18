@@ -102,6 +102,7 @@ public class TeamImage {
     private void savePlayerImage(String params, String path){
         playerRepository.findByRapidPlayerId(params).ifPresent(player -> {
            player.setImage(path);
+           playerRepository.save(player);
         });
 
     }
