@@ -48,6 +48,11 @@ jobs:
           key: ${{ secrets.EC2_KEY }}
           script: |
             cd /home/ubuntu/TennisFolio/
+            
+              if [ ! -f src/main/resources/application.properties ]; then
+              echo "❌ ERROR: src/main/resources/application.properties 파일이 존재하지 않습니다."
+              exit 1
+            fi
             docker load -i tennisfolio.tar
             docker compose down
             docker compose up -d
