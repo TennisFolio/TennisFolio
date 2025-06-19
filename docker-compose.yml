@@ -4,6 +4,8 @@ services:
     container_name: app
     ports:
       - "8080:8080"
+    volumes:
+      - ./src/main/resources/application.properties:/app/application.properties
     networks:
       - tennisnet
 
