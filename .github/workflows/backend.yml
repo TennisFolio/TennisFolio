@@ -47,12 +47,22 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_KEY }}
           script: |
-            cd /home/ubuntu/TennisFolio/
-            
-              if [ ! -f src/main/resources/application.properties ]; then
-              echo "❌ ERROR: src/main/resources/application.properties 파일이 존재하지 않습니다."
+            cd /home/ubuntu/TennisFolio
+
+            echo "📦 [1] application.properties 존재 확인"
+            if [ ! -f ./src/main/resources/application.properties ]; then
+              echo "❌ ERROR: application.properties 파일이 없습니다."
               exit 1
             fi
+
+            echo "🐳 [2] Docker 이미지 로딩"
             docker load -i tennisfolio.tar
+
+            echo "🧹 [3] 기존 컨테이너 종료"
             docker compose down
+
+            echo "🚀 [4] 새 컨테이너 시작"
             docker compose up -d
+
+            echo "🔍 [5] 마운트 확인"
+            docker exec app ls -l /app/application.properties || echo "❌ 마운트 실패"
