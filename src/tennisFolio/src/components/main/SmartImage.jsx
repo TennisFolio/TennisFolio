@@ -4,8 +4,6 @@ function SmartImage({ base_url, imageName, fallbackText }) {
   const [step, setStep] = useState(0);
   const [src, setSrc] = useState(null);
 
-  console.log(`${base_url}/${imageName}.avif`);
-  console.log(`${base_url}/${imageName}.webp`);
   const sources = [
     `${base_url}/converted/${imageName}.avif`,
     `${base_url}/${imageName}.webp`,
