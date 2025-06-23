@@ -2,7 +2,9 @@ import React from 'react'
 import './LiveEvents.css';
 import { useNavigate } from 'react-router-dom';
 import Flag from 'react-world-flags';
-import { base_url } from '../../App';
+import { base_image_url } from '../../App';
+
+import SmartImage from './SmartImage';
 
 function LiveEvents({liveEvents}) {
     const navigate = useNavigate();
@@ -32,10 +34,11 @@ function LiveEvents({liveEvents}) {
               
               <div className="eventHeader">
                 <div className="teamBlock">
-                  <picture className="playerImg">
-                    <source srcSet={`${base_url}${event.homePlayer.playerImage}.avif`} type="image/avif" />
-                    <img src={`${base_url}.jpg`} alt="Player Image" />
-                  </picture>
+                  <SmartImage
+                    base_url={base_image_url}
+                    imageName={event.homePlayer.playerImage}
+                    fallbackText={event.homePlayer.name}
+                  />
 
                   <div className="teamName">{event.homePlayer.playerName}({event.homePlayer.playerRanking})</div>
                 </div>
@@ -43,10 +46,11 @@ function LiveEvents({liveEvents}) {
                 <div className="setScore">{event.homeScore.current} : {event.awayScore.current}</div>
 
                 <div className="teamBlock">
-                  <picture className="playerImg">
-                    <source srcSet={`${base_url}${event.awayPlayer.playerImage}.avif`} type="image/avif" />
-                    <img src={`${base_url}.jpg`} alt="Player Image" />
-                  </picture>
+                  <SmartImage
+                    base_url={base_image_url}
+                    imageName={event.awayPlayer.playerImage}
+                    fallbackText={event.awayPlayer.name}
+                  />
                   <div className="teamName">{event.awayPlayer.playerName}({event.awayPlayer.playerRanking})</div>
                 </div>
               </div>

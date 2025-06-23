@@ -20,6 +20,7 @@ window.process ||= process;
 
 export const base_url = "https://tennisfolio.net";
 export const base_server_url = "https://tennisfolio.net";
+export const base_image_url = "https://tennisfolio.net/img";
 
 function App() {
   

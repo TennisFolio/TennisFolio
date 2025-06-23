@@ -7,6 +7,7 @@ import com.tennisfolio.Tennisfolio.common.image.S3Uploader;
 import com.tennisfolio.Tennisfolio.exception.ParserException;
 import com.tennisfolio.Tennisfolio.player.repository.PlayerRepository;
 import jakarta.transaction.Transactional;
+import org.apache.tika.Tika;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -89,10 +90,23 @@ public class TeamImage {
     // 이미지 저장
     private String storeImage(byte[] imageData, String fileName) {
 
+        // img/player/123456
         String imageName = ImageDirectory.PLAYER.getDirectory() + fileName;
-        String keyName = imageName + ".jpg";
 
-        String contentType = "image/jpeg";
+        Tika tika = new Tika();
+        String contentType = tika.detect(imageData);
+
+        String ext = switch (contentType) {
+            case "image/jpeg" -> ".jpg";
+            case "image/png" -> ".png";
+            case "image/webp" -> ".webp";
+            default -> throw new IllegalArgumentException("지원하지 않는 포맷");
+        };
+
+        // img/player/123456.jpg
+        // img/player/123456.png
+        // img/player/123456.webp
+        String keyName = "img/"+imageName + ext;
 
         s3Uploader.upload(imageData, keyName, contentType);
 
