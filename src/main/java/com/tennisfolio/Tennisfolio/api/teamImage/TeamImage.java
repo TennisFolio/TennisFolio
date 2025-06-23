@@ -89,13 +89,14 @@ public class TeamImage {
     // 이미지 저장
     private String storeImage(byte[] imageData, String fileName) {
 
-        String keyName = ImageDirectory.PLAYER.getDirectory() + fileName + ".jpg";
+        String imageName = ImageDirectory.PLAYER.getDirectory() + fileName;
+        String keyName = imageName + ".jpg";
 
         String contentType = "image/jpeg";
 
         s3Uploader.upload(imageData, keyName, contentType);
 
-        return keyName;
+        return imageName;
     }
 
     // 이미지 Path DB 저장

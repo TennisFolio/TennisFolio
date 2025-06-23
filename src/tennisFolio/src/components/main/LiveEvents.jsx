@@ -9,7 +9,7 @@ function LiveEvents({liveEvents}) {
     const OnClickDetailButton = (event) => {
         navigate(`/liveEvents/${event.rapidId}`);
     }
-    console.log(liveEvents);
+    
   return (
     <div className="live-events">
         <h1 className="live-title">ATP 라이브</h1>
@@ -32,14 +32,21 @@ function LiveEvents({liveEvents}) {
               
               <div className="eventHeader">
                 <div className="teamBlock">
-                  <img src={`${base_url}${event.homePlayer.playerImage}`} className="playerImg" />
+                  <picture className="playerImg">
+                    <source srcSet={`${base_url}${event.homePlayer.playerImage}.avif`} type="image/avif" />
+                    <img src={`${base_url}.jpg`} alt="Player Image" />
+                  </picture>
+
                   <div className="teamName">{event.homePlayer.playerName}({event.homePlayer.playerRanking})</div>
                 </div>
 
                 <div className="setScore">{event.homeScore.current} : {event.awayScore.current}</div>
 
                 <div className="teamBlock">
-                  <img src={`${base_url}${event.awayPlayer.playerImage}`} className="playerImg" />
+                  <picture className="playerImg">
+                    <source srcSet={`${base_url}${event.awayPlayer.playerImage}.avif`} type="image/avif" />
+                    <img src={`${base_url}.jpg`} alt="Player Image" />
+                  </picture>
                   <div className="teamName">{event.awayPlayer.playerName}({event.awayPlayer.playerRanking})</div>
                 </div>
               </div>
