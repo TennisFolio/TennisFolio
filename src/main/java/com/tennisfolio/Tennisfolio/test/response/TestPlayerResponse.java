@@ -6,7 +6,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
-@Setter
 @NoArgsConstructor
 public class TestPlayerResponse {
     private Long playerId;
@@ -20,6 +19,6 @@ public class TestPlayerResponse {
         this.rapidPlayerId = player.getRapidPlayerId();
         this.playerName = player.getPlayerName();
         this.image = player.getImage();
-        this.country = player.getCountry();
+        this.country = player.getCountry().getCountryCode();
     }
 }

@@ -1,14 +1,12 @@
 package com.tennisfolio.Tennisfolio.round.domain;
 
-import com.tennisfolio.Tennisfolio.api.leagueRounds.LeagueRoundsDTO;
+import com.tennisfolio.Tennisfolio.infrastructure.api.round.leagueRounds.LeagueRoundsDTO;
 import com.tennisfolio.Tennisfolio.season.domain.Season;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Getter
-@Setter
 @Entity
 @Table(name="tb_round")
 @NoArgsConstructor

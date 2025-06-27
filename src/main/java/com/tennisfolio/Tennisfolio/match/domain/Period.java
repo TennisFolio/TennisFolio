@@ -1,13 +1,11 @@
 package com.tennisfolio.Tennisfolio.match.domain;
 
-import com.tennisfolio.Tennisfolio.api.liveEvents.TimeDTO;
+import com.tennisfolio.Tennisfolio.infrastructure.api.match.liveEvents.TimeDTO;
 import jakarta.persistence.Embeddable;
 import lombok.Getter;
-import lombok.Setter;
 
 @Embeddable
 @Getter
-@Setter
 public class Period {
     private String set1;
     private String set2;

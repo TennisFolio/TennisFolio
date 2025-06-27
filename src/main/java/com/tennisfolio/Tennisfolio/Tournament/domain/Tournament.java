@@ -1,19 +1,17 @@
 package com.tennisfolio.Tennisfolio.Tournament.domain;
 
-import com.tennisfolio.Tennisfolio.api.categoryTournaments.CategoryTournamentsDTO;
-import com.tennisfolio.Tennisfolio.api.tournamentInfo.TournamentInfoDTO;
-import com.tennisfolio.Tennisfolio.category.domain.Category;
+import com.tennisfolio.Tennisfolio.infrastructure.api.tournament.categoryTournaments.CategoryTournamentsDTO;
+import com.tennisfolio.Tennisfolio.infrastructure.api.tournament.tournamentInfo.TournamentInfoDTO;
+import com.tennisfolio.Tennisfolio.category.domain.model.Category;
 import com.tennisfolio.Tennisfolio.common.Entity.BaseTimeEntity;
 import com.tennisfolio.Tennisfolio.player.domain.Player;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Entity
 @Table(name = "tb_tournament")
 @Getter
-@Setter
 @NoArgsConstructor
 public class Tournament extends BaseTimeEntity {
 
@@ -64,9 +62,21 @@ public class Tournament extends BaseTimeEntity {
         this.category = category;
     }
 
-    public Tournament(TournamentInfoDTO dto){
-        this.city = dto.getCity();
-        this.matchType = dto.getMatchType();
-        this.groundType = dto.getGroundType();
+//    public Tournament(TournamentInfoDTO dto){
+//        this.city = dto.getCity();
+//        this.matchType = dto.getMatchType();
+//        this.groundType = dto.getGroundType();
+//    }
+
+
+    public void updatePlayers(Player mostTitlePlayer, Player titleHolder){
+        this.mostTitlePlayer = mostTitlePlayer;
+        this.titleHolder = titleHolder;
+    }
+
+    public void updateFromTournamentInfo(TournamentInfoDTO incoming){
+        this.city = incoming.getCity();
+        this.matchType = incoming.getMatchType();
+        this.groundType = incoming.getGroundType();
     }
 }

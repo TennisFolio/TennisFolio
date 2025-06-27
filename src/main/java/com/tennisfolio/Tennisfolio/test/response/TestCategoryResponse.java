@@ -1,12 +1,11 @@
 package com.tennisfolio.Tennisfolio.test.response;
 
-import com.tennisfolio.Tennisfolio.test.domain.TestCategory;
+import com.tennisfolio.Tennisfolio.test.domain.model.TestCategory;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
-@Setter
 @NoArgsConstructor
 public class TestCategoryResponse {
     private Long testCategoryId;

@@ -1,7 +1,6 @@
 package com.tennisfolio.Tennisfolio.Tournament.repository;
 
 import com.tennisfolio.Tennisfolio.Tournament.domain.Tournament;
-import com.tennisfolio.Tennisfolio.category.domain.Category;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

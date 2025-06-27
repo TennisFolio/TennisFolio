@@ -20,7 +20,7 @@ public class ChatSocketController {
     @MessageMapping("/chat.send/{matchId}")
     @SendTo("/topic/match.{matchId}")
     public ChatMessage send(@Payload ChatMessage message, @DestinationVariable("matchId") String matchId){
-        message.setMatchId(matchId);
+        message.mappingMatch(matchId);
         chatService.saveChat(message);
         return message;
     }

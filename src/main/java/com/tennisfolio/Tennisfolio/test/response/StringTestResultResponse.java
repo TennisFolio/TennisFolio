@@ -1,12 +1,11 @@
 package com.tennisfolio.Tennisfolio.test.response;
 
-import com.tennisfolio.Tennisfolio.test.domain.TestString;
+import com.tennisfolio.Tennisfolio.test.domain.model.TestString;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
-@Setter
 @NoArgsConstructor
 public class StringTestResultResponse implements TestResultResponse{
     private Long stringId;

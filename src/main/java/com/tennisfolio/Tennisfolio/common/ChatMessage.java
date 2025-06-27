@@ -8,7 +8,6 @@ import lombok.Setter;
 
 @NoArgsConstructor
 @Getter
-@Setter
 public class ChatMessage {
     private String matchId;
     private String sender;
@@ -33,5 +32,9 @@ public class ChatMessage {
         this.userId = chat.getUserId();
         this.timestamp = ConversionUtil.timestampToHHmm(chat.getCreateDt());
         this.type = chat.getType();
+    }
+
+    public void mappingMatch(String matchId){
+        this.matchId = matchId;
     }
 }

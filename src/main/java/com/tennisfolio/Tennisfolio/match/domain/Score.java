@@ -1,13 +1,11 @@
 package com.tennisfolio.Tennisfolio.match.domain;
 
-import com.tennisfolio.Tennisfolio.api.liveEvents.ScoreDTO;
+import com.tennisfolio.Tennisfolio.infrastructure.api.match.liveEvents.ScoreDTO;
 import jakarta.persistence.Embeddable;
 import lombok.Getter;
-import lombok.Setter;
 
 @Embeddable
 @Getter
-@Setter
 public class Score {
     private Long set1;
     private Long set2;

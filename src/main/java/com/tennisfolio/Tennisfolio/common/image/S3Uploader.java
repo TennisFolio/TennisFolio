@@ -40,7 +40,7 @@ public class S3Uploader {
     public void upload(byte[] imageData, String keyName, String contentType){
         PutObjectRequest request = PutObjectRequest.builder()
                 .bucket(bucket)
-                .key(keyName)
+                .key("img/" + keyName)
                 .contentType(contentType)
                 .build();
 

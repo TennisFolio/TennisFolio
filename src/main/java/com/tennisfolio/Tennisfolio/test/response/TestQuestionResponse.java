@@ -1,7 +1,6 @@
 package com.tennisfolio.Tennisfolio.test.response;
 
-import com.tennisfolio.Tennisfolio.test.domain.TestCategory;
-import com.tennisfolio.Tennisfolio.test.domain.TestQuestion;
+import com.tennisfolio.Tennisfolio.test.domain.model.TestQuestion;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -10,7 +9,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Getter
-@Setter
 @NoArgsConstructor
 public class TestQuestionResponse {
     private Long questionId;

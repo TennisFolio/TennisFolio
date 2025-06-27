@@ -1,16 +1,17 @@
 package com.tennisfolio.Tennisfolio.player.domain;
 
-import com.tennisfolio.Tennisfolio.api.teamdetails.TeamDetailsApiDTO;
+import com.tennisfolio.Tennisfolio.player.dto.TeamDetailsApiDTO;
 import com.tennisfolio.Tennisfolio.common.Entity.BaseTimeEntity;
+import com.tennisfolio.Tennisfolio.prize.domain.PlayerPrize;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
+
+import static com.tennisfolio.Tennisfolio.util.FiledUpdateUtil.updated;
 
 @Entity
 @Table(name = "tb_player")
 @Getter
-@Setter
 @NoArgsConstructor
 public class Player extends BaseTimeEntity {
 
@@ -24,8 +25,8 @@ public class Player extends BaseTimeEntity {
     private String playerName;
     @Column(name="BIRTH")
     private String birth;
-    @Column(name="COUNTRY")
-    private String country;
+    @Embedded
+    private Country country;
     @Column(name="TURNED_PRO")
     private String turnedPro;
     @Column(name="WEIGHT")
@@ -36,15 +37,39 @@ public class Player extends BaseTimeEntity {
     private String plays;
     @Column(name="IMAGE")
     private String image;
+    @OneToOne(mappedBy="player", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private PlayerPrize prize;
 
     public Player(TeamDetailsApiDTO rapidDTO){
         this.rapidPlayerId = rapidDTO.getPlayerRapidId();
         this.playerName = rapidDTO.getPlayerName();
         this.birth = rapidDTO.getBirthDate();
-        this.country = rapidDTO.getCountry() != null ? rapidDTO.getCountry().getAlpha() : "";
+        this.country = new Country(rapidDTO.getCountry());
         this.turnedPro = rapidDTO.getTurnedPro();
         this.weight = rapidDTO.getWeight();
         this.height = rapidDTO.getHeight();
         this.plays = rapidDTO.getPlays();
     }
+
+    public void updateFrom(Player player){
+        this.rapidPlayerId = updated(this.rapidPlayerId, player.getRapidPlayerId());
+        this.playerName = updated(this.playerName, player.getPlayerName());
+        this.birth = updated(this.birth, player.getBirth());
+        this.turnedPro = updated(this.turnedPro, player.getTurnedPro());
+        this.weight = updated(this.weight, player.getWeight());
+        this.height = updated(this.height, player.getHeight());
+        this.plays = updated(this.plays, player.getPlays());
+
+        Country newCountry = player.getCountry();
+        if(!newCountry.equals(this.country)) this.country = newCountry;
+    }
+
+    public void updateProfileImage(String image){
+        this.image = image;
+    }
+
+    public void updatePrize(PlayerPrize prize){
+        this.prize = prize;
+    }
+
 }

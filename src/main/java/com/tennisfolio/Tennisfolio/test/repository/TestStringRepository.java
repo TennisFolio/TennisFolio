@@ -1,7 +1,6 @@
 package com.tennisfolio.Tennisfolio.test.repository;
 
-import com.tennisfolio.Tennisfolio.test.domain.TestPlayer;
-import com.tennisfolio.Tennisfolio.test.domain.TestString;
+import com.tennisfolio.Tennisfolio.test.domain.model.TestString;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

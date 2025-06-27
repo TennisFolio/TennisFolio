@@ -1,12 +1,11 @@
 package com.tennisfolio.Tennisfolio.test.response;
 
-import com.tennisfolio.Tennisfolio.test.domain.TestRacket;
+import com.tennisfolio.Tennisfolio.test.domain.model.TestRacket;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
-@Setter
 @NoArgsConstructor
 public class RacketTestResultResponse implements TestResultResponse{
     private Long racketId;

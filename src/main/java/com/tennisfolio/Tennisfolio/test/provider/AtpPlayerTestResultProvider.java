@@ -3,10 +3,9 @@ package com.tennisfolio.Tennisfolio.test.provider;
 import com.tennisfolio.Tennisfolio.common.ExceptionCode;
 import com.tennisfolio.Tennisfolio.common.TestType;
 import com.tennisfolio.Tennisfolio.exception.ResultNotFoundException;
-import com.tennisfolio.Tennisfolio.test.domain.TestPlayer;
+import com.tennisfolio.Tennisfolio.test.domain.model.TestPlayer;
 import com.tennisfolio.Tennisfolio.test.repository.TestPlayerRepository;
 import com.tennisfolio.Tennisfolio.test.response.PlayerTestResultResponse;
-import com.tennisfolio.Tennisfolio.test.response.TestResultResponse;
 import org.springframework.stereotype.Component;
 
 @Component

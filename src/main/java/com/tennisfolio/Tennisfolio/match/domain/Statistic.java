@@ -1,14 +1,12 @@
 package com.tennisfolio.Tennisfolio.match.domain;
 
-import com.tennisfolio.Tennisfolio.api.eventStatistics.StatisticsDTO;
+import com.tennisfolio.Tennisfolio.infrastructure.api.match.eventStatistics.StatisticsDTO;
 import com.tennisfolio.Tennisfolio.common.Entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Getter
-@Setter
 @Entity
 @Table(name="tb_statistic")
 @NoArgsConstructor

@@ -1,15 +1,13 @@
 package com.tennisfolio.Tennisfolio.match.domain;
 
-import com.tennisfolio.Tennisfolio.api.leagueEventsByRound.LeagueEventsByRoundDTO;
+import com.tennisfolio.Tennisfolio.infrastructure.api.match.leagueEventsByRound.LeagueEventsByRoundDTO;
 import com.tennisfolio.Tennisfolio.player.domain.Player;
 import com.tennisfolio.Tennisfolio.round.domain.Round;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Getter
-@Setter
 @Entity
 @Table(name="tb_match")
 @NoArgsConstructor
