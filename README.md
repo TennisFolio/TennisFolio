@@ -2,15 +2,17 @@
 
 - TennisFolio는 테니스 팬과 일반 사용자를 위한 테니스 정보 제공 플랫폼 입니다.
 - 해외 API 데이터를 가공하여 실시간 경기, 선수 랭킹, 추천 테스트 등 다양한 기능을 제공합니다.
+- 배포 링크 : https://tennisfolio.net
 
 ## 기술 스택
 - Backend : Java, Spring Boot
 - Frontend : React
-- DB/Infra : MariaDB, AWS EC2, S3, RDS
+- DB/Infra : MariaDB, AWS EC2, S3, RDS, Cloud Front, Route53
 - CI/CD : Github Actions, Docker
 
-## 링크
-- 배포 링크 : https://tennisfolio.net
+## 아키텍처
+![image](https://github.com/user-attachments/assets/11929765-7e03-4b20-a96c-be6c4796b17f)
+
 ## 도메인
 ![image](https://github.com/user-attachments/assets/e2064138-c5f9-4ea9-bc07-0dae43665948)
 
