@@ -13,6 +13,7 @@ public class DecompressorUtil {
     public static String decompressGzip(byte[] compressedData) throws IOException {
         try(GZIPInputStream gis = new GZIPInputStream(new ByteArrayInputStream(compressedData))){
             return new String(gis.readAllBytes(), "UTF-8");
+
         }
     }
 
