@@ -17,5 +17,5 @@ public interface RankingRepository extends JpaRepository<Ranking, Long> {
     @Query("SELECT r FROM Ranking r JOIN r.player p WHERE r.lastUpdate = (SELECT MAX(r2.lastUpdate) FROM Ranking r2) ORDER BY r.curRank")
     List<Ranking> findLatestRankings(Pageable pageable);
 
-    Optional<List<Ranking>> findByLastUpdate(String lastUpdate);
+    List<Ranking> findByLastUpdate(String lastUpdate);
 }
