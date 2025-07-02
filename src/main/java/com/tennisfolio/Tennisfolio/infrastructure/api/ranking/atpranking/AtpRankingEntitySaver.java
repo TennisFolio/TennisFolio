@@ -24,7 +24,7 @@ public class AtpRankingEntitySaver implements EntitySaver<List<Ranking>> {
 
         String lastUpdateDate = entity.get(0).getLastUpdate();
 
-        boolean alreadyExists = rankingRepository.findByLastUpdate(lastUpdateDate).isPresent();
+        boolean alreadyExists = !rankingRepository.findByLastUpdate(lastUpdateDate).isEmpty();
 
         if (alreadyExists) {
             return Collections.emptyList(); // 또는 Optional.empty() / custom result

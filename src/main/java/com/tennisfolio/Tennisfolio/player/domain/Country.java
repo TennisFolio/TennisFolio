@@ -18,8 +18,11 @@ public class Country {
     private String countryName;
 
     public Country(CountryDTO dto){
-        this.countryCode = dto.getAlpha();
-        this.countryName = dto.getName();
+        if(dto != null){
+            this.countryCode = dto.getAlpha();
+            this.countryName = dto.getName();
+        }
+
     }
 
     @Override
