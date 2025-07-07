@@ -17,4 +17,5 @@ public class TournamentDTO {
     private String slug;
     @JsonProperty("category")
     private CategoryDTO category;
+
 }
