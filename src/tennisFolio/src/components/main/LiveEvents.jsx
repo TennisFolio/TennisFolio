@@ -3,18 +3,20 @@ import './LiveEvents.css';
 import { useNavigate } from 'react-router-dom';
 import Flag from 'react-world-flags';
 import { base_image_url } from '../../App';
-
+import { useParams } from 'react-router-dom';
 import SmartImage from './SmartImage';
 
 function LiveEvents({liveEvents}) {
     const navigate = useNavigate();
+    const param = useParams();
+    const category = param.category;
     const OnClickDetailButton = (event) => {
         navigate(`/liveEvents/${event.rapidId}`);
     }
     
   return (
     <div className="live-events">
-        <h1 className="live-title">ATP 라이브</h1>
+        <h1 className="live-title">{category.toUpperCase()} 라이브</h1>
         {liveEvents && liveEvents.length === 0 ? (
           <div className="no-events-message">현재 진행 중인 경기가 없습니다.</div>
         ) :

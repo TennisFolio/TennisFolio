@@ -7,7 +7,8 @@ const NAV_ITEMS = [
   {
     title: '라이브',
     children: [
-      { label: 'ATP', path: '/' },
+      { label: 'ATP', path: '/live/atp' },
+      { label: 'WTA', path: '/live/wta' },
     ],
   },
   {

@@ -27,16 +27,28 @@ public class MatchController {
         this.matchSyncService = matchSyncService;
         this.statisticSyncService = statisticSyncService;
     }
-    @GetMapping("/liveEvents")
-    public ResponseEntity<ResponseDTO<List<LiveMatchResponse>>> getLiveEvents(){
-        List<LiveMatchResponse> events = liveMatchService.getLiveEvents();
+    @GetMapping("/atp/liveEvents")
+    public ResponseEntity<ResponseDTO<List<LiveMatchResponse>>> getATPLiveEvents(){
+        List<LiveMatchResponse> events = liveMatchService.getATPLiveEvents();
 
         return new ResponseEntity<>(ResponseDTO.success(events), HttpStatus.OK);
     }
     @Scheduled(fixedRate = 30000)
-    public void getLiveEventsSchedule(){
-        List<LiveMatchResponse> events = liveMatchService.getLiveEvents();
-        messagingTemplate.convertAndSend("/topic/liveMatches", events);
+    public void getATPLiveEventsSchedule(){
+        List<LiveMatchResponse> events = liveMatchService.getATPLiveEvents();
+        messagingTemplate.convertAndSend("/topic/atp/liveMatches", events);
+    }
+
+    @GetMapping("/wta/liveEvents")
+    public ResponseEntity<ResponseDTO<List<LiveMatchResponse>>> getWTALiveEvents(){
+        List<LiveMatchResponse> events = liveMatchService.getWTALiveEvents();
+
+        return new ResponseEntity<>(ResponseDTO.success(events), HttpStatus.OK);
+    }
+    @Scheduled(fixedRate = 30000)
+    public void getWTALiveEventsSchedule(){
+        List<LiveMatchResponse> events = liveMatchService.getWTALiveEvents();
+        messagingTemplate.convertAndSend("/topic/wta/liveMatches", events);
     }
 
     @GetMapping("/liveEvents/{matchId}")
@@ -48,7 +60,7 @@ public class MatchController {
 
     @Scheduled(fixedRate = 30000)
     public void getLiveEventSchedule(){
-        List<LiveMatchResponse> events = liveMatchService.getLiveEvents();
+        List<LiveMatchResponse> events = liveMatchService.getATPLiveEvents();
         events.stream().forEach( event -> {
             messagingTemplate.convertAndSend("/topic/liveMatch/" + event.getRapidId(), event);
         });

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import Main from './page/Main'
+import LiveEventsList from './page/LiveEventsList.jsx'
 import Ranking from './page/Ranking'
 import Layout from './Layout'
 import LiveEventsDetail from './page/LiveEventsDetail'
@@ -13,13 +13,16 @@ import TestList from './page/TestList.jsx'
 import TestResult from './page/TestResult.jsx'
 import { Navigate } from 'react-router-dom';
 import Privacy from './components/main/Privacy.jsx';
+import Main from './page/Main.jsx';
 
 window.global ||= window;
 window.Buffer ||= Buffer;
 window.process ||= process;
 
+//export const base_url = "http://localhost:5173";
+//export const base_server_url = "http://localhost:8080";
 export const base_url = "https://tennisfolio.net";
-export const base_server_url = "https://tennisfolio.net";
+export const base_server_url = "https://tennisfolio.net/api";
 export const base_image_url = "https://tennisfolio.net/img";
 
 function App() {
@@ -30,6 +33,7 @@ function App() {
     <Layout>
       <Routes>
         <Route path="/" element={<Main />} />
+        <Route path="/live/:category" element={<LiveEventsList />} />
         <Route path="/ranking" element={<Ranking />} />
         <Route path="/liveEvents/:matchId" element={<LiveEventsDetail />}/>
         <Route path="/test" element={<TestList />} />

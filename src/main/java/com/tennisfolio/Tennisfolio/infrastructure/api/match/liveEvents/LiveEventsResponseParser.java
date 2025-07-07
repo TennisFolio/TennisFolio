@@ -33,10 +33,9 @@ public class LiveEventsResponseParser implements ResponseParser<List<LiveEventsA
                 dto.convertTime();
 
                 dto.scoreNullToZero();
-                // ATP만 저장
-               if("atp".equals(dto.getTournament().getCategory().getSlug())){
-                    eventList.add(dto);
-               }
+
+                eventList.add(dto);
+
             }
 
             eventList.sort(Comparator.comparingInt(LiveEventsApiDTO::getTotalRanking));

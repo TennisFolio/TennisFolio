@@ -10,6 +10,7 @@ import com.tennisfolio.Tennisfolio.player.domain.Player;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Service
@@ -23,17 +24,28 @@ public class LiveMatchService {
         this.liveEventsTemplate = liveEventsTemplate;
     }
 
-    public List<LiveMatchResponse> getLiveEvents() {
+    public List<LiveMatchResponse> getATPLiveEvents() {
+        List<LiveEventsApiDTO> apiDTO = liveEventsTemplate.executeWithoutSave("");
+
+        if(apiDTO == null || apiDTO.isEmpty()){
+            throw new LiveMatchNotFoundException(ExceptionCode.NOT_FOUND);
+        }
+
+        return  apiDTO.stream()
+                .filter(dto -> dto.getTournament().isAtp())
+                .map(this::getLiveMatchResponse)
+                .collect(Collectors.toList());
+    }
+
+    public List<LiveMatchResponse> getWTALiveEvents(){
         List<LiveEventsApiDTO> apiDTO = liveEventsTemplate.executeWithoutSave("");
         if(apiDTO == null || apiDTO.isEmpty()){
             throw new LiveMatchNotFoundException(ExceptionCode.NOT_FOUND);
         }
 
-        return apiDTO.stream().map(dto -> {
-                    Player homePlayer = playerService.getOrCreatePlayerByRapidId(dto.getHomeTeam().getRapidPlayerId());
-                    Player awayPlayer = playerService.getOrCreatePlayerByRapidId(dto.getAwayTeam().getRapidPlayerId());
-                    return new LiveMatchResponse(dto, homePlayer, awayPlayer);
-                })
+        return apiDTO.stream()
+                .filter(dto -> dto.getTournament().isWta())
+                .map(this::getLiveMatchResponse)
                 .collect(Collectors.toList());
     }
 
@@ -41,13 +53,17 @@ public class LiveMatchService {
     public LiveMatchResponse getLiveEvent(String rapidMatchId) {
         List<LiveEventsApiDTO> apiDTO = liveEventsTemplate.executeWithoutSave("");
 
-        return apiDTO.stream().map(dto -> {
-                    Player homePlayer = playerService.getOrCreatePlayerByRapidId(dto.getHomeTeam().getRapidPlayerId());
-                    Player awayPlayer = playerService.getOrCreatePlayerByRapidId(dto.getAwayTeam().getRapidPlayerId());
-                    return new LiveMatchResponse(dto, homePlayer, awayPlayer);
-                }).filter(event -> rapidMatchId.equals(event.getRapidId()))
+        return apiDTO.stream()
+                .map(this::getLiveMatchResponse)
+                .filter(dto -> rapidMatchId.equals(dto.getRapidId()))
                 .findFirst()
                 .orElseThrow(() -> new LiveMatchNotFoundException(ExceptionCode.NOT_FOUND));
 
+    }
+
+    private LiveMatchResponse getLiveMatchResponse(LiveEventsApiDTO dto){
+        Player homePlayer = playerService.getOrCreatePlayerByRapidId(dto.getHomeTeam().getRapidPlayerId());
+        Player awayPlayer = playerService.getOrCreatePlayerByRapidId(dto.getAwayTeam().getRapidPlayerId());
+        return new LiveMatchResponse(dto, homePlayer, awayPlayer);
     }
 }
