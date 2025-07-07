@@ -16,11 +16,8 @@ function Main() {
   const category = param.category;
   // 초기 데이터 요청
   useEffect(() => {
-    
-    console.log(category);
     axios.get(`${base_server_url}/api/${category}/liveEvents`)
     .then((res => {
-      console.log(res.data.data);
       setLiveEvents(res.data.data)
     }))
     .catch((err) => console.log(err));

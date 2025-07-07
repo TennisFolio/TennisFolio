@@ -30,7 +30,7 @@ public class MatchController {
     @GetMapping("/atp/liveEvents")
     public ResponseEntity<ResponseDTO<List<LiveMatchResponse>>> getATPLiveEvents(){
         List<LiveMatchResponse> events = liveMatchService.getATPLiveEvents();
-
+        System.out.println("========= ATP 적용 완료 ===========");
         return new ResponseEntity<>(ResponseDTO.success(events), HttpStatus.OK);
     }
     @Scheduled(fixedRate = 30000)
@@ -42,7 +42,7 @@ public class MatchController {
     @GetMapping("/wta/liveEvents")
     public ResponseEntity<ResponseDTO<List<LiveMatchResponse>>> getWTALiveEvents(){
         List<LiveMatchResponse> events = liveMatchService.getWTALiveEvents();
-
+        System.out.println("========= WTA 적용 완료 ===========");
         return new ResponseEntity<>(ResponseDTO.success(events), HttpStatus.OK);
     }
     @Scheduled(fixedRate = 30000)
