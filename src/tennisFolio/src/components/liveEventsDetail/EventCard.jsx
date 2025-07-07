@@ -2,7 +2,8 @@ import React from 'react'
 import { useState } from 'react'
 import { useLocation } from 'react-router-dom';
 import Flag from 'react-world-flags';
-import {base_url} from '../../App';
+import { base_image_url } from '../../App';
+import SmartImage from '../main/SmartImage';
 function EventCard({event}) {
     const location = useLocation();
      if (!event) return null;
@@ -19,14 +20,22 @@ function EventCard({event}) {
               </div>
               <div className="eventHeader">
                 <div className="teamBlock">
-                  <img src={`${base_url}${event?.homePlayer?.playerImage}`} className="playerImg" />
+                  <SmartImage
+                    base_url={base_image_url}
+                    imageName={event.homePlayer.playerImage}
+                    fallbackText={event.homePlayer.name}
+                  />
                   <div className="teamName">{event?.homePlayer?.playerName}({event?.homePlayer?.playerRanking})</div>
                 </div>
 
                 <div className="setScore">{event?.homeScore?.current} : {event?.awayScore?.current}</div>
 
                 <div className="teamBlock">
-                  <img src={`${base_url}${event?.awayPlayer?.playerImage}`} className="playerImg" />
+                  <SmartImage
+                    base_url={base_image_url}
+                    imageName={event.awayPlayer.playerImage}
+                    fallbackText={event.awayPlayer.name}
+                  />
                   <div className="teamName">{event?.awayPlayer?.playerName}({event?.awayPlayer?.playerRanking})</div>
                 </div>
               </div>
