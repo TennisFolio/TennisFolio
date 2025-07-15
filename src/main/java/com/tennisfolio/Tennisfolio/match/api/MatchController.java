@@ -30,6 +30,7 @@ public class MatchController {
     @GetMapping("/atp/liveEvents")
     public ResponseEntity<ResponseDTO<List<LiveMatchResponse>>> getATPLiveEvents(){
         List<LiveMatchResponse> events = liveMatchService.getATPLiveEvents();
+        System.out.println("테스트");
         return new ResponseEntity<>(ResponseDTO.success(events), HttpStatus.OK);
     }
     @Scheduled(fixedRate = 30000)
