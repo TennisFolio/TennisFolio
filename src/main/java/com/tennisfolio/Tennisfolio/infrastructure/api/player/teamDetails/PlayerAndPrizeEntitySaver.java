@@ -5,7 +5,7 @@ import com.tennisfolio.Tennisfolio.player.domain.Player;
 import com.tennisfolio.Tennisfolio.player.domain.PlayerAggregate;
 import com.tennisfolio.Tennisfolio.prize.domain.PlayerPrize;
 import com.tennisfolio.Tennisfolio.prize.repository.PlayerPrizeRepository;
-import com.tennisfolio.Tennisfolio.player.repository.PlayerRepository;
+import com.tennisfolio.Tennisfolio.player.infrastructure.PlayerJpaRepository;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
@@ -13,23 +13,23 @@ import java.util.Optional;
 @Component
 public class PlayerAndPrizeEntitySaver implements EntitySaver<PlayerAggregate> {
 
-    private final PlayerRepository playerRepository;
+    private final PlayerJpaRepository playerJpaRepository;
     private final PlayerPrizeRepository playerPrizeRepository;
 
-    public PlayerAndPrizeEntitySaver(PlayerRepository playerRepository, PlayerPrizeRepository playerPrizeRepository){
-        this.playerRepository = playerRepository;
+    public PlayerAndPrizeEntitySaver(PlayerJpaRepository playerJpaRepository, PlayerPrizeRepository playerPrizeRepository){
+        this.playerJpaRepository = playerJpaRepository;
         this.playerPrizeRepository = playerPrizeRepository;
     }
     @Override
     public PlayerAggregate save(PlayerAggregate aggregate) {
         Player incomingPlayer = aggregate.getPlayer();
 
-        Optional<Player> existingPlayerOpt = playerRepository.findByRapidPlayerId(incomingPlayer.getRapidPlayerId());
+        Optional<Player> existingPlayerOpt = playerJpaRepository.findByRapidPlayerId(incomingPlayer.getRapidPlayerId());
 
         Player savedPlayer = existingPlayerOpt.map(existing -> {
             existing.updateFrom(incomingPlayer);
-            return playerRepository.save(existing);
-        }).orElseGet(() -> playerRepository.save(incomingPlayer));
+            return playerJpaRepository.save(existing);
+        }).orElseGet(() -> playerJpaRepository.save(incomingPlayer));
 
         PlayerPrize savedPrize = null;
         PlayerPrize incomingPrize = aggregate.getPrize();

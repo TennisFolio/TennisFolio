@@ -41,6 +41,9 @@ public class Season extends BaseTimeEntity {
     }
 
     public void updateFromLeagueSeasonInfo(LeagueSeasonInfoDTO dto){
+        if(totalPrize < 0L){
+            throw new IllegalArgumentException("상금은 음수가 될 수 없습니다.");
+        }
         this.totalPrize = dto.getTotalPrizeMoney();
         this.totalPrizeCurrency = dto.getCurrency();
         this.competitors = dto.getCompetitors();
