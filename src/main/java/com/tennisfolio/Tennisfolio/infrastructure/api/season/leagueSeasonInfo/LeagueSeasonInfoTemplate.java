@@ -12,9 +12,8 @@ public class LeagueSeasonInfoTemplate extends StrategyApiTemplate<LeagueSeasonIn
     public LeagueSeasonInfoTemplate(
              ResponseParser<LeagueSeasonInfoDTO> leagueSeasonInfoParser
             , EntityMapper<LeagueSeasonInfoDTO, Season> leagueSeasonInfoEntityMapper
-            , EntitySaver<Season> leagueSeasonInfoEntitySaver
             ) {
-        super(leagueSeasonInfoParser, leagueSeasonInfoEntityMapper, leagueSeasonInfoEntitySaver, RapidApi.LEAGUESEASONINFO);
+        super(leagueSeasonInfoParser, leagueSeasonInfoEntityMapper,  RapidApi.LEAGUESEASONINFO);
 
     }
 }

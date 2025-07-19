@@ -14,8 +14,8 @@ public class LeagueEventsByRoundTemplate extends StrategyApiTemplate<List<League
     public LeagueEventsByRoundTemplate(
               ResponseParser<List<LeagueEventsByRoundDTO>> leagueEventsByRoundResponseParser
             , EntityMapper<List<LeagueEventsByRoundDTO>, List<Match>> leagueEventsByRoundEntityMapper
-            , EntitySaver<List<Match>> leagueEventsByRoundEntitySaver
+
             ) {
-        super(leagueEventsByRoundResponseParser, leagueEventsByRoundEntityMapper, leagueEventsByRoundEntitySaver, RapidApi.LEAGUEEVENETBYROUND);
+        super(leagueEventsByRoundResponseParser, leagueEventsByRoundEntityMapper, RapidApi.LEAGUEEVENETBYROUND);
     }
 }

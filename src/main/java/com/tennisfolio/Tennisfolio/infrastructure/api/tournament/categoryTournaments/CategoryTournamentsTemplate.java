@@ -11,10 +11,9 @@ public class CategoryTournamentsTemplate extends StrategyApiTemplate<List<Catego
 
 
     public CategoryTournamentsTemplate(ResponseParser<List<CategoryTournamentsDTO>> responseParser,
-                                       EntityMapper<List<CategoryTournamentsDTO>, List<Tournament>> entityMapper,
-                                       EntitySaver<List<Tournament>> entitySaver
+                                       EntityMapper<List<CategoryTournamentsDTO>, List<Tournament>> entityMapper
                                       ) {
-        super(responseParser, entityMapper, entitySaver, RapidApi.CATEGORYTOURNAMENTS);
+        super(responseParser, entityMapper, RapidApi.CATEGORYTOURNAMENTS);
 
     }
 

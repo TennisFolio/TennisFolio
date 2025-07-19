@@ -4,7 +4,7 @@ package com.tennisfolio.Tennisfolio.infrastructure.api.tournament.categoryTourna
 import com.tennisfolio.Tennisfolio.Tournament.domain.Tournament;
 import com.tennisfolio.Tennisfolio.infrastructure.api.base.EntityAssemble;
 import com.tennisfolio.Tennisfolio.category.domain.model.Category;
-import com.tennisfolio.Tennisfolio.category.repository.CategoryRepository;
+import com.tennisfolio.Tennisfolio.infrastructure.repository.CategoryJpaRepository;
 import org.springframework.stereotype.Component;
 
 
@@ -15,17 +15,17 @@ import java.util.stream.Collectors;
 @Component
 public class CategoryTournamentsAssemble implements EntityAssemble<List<CategoryTournamentsDTO>, List<Tournament>> {
 
-    private final CategoryRepository categoryRepository;
+    private final CategoryJpaRepository categoryJpaRepository;
 
-    public CategoryTournamentsAssemble(CategoryRepository categoryRepository) {
-        this.categoryRepository = categoryRepository;
+    public CategoryTournamentsAssemble(CategoryJpaRepository categoryJpaRepository) {
+        this.categoryJpaRepository = categoryJpaRepository;
     }
 
     @Override
     public List<Tournament> assemble(List<CategoryTournamentsDTO> dto, Object... params) {
         return dto.stream()
                 .map(tournament -> {
-                    Optional<Category> findCategory = categoryRepository.findByRapidCategoryId(tournament.getCategory().getRapidId());
+                    Optional<Category> findCategory = categoryJpaRepository.findByRapidCategoryId(tournament.getCategory().getRapidId());
                     return findCategory.map(category -> new Tournament(tournament, category));
                 })
                 .filter(Optional::isPresent)

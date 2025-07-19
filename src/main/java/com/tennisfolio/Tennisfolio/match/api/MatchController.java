@@ -32,7 +32,7 @@ public class MatchController {
         List<LiveMatchResponse> events = liveMatchService.getATPLiveEvents();
         return new ResponseEntity<>(ResponseDTO.success(events), HttpStatus.OK);
     }
-    @Scheduled(fixedRate = 30000)
+    //@Scheduled(fixedRate = 30000)
     public void getATPLiveEventsSchedule(){
         List<LiveMatchResponse> events = liveMatchService.getATPLiveEvents();
         messagingTemplate.convertAndSend("/topic/atp/liveMatches", events);
@@ -43,7 +43,7 @@ public class MatchController {
         List<LiveMatchResponse> events = liveMatchService.getWTALiveEvents();
         return new ResponseEntity<>(ResponseDTO.success(events), HttpStatus.OK);
     }
-    @Scheduled(fixedRate = 30000)
+    //@Scheduled(fixedRate = 30000)
     public void getWTALiveEventsSchedule(){
         List<LiveMatchResponse> events = liveMatchService.getWTALiveEvents();
         messagingTemplate.convertAndSend("/topic/wta/liveMatches", events);

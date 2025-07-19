@@ -1,20 +1,25 @@
 package com.tennisfolio.Tennisfolio.ranking.repository;
 
+import com.tennisfolio.Tennisfolio.player.domain.Player;
 import com.tennisfolio.Tennisfolio.ranking.domain.Ranking;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Optional;
 
-@Repository
-public interface RankingRepository extends JpaRepository<Ranking, Long> {
-    @Query("SELECT r FROM Ranking r JOIN r.player p WHERE r.lastUpdate = (SELECT MAX(r2.lastUpdate) FROM Ranking r2) ORDER BY r.curRank")
+public interface RankingRepository {
+
+    Ranking getById(Long id);
+
+    Ranking save(Ranking ranking);
+
+    List<Ranking> saveAll(List<Ranking> rankings);
+
+    List<Ranking> bufferedSave(Ranking ranking);
+    List<Ranking> bufferedSaveAll(List<Ranking> rankings);
+    List<Ranking> flush();
+
     List<Ranking> findLatestRankings();
 
-    @Query("SELECT r FROM Ranking r JOIN r.player p WHERE r.lastUpdate = (SELECT MAX(r2.lastUpdate) FROM Ranking r2) ORDER BY r.curRank")
     List<Ranking> findLatestRankings(Pageable pageable);
 
     List<Ranking> findByLastUpdate(String lastUpdate);

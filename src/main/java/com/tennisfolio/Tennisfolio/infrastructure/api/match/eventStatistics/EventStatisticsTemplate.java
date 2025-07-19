@@ -13,8 +13,8 @@ public class EventStatisticsTemplate extends StrategyApiTemplate<List<EventsStat
     public EventStatisticsTemplate(
               ResponseParser<List<EventsStatisticsDTO>> eventsStatisticsResponseParser
             , EntityMapper<List<EventsStatisticsDTO>, List<Statistic>> eventsStatisticsEntityMapper
-            , EntitySaver<List<Statistic>> eventsStatisticEntitySaver) {
-        super(eventsStatisticsResponseParser, eventsStatisticsEntityMapper, eventsStatisticEntitySaver, RapidApi.EVENTSTATISTICS);
+            ) {
+        super(eventsStatisticsResponseParser, eventsStatisticsEntityMapper,  RapidApi.EVENTSTATISTICS);
 
     }
 }

@@ -13,9 +13,8 @@ public class TournamentInfoTemplate extends StrategyApiTemplate<TournamentInfoDT
     public TournamentInfoTemplate(
               ResponseParser<TournamentInfoDTO> tournamentInfoResponseParser
             , EntityMapper<TournamentInfoDTO, Tournament> tournamentInfoEntityMapper
-            , @Qualifier("tournamentInfoEntitySaver") EntitySaver<Tournament> tournamentEntitySaver
             ) {
-        super(tournamentInfoResponseParser, tournamentInfoEntityMapper, tournamentEntitySaver, RapidApi.TOURNAMENTINFO);
+        super(tournamentInfoResponseParser, tournamentInfoEntityMapper, RapidApi.TOURNAMENTINFO);
     }
 
 }

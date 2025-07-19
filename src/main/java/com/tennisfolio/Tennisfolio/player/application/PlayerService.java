@@ -4,6 +4,7 @@ import com.tennisfolio.Tennisfolio.player.domain.PlayerAggregate;
 import com.tennisfolio.Tennisfolio.infrastructure.api.player.teamImage.PlayerImageService;
 import com.tennisfolio.Tennisfolio.player.dto.TeamDetailsApiDTO;
 import com.tennisfolio.Tennisfolio.player.domain.Player;
+import com.tennisfolio.Tennisfolio.infrastructure.repository.PlayerJpaRepository;
 import com.tennisfolio.Tennisfolio.player.repository.PlayerRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Qualifier;

@@ -62,13 +62,6 @@ public class Tournament extends BaseTimeEntity {
         this.category = category;
     }
 
-//    public Tournament(TournamentInfoDTO dto){
-//        this.city = dto.getCity();
-//        this.matchType = dto.getMatchType();
-//        this.groundType = dto.getGroundType();
-//    }
-
-
     public void updatePlayers(Player mostTitlePlayer, Player titleHolder){
         this.mostTitlePlayer = mostTitlePlayer;
         this.titleHolder = titleHolder;
@@ -78,5 +71,10 @@ public class Tournament extends BaseTimeEntity {
         this.city = incoming.getCity();
         this.matchType = incoming.getMatchType();
         this.groundType = incoming.getGroundType();
+    }
+
+    public void mergeTournament(Tournament tournament){
+        this.mostTitlePlayer = tournament.getMostTitlePlayer();
+        this.titleHolder = tournament.getTitleHolder();
     }
 }

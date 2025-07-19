@@ -11,9 +11,8 @@ import java.util.List;
 public class LeagueRoundsTemplate extends StrategyApiTemplate<List<LeagueRoundsDTO>, List<Round>> {
     public LeagueRoundsTemplate(
               ResponseParser<List<LeagueRoundsDTO>> leagueRoundsResponseParser
-            , EntityMapper<List<LeagueRoundsDTO>, List<Round>> leagueRoundsEntityMapper
-            , EntitySaver<List<Round>> leagueRoundsEntitySaver) {
+            , EntityMapper<List<LeagueRoundsDTO>, List<Round>> leagueRoundsEntityMapper) {
 
-        super(leagueRoundsResponseParser, leagueRoundsEntityMapper, leagueRoundsEntitySaver, RapidApi.LEAGUEROUNDS);
+        super(leagueRoundsResponseParser, leagueRoundsEntityMapper, RapidApi.LEAGUEROUNDS);
     }
 }

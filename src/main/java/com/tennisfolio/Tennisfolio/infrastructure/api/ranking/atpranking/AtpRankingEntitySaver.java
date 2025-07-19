@@ -2,7 +2,7 @@ package com.tennisfolio.Tennisfolio.infrastructure.api.ranking.atpranking;
 
 import com.tennisfolio.Tennisfolio.infrastructure.api.base.EntitySaver;
 import com.tennisfolio.Tennisfolio.ranking.domain.Ranking;
-import com.tennisfolio.Tennisfolio.ranking.repository.RankingRepository;
+import com.tennisfolio.Tennisfolio.infrastructure.repository.RankingJpaRepository;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
@@ -10,10 +10,10 @@ import java.util.List;
 
 @Component
 public class AtpRankingEntitySaver implements EntitySaver<List<Ranking>> {
-    private final RankingRepository rankingRepository;
+    private final RankingJpaRepository rankingJpaRepository;
 
-    public AtpRankingEntitySaver(RankingRepository rankingRepository){
-        this.rankingRepository = rankingRepository;
+    public AtpRankingEntitySaver(RankingJpaRepository rankingJpaRepository){
+        this.rankingJpaRepository = rankingJpaRepository;
     }
 
     @Override
@@ -24,12 +24,12 @@ public class AtpRankingEntitySaver implements EntitySaver<List<Ranking>> {
 
         String lastUpdateDate = entity.get(0).getLastUpdate();
 
-        boolean alreadyExists = !rankingRepository.findByLastUpdate(lastUpdateDate).isEmpty();
+        boolean alreadyExists = !rankingJpaRepository.findByLastUpdate(lastUpdateDate).isEmpty();
 
         if (alreadyExists) {
             return Collections.emptyList(); // 또는 Optional.empty() / custom result
         }
 
-        return rankingRepository.saveAll(entity);
+        return rankingJpaRepository.saveAll(entity);
     }
 }

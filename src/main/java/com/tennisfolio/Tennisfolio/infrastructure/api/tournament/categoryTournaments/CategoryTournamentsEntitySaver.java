@@ -1,7 +1,7 @@
 package com.tennisfolio.Tennisfolio.infrastructure.api.tournament.categoryTournaments;
 
 import com.tennisfolio.Tennisfolio.Tournament.domain.Tournament;
-import com.tennisfolio.Tennisfolio.Tournament.repository.TournamentRepository;
+import com.tennisfolio.Tennisfolio.infrastructure.repository.TournamentJpaRepository;
 import com.tennisfolio.Tennisfolio.infrastructure.api.base.EntitySaver;
 import org.springframework.stereotype.Component;
 
@@ -12,10 +12,10 @@ import java.util.stream.Collectors;
 @Component
 public class CategoryTournamentsEntitySaver implements EntitySaver<List<Tournament>> {
 
-    private final TournamentRepository tournamentRepository;
+    private final TournamentJpaRepository tournamentJpaRepository;
 
-    public CategoryTournamentsEntitySaver(TournamentRepository tournamentRepository) {
-        this.tournamentRepository = tournamentRepository;
+    public CategoryTournamentsEntitySaver(TournamentJpaRepository tournamentJpaRepository) {
+        this.tournamentJpaRepository = tournamentJpaRepository;
     }
 
     @Override
@@ -25,7 +25,7 @@ public class CategoryTournamentsEntitySaver implements EntitySaver<List<Tourname
                 .map(Tournament::getRapidTournamentId)
                 .collect(Collectors.toList());
 
-        Map<String,Tournament> existingMap = tournamentRepository.findByRapidTournamentIds(ids).stream()
+        Map<String,Tournament> existingMap = tournamentJpaRepository.findByRapidTournamentIds(ids).stream()
                 .collect(Collectors.toMap(Tournament::getRapidTournamentId, Function.identity()));
 
         List<Tournament> toSave = entity.stream().map(
@@ -37,6 +37,6 @@ public class CategoryTournamentsEntitySaver implements EntitySaver<List<Tourname
                     return incoming;
                 }).collect(Collectors.toList());
 
-        return tournamentRepository.saveAll(toSave);
+        return tournamentJpaRepository.saveAll(toSave);
     }
 }

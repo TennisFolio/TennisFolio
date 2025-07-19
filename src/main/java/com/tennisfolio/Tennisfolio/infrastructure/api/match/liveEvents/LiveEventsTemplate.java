@@ -15,7 +15,7 @@ public class LiveEventsTemplate extends StrategyApiTemplate<List<LiveEventsApiDT
 
     public LiveEventsTemplate(
          @Qualifier("liveEventsResponseParser") ResponseParser<List<LiveEventsApiDTO>> parser) {
-        super(parser, null, null, RapidApi.LIVEEVENTS);
+        super(parser, null,  RapidApi.LIVEEVENTS);
     }
 
 }

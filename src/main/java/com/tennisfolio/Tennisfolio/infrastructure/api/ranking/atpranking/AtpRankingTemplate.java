@@ -14,10 +14,9 @@ public class AtpRankingTemplate extends StrategyApiTemplate<List<AtpRankingApiDT
 
     public AtpRankingTemplate(
                               ResponseParser<List<AtpRankingApiDTO>> atpRankingResponseParser,
-                              EntityMapper<List<AtpRankingApiDTO>, List<Ranking>> atpRankingEntityMapper,
-                              EntitySaver<List<Ranking>> atpRankingEntitySaver
+                              EntityMapper<List<AtpRankingApiDTO>, List<Ranking>> atpRankingEntityMapper
                               ) {
-        super(atpRankingResponseParser,atpRankingEntityMapper,atpRankingEntitySaver,RapidApi.ATPRANKINGS);
+        super(atpRankingResponseParser,atpRankingEntityMapper,RapidApi.ATPRANKINGS);
 
     }
 

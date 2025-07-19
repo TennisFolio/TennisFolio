@@ -1,7 +1,7 @@
 package com.tennisfolio.Tennisfolio.infrastructure.api.season.leagueSeasons;
 
 import com.tennisfolio.Tennisfolio.Tournament.domain.Tournament;
-import com.tennisfolio.Tennisfolio.Tournament.repository.TournamentRepository;
+import com.tennisfolio.Tennisfolio.infrastructure.repository.TournamentJpaRepository;
 import com.tennisfolio.Tennisfolio.infrastructure.api.base.EntityAssemble;
 import com.tennisfolio.Tennisfolio.common.ExceptionCode;
 import com.tennisfolio.Tennisfolio.exception.InvalidRequestException;
@@ -12,10 +12,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 @Component
 public class LeagueSeasonsAssemble implements EntityAssemble<List<LeagueSeasonsDTO>, List<Season>> {
-    private final TournamentRepository tournamentRepository;
+    private final TournamentJpaRepository tournamentJpaRepository;
 
-    public LeagueSeasonsAssemble(TournamentRepository tournamentRepository) {
-        this.tournamentRepository = tournamentRepository;
+    public LeagueSeasonsAssemble(TournamentJpaRepository tournamentJpaRepository) {
+        this.tournamentJpaRepository = tournamentJpaRepository;
     }
 
     @Override
@@ -25,7 +25,7 @@ public class LeagueSeasonsAssemble implements EntityAssemble<List<LeagueSeasonsD
         }
 
         String rapidTournamentId = params[0].toString();
-        Tournament tournament = tournamentRepository.findByRapidTournamentId(rapidTournamentId)
+        Tournament tournament = tournamentJpaRepository.findByRapidTournamentId(rapidTournamentId)
                 .orElseThrow(() -> new IllegalArgumentException("조회되는 데이터가 없습니다."));
 
         return dto.stream()

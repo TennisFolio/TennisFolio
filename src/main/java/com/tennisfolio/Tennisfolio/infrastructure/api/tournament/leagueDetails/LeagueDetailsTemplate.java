@@ -12,9 +12,8 @@ public class LeagueDetailsTemplate extends StrategyApiTemplate<LeagueDetailsDTO,
     public LeagueDetailsTemplate(
               ResponseParser<LeagueDetailsDTO> leagueDetailsParser
             , EntityMapper<LeagueDetailsDTO, Tournament> leagueDetailsEntityMapper
-            , @Qualifier("leagueDetailsEntitySaver")EntitySaver<Tournament> leagueDetailsEntitySaver
             ) {
-        super(leagueDetailsParser, leagueDetailsEntityMapper, leagueDetailsEntitySaver, RapidApi.LEAGUEDETAILS);
+        super(leagueDetailsParser, leagueDetailsEntityMapper, RapidApi.LEAGUEDETAILS);
     }
 
 }

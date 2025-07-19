@@ -12,10 +12,9 @@ public class TeamDetailsTemplate extends StrategyApiTemplate<TeamDetailsApiDTO, 
 
     public TeamDetailsTemplate(
                                ResponseParser<TeamDetailsApiDTO> responseParser,
-                               EntityMapper<TeamDetailsApiDTO, PlayerAggregate> entityMapper,
-                               EntitySaver<PlayerAggregate> entitySaver
+                               EntityMapper<TeamDetailsApiDTO, PlayerAggregate> entityMapper
                               ){
-        super(responseParser, entityMapper, entitySaver, RapidApi.TEAMDETAILS);
+        super(responseParser, entityMapper, RapidApi.TEAMDETAILS);
     }
 
 

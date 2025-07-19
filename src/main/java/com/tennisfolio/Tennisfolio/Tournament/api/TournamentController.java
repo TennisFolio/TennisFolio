@@ -22,16 +22,4 @@ public class TournamentController {
         tournamentSyncService.saveTournamentList();
         return new ResponseEntity<>(HttpStatus.OK);
     }
-
-    @PostMapping("/info")
-    public ResponseEntity<ResponseDTO> saveTournamentInfo(){
-        tournamentSyncService.saveTournamentInfo();
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
-
-    @PostMapping("/details")
-    public ResponseEntity<ResponseDTO> saveLeagueDetails(){
-        tournamentSyncService.saveLeagueDetails();
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
 }
