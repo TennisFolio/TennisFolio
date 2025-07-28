@@ -1,5 +1,6 @@
 package com.tennisfolio.Tennisfolio.common.response;
 
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -9,6 +10,7 @@ public class ResponseDTO<T> {
     private final String message;
     private final T data;
 
+    @Builder
     public ResponseDTO(String code, String message, T data) {
         this.code = code;
         this.message = message;

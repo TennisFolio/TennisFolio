@@ -3,7 +3,6 @@ package com.tennisfolio.Tennisfolio.ranking.dto;
 import com.tennisfolio.Tennisfolio.player.domain.Player;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Getter
 @NoArgsConstructor

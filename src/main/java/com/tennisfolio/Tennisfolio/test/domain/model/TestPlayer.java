@@ -1,10 +1,9 @@
 package com.tennisfolio.Tennisfolio.test.domain.model;
 
-import com.tennisfolio.Tennisfolio.player.domain.Player;
+import com.tennisfolio.Tennisfolio.player.infrastructure.PlayerEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Getter
 @Entity
@@ -17,7 +16,7 @@ public class TestPlayer {
     private Long testPlayerId;
     @OneToOne
     @JoinColumn(name="PLAYER_ID")
-    private Player player;
+    private PlayerEntity player;
     @Column(name="PLAYER_NAME")
     private String playerName;
     @Column(name="DESCRIPTION")

@@ -1,6 +1,6 @@
 package com.tennisfolio.Tennisfolio.infrastructure.api.player.teamDetails;
 
-import com.tennisfolio.Tennisfolio.common.RapidApi;
+import com.tennisfolio.Tennisfolio.infrastructure.api.base.RapidApi;
 import com.tennisfolio.Tennisfolio.infrastructure.api.base.*;
 import com.tennisfolio.Tennisfolio.player.domain.PlayerAggregate;
 import com.tennisfolio.Tennisfolio.player.dto.TeamDetailsApiDTO;
@@ -12,10 +12,9 @@ public class TeamDetailsTemplate extends StrategyApiTemplate<TeamDetailsApiDTO, 
 
     public TeamDetailsTemplate(
                                ResponseParser<TeamDetailsApiDTO> responseParser,
-                               EntityMapper<TeamDetailsApiDTO, PlayerAggregate> entityMapper,
-                               EntitySaver<PlayerAggregate> entitySaver
+                               EntityMapper<TeamDetailsApiDTO, PlayerAggregate> entityMapper
                               ){
-        super(responseParser, entityMapper, entitySaver, RapidApi.TEAMDETAILS);
+        super(responseParser, entityMapper, RapidApi.TEAMDETAILS);
     }
 
 

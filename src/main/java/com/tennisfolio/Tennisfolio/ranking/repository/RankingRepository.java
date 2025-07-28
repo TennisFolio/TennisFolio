@@ -1,21 +1,28 @@
 package com.tennisfolio.Tennisfolio.ranking.repository;
 
-import com.tennisfolio.Tennisfolio.ranking.domain.Ranking;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Optional;
 
-@Repository
-public interface RankingRepository extends JpaRepository<Ranking, Long> {
-    @Query("SELECT r FROM Ranking r JOIN r.player p WHERE r.lastUpdate = (SELECT MAX(r2.lastUpdate) FROM Ranking r2) ORDER BY r.curRank")
-    List<Ranking> findLatestRankings();
+public interface RankingRepository {
 
-    @Query("SELECT r FROM Ranking r JOIN r.player p WHERE r.lastUpdate = (SELECT MAX(r2.lastUpdate) FROM Ranking r2) ORDER BY r.curRank")
-    List<Ranking> findLatestRankings(Pageable pageable);
+    RankingEntity getById(Long id);
 
-    List<Ranking> findByLastUpdate(String lastUpdate);
+    RankingEntity save(RankingEntity rankingEntity);
+
+    List<RankingEntity> saveAll(List<RankingEntity> rankingEntities);
+
+    List<RankingEntity> findLatestRankings();
+
+    List<RankingEntity> findLatestRankings(Pageable pageable);
+
+    List<RankingEntity> findByLastUpdate(String lastUpdate);
+
+    List<RankingEntity> collect(RankingEntity rankingEntity);
+
+    List<RankingEntity> collect(List<RankingEntity> rankingEntity);
+
+    boolean flushWhenFull();
+
+    boolean flushAll();
 }

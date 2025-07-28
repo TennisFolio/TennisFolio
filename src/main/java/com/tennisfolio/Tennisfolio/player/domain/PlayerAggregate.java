@@ -1,6 +1,8 @@
 package com.tennisfolio.Tennisfolio.player.domain;
 
+import com.tennisfolio.Tennisfolio.player.infrastructure.PlayerEntity;
 import com.tennisfolio.Tennisfolio.prize.domain.PlayerPrize;
+import com.tennisfolio.Tennisfolio.prize.repository.PlayerPrizeEntity;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -8,15 +10,15 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class PlayerAggregate {
     private Player player;
-    private PlayerPrize prize;
+    private PlayerPrize playerPrize;
 
-    public PlayerAggregate(Player player, PlayerPrize prize){
+    public PlayerAggregate(Player player, PlayerPrize playerPrize){
         this.player = player;
-        this.prize = prize;
+        this.playerPrize = playerPrize;
     }
 
     public Player toPlayer() {
-        player.updatePrize(prize);
+        player.updatePrize(playerPrize);
         return this.player;
     }
 }

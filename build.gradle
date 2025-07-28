@@ -36,6 +36,7 @@ dependencies {
 	implementation("software.amazon.awssdk:s3:2.31.35")
 	implementation 'org.apache.tika:tika-core:2.9.0'
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+	implementation 'mysql:mysql-connector-java:8.0.33'
 	runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
 	implementation 'mysql:mysql-connector-java:8.0.33'
 }

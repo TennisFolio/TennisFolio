@@ -1,6 +1,6 @@
 package com.tennisfolio.Tennisfolio.chat.service;
 
-import com.tennisfolio.Tennisfolio.chat.domain.Chat;
+import com.tennisfolio.Tennisfolio.chat.repository.Chat;
 import com.tennisfolio.Tennisfolio.chat.repository.ChatRepository;
 import com.tennisfolio.Tennisfolio.common.ChatMessage;
 import org.springframework.stereotype.Service;

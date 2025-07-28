@@ -1,20 +1,19 @@
 package com.tennisfolio.Tennisfolio.player.domain;
 
 import com.tennisfolio.Tennisfolio.player.dto.CountryDTO;
-import jakarta.persistence.Column;
-import jakarta.persistence.Embeddable;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 import java.util.Objects;
 
-@Embeddable
 @Getter
-@NoArgsConstructor
+@Builder
+@AllArgsConstructor
 public class Country {
-    @Column(name="COUNTRY_CODE")
+
     private String countryCode;
-    @Column(name="COUNTRY_NAME")
+
     private String countryName;
 
     public Country(CountryDTO dto){

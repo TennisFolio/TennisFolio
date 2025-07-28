@@ -1,7 +1,8 @@
 package com.tennisfolio.Tennisfolio.ranking.application;
 
 import com.tennisfolio.Tennisfolio.ranking.domain.Ranking;
-import com.tennisfolio.Tennisfolio.ranking.repository.RankingRepository;
+import com.tennisfolio.Tennisfolio.ranking.repository.RankingEntity;
+import com.tennisfolio.Tennisfolio.infrastructure.repository.RankingJpaRepository;
 import com.tennisfolio.Tennisfolio.ranking.dto.RankingResponse;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -11,19 +12,19 @@ import java.util.stream.Collectors;
 
 @Service
 public class RankingService {
-    private final RankingRepository rankingRepository;
+    private final RankingJpaRepository rankingJpaRepository;
 
-    public RankingService( RankingRepository rankingRepository){
+    public RankingService( RankingJpaRepository rankingJpaRepository){
 
-        this.rankingRepository = rankingRepository;
+        this.rankingJpaRepository = rankingJpaRepository;
     }
 
     public List<RankingResponse> getRanking(String type) {
-        List<Ranking> rankings = "init".equalsIgnoreCase(type)
-                ? rankingRepository.findLatestRankings(PageRequest.of(0, 20))
-                : rankingRepository.findLatestRankings();
+        List<Ranking> rankingEntities = "init".equalsIgnoreCase(type)
+                ? rankingJpaRepository.findLatestRankings(PageRequest.of(0, 20)).stream().map(p -> p.toModel()).toList()
+                : rankingJpaRepository.findLatestRankings().stream().map(p -> p.toModel()).toList();
 
-        return rankings.stream()
+        return rankingEntities.stream()
                        .map(RankingResponse::new)
                        .collect(Collectors.toList());
 

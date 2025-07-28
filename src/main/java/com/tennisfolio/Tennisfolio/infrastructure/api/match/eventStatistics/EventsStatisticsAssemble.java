@@ -1,10 +1,13 @@
 package com.tennisfolio.Tennisfolio.infrastructure.api.match.eventStatistics;
 
+import com.tennisfolio.Tennisfolio.exception.NotFoundException;
 import com.tennisfolio.Tennisfolio.infrastructure.api.base.EntityAssemble;
 import com.tennisfolio.Tennisfolio.common.ExceptionCode;
 import com.tennisfolio.Tennisfolio.exception.InvalidRequestException;
 import com.tennisfolio.Tennisfolio.match.domain.Match;
 import com.tennisfolio.Tennisfolio.match.domain.Statistic;
+import com.tennisfolio.Tennisfolio.match.repository.MatchEntity;
+import com.tennisfolio.Tennisfolio.match.repository.StatisticEntity;
 import com.tennisfolio.Tennisfolio.match.repository.MatchRepository;
 import org.springframework.stereotype.Component;
 
@@ -27,7 +30,9 @@ public class EventsStatisticsAssemble implements EntityAssemble<List<EventsStati
         List<Statistic> result = new ArrayList<>();
         String matchRapidId = params[0].toString();
 
-        Match match = matchRepository.findByRapidMatchId(matchRapidId).get();
+        Match match = matchRepository.findByRapidMatchId(matchRapidId)
+                .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND))
+                .toModel();
 
         for(EventsStatisticsDTO event : dto){
             String period = event.getPeriod();

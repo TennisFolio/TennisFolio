@@ -3,6 +3,7 @@ package com.tennisfolio.Tennisfolio.infrastructure.api.match.leagueEventsByRound
 import com.tennisfolio.Tennisfolio.infrastructure.api.base.EntityAssemble;
 import com.tennisfolio.Tennisfolio.infrastructure.api.base.EntityMapper;
 import com.tennisfolio.Tennisfolio.match.domain.Match;
+import com.tennisfolio.Tennisfolio.match.repository.MatchEntity;
 import org.springframework.stereotype.Component;
 
 import java.util.List;

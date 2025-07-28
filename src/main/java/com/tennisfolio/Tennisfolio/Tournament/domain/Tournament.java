@@ -1,60 +1,45 @@
 package com.tennisfolio.Tennisfolio.Tournament.domain;
 
+import com.tennisfolio.Tennisfolio.category.domain.Category;
 import com.tennisfolio.Tennisfolio.infrastructure.api.tournament.categoryTournaments.CategoryTournamentsDTO;
+import com.tennisfolio.Tennisfolio.infrastructure.api.tournament.leagueDetails.LeagueDetailsDTO;
 import com.tennisfolio.Tennisfolio.infrastructure.api.tournament.tournamentInfo.TournamentInfoDTO;
-import com.tennisfolio.Tennisfolio.category.domain.model.Category;
-import com.tennisfolio.Tennisfolio.common.Entity.BaseTimeEntity;
 import com.tennisfolio.Tennisfolio.player.domain.Player;
-import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
-@Entity
-@Table(name = "tb_tournament")
+
 @Getter
-@NoArgsConstructor
-public class Tournament extends BaseTimeEntity {
+@Builder
+@AllArgsConstructor
+public class Tournament{
 
-    @Id
-    @GeneratedValue(strategy= GenerationType.IDENTITY)
-    @Column(name="TOURNAMENT_ID")
     private Long tournamentId;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "CATEGORY_ID")
     private Category category;
 
-    @Column(name = "RAPID_TOURNAMENT_ID")
     private String rapidTournamentId;
 
-    @Column(name = "MATCH_TYPE")
     private String matchType;
 
-    @Column(name = "TOURNAMENT_NAME")
     private String tournamentName;
 
-    @Column(name = "CITY")
     private String city;
 
-    @Column(name="GROUND_TYPE")
     private String groundType;
 
-    @Column(name="LOGO")
     private String logo;
 
-    @Column(name="MOST_TITLES")
     private String mostTitles;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="MOST_TITLE_PLAYER_ID", nullable = true)
     private Player mostTitlePlayer;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="TITLE_HOLDER_ID")
     private Player titleHolder;
 
-    @Column(name="POINTS")
     private Long points;
+
+    public Tournament(){}
 
     public Tournament(CategoryTournamentsDTO dto, Category category){
         this.rapidTournamentId = dto.getTournamentRapidId();
@@ -62,16 +47,11 @@ public class Tournament extends BaseTimeEntity {
         this.category = category;
     }
 
-//    public Tournament(TournamentInfoDTO dto){
-//        this.city = dto.getCity();
-//        this.matchType = dto.getMatchType();
-//        this.groundType = dto.getGroundType();
-//    }
-
-
-    public void updatePlayers(Player mostTitlePlayer, Player titleHolder){
+    public void updateFromLeagueDetails(Player mostTitlePlayer, Player titleHolder, LeagueDetailsDTO dto){
         this.mostTitlePlayer = mostTitlePlayer;
         this.titleHolder = titleHolder;
+        this.mostTitles = dto.getMostTitles();
+        this.points = dto.getPoints();
     }
 
     public void updateFromTournamentInfo(TournamentInfoDTO incoming){
@@ -79,4 +59,12 @@ public class Tournament extends BaseTimeEntity {
         this.matchType = incoming.getMatchType();
         this.groundType = incoming.getGroundType();
     }
+
+    public void mergeTournament(Tournament tournament){
+        this.mostTitlePlayer = tournament.getMostTitlePlayer();
+        this.titleHolder = tournament.getTitleHolder();
+        this.mostTitles = tournament.getMostTitles();
+        this.points = tournament.getPoints();
+    }
+
 }
