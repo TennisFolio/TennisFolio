@@ -4,9 +4,9 @@ import com.tennisfolio.Tennisfolio.common.ExceptionCode;
 import lombok.Getter;
 
 @Getter
-public class PlayerNotFoundException extends RuntimeException {
+public class NotFoundException extends RuntimeException {
   private final ExceptionCode exceptionCode;
-    public PlayerNotFoundException(ExceptionCode exceptionCode) {
+    public NotFoundException(ExceptionCode exceptionCode) {
         super(exceptionCode.getMessage());
         this.exceptionCode = exceptionCode;
     }

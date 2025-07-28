@@ -1,7 +1,6 @@
 package com.tennisfolio.Tennisfolio.infrastructure.api.base;
 
 import com.tennisfolio.Tennisfolio.common.ExceptionCode;
-import com.tennisfolio.Tennisfolio.common.RapidApi;
 import com.tennisfolio.Tennisfolio.exception.RapidApiException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -18,7 +17,6 @@ public abstract class StrategyApiTemplate<T, E> {
     private DecompressorUtil decompressorUtil;
     private final ResponseParser<T> parser;
     private final EntityMapper<T, E> mapper;
-    private final EntitySaver<E> saver;
     private final RapidApi endpoint;
 
     // API Key
@@ -33,12 +31,10 @@ public abstract class StrategyApiTemplate<T, E> {
     public StrategyApiTemplate(
                                ResponseParser<T> parser,
                                EntityMapper<T, E> mapper,
-                               EntitySaver<E> saver,
                                RapidApi endpoint) {
 
         this.parser = parser;
         this.mapper = mapper;
-        this.saver = saver;
         this.endpoint = endpoint;
     }
 
@@ -55,9 +51,7 @@ public abstract class StrategyApiTemplate<T, E> {
         // response to DTO
         T dto = parser.parse(responseStr);
         // DTO to Entity
-        E entity = mapper.map(dto, params);
-        // Entity DB에 저장
-        return saver.save(entity);
+        return mapper.map(dto, params);
 
     }
 

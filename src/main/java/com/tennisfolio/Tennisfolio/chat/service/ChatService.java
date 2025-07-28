@@ -1,6 +1,5 @@
 package com.tennisfolio.Tennisfolio.chat.service;
 
-import com.tennisfolio.Tennisfolio.chat.domain.Chat;
 import com.tennisfolio.Tennisfolio.common.ChatMessage;
 
 import java.util.List;

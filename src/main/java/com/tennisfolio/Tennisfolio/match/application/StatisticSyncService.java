@@ -3,6 +3,7 @@ package com.tennisfolio.Tennisfolio.match.application;
 import com.tennisfolio.Tennisfolio.infrastructure.api.base.StrategyApiTemplate;
 import com.tennisfolio.Tennisfolio.infrastructure.api.match.eventStatistics.EventsStatisticsDTO;
 import com.tennisfolio.Tennisfolio.match.domain.Statistic;
+import com.tennisfolio.Tennisfolio.match.repository.StatisticEntity;
 import com.tennisfolio.Tennisfolio.match.repository.MatchRepository;
 import com.tennisfolio.Tennisfolio.match.repository.StatisticRepository;
 import org.springframework.stereotype.Service;
@@ -23,7 +24,7 @@ public class StatisticSyncService {
         this.statisticRepository = statisticRepository;
     }
 
-    public List<Statistic> saveStatisticList() {
+    public void saveStatisticList() {
         List<Statistic> toSave = matchRepository.findAll()
                 .stream()
                 .map(match -> {
@@ -31,7 +32,8 @@ public class StatisticSyncService {
                     return eventsStatisticsTemplate.execute(rapidMatchId);
                 }).flatMap(list -> list != null ? list.stream() : Stream.empty())
                 .collect(Collectors.toList());
+        List<StatisticEntity> entities = toSave.stream().map(p -> StatisticEntity.fromModel(p)).toList();
+        statisticRepository.saveAll(entities);
 
-        return statisticRepository.saveAll(toSave);
     }
 }

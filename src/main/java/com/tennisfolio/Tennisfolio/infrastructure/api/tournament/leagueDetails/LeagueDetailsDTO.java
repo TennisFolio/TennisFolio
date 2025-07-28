@@ -17,6 +17,8 @@ public class LeagueDetailsDTO {
     private String rapidId;
     @JsonProperty("titleHolder")
     private LeagueDetailsPlayerDTO titleHolder;
+    @JsonProperty("mostTitles")
+    private String mostTitles;
     @JsonProperty("mostTitlesTeams")
     private List<LeagueDetailsPlayerDTO> mostTitlesTeams;
     @JsonProperty("tennisPoints")

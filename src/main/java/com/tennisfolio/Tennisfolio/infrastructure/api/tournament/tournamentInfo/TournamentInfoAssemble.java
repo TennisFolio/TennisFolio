@@ -1,21 +1,22 @@
 package com.tennisfolio.Tennisfolio.infrastructure.api.tournament.tournamentInfo;
 
 import com.tennisfolio.Tennisfolio.Tournament.domain.Tournament;
-import com.tennisfolio.Tennisfolio.Tournament.repository.TournamentRepository;
+import com.tennisfolio.Tennisfolio.infrastructure.repository.TournamentJpaRepository;
 import com.tennisfolio.Tennisfolio.infrastructure.api.base.EntityAssemble;
 import org.springframework.stereotype.Component;
 
 @Component
 public class TournamentInfoAssemble implements EntityAssemble<TournamentInfoDTO, Tournament> {
-    private final TournamentRepository tournamentRepository;
+    private final TournamentJpaRepository tournamentJpaRepository;
 
-    public TournamentInfoAssemble(TournamentRepository tournamentRepository) {
-        this.tournamentRepository = tournamentRepository;
+    public TournamentInfoAssemble(TournamentJpaRepository tournamentJpaRepository) {
+        this.tournamentJpaRepository = tournamentJpaRepository;
     }
 
     @Override
     public Tournament assemble(TournamentInfoDTO dto, Object... params) {
-        return tournamentRepository.findByRapidTournamentId(dto.getTournament().getRapidId())
+        return tournamentJpaRepository.findByRapidTournamentId(dto.getTournament().getRapidId())
+                .map(entity -> entity.toModel())
                 .map(
                 tournament -> {
                     tournament.updateFromTournamentInfo(dto);

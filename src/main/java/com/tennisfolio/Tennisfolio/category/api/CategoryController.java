@@ -2,6 +2,7 @@ package com.tennisfolio.Tennisfolio.category.api;
 
 import com.tennisfolio.Tennisfolio.category.application.CategoryService;
 import com.tennisfolio.Tennisfolio.common.response.ResponseDTO;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/category")
 public class CategoryController {
 
+    @Autowired
     private final CategoryService categoryService;
 
     public CategoryController(CategoryService categoryService) {

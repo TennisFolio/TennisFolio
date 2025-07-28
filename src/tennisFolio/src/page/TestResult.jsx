@@ -22,7 +22,7 @@ function TestResult() {
   useEffect(() => { 
 
     if(param.query === undefined || param.query === null || param.query === ""){
-      alert("잘못된 접근입니다!");
+      alert("잘못된 접근입니다.");
       navigate(`/test/${param.category}`);
       return;
     }

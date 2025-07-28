@@ -1,16 +1,15 @@
 package com.tennisfolio.Tennisfolio.match.application;
 
-import com.tennisfolio.Tennisfolio.infrastructure.api.base.StrategyApiTemplate;
-import com.tennisfolio.Tennisfolio.infrastructure.api.match.liveEvents.LiveEventsApiDTO;
 import com.tennisfolio.Tennisfolio.common.ExceptionCode;
 import com.tennisfolio.Tennisfolio.exception.LiveMatchNotFoundException;
+import com.tennisfolio.Tennisfolio.infrastructure.api.base.StrategyApiTemplate;
+import com.tennisfolio.Tennisfolio.infrastructure.api.match.liveEvents.LiveEventsApiDTO;
 import com.tennisfolio.Tennisfolio.match.dto.LiveMatchResponse;
 import com.tennisfolio.Tennisfolio.player.application.PlayerService;
 import com.tennisfolio.Tennisfolio.player.domain.Player;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Service

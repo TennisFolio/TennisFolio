@@ -3,6 +3,7 @@ package com.tennisfolio.Tennisfolio.infrastructure.api.season.leagueSeasons;
 import com.tennisfolio.Tennisfolio.infrastructure.api.base.EntityAssemble;
 import com.tennisfolio.Tennisfolio.infrastructure.api.base.EntityMapper;
 import com.tennisfolio.Tennisfolio.season.domain.Season;
+import com.tennisfolio.Tennisfolio.season.repository.SeasonEntity;
 import org.springframework.stereotype.Component;
 
 import java.util.List;

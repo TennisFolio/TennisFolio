@@ -30,6 +30,7 @@ public class CategoryTournamentsResponseParser implements ResponseParser<List<Ca
                     // 대회가 7, 8월에 진행되는 경우 둘 다 포함되는 경우가 있음.
                     boolean flag = list.stream().anyMatch(exist -> exist.getTournamentRapidId().equals(dto.getTournamentRapidId()));
                     if(!flag) list.add(dto);
+
                 }
             }
             return list;

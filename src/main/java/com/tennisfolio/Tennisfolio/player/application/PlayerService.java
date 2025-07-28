@@ -1,10 +1,11 @@
 package com.tennisfolio.Tennisfolio.player.application;
 import com.tennisfolio.Tennisfolio.infrastructure.api.base.StrategyApiTemplate;
+import com.tennisfolio.Tennisfolio.player.domain.Player;
 import com.tennisfolio.Tennisfolio.player.domain.PlayerAggregate;
 import com.tennisfolio.Tennisfolio.infrastructure.api.player.teamImage.PlayerImageService;
 import com.tennisfolio.Tennisfolio.player.dto.TeamDetailsApiDTO;
-import com.tennisfolio.Tennisfolio.player.domain.Player;
-import com.tennisfolio.Tennisfolio.player.infrastructure.PlayerJpaRepository;
+import com.tennisfolio.Tennisfolio.player.infrastructure.PlayerEntity;
+import com.tennisfolio.Tennisfolio.player.infrastructure.PlayerRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -13,23 +14,24 @@ import org.springframework.stereotype.Service;
 public class PlayerService {
     private final StrategyApiTemplate<TeamDetailsApiDTO, PlayerAggregate> teamDetailsTemplate;
     private final PlayerImageService playerImageService;
-    private final PlayerJpaRepository playerJpaRepository;
+    private final PlayerRepository playerRepository;
     public PlayerService(@Qualifier("teamDetailsTemplate") StrategyApiTemplate<TeamDetailsApiDTO, PlayerAggregate> teamDetailsTemplate, PlayerImageService playerImageService
-            , PlayerJpaRepository playerJpaRepository){
+            , PlayerRepository playerRepository){
         this.teamDetailsTemplate = teamDetailsTemplate;
         this.playerImageService = playerImageService;
-        this.playerJpaRepository = playerJpaRepository;
+        this.playerRepository = playerRepository;
     }
 
     @Transactional
     public Player getOrCreatePlayerByRapidId(String rapidId) {
-        return playerJpaRepository.findByRapidPlayerId(rapidId)
+        return playerRepository.findByRapidPlayerId(rapidId)
                 .orElseGet(() -> {
                     Player player = teamDetailsTemplate.execute(rapidId).toPlayer();
                     String path = playerImageService.fetchImage(rapidId);
                     player.updateProfileImage(path);
-                    return playerJpaRepository.save(player);
-                });
+                    PlayerEntity playerEntity = PlayerEntity.fromModel(player);
+                    return playerRepository.save(playerEntity);
+                }).toModel();
     }
 
 

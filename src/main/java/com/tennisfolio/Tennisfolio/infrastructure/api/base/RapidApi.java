@@ -1,4 +1,4 @@
-package com.tennisfolio.Tennisfolio.common;
+package com.tennisfolio.Tennisfolio.infrastructure.api.base;
 
 public enum RapidApi {
     ATPRANKINGS("atpRankings", "/tennis/rankings/atp"),

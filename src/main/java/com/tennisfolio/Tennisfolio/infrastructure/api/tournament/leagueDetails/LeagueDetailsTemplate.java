@@ -1,9 +1,8 @@
 package com.tennisfolio.Tennisfolio.infrastructure.api.tournament.leagueDetails;
 
 import com.tennisfolio.Tennisfolio.Tournament.domain.Tournament;
-import com.tennisfolio.Tennisfolio.common.RapidApi;
+import com.tennisfolio.Tennisfolio.infrastructure.api.base.RapidApi;
 import com.tennisfolio.Tennisfolio.infrastructure.api.base.*;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -12,9 +11,8 @@ public class LeagueDetailsTemplate extends StrategyApiTemplate<LeagueDetailsDTO,
     public LeagueDetailsTemplate(
               ResponseParser<LeagueDetailsDTO> leagueDetailsParser
             , EntityMapper<LeagueDetailsDTO, Tournament> leagueDetailsEntityMapper
-            , @Qualifier("leagueDetailsEntitySaver")EntitySaver<Tournament> leagueDetailsEntitySaver
             ) {
-        super(leagueDetailsParser, leagueDetailsEntityMapper, leagueDetailsEntitySaver, RapidApi.LEAGUEDETAILS);
+        super(leagueDetailsParser, leagueDetailsEntityMapper, RapidApi.LEAGUEDETAILS);
     }
 
 }

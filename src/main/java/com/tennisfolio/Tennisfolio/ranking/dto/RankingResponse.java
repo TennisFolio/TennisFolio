@@ -1,9 +1,9 @@
 package com.tennisfolio.Tennisfolio.ranking.dto;
 
 import com.tennisfolio.Tennisfolio.ranking.domain.Ranking;
+import com.tennisfolio.Tennisfolio.ranking.repository.RankingEntity;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Getter
 @NoArgsConstructor
