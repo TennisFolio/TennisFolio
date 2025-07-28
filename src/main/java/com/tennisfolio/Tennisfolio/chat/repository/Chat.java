@@ -1,11 +1,10 @@
-package com.tennisfolio.Tennisfolio.chat.domain;
+package com.tennisfolio.Tennisfolio.chat.repository;
 
 import com.tennisfolio.Tennisfolio.common.ChatMessage;
 import com.tennisfolio.Tennisfolio.common.Entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Getter
 @Entity

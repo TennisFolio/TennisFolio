@@ -3,6 +3,7 @@ package com.tennisfolio.Tennisfolio.match.application;
 import com.tennisfolio.Tennisfolio.infrastructure.api.base.StrategyApiTemplate;
 import com.tennisfolio.Tennisfolio.infrastructure.api.match.leagueEventsByRound.LeagueEventsByRoundDTO;
 import com.tennisfolio.Tennisfolio.match.domain.Match;
+import com.tennisfolio.Tennisfolio.match.repository.MatchEntity;
 import com.tennisfolio.Tennisfolio.round.repository.RoundRepository;
 import org.springframework.stereotype.Service;
 
@@ -25,8 +26,8 @@ public class MatchSyncService {
         return roundRepository.findAll()
                 .stream()
                 .map(round -> {
-                    String rapidTournamentId = round.getSeason().getTournament().getRapidTournamentId();
-                    String rapidSeasonId = round.getSeason().getRapidSeasonId();
+                    String rapidTournamentId = round.getSeasonEntity().getTournamentEntity().getRapidTournamentId();
+                    String rapidSeasonId = round.getSeasonEntity().getRapidSeasonId();
                     Long roundNum = round.getRound();
                     String slug = round.getSlug();
 

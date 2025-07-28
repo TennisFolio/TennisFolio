@@ -1,7 +1,6 @@
 package com.tennisfolio.Tennisfolio.infrastructure.api.base;
 
 import com.tennisfolio.Tennisfolio.common.ExceptionCode;
-import com.tennisfolio.Tennisfolio.common.RapidApi;
 import com.tennisfolio.Tennisfolio.exception.RapidApiException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.util.UriComponentsBuilder;

@@ -1,8 +1,9 @@
 package com.tennisfolio.Tennisfolio.category.application;
 
+import com.tennisfolio.Tennisfolio.category.domain.Category;
 import com.tennisfolio.Tennisfolio.category.repository.CategoryRepository;
 import com.tennisfolio.Tennisfolio.infrastructure.api.category.categories.CategoryDTO;
-import com.tennisfolio.Tennisfolio.category.domain.model.Category;
+import com.tennisfolio.Tennisfolio.category.repository.CategoryEntity;
 import com.tennisfolio.Tennisfolio.infrastructure.api.base.StrategyApiTemplate;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -21,6 +22,10 @@ public class CategoryService {
 
     public void saveCategory() {
         List<Category> categories = categoriesApiTemplate.execute("");
-        categoryRepository.saveAll(categories);
+        List<CategoryEntity> categoryEntities = categories
+                .stream()
+                .map(category -> CategoryEntity.fromModel(category))
+                .toList();
+        categoryRepository.saveAll(categoryEntities);
     }
 }

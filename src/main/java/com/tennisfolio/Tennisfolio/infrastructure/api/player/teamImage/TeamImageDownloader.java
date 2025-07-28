@@ -1,7 +1,7 @@
 package com.tennisfolio.Tennisfolio.infrastructure.api.player.teamImage;
 
 import com.tennisfolio.Tennisfolio.common.ExceptionCode;
-import com.tennisfolio.Tennisfolio.common.RapidApi;
+import com.tennisfolio.Tennisfolio.infrastructure.api.base.RapidApi;
 import com.tennisfolio.Tennisfolio.exception.ParserException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;

@@ -1,6 +1,7 @@
 package com.tennisfolio.Tennisfolio.ranking.application;
 
 import com.tennisfolio.Tennisfolio.ranking.domain.Ranking;
+import com.tennisfolio.Tennisfolio.ranking.repository.RankingEntity;
 import com.tennisfolio.Tennisfolio.infrastructure.repository.RankingJpaRepository;
 import com.tennisfolio.Tennisfolio.ranking.dto.RankingResponse;
 import org.springframework.data.domain.PageRequest;
@@ -19,11 +20,11 @@ public class RankingService {
     }
 
     public List<RankingResponse> getRanking(String type) {
-        List<Ranking> rankings = "init".equalsIgnoreCase(type)
-                ? rankingJpaRepository.findLatestRankings(PageRequest.of(0, 20))
-                : rankingJpaRepository.findLatestRankings();
+        List<Ranking> rankingEntities = "init".equalsIgnoreCase(type)
+                ? rankingJpaRepository.findLatestRankings(PageRequest.of(0, 20)).stream().map(p -> p.toModel()).toList()
+                : rankingJpaRepository.findLatestRankings().stream().map(p -> p.toModel()).toList();
 
-        return rankings.stream()
+        return rankingEntities.stream()
                        .map(RankingResponse::new)
                        .collect(Collectors.toList());
 

@@ -16,6 +16,7 @@ public class TournamentInfoAssemble implements EntityAssemble<TournamentInfoDTO,
     @Override
     public Tournament assemble(TournamentInfoDTO dto, Object... params) {
         return tournamentJpaRepository.findByRapidTournamentId(dto.getTournament().getRapidId())
+                .map(entity -> entity.toModel())
                 .map(
                 tournament -> {
                     tournament.updateFromTournamentInfo(dto);

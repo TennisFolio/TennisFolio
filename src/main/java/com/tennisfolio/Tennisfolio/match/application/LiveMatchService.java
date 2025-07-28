@@ -7,10 +7,10 @@ import com.tennisfolio.Tennisfolio.exception.LiveMatchNotFoundException;
 import com.tennisfolio.Tennisfolio.match.dto.LiveMatchResponse;
 import com.tennisfolio.Tennisfolio.player.application.PlayerService;
 import com.tennisfolio.Tennisfolio.player.domain.Player;
+import com.tennisfolio.Tennisfolio.player.repository.PlayerEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Service

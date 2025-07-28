@@ -1,12 +1,12 @@
 package com.tennisfolio.Tennisfolio.infrastructure.api.ranking.atpranking;
 
 import com.tennisfolio.Tennisfolio.infrastructure.api.base.EntityAssemble;
-import com.tennisfolio.Tennisfolio.infrastructure.saver.BufferedBatchSaver;
 import com.tennisfolio.Tennisfolio.player.application.PlayerService;
 import com.tennisfolio.Tennisfolio.player.domain.Player;
-import com.tennisfolio.Tennisfolio.infrastructure.repository.PlayerJpaRepository;
+import com.tennisfolio.Tennisfolio.player.repository.PlayerEntity;
 import com.tennisfolio.Tennisfolio.player.repository.PlayerRepository;
 import com.tennisfolio.Tennisfolio.ranking.domain.Ranking;
+import com.tennisfolio.Tennisfolio.ranking.repository.RankingEntity;
 import com.tennisfolio.Tennisfolio.ranking.dto.AtpRankingApiDTO;
 import org.springframework.stereotype.Component;
 
@@ -28,7 +28,7 @@ public class AtpRankingAssemble implements EntityAssemble<List<AtpRankingApiDTO>
 
         List<Ranking> rankList = dto.stream().map(rank -> {
             Player player = playerService.getOrCreatePlayerByRapidId(rank.getTeam().getPlayerRapidId());
-            playerRepository.save(player);
+            playerRepository.save(PlayerEntity.fromModel(player));
             return new Ranking(rank, player);
         }).collect(Collectors.toList());
 

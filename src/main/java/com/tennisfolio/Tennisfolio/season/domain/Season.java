@@ -1,36 +1,34 @@
 package com.tennisfolio.Tennisfolio.season.domain;
 
 import com.tennisfolio.Tennisfolio.Tournament.domain.Tournament;
+import com.tennisfolio.Tennisfolio.Tournament.repository.TournamentEntity;
 import com.tennisfolio.Tennisfolio.infrastructure.api.season.leagueSeasonInfo.LeagueSeasonInfoDTO;
 import com.tennisfolio.Tennisfolio.infrastructure.api.season.leagueSeasons.LeagueSeasonsDTO;
-import com.tennisfolio.Tennisfolio.common.Entity.BaseTimeEntity;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 @Getter
-@Entity
-@Table(name = "tb_season")
-@NoArgsConstructor
-public class Season extends BaseTimeEntity {
-    @Id
-    @GeneratedValue(strategy= GenerationType.IDENTITY)
-    @Column(name="SEASON_ID")
+@Builder
+@AllArgsConstructor
+public class Season {
     private Long seasonId;
-    @ManyToOne
-    @JoinColumn(name = "TOURNAMENT_ID")
+
     private Tournament tournament;
-    @Column(name = "SEASON_NAME")
+
     private String seasonName;
-    @Column(name = "RAPID_SEASON_ID")
+
     private String rapidSeasonId;
-    @Column(name="SEASON_YEAR")
+
     private String year;
-    @Column(name="TOTAL_PRIZE")
+
     private Long totalPrize;
-    @Column(name="TOTAL_PRIZE_CURRENCY")
+
     private String totalPrizeCurrency;
-    @Column(name="COMPETITORS")
+
     private Long competitors;
 
     public Season(LeagueSeasonsDTO dto, Tournament tournament){

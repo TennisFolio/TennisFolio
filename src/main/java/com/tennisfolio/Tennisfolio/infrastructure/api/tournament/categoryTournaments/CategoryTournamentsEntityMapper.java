@@ -17,7 +17,7 @@ public class CategoryTournamentsEntityMapper implements EntityMapper<List<Catego
     }
 
     @Override
-    public List<Tournament> map(List<CategoryTournamentsDTO> dto, Object... parmas) {
-        return categoryTournamentsAssemble.assemble(dto);
+    public List<Tournament> map(List<CategoryTournamentsDTO> dto, Object... params) {
+        return categoryTournamentsAssemble.assemble(dto, params);
     }
 }

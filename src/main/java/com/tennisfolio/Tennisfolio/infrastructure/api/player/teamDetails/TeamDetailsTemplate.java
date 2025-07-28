@@ -1,6 +1,6 @@
 package com.tennisfolio.Tennisfolio.infrastructure.api.player.teamDetails;
 
-import com.tennisfolio.Tennisfolio.common.RapidApi;
+import com.tennisfolio.Tennisfolio.infrastructure.api.base.RapidApi;
 import com.tennisfolio.Tennisfolio.infrastructure.api.base.*;
 import com.tennisfolio.Tennisfolio.player.domain.PlayerAggregate;
 import com.tennisfolio.Tennisfolio.player.dto.TeamDetailsApiDTO;

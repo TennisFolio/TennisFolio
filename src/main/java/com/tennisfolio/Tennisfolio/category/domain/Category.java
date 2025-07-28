@@ -1,25 +1,26 @@
-package com.tennisfolio.Tennisfolio.category.domain.model;
+package com.tennisfolio.Tennisfolio.category.domain;
 
+import com.tennisfolio.Tennisfolio.category.repository.CategoryEntity;
 import com.tennisfolio.Tennisfolio.infrastructure.api.category.categories.CategoryDTO;
-import com.tennisfolio.Tennisfolio.common.Entity.BaseTimeEntity;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
-@Entity
-@Table(name = "tb_category")
 @Getter
-@NoArgsConstructor
-public class Category extends BaseTimeEntity {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name="CATEGORY_ID")
+@Builder
+@AllArgsConstructor
+public class Category {
+
     private Long categoryId;
-    @Column(name="RAPID_CATEGORY_ID")
+
     private String rapidCategoryId;
-    @Column(name="CATEGORY_NAME")
+
     private String categoryName;
-    @Column(name="CATEGORY_SLUG")
+
     private String categorySlug;
 
 

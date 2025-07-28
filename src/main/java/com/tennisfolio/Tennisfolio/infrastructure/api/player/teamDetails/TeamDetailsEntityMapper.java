@@ -2,9 +2,11 @@ package com.tennisfolio.Tennisfolio.infrastructure.api.player.teamDetails;
 
 import com.tennisfolio.Tennisfolio.infrastructure.api.base.EntityMapper;
 import com.tennisfolio.Tennisfolio.player.domain.Player;
+import com.tennisfolio.Tennisfolio.player.repository.PlayerEntity;
 import com.tennisfolio.Tennisfolio.player.domain.PlayerAggregate;
 import com.tennisfolio.Tennisfolio.player.dto.TeamDetailsApiDTO;
 import com.tennisfolio.Tennisfolio.prize.domain.PlayerPrize;
+import com.tennisfolio.Tennisfolio.prize.repository.PlayerPrizeEntity;
 import org.springframework.stereotype.Component;
 
 @Component

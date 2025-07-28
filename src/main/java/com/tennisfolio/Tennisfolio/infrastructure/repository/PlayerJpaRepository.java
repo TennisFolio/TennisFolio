@@ -1,12 +1,11 @@
 package com.tennisfolio.Tennisfolio.infrastructure.repository;
 
-import com.tennisfolio.Tennisfolio.player.domain.Player;
+import com.tennisfolio.Tennisfolio.player.repository.PlayerEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
 
-public interface PlayerJpaRepository extends JpaRepository<Player, Long> {
-    Optional<Player> findByRapidPlayerId(String rapidPlayerId);
+public interface PlayerJpaRepository extends JpaRepository<PlayerEntity, Long> {
+    Optional<PlayerEntity> findByRapidPlayerId(String rapidPlayerId);
 }

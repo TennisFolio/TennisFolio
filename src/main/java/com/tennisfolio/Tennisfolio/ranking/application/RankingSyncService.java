@@ -1,10 +1,9 @@
 package com.tennisfolio.Tennisfolio.ranking.application;
 
 import com.tennisfolio.Tennisfolio.infrastructure.api.base.StrategyApiTemplate;
-import com.tennisfolio.Tennisfolio.infrastructure.saver.BufferedBatchSaver;
 import com.tennisfolio.Tennisfolio.ranking.domain.Ranking;
+import com.tennisfolio.Tennisfolio.ranking.repository.RankingEntity;
 import com.tennisfolio.Tennisfolio.ranking.dto.AtpRankingApiDTO;
-import com.tennisfolio.Tennisfolio.infrastructure.repository.RankingJpaRepository;
 import com.tennisfolio.Tennisfolio.ranking.repository.RankingRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
@@ -25,6 +24,7 @@ public class RankingSyncService {
     @Transactional
     public void saveAtpRanking() {
         List<Ranking> rankingList = rankingApiTemplate.execute("");
-        rankingRepository.saveAll(rankingList);
+        List<RankingEntity> rankingEntityList = rankingList.stream().map(p -> RankingEntity.fromModel(p)).toList();
+        rankingRepository.saveAll(rankingEntityList);
     }
 }

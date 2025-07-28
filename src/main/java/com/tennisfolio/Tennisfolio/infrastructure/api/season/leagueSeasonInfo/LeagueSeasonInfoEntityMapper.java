@@ -2,6 +2,7 @@ package com.tennisfolio.Tennisfolio.infrastructure.api.season.leagueSeasonInfo;
 
 import com.tennisfolio.Tennisfolio.infrastructure.api.base.EntityMapper;
 import com.tennisfolio.Tennisfolio.season.domain.Season;
+import com.tennisfolio.Tennisfolio.season.repository.SeasonEntity;
 import com.tennisfolio.Tennisfolio.season.repository.SeasonRepository;
 import org.springframework.stereotype.Component;
 
@@ -17,11 +18,12 @@ public class LeagueSeasonInfoEntityMapper implements EntityMapper<LeagueSeasonIn
     public Season map(LeagueSeasonInfoDTO dto, Object... params) {
         String seasonRapidID = params[1].toString();
 
-        Season findSeason = seasonRepository.findByRapidSeasonId(seasonRapidID)
-                .orElseThrow(() -> new IllegalArgumentException("조회되는 데이터가 없습니다."));
+        Season season = seasonRepository.findByRapidSeasonId(seasonRapidID)
+                .orElseThrow(() -> new IllegalArgumentException("조회되는 데이터가 없습니다."))
+                .toModel();
 
-        findSeason.updateFromLeagueSeasonInfo(dto);
+        season.updateFromLeagueSeasonInfo(dto);
 
-        return findSeason;
+        return season;
     }
 }

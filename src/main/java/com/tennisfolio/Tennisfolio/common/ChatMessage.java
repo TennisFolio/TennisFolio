@@ -1,10 +1,9 @@
 package com.tennisfolio.Tennisfolio.common;
 
-import com.tennisfolio.Tennisfolio.chat.domain.Chat;
+import com.tennisfolio.Tennisfolio.chat.repository.Chat;
 import com.tennisfolio.Tennisfolio.util.ConversionUtil;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @NoArgsConstructor
 @Getter

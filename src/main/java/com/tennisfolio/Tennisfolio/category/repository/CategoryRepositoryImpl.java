@@ -1,6 +1,5 @@
 package com.tennisfolio.Tennisfolio.category.repository;
 
-import com.tennisfolio.Tennisfolio.category.domain.model.Category;
 import com.tennisfolio.Tennisfolio.infrastructure.repository.CategoryJpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -16,22 +15,27 @@ public class CategoryRepositoryImpl implements CategoryRepository{
     }
 
     @Override
-    public List<Category> findByRapidCategoryIds(List<String> ids) {
-        return categoryJpaRepository.findByRapidCategoryIds(ids);
+    public List<CategoryEntity> findAll() {
+        return categoryJpaRepository.findAll();
     }
 
     @Override
-    public Optional<Category> findByRapidCategoryId(String rapidId) {
+    public List<CategoryEntity> findByRapidCategoryIdNotIn(List<String> ids) {
+        return categoryJpaRepository.findByRapidCategoryIdNotIn(ids);
+    }
+
+    @Override
+    public Optional<CategoryEntity> findByRapidCategoryId(String rapidId) {
         return categoryJpaRepository.findByRapidCategoryId(rapidId);
     }
 
     @Override
-    public List<Category> saveAll(List<Category> categories) {
+    public List<CategoryEntity> saveAll(List<CategoryEntity> categories) {
         return categoryJpaRepository.saveAll(categories);
     }
 
     @Override
-    public Category save(Category category) {
-        return categoryJpaRepository.save(category);
+    public CategoryEntity save(CategoryEntity categoryEntity) {
+        return categoryJpaRepository.save(categoryEntity);
     }
 }

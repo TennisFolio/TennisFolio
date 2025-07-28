@@ -1,10 +1,10 @@
 package com.tennisfolio.Tennisfolio.player.application;
 import com.tennisfolio.Tennisfolio.infrastructure.api.base.StrategyApiTemplate;
+import com.tennisfolio.Tennisfolio.player.domain.Player;
 import com.tennisfolio.Tennisfolio.player.domain.PlayerAggregate;
 import com.tennisfolio.Tennisfolio.infrastructure.api.player.teamImage.PlayerImageService;
 import com.tennisfolio.Tennisfolio.player.dto.TeamDetailsApiDTO;
-import com.tennisfolio.Tennisfolio.player.domain.Player;
-import com.tennisfolio.Tennisfolio.infrastructure.repository.PlayerJpaRepository;
+import com.tennisfolio.Tennisfolio.player.repository.PlayerEntity;
 import com.tennisfolio.Tennisfolio.player.repository.PlayerRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -29,8 +29,9 @@ public class PlayerService {
                     Player player = teamDetailsTemplate.execute(rapidId).toPlayer();
                     String path = playerImageService.fetchImage(rapidId);
                     player.updateProfileImage(path);
-                    return playerRepository.save(player);
-                });
+                    PlayerEntity playerEntity = PlayerEntity.fromModel(player);
+                    return playerRepository.save(playerEntity);
+                }).toModel();
     }
 
 

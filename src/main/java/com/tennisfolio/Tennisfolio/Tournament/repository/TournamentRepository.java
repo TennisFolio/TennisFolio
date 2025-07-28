@@ -1,24 +1,27 @@
 package com.tennisfolio.Tennisfolio.Tournament.repository;
 
-import com.tennisfolio.Tennisfolio.Tournament.domain.Tournament;
-import com.tennisfolio.Tennisfolio.ranking.domain.Ranking;
-import org.springframework.data.repository.query.Param;
-
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public interface TournamentRepository {
-    Tournament save(Tournament tournament);
+    TournamentEntity save(TournamentEntity tournament);
 
-    List<Tournament> saveAll(List<Tournament> tournaments);
+    List<TournamentEntity> saveAll(List<TournamentEntity> tournaments);
 
-    List<Tournament> findByRapidTournamentIds(List<String> ids);
+    List<TournamentEntity> findAll();
 
-    Optional<Tournament> findByRapidTournamentId(String rapidId);
+    Set<String> findAllRapidIds();
 
-    List<Tournament> bufferedSave(Tournament tournament);
+    List<TournamentEntity> findByRapidTournamentIds(List<String> ids);
 
-    List<Tournament> bufferedSaveAll(List<Tournament> tournaments);
+    Optional<TournamentEntity> findByRapidTournamentId(String rapidId);
 
-    List<Tournament> flush();
+    List<TournamentEntity> collect(TournamentEntity tournament);
+
+    List<TournamentEntity> collect(List<TournamentEntity> tournaments);
+
+    boolean flushWhenFull();
+
+    boolean flushAll();
 }
