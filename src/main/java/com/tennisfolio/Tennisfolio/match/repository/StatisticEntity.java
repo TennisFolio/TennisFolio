@@ -1,11 +1,7 @@
 package com.tennisfolio.Tennisfolio.match.repository;
 
-import com.tennisfolio.Tennisfolio.infrastructure.api.match.eventStatistics.StatisticsDTO;
 import com.tennisfolio.Tennisfolio.common.Entity.BaseTimeEntity;
-import com.tennisfolio.Tennisfolio.match.domain.Match;
 import com.tennisfolio.Tennisfolio.match.domain.Statistic;
-import com.tennisfolio.Tennisfolio.player.repository.PlayerEntity;
-import com.tennisfolio.Tennisfolio.round.repository.RoundEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

@@ -1,6 +1,6 @@
 package com.tennisfolio.Tennisfolio.test.response;
 
-import com.tennisfolio.Tennisfolio.player.repository.PlayerEntity;
+import com.tennisfolio.Tennisfolio.player.infrastructure.PlayerEntity;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 

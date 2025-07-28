@@ -1,13 +1,10 @@
 package com.tennisfolio.Tennisfolio.match.repository;
 
-import com.tennisfolio.Tennisfolio.infrastructure.api.match.leagueEventsByRound.LeagueEventsByRoundDTO;
 import com.tennisfolio.Tennisfolio.match.domain.Match;
 import com.tennisfolio.Tennisfolio.match.domain.Period;
 import com.tennisfolio.Tennisfolio.match.domain.Score;
-import com.tennisfolio.Tennisfolio.player.repository.PlayerEntity;
-import com.tennisfolio.Tennisfolio.round.domain.Round;
+import com.tennisfolio.Tennisfolio.player.infrastructure.PlayerEntity;
 import com.tennisfolio.Tennisfolio.round.repository.RoundEntity;
-import com.tennisfolio.Tennisfolio.season.repository.SeasonEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

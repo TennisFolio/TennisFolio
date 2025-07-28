@@ -1,12 +1,10 @@
 package com.tennisfolio.Tennisfolio.Tournament.domain;
 
 import com.tennisfolio.Tennisfolio.category.domain.Category;
-import com.tennisfolio.Tennisfolio.category.repository.CategoryEntity;
 import com.tennisfolio.Tennisfolio.infrastructure.api.tournament.categoryTournaments.CategoryTournamentsDTO;
 import com.tennisfolio.Tennisfolio.infrastructure.api.tournament.leagueDetails.LeagueDetailsDTO;
 import com.tennisfolio.Tennisfolio.infrastructure.api.tournament.tournamentInfo.TournamentInfoDTO;
 import com.tennisfolio.Tennisfolio.player.domain.Player;
-import com.tennisfolio.Tennisfolio.player.repository.PlayerEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

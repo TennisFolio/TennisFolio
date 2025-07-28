@@ -2,15 +2,10 @@ package com.tennisfolio.Tennisfolio.prize.domain;
 
 import com.tennisfolio.Tennisfolio.player.domain.Player;
 import com.tennisfolio.Tennisfolio.player.dto.TeamDetailsApiDTO;
-import com.tennisfolio.Tennisfolio.player.repository.PlayerEntity;
 import com.tennisfolio.Tennisfolio.prize.repository.PlayerPrizeEntity;
-import jakarta.persistence.Column;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 import static com.tennisfolio.Tennisfolio.util.FiledUpdateUtil.updated;
 

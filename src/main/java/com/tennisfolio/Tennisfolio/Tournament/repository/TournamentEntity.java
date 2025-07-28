@@ -3,7 +3,7 @@ package com.tennisfolio.Tennisfolio.Tournament.repository;
 import com.tennisfolio.Tennisfolio.Tournament.domain.Tournament;
 import com.tennisfolio.Tennisfolio.category.repository.CategoryEntity;
 import com.tennisfolio.Tennisfolio.common.Entity.BaseTimeEntity;
-import com.tennisfolio.Tennisfolio.player.repository.PlayerEntity;
+import com.tennisfolio.Tennisfolio.player.infrastructure.PlayerEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

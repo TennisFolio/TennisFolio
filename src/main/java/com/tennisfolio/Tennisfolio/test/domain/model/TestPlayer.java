@@ -1,6 +1,6 @@
 package com.tennisfolio.Tennisfolio.test.domain.model;
 
-import com.tennisfolio.Tennisfolio.player.repository.PlayerEntity;
+import com.tennisfolio.Tennisfolio.player.infrastructure.PlayerEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

@@ -1,11 +1,8 @@
 package com.tennisfolio.Tennisfolio.ranking.repository;
 
-import com.tennisfolio.Tennisfolio.player.domain.Player;
-import com.tennisfolio.Tennisfolio.player.repository.CountryEntity;
-import com.tennisfolio.Tennisfolio.ranking.domain.Ranking;
-import com.tennisfolio.Tennisfolio.ranking.dto.AtpRankingApiDTO;
 import com.tennisfolio.Tennisfolio.common.Entity.BaseTimeEntity;
-import com.tennisfolio.Tennisfolio.player.repository.PlayerEntity;
+import com.tennisfolio.Tennisfolio.player.infrastructure.PlayerEntity;
+import com.tennisfolio.Tennisfolio.ranking.domain.Ranking;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

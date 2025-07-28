@@ -1,8 +1,6 @@
 package com.tennisfolio.Tennisfolio.player.domain;
 
 import com.tennisfolio.Tennisfolio.player.dto.CountryDTO;
-import com.tennisfolio.Tennisfolio.player.repository.CountryEntity;
-import jakarta.persistence.Column;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

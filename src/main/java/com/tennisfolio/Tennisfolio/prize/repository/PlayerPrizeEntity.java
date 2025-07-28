@@ -1,16 +1,11 @@
 package com.tennisfolio.Tennisfolio.prize.repository;
 
-import com.tennisfolio.Tennisfolio.player.domain.Player;
-import com.tennisfolio.Tennisfolio.player.repository.CountryEntity;
-import com.tennisfolio.Tennisfolio.player.repository.PlayerEntity;
-import com.tennisfolio.Tennisfolio.player.dto.TeamDetailsApiDTO;
 import com.tennisfolio.Tennisfolio.common.Entity.BaseTimeEntity;
+import com.tennisfolio.Tennisfolio.player.infrastructure.PlayerEntity;
 import com.tennisfolio.Tennisfolio.prize.domain.PlayerPrize;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import static com.tennisfolio.Tennisfolio.util.FiledUpdateUtil.updated;
 
 @Entity
 @Table(name = "tb_player_prize")

@@ -1,4 +1,4 @@
-package com.tennisfolio.Tennisfolio.player.repository;
+package com.tennisfolio.Tennisfolio.player.infrastructure;
 
 import com.tennisfolio.Tennisfolio.common.ExceptionCode;
 import com.tennisfolio.Tennisfolio.exception.NotFoundException;

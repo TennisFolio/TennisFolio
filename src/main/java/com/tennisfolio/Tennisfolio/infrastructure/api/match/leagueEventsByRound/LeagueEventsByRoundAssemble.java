@@ -8,7 +8,7 @@ import com.tennisfolio.Tennisfolio.match.domain.Match;
 import com.tennisfolio.Tennisfolio.match.repository.MatchEntity;
 import com.tennisfolio.Tennisfolio.player.application.PlayerService;
 import com.tennisfolio.Tennisfolio.player.domain.Player;
-import com.tennisfolio.Tennisfolio.player.repository.PlayerEntity;
+import com.tennisfolio.Tennisfolio.player.infrastructure.PlayerEntity;
 import com.tennisfolio.Tennisfolio.round.domain.Round;
 import com.tennisfolio.Tennisfolio.round.repository.RoundEntity;
 import com.tennisfolio.Tennisfolio.round.repository.RoundRepository;

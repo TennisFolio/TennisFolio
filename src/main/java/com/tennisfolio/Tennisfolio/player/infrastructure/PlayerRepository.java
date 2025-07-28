@@ -1,4 +1,4 @@
-package com.tennisfolio.Tennisfolio.player.repository;
+package com.tennisfolio.Tennisfolio.player.infrastructure;
 
 import java.util.List;
 import java.util.Optional;
