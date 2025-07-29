@@ -1,6 +1,7 @@
 package com.tennisfolio.Tennisfolio.chat.service;
 
-import com.tennisfolio.Tennisfolio.chat.repository.Chat;
+import com.tennisfolio.Tennisfolio.chat.domain.Chat;
+import com.tennisfolio.Tennisfolio.chat.repository.ChatEntity;
 import com.tennisfolio.Tennisfolio.chat.repository.ChatRepository;
 import com.tennisfolio.Tennisfolio.common.ChatMessage;
 import org.springframework.stereotype.Service;
@@ -27,7 +28,7 @@ public class ChatServiceImpl implements ChatService{
     @Override
     public List<ChatMessage> getChatByMatchId(String matchId) {
         return chatRepository.findByRapidMatchId(matchId).stream()
-                .map(chat -> new ChatMessage(chat))
+                .map(chat -> new ChatMessage(ChatEntity.fromModel(chat)))
                 .collect(Collectors.toList());
     }
 }

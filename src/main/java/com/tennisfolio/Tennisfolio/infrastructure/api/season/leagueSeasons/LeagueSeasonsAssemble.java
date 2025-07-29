@@ -27,10 +27,7 @@ public class LeagueSeasonsAssemble implements EntityAssemble<List<LeagueSeasonsD
         }
 
         String rapidTournamentId = params[0].toString();
-        Tournament tournament = tournamentRepository.findByRapidTournamentId(rapidTournamentId)
-                .orElseThrow(() -> new IllegalArgumentException("조회되는 데이터가 없습니다."))
-                .toModel();
-
+        Tournament tournament = tournamentRepository.findByRapidTournamentId(rapidTournamentId);
 
         return dto.stream()
                 .map(season -> new Season(season,tournament))

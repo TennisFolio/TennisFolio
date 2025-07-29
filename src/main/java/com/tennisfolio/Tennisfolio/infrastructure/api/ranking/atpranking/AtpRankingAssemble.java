@@ -26,12 +26,10 @@ public class AtpRankingAssemble implements EntityAssemble<List<AtpRankingApiDTO>
     @Override
     public List<Ranking> assemble(List<AtpRankingApiDTO> dto, Object... params) {
 
-        List<Ranking> rankList = dto.stream().map(rank -> {
+        return dto.stream().map(rank -> {
             Player player = playerService.getOrCreatePlayerByRapidId(rank.getTeam().getPlayerRapidId());
-            playerRepository.save(PlayerEntity.fromModel(player));
+            playerRepository.save(player);
             return new Ranking(rank, player);
         }).collect(Collectors.toList());
-
-        return rankList;
     }
 }
