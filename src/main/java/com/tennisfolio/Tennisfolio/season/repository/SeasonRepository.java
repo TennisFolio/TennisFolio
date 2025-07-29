@@ -1,9 +1,9 @@
 package com.tennisfolio.Tennisfolio.season.repository;
 
-import com.tennisfolio.Tennisfolio.season.domain.Season;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.List;
+import java.util.Optional;
 
-public interface SeasonRepository {
-    List<Season> findAll();
+public interface SeasonRepository extends JpaRepository<SeasonEntity, Long> {
+    Optional<SeasonEntity> findByRapidSeasonId(String rapidId);
 }

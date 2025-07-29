@@ -24,14 +24,14 @@ public class PlayerService {
 
     @Transactional
     public Player getOrCreatePlayerByRapidId(String rapidId) {
-        if(!playerRepository.existsByRapidPlayerId(rapidId)){
-            Player player = teamDetailsTemplate.execute(rapidId).toPlayer();
-            String path = playerImageService.fetchImage(rapidId);
-            player.updateProfileImage(path);
-            return playerRepository.save(player);
-        }
-
-        return playerRepository.findByRapidPlayerId(rapidId);
+        return playerRepository.findByRapidPlayerId(rapidId)
+                .orElseGet(() -> {
+                    Player player = teamDetailsTemplate.execute(rapidId).toPlayer();
+                    String path = playerImageService.fetchImage(rapidId);
+                    player.updateProfileImage(path);
+                    PlayerEntity playerEntity = PlayerEntity.fromModel(player);
+                    return playerRepository.save(playerEntity);
+                }).toModel();
     }
 
 

@@ -31,8 +31,8 @@ public class RankingController {
     }
 
     @GetMapping("/ranking")
-    public ResponseEntity<ResponseDTO<List<RankingResponse>>> getAtpRankings(@RequestParam("page") int page, @RequestParam("size") int size){
-        List<RankingResponse> res = rankingService.getRanking(page, size);
+    public ResponseEntity<ResponseDTO<List<RankingResponse>>> getAtpRankings(@RequestParam("type") String type){
+        List<RankingResponse> res = rankingService.getRanking(type);
         return new ResponseEntity(ResponseDTO.success(res), HttpStatus.OK);
     }
 }

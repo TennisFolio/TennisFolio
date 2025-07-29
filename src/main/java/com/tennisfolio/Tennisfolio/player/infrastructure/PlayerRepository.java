@@ -1,22 +1,25 @@
 package com.tennisfolio.Tennisfolio.player.infrastructure;
 
-import com.tennisfolio.Tennisfolio.player.domain.Player;
-
 import java.util.List;
 import java.util.Optional;
 
 public interface PlayerRepository {
 
-    Player getById(Long id);
+    PlayerEntity getById(Long id);
 
-    Player findByRapidPlayerId(String rapidPlayerId);
+    Optional<PlayerEntity> findByRapidPlayerId(String rapidPlayerId);
 
-    boolean existsByRapidPlayerId(String rapidPlayerId);
+    PlayerEntity save(PlayerEntity player);
 
-    Player save(Player player);
+    List<PlayerEntity> saveAll(List<PlayerEntity> players);
 
-    List<Player> saveAll(List<Player> players);
+    List<PlayerEntity> collect(PlayerEntity player);
 
+    List<PlayerEntity> collect(List<PlayerEntity> players);
+
+    boolean flushWhenFull();
+
+    boolean flushAll();
 
 }
 

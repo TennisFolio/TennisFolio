@@ -19,8 +19,10 @@ public class RankingService {
         this.rankingJpaRepository = rankingJpaRepository;
     }
 
-    public List<RankingResponse> getRanking(int page, int size) {
-        List<Ranking> rankingEntities = rankingJpaRepository.findLatestRankings(PageRequest.of(page,size)).stream().map(p -> p.toModel()).toList();
+    public List<RankingResponse> getRanking(String type) {
+        List<Ranking> rankingEntities = "init".equalsIgnoreCase(type)
+                ? rankingJpaRepository.findLatestRankings(PageRequest.of(0, 20)).stream().map(p -> p.toModel()).toList()
+                : rankingJpaRepository.findLatestRankings().stream().map(p -> p.toModel()).toList();
 
         return rankingEntities.stream()
                        .map(RankingResponse::new)

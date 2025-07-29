@@ -35,7 +35,7 @@ public class PlayerEntity extends BaseTimeEntity {
     private String plays;
     @Column(name="IMAGE")
     private String image;
-    @OneToOne(mappedBy="playerEntity", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToOne(mappedBy="playerEntity", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private PlayerPrizeEntity prizeEntity;
 
     public static PlayerEntity fromModel(Player player) {

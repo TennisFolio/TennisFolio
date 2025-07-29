@@ -8,5 +8,4 @@ import java.util.Optional;
 
 public interface PlayerJpaRepository extends JpaRepository<PlayerEntity, Long> {
     Optional<PlayerEntity> findByRapidPlayerId(String rapidPlayerId);
-    boolean existsByRapidPlayerId(String rapidPlayerId);
 }
