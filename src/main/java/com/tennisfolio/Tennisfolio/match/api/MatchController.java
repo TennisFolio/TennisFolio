@@ -3,7 +3,7 @@ package com.tennisfolio.Tennisfolio.match.api;
 import com.tennisfolio.Tennisfolio.common.response.ResponseDTO;
 import com.tennisfolio.Tennisfolio.match.application.LiveMatchService;
 import com.tennisfolio.Tennisfolio.match.application.MatchSyncService;
-import com.tennisfolio.Tennisfolio.match.application.StatisticSyncService;
+import com.tennisfolio.Tennisfolio.statistic.application.StatisticSyncService;
 import com.tennisfolio.Tennisfolio.match.dto.LiveMatchResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,10 +30,9 @@ public class MatchController {
     @GetMapping("/atp/liveEvents")
     public ResponseEntity<ResponseDTO<List<LiveMatchResponse>>> getATPLiveEvents(){
         List<LiveMatchResponse> events = liveMatchService.getATPLiveEvents();
-        System.out.println("테스트");
         return new ResponseEntity<>(ResponseDTO.success(events), HttpStatus.OK);
     }
-    //@Scheduled(fixedRate = 30000)
+    @Scheduled(fixedRate = 30000)
     public void getATPLiveEventsSchedule(){
         List<LiveMatchResponse> events = liveMatchService.getATPLiveEvents();
         messagingTemplate.convertAndSend("/topic/atp/liveMatches", events);
@@ -44,7 +43,7 @@ public class MatchController {
         List<LiveMatchResponse> events = liveMatchService.getWTALiveEvents();
         return new ResponseEntity<>(ResponseDTO.success(events), HttpStatus.OK);
     }
-    //@Scheduled(fixedRate = 30000)
+    @Scheduled(fixedRate = 30000)
     public void getWTALiveEventsSchedule(){
         List<LiveMatchResponse> events = liveMatchService.getWTALiveEvents();
         messagingTemplate.convertAndSend("/topic/wta/liveMatches", events);
@@ -57,7 +56,7 @@ public class MatchController {
         return new ResponseEntity<>(ResponseDTO.success(event), HttpStatus.OK);
     }
 
-    //@Scheduled(fixedRate = 30000)
+    @Scheduled(fixedRate = 30000)
     public void getLiveEventSchedule(){
         List<LiveMatchResponse> events = liveMatchService.getATPLiveEvents();
         events.stream().forEach( event -> {

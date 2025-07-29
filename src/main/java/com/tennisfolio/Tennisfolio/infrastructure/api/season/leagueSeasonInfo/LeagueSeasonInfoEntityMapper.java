@@ -2,23 +2,22 @@ package com.tennisfolio.Tennisfolio.infrastructure.api.season.leagueSeasonInfo;
 
 import com.tennisfolio.Tennisfolio.infrastructure.api.base.EntityMapper;
 import com.tennisfolio.Tennisfolio.season.domain.Season;
-import com.tennisfolio.Tennisfolio.season.repository.SeasonEntity;
-import com.tennisfolio.Tennisfolio.season.repository.SeasonRepository;
+import com.tennisfolio.Tennisfolio.infrastructure.repository.SeasonJpaRepository;
 import org.springframework.stereotype.Component;
 
 @Component
 public class LeagueSeasonInfoEntityMapper implements EntityMapper<LeagueSeasonInfoDTO, Season> {
-    private final SeasonRepository seasonRepository;
+    private final SeasonJpaRepository seasonJpaRepository;
 
-    public LeagueSeasonInfoEntityMapper(SeasonRepository seasonRepository) {
-        this.seasonRepository = seasonRepository;
+    public LeagueSeasonInfoEntityMapper(SeasonJpaRepository seasonJpaRepository) {
+        this.seasonJpaRepository = seasonJpaRepository;
     }
 
     @Override
     public Season map(LeagueSeasonInfoDTO dto, Object... params) {
         String seasonRapidID = params[1].toString();
 
-        Season season = seasonRepository.findByRapidSeasonId(seasonRapidID)
+        Season season = seasonJpaRepository.findByRapidSeasonId(seasonRapidID)
                 .orElseThrow(() -> new IllegalArgumentException("조회되는 데이터가 없습니다."))
                 .toModel();
 
