@@ -1,25 +1,27 @@
 package com.tennisfolio.Tennisfolio.Tournament.repository;
 
+import com.tennisfolio.Tennisfolio.Tournament.domain.Tournament;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
 public interface TournamentRepository {
-    TournamentEntity save(TournamentEntity tournament);
+    Tournament save(Tournament tournament);
 
-    List<TournamentEntity> saveAll(List<TournamentEntity> tournaments);
+    List<Tournament> saveAll(List<Tournament> tournaments);
 
-    List<TournamentEntity> findAll();
+    List<Tournament> findAll();
 
     Set<String> findAllRapidIds();
 
-    List<TournamentEntity> findByRapidTournamentIds(List<String> ids);
+    List<Tournament> findByRapidTournamentIds(List<String> ids);
 
-    Optional<TournamentEntity> findByRapidTournamentId(String rapidId);
+    Tournament findByRapidTournamentId(String rapidId);
 
-    List<TournamentEntity> collect(TournamentEntity tournament);
+    List<Tournament> collect(Tournament tournament);
 
-    List<TournamentEntity> collect(List<TournamentEntity> tournaments);
+    List<Tournament> collect(List<Tournament> tournaments);
 
     boolean flushWhenFull();
 
