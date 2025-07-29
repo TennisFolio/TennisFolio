@@ -3,7 +3,7 @@ package com.tennisfolio.Tennisfolio.match.api;
 import com.tennisfolio.Tennisfolio.common.response.ResponseDTO;
 import com.tennisfolio.Tennisfolio.match.application.LiveMatchService;
 import com.tennisfolio.Tennisfolio.match.application.MatchSyncService;
-import com.tennisfolio.Tennisfolio.statistic.application.StatisticSyncService;
+import com.tennisfolio.Tennisfolio.match.application.StatisticSyncService;
 import com.tennisfolio.Tennisfolio.match.dto.LiveMatchResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

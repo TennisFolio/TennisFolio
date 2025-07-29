@@ -24,6 +24,7 @@ public class RankingSyncService {
     @Transactional
     public void saveAtpRanking() {
         List<Ranking> rankingList = rankingApiTemplate.execute("");
-        rankingRepository.saveAll(rankingList);
+        List<RankingEntity> rankingEntityList = rankingList.stream().map(p -> RankingEntity.fromModel(p)).toList();
+        rankingRepository.saveAll(rankingEntityList);
     }
 }

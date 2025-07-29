@@ -5,8 +5,10 @@ import com.tennisfolio.Tennisfolio.infrastructure.api.base.EntityAssemble;
 import com.tennisfolio.Tennisfolio.common.ExceptionCode;
 import com.tennisfolio.Tennisfolio.exception.InvalidRequestException;
 import com.tennisfolio.Tennisfolio.round.domain.Round;
+import com.tennisfolio.Tennisfolio.round.repository.RoundEntity;
 import com.tennisfolio.Tennisfolio.season.domain.Season;
-import com.tennisfolio.Tennisfolio.infrastructure.repository.SeasonJpaRepository;
+import com.tennisfolio.Tennisfolio.season.repository.SeasonEntity;
+import com.tennisfolio.Tennisfolio.season.repository.SeasonRepository;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -14,10 +16,10 @@ import java.util.stream.Collectors;
 
 @Component
 public class LeagueRoundsAssemble implements EntityAssemble<List<LeagueRoundsDTO>, List<Round>> {
-    private final SeasonJpaRepository seasonJpaRepository;
+    private final SeasonRepository seasonRepository;
 
-    public LeagueRoundsAssemble(SeasonJpaRepository seasonJpaRepository) {
-        this.seasonJpaRepository = seasonJpaRepository;
+    public LeagueRoundsAssemble(SeasonRepository seasonRepository) {
+        this.seasonRepository = seasonRepository;
     }
 
     @Override
@@ -26,7 +28,7 @@ public class LeagueRoundsAssemble implements EntityAssemble<List<LeagueRoundsDTO
             throw new InvalidRequestException(ExceptionCode.INVALID_REQUEST);
         }
         String seasonRapidId = params[1].toString();
-        Season season = seasonJpaRepository.findByRapidSeasonId(seasonRapidId)
+        Season season = seasonRepository.findByRapidSeasonId(seasonRapidId)
                 .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND))
                 .toModel();
 

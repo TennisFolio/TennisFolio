@@ -1,4 +1,8 @@
 package com.tennisfolio.Tennisfolio.prize.repository;
 
-public interface PlayerPrizeRepository {
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface PlayerPrizeRepository extends JpaRepository<PlayerPrizeEntity, Long> {
 }

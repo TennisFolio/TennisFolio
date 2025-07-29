@@ -5,8 +5,10 @@ import com.tennisfolio.Tennisfolio.infrastructure.api.base.EntityAssemble;
 import com.tennisfolio.Tennisfolio.common.ExceptionCode;
 import com.tennisfolio.Tennisfolio.exception.InvalidRequestException;
 import com.tennisfolio.Tennisfolio.match.domain.Match;
-import com.tennisfolio.Tennisfolio.statistic.domain.Statistic;
-import com.tennisfolio.Tennisfolio.infrastructure.repository.MatchJpaRepository;
+import com.tennisfolio.Tennisfolio.match.domain.Statistic;
+import com.tennisfolio.Tennisfolio.match.repository.MatchEntity;
+import com.tennisfolio.Tennisfolio.match.repository.StatisticEntity;
+import com.tennisfolio.Tennisfolio.match.repository.MatchRepository;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -14,9 +16,9 @@ import java.util.List;
 
 @Component
 public class EventsStatisticsAssemble implements EntityAssemble<List<EventsStatisticsDTO>, List<Statistic>> {
-    private final MatchJpaRepository matchRepository;
+    private final MatchRepository matchRepository;
 
-    public EventsStatisticsAssemble(MatchJpaRepository matchRepository) {
+    public EventsStatisticsAssemble(MatchRepository matchRepository) {
         this.matchRepository = matchRepository;
     }
 
