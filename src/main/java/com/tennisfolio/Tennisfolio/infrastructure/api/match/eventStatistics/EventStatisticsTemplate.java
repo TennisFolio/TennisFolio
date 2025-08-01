@@ -11,10 +11,11 @@ import java.util.List;
 public class EventStatisticsTemplate extends StrategyApiTemplate<List<EventsStatisticsDTO>, List<Statistic>> {
 
     public EventStatisticsTemplate(
-              ResponseParser<List<EventsStatisticsDTO>> eventsStatisticsResponseParser
+              ApiCaller apiCaller
+            , ResponseParser<List<EventsStatisticsDTO>> eventsStatisticsResponseParser
             , EntityMapper<List<EventsStatisticsDTO>, List<Statistic>> eventsStatisticsEntityMapper
             ) {
-        super(eventsStatisticsResponseParser, eventsStatisticsEntityMapper,  RapidApi.EVENTSTATISTICS);
+        super(apiCaller, eventsStatisticsResponseParser, eventsStatisticsEntityMapper,  RapidApi.EVENTSTATISTICS);
 
     }
 }

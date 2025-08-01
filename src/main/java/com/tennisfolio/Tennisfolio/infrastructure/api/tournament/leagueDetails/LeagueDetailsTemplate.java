@@ -9,10 +9,11 @@ import org.springframework.stereotype.Component;
 public class LeagueDetailsTemplate extends StrategyApiTemplate<LeagueDetailsDTO, Tournament> {
 
     public LeagueDetailsTemplate(
-              ResponseParser<LeagueDetailsDTO> leagueDetailsParser
+              ApiCaller apiCaller
+            , ResponseParser<LeagueDetailsDTO> leagueDetailsParser
             , EntityMapper<LeagueDetailsDTO, Tournament> leagueDetailsEntityMapper
             ) {
-        super(leagueDetailsParser, leagueDetailsEntityMapper, RapidApi.LEAGUEDETAILS);
+        super(apiCaller, leagueDetailsParser, leagueDetailsEntityMapper, RapidApi.LEAGUEDETAILS);
     }
 
 }

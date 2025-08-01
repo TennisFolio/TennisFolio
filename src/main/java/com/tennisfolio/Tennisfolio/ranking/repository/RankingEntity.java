@@ -14,7 +14,15 @@ import lombok.NoArgsConstructor;
 public class RankingEntity extends BaseTimeEntity {
 
     @Id
-    @GeneratedValue(strategy= GenerationType.IDENTITY)
+    @GeneratedValue(strategy= GenerationType.TABLE, generator = "ranking_gen")
+    @TableGenerator(
+            name = "ranking_gen",
+            table= "TB_SEQUENCES",
+            pkColumnName= "TABLE_ID",
+            valueColumnName= "NEXT_VAL",
+            pkColumnValue = "RANKING_ID",
+            allocationSize = 500
+    )
     @Column(name="RANKING_ID")
     private Long rankingId;
     @ManyToOne

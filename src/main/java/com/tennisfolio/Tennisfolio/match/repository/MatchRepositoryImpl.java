@@ -16,8 +16,8 @@ public class MatchRepositoryImpl implements MatchRepository{
     }
 
     @Override
-    public Match findByRapidMatchId(String rapidMatchId) {
-        return matchJpaRepository.findByRapidMatchId(rapidMatchId).orElseThrow().toModel();
+    public Optional<Match> findByRapidMatchId(String rapidMatchId) {
+        return matchJpaRepository.findByRapidMatchId(rapidMatchId).map(MatchEntity::toModel);
     }
 
     @Override

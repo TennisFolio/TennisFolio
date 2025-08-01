@@ -11,9 +11,10 @@ import java.util.List;
 public class LeagueSeasonsTemplate extends StrategyApiTemplate<List<LeagueSeasonsDTO>, List<Season>> {
 
     public LeagueSeasonsTemplate(
-              ResponseParser<List<LeagueSeasonsDTO>> leagueSeasonsParser
+              ApiCaller apiCaller
+            , ResponseParser<List<LeagueSeasonsDTO>> leagueSeasonsParser
             , EntityMapper<List<LeagueSeasonsDTO>, List<Season>> leagueSeasonsEntityMapper
             ) {
-        super(leagueSeasonsParser, leagueSeasonsEntityMapper, RapidApi.LEAGUESEASONS);
+        super(apiCaller, leagueSeasonsParser, leagueSeasonsEntityMapper, RapidApi.LEAGUESEASONS);
     }
 }

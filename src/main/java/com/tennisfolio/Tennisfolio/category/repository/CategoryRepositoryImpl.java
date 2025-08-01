@@ -1,5 +1,7 @@
 package com.tennisfolio.Tennisfolio.category.repository;
 
+import com.tennisfolio.Tennisfolio.Tournament.repository.TournamentEntity;
+import com.tennisfolio.Tennisfolio.category.domain.Category;
 import com.tennisfolio.Tennisfolio.infrastructure.repository.CategoryJpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -15,27 +17,28 @@ public class CategoryRepositoryImpl implements CategoryRepository{
     }
 
     @Override
-    public List<CategoryEntity> findAll() {
-        return categoryJpaRepository.findAll();
+    public List<Category> findAll() {
+        return categoryJpaRepository.findAll().stream().map(CategoryEntity::toModel).toList();
     }
 
     @Override
-    public List<CategoryEntity> findByRapidCategoryIdNotIn(List<String> ids) {
-        return categoryJpaRepository.findByRapidCategoryIdNotIn(ids);
+    public List<Category> findByRapidCategoryIdNotIn(List<String> ids) {
+        return categoryJpaRepository.findByRapidCategoryIdNotIn(ids).stream().map(CategoryEntity::toModel).toList();
     }
 
     @Override
-    public Optional<CategoryEntity> findByRapidCategoryId(String rapidId) {
-        return categoryJpaRepository.findByRapidCategoryId(rapidId);
+    public Optional<Category> findByRapidCategoryId(String rapidId) {
+        return categoryJpaRepository.findByRapidCategoryId(rapidId).map(CategoryEntity::toModel);
     }
 
     @Override
-    public List<CategoryEntity> saveAll(List<CategoryEntity> categories) {
-        return categoryJpaRepository.saveAll(categories);
+    public List<Category> saveAll(List<Category> categories) {
+        List<CategoryEntity> entities = categories.stream().map(CategoryEntity::fromModel).toList();
+        return categoryJpaRepository.saveAll(entities).stream().map(CategoryEntity::toModel).toList();
     }
 
     @Override
-    public CategoryEntity save(CategoryEntity categoryEntity) {
-        return categoryJpaRepository.save(categoryEntity);
+    public Category save(Category category) {
+        return categoryJpaRepository.save(CategoryEntity.fromModel(category)).toModel();
     }
 }

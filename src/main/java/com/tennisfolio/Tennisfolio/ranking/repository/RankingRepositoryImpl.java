@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Repository
@@ -25,8 +26,8 @@ public class RankingRepositoryImpl implements RankingRepository{
     }
 
     @Override
-    public Ranking getById(Long id) {
-        return rankingJpaRepository.findById(id).orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND)).toModel();
+    public Optional<Ranking> getById(Long id) {
+        return rankingJpaRepository.findById(id).map(RankingEntity::toModel);
     }
 
     @Override
@@ -51,6 +52,11 @@ public class RankingRepositoryImpl implements RankingRepository{
     @Override
     public List<Ranking> findByLastUpdate(String lastUpdate) {
         return rankingJpaRepository.findByLastUpdate(lastUpdate).stream().map(RankingEntity::toModel).toList();
+    }
+
+    @Override
+    public boolean existsByLastUpdate(String lastUpdate) {
+        return rankingJpaRepository.existsByLastUpdate(lastUpdate);
     }
 
     @Override

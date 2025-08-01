@@ -47,8 +47,8 @@ public class TournamentRepositoryImpl implements TournamentRepository{
     }
 
     @Override
-    public Tournament findByRapidTournamentId(String rapidId) {
-        return tournamentJpaRepository.findByRapidTournamentId(rapidId).orElseThrow().toModel();
+    public Optional<Tournament> findByRapidTournamentId(String rapidId) {
+        return tournamentJpaRepository.findByRapidTournamentId(rapidId).map(TournamentEntity::toModel);
     }
     @Override
     public List<Tournament> collect(Tournament tournament){
