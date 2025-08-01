@@ -12,10 +12,11 @@ import java.util.List;
 public class LeagueEventsByRoundTemplate extends StrategyApiTemplate<List<LeagueEventsByRoundDTO>, List<Match>> {
 
     public LeagueEventsByRoundTemplate(
-              ResponseParser<List<LeagueEventsByRoundDTO>> leagueEventsByRoundResponseParser
+              ApiCaller apiCaller
+            , ResponseParser<List<LeagueEventsByRoundDTO>> leagueEventsByRoundResponseParser
             , EntityMapper<List<LeagueEventsByRoundDTO>, List<Match>> leagueEventsByRoundEntityMapper
 
             ) {
-        super(leagueEventsByRoundResponseParser, leagueEventsByRoundEntityMapper, RapidApi.LEAGUEEVENETBYROUND);
+        super(apiCaller, leagueEventsByRoundResponseParser, leagueEventsByRoundEntityMapper, RapidApi.LEAGUEEVENETBYROUND);
     }
 }

@@ -16,4 +16,6 @@ public interface RankingJpaRepository extends JpaRepository<RankingEntity, Long>
     List<RankingEntity> findLatestRankings(Pageable pageable);
 
     List<RankingEntity> findByLastUpdate(String lastUpdate);
+
+    boolean existsByLastUpdate(String lastUpdate);
 }

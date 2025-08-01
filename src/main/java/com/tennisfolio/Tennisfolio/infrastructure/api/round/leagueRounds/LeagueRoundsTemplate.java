@@ -10,10 +10,10 @@ import java.util.List;
 
 @Component
 public class LeagueRoundsTemplate extends StrategyApiTemplate<List<LeagueRoundsDTO>, List<Round>> {
-    public LeagueRoundsTemplate(
-              ResponseParser<List<LeagueRoundsDTO>> leagueRoundsResponseParser
+    public LeagueRoundsTemplate(ApiCaller apiCaller
+            , ResponseParser<List<LeagueRoundsDTO>> leagueRoundsResponseParser
             , EntityMapper<List<LeagueRoundsDTO>, List<Round>> leagueRoundsEntityMapper) {
 
-        super(leagueRoundsResponseParser, leagueRoundsEntityMapper, RapidApi.LEAGUEROUNDS);
+        super(apiCaller, leagueRoundsResponseParser, leagueRoundsEntityMapper, RapidApi.LEAGUEROUNDS);
     }
 }

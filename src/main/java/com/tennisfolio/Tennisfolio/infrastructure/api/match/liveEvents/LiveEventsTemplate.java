@@ -1,6 +1,7 @@
 package com.tennisfolio.Tennisfolio.infrastructure.api.match.liveEvents;
 
 
+import com.tennisfolio.Tennisfolio.infrastructure.api.base.ApiCaller;
 import com.tennisfolio.Tennisfolio.infrastructure.api.base.ResponseParser;
 import com.tennisfolio.Tennisfolio.infrastructure.api.base.RapidApi;
 import com.tennisfolio.Tennisfolio.infrastructure.api.base.StrategyApiTemplate;
@@ -13,8 +14,9 @@ import java.util.List;
 public class LiveEventsTemplate extends StrategyApiTemplate<List<LiveEventsApiDTO>, Void> {
 
     public LiveEventsTemplate(
+            ApiCaller apiCaller,
          @Qualifier("liveEventsResponseParser") ResponseParser<List<LiveEventsApiDTO>> parser) {
-        super(parser, null,  RapidApi.LIVEEVENTS);
+        super(apiCaller, parser, null,  RapidApi.LIVEEVENTS);
     }
 
 }

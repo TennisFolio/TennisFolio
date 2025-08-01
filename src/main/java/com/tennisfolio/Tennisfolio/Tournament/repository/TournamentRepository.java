@@ -17,7 +17,7 @@ public interface TournamentRepository {
 
     List<Tournament> findByRapidTournamentIds(List<String> ids);
 
-    Tournament findByRapidTournamentId(String rapidId);
+    Optional<Tournament> findByRapidTournamentId(String rapidId);
 
     List<Tournament> collect(Tournament tournament);
 

@@ -2,6 +2,7 @@ package com.tennisfolio.Tennisfolio.infrastructure.api.tournament.categoryTourna
 
 
 import com.tennisfolio.Tennisfolio.Tournament.domain.Tournament;
+import com.tennisfolio.Tennisfolio.category.domain.Category;
 import com.tennisfolio.Tennisfolio.category.repository.CategoryRepository;
 import com.tennisfolio.Tennisfolio.common.ExceptionCode;
 import com.tennisfolio.Tennisfolio.exception.NotFoundException;
@@ -24,12 +25,12 @@ public class CategoryTournamentsAssemble implements EntityAssemble<List<Category
 
     @Override
     public List<Tournament> assemble(List<CategoryTournamentsDTO> dto, Object... params) {
-        CategoryEntity findCategoryEntity = categoryRepository.findByRapidCategoryId(params[0].toString())
+        Category findCategory = categoryRepository.findByRapidCategoryId(params[0].toString())
                 .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND));
 
         return dto.stream()
                 .map(tournament -> {
-                    return new Tournament(tournament, findCategoryEntity.toModel());
+                    return new Tournament(tournament, findCategory);
                 })
                 .collect(Collectors.toList());
     }

@@ -17,26 +17,20 @@ import java.util.stream.Collectors;
 public class PlayerRepositoryImpl implements PlayerRepository{
 
     private final PlayerJpaRepository playerJpaRepository;
-    private final BufferedBatchSaver<PlayerEntity> bufferedBatchSaver;
 
-
-    public PlayerRepositoryImpl(PlayerJpaRepository playerJpaRepository, TransactionTemplate transactionTemplate) {
+    public PlayerRepositoryImpl(PlayerJpaRepository playerJpaRepository) {
         this.playerJpaRepository = playerJpaRepository;
-        this.bufferedBatchSaver = new BufferedBatchSaver<>(playerJpaRepository, 500, transactionTemplate);
     }
 
     @Override
-    public Player getById(Long id) {
-        return playerJpaRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND))
-                .toModel();
+    public Optional<Player> findById(Long id) {
+        return playerJpaRepository.findById(id).map(PlayerEntity::toModel);
+
     }
 
     @Override
-    public Player findByRapidPlayerId(String rapidPlayerId) {
-        return playerJpaRepository.findByRapidPlayerId(rapidPlayerId)
-                .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND))
-                .toModel();
+    public Optional<Player> findByRapidPlayerId(String rapidPlayerId) {
+        return playerJpaRepository.findByRapidPlayerId(rapidPlayerId).map(PlayerEntity::toModel);
     }
 
     @Override

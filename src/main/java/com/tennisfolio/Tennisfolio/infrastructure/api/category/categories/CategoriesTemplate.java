@@ -12,9 +12,10 @@ import java.util.List;
 public class CategoriesTemplate extends StrategyApiTemplate<List<CategoryDTO>, List<Category>> {
 
     public CategoriesTemplate(
-              EntityMapper<List<CategoryDTO>, List<Category>> categoriesEntityMapper
+              ApiCaller apiCaller
+            , EntityMapper<List<CategoryDTO>, List<Category>> categoriesEntityMapper
             , ResponseParser<List<CategoryDTO>> categoriesResponseParser) {
-        super( categoriesResponseParser, categoriesEntityMapper,  RapidApi.CATEGORIES);
+        super(apiCaller, categoriesResponseParser, categoriesEntityMapper,  RapidApi.CATEGORIES);
     }
 
 }

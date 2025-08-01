@@ -7,9 +7,9 @@ import java.util.Optional;
 
 public interface PlayerRepository {
 
-    Player getById(Long id);
+    Optional<Player> findById(Long id);
 
-    Player findByRapidPlayerId(String rapidPlayerId);
+    Optional<Player> findByRapidPlayerId(String rapidPlayerId);
 
     boolean existsByRapidPlayerId(String rapidPlayerId);
 

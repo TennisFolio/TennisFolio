@@ -4,10 +4,11 @@ import com.tennisfolio.Tennisfolio.ranking.domain.Ranking;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface RankingRepository {
 
-    Ranking getById(Long id);
+    Optional<Ranking> getById(Long id);
 
     Ranking save(Ranking ranking);
 
@@ -16,6 +17,8 @@ public interface RankingRepository {
     List<Ranking> findLatestRankings(Pageable pageable);
 
     List<Ranking> findByLastUpdate(String lastUpdate);
+
+    boolean existsByLastUpdate(String lastUpdate);
 
     List<Ranking> collect(Ranking ranking);
 
