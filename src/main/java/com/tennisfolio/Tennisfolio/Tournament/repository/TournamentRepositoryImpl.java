@@ -1,6 +1,8 @@
 package com.tennisfolio.Tennisfolio.Tournament.repository;
 
 import com.tennisfolio.Tennisfolio.Tournament.domain.Tournament;
+import com.tennisfolio.Tennisfolio.category.domain.Category;
+import com.tennisfolio.Tennisfolio.category.repository.CategoryEntity;
 import com.tennisfolio.Tennisfolio.infrastructure.repository.TournamentJpaRepository;
 import com.tennisfolio.Tennisfolio.infrastructure.saver.BufferedBatchSaver;
 import org.springframework.stereotype.Repository;
@@ -33,7 +35,7 @@ public class TournamentRepositoryImpl implements TournamentRepository{
 
     @Override
     public List<Tournament> findAll() {
-        return tournamentJpaRepository.findAll().stream().map(TournamentEntity::toModel).toList();
+        return tournamentJpaRepository.findAll().stream().map(TournamentEntity::toModelBaseOnly).toList();
     }
 
     @Override
@@ -47,8 +49,14 @@ public class TournamentRepositoryImpl implements TournamentRepository{
     }
 
     @Override
+    public List<Tournament> findByCategoryIn(List<Category> categories) {
+        List<CategoryEntity> categoryEntities = categories.stream().map(CategoryEntity::fromModel).toList();
+        return tournamentJpaRepository.findByCategoryIn(categoryEntities).stream().map(TournamentEntity::toModelBaseOnly).toList();
+    }
+
+    @Override
     public Optional<Tournament> findByRapidTournamentId(String rapidId) {
-        return tournamentJpaRepository.findByRapidTournamentId(rapidId).map(TournamentEntity::toModel);
+        return tournamentJpaRepository.findByRapidTournamentId(rapidId).map(TournamentEntity::toModelBaseOnly);
     }
     @Override
     public List<Tournament> collect(Tournament tournament){

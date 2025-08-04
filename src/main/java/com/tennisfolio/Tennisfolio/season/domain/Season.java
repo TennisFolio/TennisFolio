@@ -31,6 +31,8 @@ public class Season {
 
     private Long competitors;
 
+    private static final int FIRST_VALID_YEAR = 2019;
+
     public Season(LeagueSeasonsDTO dto, Tournament tournament){
         this.tournament = tournament;
         this.seasonName = dto.getSeasonName();
@@ -39,11 +41,17 @@ public class Season {
     }
 
     public void updateFromLeagueSeasonInfo(LeagueSeasonInfoDTO dto){
-        if(totalPrize < 0L){
-            throw new IllegalArgumentException("상금은 음수가 될 수 없습니다.");
-        }
-        this.totalPrize = dto.getTotalPrizeMoney();
+        this.totalPrize = dto.getTotalPrizeMoney() == null ? 0L : dto.getTotalPrizeMoney();
         this.totalPrizeCurrency = dto.getCurrency();
         this.competitors = dto.getCompetitors();
+    }
+
+    public boolean isSince2019(){
+        try{
+            return Integer.parseInt(this.year) >= FIRST_VALID_YEAR;
+        }catch(NumberFormatException e){
+            return false;
+        }
+
     }
 }

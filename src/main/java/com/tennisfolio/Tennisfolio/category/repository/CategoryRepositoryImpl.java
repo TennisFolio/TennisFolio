@@ -22,6 +22,11 @@ public class CategoryRepositoryImpl implements CategoryRepository{
     }
 
     @Override
+    public List<Category> findByRapidCategoryIdIn(List<String> ids) {
+        return categoryJpaRepository.findByRapidCategoryIdIn(ids).stream().map(CategoryEntity::toModel).toList();
+    }
+
+    @Override
     public List<Category> findByRapidCategoryIdNotIn(List<String> ids) {
         return categoryJpaRepository.findByRapidCategoryIdNotIn(ids).stream().map(CategoryEntity::toModel).toList();
     }

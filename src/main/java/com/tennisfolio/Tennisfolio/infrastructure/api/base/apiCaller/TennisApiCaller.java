@@ -54,11 +54,15 @@ public class TennisApiCaller implements ApiCaller {
                     .build();
             HttpResponse<byte[]> response = httpClientConfig.httpClient().send(request, HttpResponse.BodyHandlers.ofByteArray());
             if(response.statusCode() != 200){
-                throw new RapidApiException(ExceptionCode.RAPID_ERROR);
+                for(Object param : params){
+                    System.out.println(param);
+                }
+                throw new Exception();
             }
 
             return decodeResponse(response);
         }catch(Exception e){
+            e.printStackTrace();
             throw new RapidApiException(ExceptionCode.RAPID_ERROR);
         }
     }

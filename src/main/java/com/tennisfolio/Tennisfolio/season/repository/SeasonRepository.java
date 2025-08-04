@@ -1,9 +1,21 @@
 package com.tennisfolio.Tennisfolio.season.repository;
 
+import com.tennisfolio.Tennisfolio.Tournament.domain.Tournament;
 import com.tennisfolio.Tennisfolio.season.domain.Season;
 
 import java.util.List;
+import java.util.Set;
 
 public interface SeasonRepository {
     List<Season> findAll();
+
+    List<Season> collect(Season season);
+
+    List<Season> collect(List<Season> seasons);
+
+    Set<String> findAllRapidIds();
+
+    boolean flushWhenFull();
+
+    boolean flushAll();
 }
