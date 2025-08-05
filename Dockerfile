@@ -8,4 +8,4 @@ RUN gradle clean build -x test
 FROM openjdk:17-jdk-slim
 ARG JAR_FILE=app/build/libs/*.jar
 COPY --from=builder ${JAR_FILE} app.jar
-ENTRYPOINT ["java", "-jar", "/app.jar", "--spring.config.location=file:/app/application.properties"]
+ENTRYPOINT ["java", "-jar", "/app.jar","-Dspring.profiles.active=stg", "--spring.config.location=file:/app/application-stg.properties"]
