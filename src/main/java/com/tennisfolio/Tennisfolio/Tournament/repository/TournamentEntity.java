@@ -115,4 +115,18 @@ public class TournamentEntity extends BaseTimeEntity {
                 .points(points)
                 .build();
     }
+
+    public Tournament toModelBaseOnly(){
+        return Tournament.builder()
+                .tournamentId(tournamentId)
+                .rapidTournamentId(rapidTournamentId)
+                .matchType(matchType)
+                .tournamentName(tournamentName)
+                .city(city)
+                .groundType(groundType)
+                .logo(logo)
+                .mostTitles(mostTitles)
+                .points(points)
+                .build();
+    }
 }

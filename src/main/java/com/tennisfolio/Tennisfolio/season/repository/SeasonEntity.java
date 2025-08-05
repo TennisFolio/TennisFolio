@@ -17,10 +17,17 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class SeasonEntity extends BaseTimeEntity {
     @Id
-    @GeneratedValue(strategy= GenerationType.IDENTITY)
-    @Column(name="SEASON_ID")
+    @GeneratedValue(strategy= GenerationType.TABLE, generator = "season_gen")
+    @TableGenerator(
+            name="season_gen",
+            table="TB_SEQUENCES",
+            pkColumnName = "TABLE_ID",
+            valueColumnName = "NEXT_VAL",
+            pkColumnValue = "SEASON_ID",
+            allocationSize = 1000
+    )
     private Long seasonId;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "TOURNAMENT_ID")
     private TournamentEntity tournamentEntity;
     @Column(name = "SEASON_NAME")
@@ -54,7 +61,19 @@ public class SeasonEntity extends BaseTimeEntity {
     public Season toModel(){
         return Season.builder()
                 .seasonId(seasonId)
-                .tournament(tournamentEntity.toModel())
+                .tournament(tournamentEntity.toModelBaseOnly())
+                .seasonName(seasonName)
+                .rapidSeasonId(rapidSeasonId)
+                .year(year)
+                .totalPrize(totalPrize)
+                .totalPrizeCurrency(totalPrizeCurrency)
+                .competitors(competitors)
+                .build();
+    }
+
+    public Season toModelBaseOnly(){
+        return Season.builder()
+                .seasonId(seasonId)
                 .seasonName(seasonName)
                 .rapidSeasonId(rapidSeasonId)
                 .year(year)

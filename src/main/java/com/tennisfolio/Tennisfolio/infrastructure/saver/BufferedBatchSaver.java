@@ -53,6 +53,7 @@ public class BufferedBatchSaver<E> {
     }
 
     private void add(List<E> entities){
+
         this.buffer.addAll(entities);
     }
 

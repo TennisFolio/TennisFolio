@@ -1,6 +1,7 @@
 package com.tennisfolio.Tennisfolio.Tournament.repository;
 
 import com.tennisfolio.Tennisfolio.Tournament.domain.Tournament;
+import com.tennisfolio.Tennisfolio.category.domain.Category;
 
 import java.util.List;
 import java.util.Optional;
@@ -16,7 +17,7 @@ public interface TournamentRepository {
     Set<String> findAllRapidIds();
 
     List<Tournament> findByRapidTournamentIds(List<String> ids);
-
+    List<Tournament> findByCategoryIn(List<Category> ids);
     Optional<Tournament> findByRapidTournamentId(String rapidId);
 
     List<Tournament> collect(Tournament tournament);

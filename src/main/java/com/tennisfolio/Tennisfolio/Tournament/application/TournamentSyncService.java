@@ -3,6 +3,7 @@ package com.tennisfolio.Tennisfolio.Tournament.application;
 import com.tennisfolio.Tennisfolio.Tournament.domain.Tournament;
 import com.tennisfolio.Tennisfolio.Tournament.repository.TournamentEntity;
 import com.tennisfolio.Tennisfolio.Tournament.repository.TournamentRepository;
+import com.tennisfolio.Tennisfolio.category.application.CategoryService;
 import com.tennisfolio.Tennisfolio.category.domain.Category;
 import com.tennisfolio.Tennisfolio.category.repository.CategoryEntity;
 import com.tennisfolio.Tennisfolio.category.repository.CategoryRepository;
@@ -26,7 +27,7 @@ public class TournamentSyncService {
     private final StrategyApiTemplate<List<CategoryTournamentsDTO>, List<Tournament>> categoryTournamentsApiTemplate;
     private final StrategyApiTemplate<TournamentInfoDTO, Tournament> tournamentInfoApiTemplate;
     private final StrategyApiTemplate<LeagueDetailsDTO, Tournament> leagueDetailsApiTemplate;
-    private final CategoryRepository categoryRepository;
+    private final CategoryService categoryService;
     private final TournamentRepository tournamentRepository;
     private final TransactionTemplate transactionTemplate;
 
@@ -35,13 +36,13 @@ public class TournamentSyncService {
                                  List<Tournament>> categoryTournamentsApiTemplate,
                                  StrategyApiTemplate<TournamentInfoDTO, Tournament> tournamentInfoApiTemplate,
                                  StrategyApiTemplate<LeagueDetailsDTO, Tournament> leagueDetailsApiTemplate,
-                                 CategoryRepository categoryRepository,
+                                 CategoryService categoryService,
                                  TournamentRepository tournamentRepository,
                                  PlatformTransactionManager transactionManager) {
         this.categoryTournamentsApiTemplate = categoryTournamentsApiTemplate;
         this.tournamentInfoApiTemplate = tournamentInfoApiTemplate;
         this.leagueDetailsApiTemplate = leagueDetailsApiTemplate;
-        this.categoryRepository = categoryRepository;
+        this.categoryService = categoryService;
         this.tournamentRepository = tournamentRepository;
         this.transactionTemplate = new TransactionTemplate(transactionManager);
     }
@@ -52,7 +53,7 @@ public class TournamentSyncService {
         List<String> notInIds = List.of("-100", "-101");
 
         // DB에 저장된 category 조회
-        List<String> categoryRapidIdList = categoryRepository.findByRapidCategoryIdNotIn(notInIds)
+        List<String> categoryRapidIdList = categoryService.getByRapidCategoryIdNotIn(notInIds)
                 .stream()
                 .map(Category::getRapidCategoryId)
                 .collect(Collectors.toList());
@@ -66,10 +67,9 @@ public class TournamentSyncService {
                 // api 조회
                 .map(rapidId -> categoryTournamentsApiTemplate.execute(rapidId))
                 .flatMap(List::stream)
-                .map(TournamentEntity::fromListModel)
-                .filter(entity -> !existingKeys.contains(entity.getRapidTournamentId()))
-                .forEach(entity -> {
-                    tournamentRepository.collect(entity);
+                .filter(tournament -> !existingKeys.contains(tournament.getRapidTournamentId()))
+                .forEach(tournament -> {
+                    tournamentRepository.collect(tournament);
                     tournamentRepository.flushWhenFull();
                 });
 
@@ -79,23 +79,30 @@ public class TournamentSyncService {
     }
 
     public void saveTournamentDetail(){
-        List<TournamentEntity> findTournaments = tournamentRepository.findAll();
+
+        List<Tournament> findTournaments = tournamentRepository.findAll();
         findTournaments
                 .stream()
-                .map(tournamentEntity -> {
-
-                    Tournament tournamentInfo = tournamentInfoApiTemplate.execute(tournamentEntity.getRapidTournamentId());
-                    Tournament leagueDetails = leagueDetailsApiTemplate.execute(tournamentEntity.getRapidTournamentId());
-                    if(tournamentInfo != null){
-                        tournamentInfo.mergeTournament(leagueDetails);
-                    }else{
-                        tournamentInfo = new Tournament();
+                .map(tournament -> {
+                    try{
+                        Tournament tournamentInfo = tournamentInfoApiTemplate.execute(tournament.getRapidTournamentId());
+                        Tournament leagueDetails = leagueDetailsApiTemplate.execute(tournament.getRapidTournamentId());
+                        if(tournamentInfo != null){
+                            tournamentInfo.mergeTournament(leagueDetails);
+                            tournamentRepository.collect(tournamentInfo);
+                            tournamentRepository.flushWhenFull();
+                        }
+                        return tournamentInfo;
+                    }catch(Exception e){
+                        e.printStackTrace();
+                        System.out.println(tournament.getRapidTournamentId());
                     }
 
-                    TournamentEntity newTournament = TournamentEntity.fromModel(tournamentInfo);
-                    tournamentRepository.save(newTournament);
-                    return newTournament;
-                }).toList();
+                    return null;
+                })
+                .toList();
+
+        tournamentRepository.flushAll();
 
 
     }
