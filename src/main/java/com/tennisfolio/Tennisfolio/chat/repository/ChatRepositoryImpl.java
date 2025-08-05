@@ -21,6 +21,6 @@ public class ChatRepositoryImpl implements ChatRepository{
 
     @Override
     public Chat save(Chat chat) {
-        return chatJpaRepository.save(chat);
+        return chatJpaRepository.save(ChatEntity.fromModel(chat)).toModel();
     }
 }
