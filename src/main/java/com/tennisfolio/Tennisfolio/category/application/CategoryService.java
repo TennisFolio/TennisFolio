@@ -25,4 +25,12 @@ public class CategoryService {
         
         categoryRepository.saveAll(categories);
     }
+
+    public List<Category> getByRapidCategoryIdNotIn(List<String> rapidIds){
+        return categoryRepository.findByRapidCategoryIdNotIn(rapidIds);
+    }
+
+    public List<Category> getByRapidCategoryId(List<String> rapidIds){
+        return categoryRepository.findByRapidCategoryIdIn(rapidIds);
+    }
 }

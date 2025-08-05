@@ -11,8 +11,11 @@ import java.util.Optional;
 
 
 public interface CategoryJpaRepository extends JpaRepository<CategoryEntity, Long> {
-    @Query("SELECT c FROM CategoryEntity c WHERE c.rapidCategoryId NOT IN :ids")
-    List<CategoryEntity> findByRapidCategoryIdNotIn(@Param("ids") List<String> ids);
+    @Query("SELECT c FROM CategoryEntity c WHERE c.rapidCategoryId NOT IN :rapidIds")
+    List<CategoryEntity> findByRapidCategoryIdNotIn(@Param("rapidIds") List<String> rapidIds);
+
+    @Query("SELECT c FROM CategoryEntity c WHERE c.rapidCategoryId IN :rapidIds")
+    List<CategoryEntity> findByRapidCategoryIdIn(@Param("rapidIds") List<String> rapidIds);
 
     Optional<CategoryEntity> findByRapidCategoryId(String rapidId);
 }

@@ -1,12 +1,18 @@
 package com.tennisfolio.Tennisfolio.round.repository;
 
-import com.tennisfolio.Tennisfolio.season.repository.SeasonEntity;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
+import org.apache.commons.lang3.tuple.Pair;
+import com.tennisfolio.Tennisfolio.round.domain.Round;
+import com.tennisfolio.Tennisfolio.season.domain.Season;
 
-import java.util.Optional;
+import java.util.List;
+import java.util.Set;
 
-@Repository
-public interface RoundRepository extends JpaRepository<RoundEntity, Long> {
-    Optional<RoundEntity> findBySeasonEntityAndRoundAndSlug(SeasonEntity seasonEntity, Long round, String slug);
+public interface RoundRepository {
+    List<Round> findAll();
+    Set<Pair<Season, String>> findAllSeasonRoundPairs();
+    List<Round> collect(Round round);
+    List<Round> collect(List<Round> rounds);
+    boolean flushWhenFull();
+
+    boolean flushAll();
 }

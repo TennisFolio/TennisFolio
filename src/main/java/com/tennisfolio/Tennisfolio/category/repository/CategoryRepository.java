@@ -7,6 +7,7 @@ import java.util.Optional;
 
 public interface CategoryRepository {
     List<Category> findAll();
+    List<Category> findByRapidCategoryIdIn(List<String> ids);
     List<Category> findByRapidCategoryIdNotIn(List<String> ids);
     Optional<Category> findByRapidCategoryId(String rapidId);
     List<Category> saveAll(List<Category> categories);

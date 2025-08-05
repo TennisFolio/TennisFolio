@@ -3,6 +3,7 @@ package com.tennisfolio.Tennisfolio.mock;
 import com.tennisfolio.Tennisfolio.Tournament.domain.Tournament;
 import com.tennisfolio.Tennisfolio.Tournament.repository.TournamentEntity;
 import com.tennisfolio.Tennisfolio.Tournament.repository.TournamentRepository;
+import com.tennisfolio.Tennisfolio.category.domain.Category;
 
 import java.util.*;
 
@@ -34,6 +35,11 @@ public class FakeTournamentRepository implements TournamentRepository {
 
     @Override
     public List<Tournament> findByRapidTournamentIds(List<String> ids) {
+        return List.of();
+    }
+
+    @Override
+    public List<Tournament> findByCategoryIn(List<Category> ids) {
         return List.of();
     }
 
