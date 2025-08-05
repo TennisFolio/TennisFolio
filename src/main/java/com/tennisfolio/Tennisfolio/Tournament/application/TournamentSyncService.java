@@ -66,9 +66,10 @@ public class TournamentSyncService {
                 // api 조회
                 .map(rapidId -> categoryTournamentsApiTemplate.execute(rapidId))
                 .flatMap(List::stream)
-                .filter(tournament -> !existingKeys.contains(tournament.getRapidTournamentId()))
-                .forEach(tournament -> {
-                    tournamentRepository.collect(tournament);
+                .map(TournamentEntity::fromListModel)
+                .filter(entity -> !existingKeys.contains(entity.getRapidTournamentId()))
+                .forEach(entity -> {
+                    tournamentRepository.collect(entity);
                     tournamentRepository.flushWhenFull();
                 });
 
@@ -78,18 +79,22 @@ public class TournamentSyncService {
     }
 
     public void saveTournamentDetail(){
-        List<Tournament> findTournaments = tournamentRepository.findAll();
+        List<TournamentEntity> findTournaments = tournamentRepository.findAll();
         findTournaments
                 .stream()
-                .map(tournament -> {
+                .map(tournamentEntity -> {
 
-                    Tournament tournamentInfo = tournamentInfoApiTemplate.execute(tournament.getRapidTournamentId());
-                    Tournament leagueDetails = leagueDetailsApiTemplate.execute(tournament.getRapidTournamentId());
+                    Tournament tournamentInfo = tournamentInfoApiTemplate.execute(tournamentEntity.getRapidTournamentId());
+                    Tournament leagueDetails = leagueDetailsApiTemplate.execute(tournamentEntity.getRapidTournamentId());
                     if(tournamentInfo != null){
                         tournamentInfo.mergeTournament(leagueDetails);
-                        tournamentRepository.save(tournamentInfo);
+                    }else{
+                        tournamentInfo = new Tournament();
                     }
-                    return tournamentInfo;
+
+                    TournamentEntity newTournament = TournamentEntity.fromModel(tournamentInfo);
+                    tournamentRepository.save(newTournament);
+                    return newTournament;
                 }).toList();
 
 

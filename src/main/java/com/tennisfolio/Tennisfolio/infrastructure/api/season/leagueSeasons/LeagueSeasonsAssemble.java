@@ -2,7 +2,6 @@ package com.tennisfolio.Tennisfolio.infrastructure.api.season.leagueSeasons;
 
 import com.tennisfolio.Tennisfolio.Tournament.domain.Tournament;
 import com.tennisfolio.Tennisfolio.Tournament.repository.TournamentRepository;
-import com.tennisfolio.Tennisfolio.exception.NotFoundException;
 import com.tennisfolio.Tennisfolio.infrastructure.api.base.EntityAssemble;
 import com.tennisfolio.Tennisfolio.common.ExceptionCode;
 import com.tennisfolio.Tennisfolio.exception.InvalidRequestException;
@@ -29,7 +28,9 @@ public class LeagueSeasonsAssemble implements EntityAssemble<List<LeagueSeasonsD
 
         String rapidTournamentId = params[0].toString();
         Tournament tournament = tournamentRepository.findByRapidTournamentId(rapidTournamentId)
-                .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND));
+                .orElseThrow(() -> new IllegalArgumentException("조회되는 데이터가 없습니다."))
+                .toModel();
+
 
         return dto.stream()
                 .map(season -> new Season(season,tournament))

@@ -1,10 +1,11 @@
 package com.tennisfolio.Tennisfolio.chat.repository;
 
-import com.tennisfolio.Tennisfolio.chat.domain.Chat;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-public interface ChatRepository {
+@Repository
+public interface ChatRepository extends JpaRepository<Chat, Long> {
     List<Chat> findByRapidMatchId(String matchId);
-    Chat save(Chat chat);
 }

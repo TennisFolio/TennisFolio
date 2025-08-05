@@ -3,7 +3,8 @@ package com.tennisfolio.Tennisfolio.round.application;
 import com.tennisfolio.Tennisfolio.infrastructure.api.base.StrategyApiTemplate;
 import com.tennisfolio.Tennisfolio.infrastructure.api.round.leagueRounds.LeagueRoundsDTO;
 import com.tennisfolio.Tennisfolio.round.domain.Round;
-import com.tennisfolio.Tennisfolio.infrastructure.repository.SeasonJpaRepository;
+import com.tennisfolio.Tennisfolio.round.repository.RoundEntity;
+import com.tennisfolio.Tennisfolio.season.repository.SeasonRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -14,15 +15,15 @@ import java.util.stream.Stream;
 public class RoundSyncService {
 
     private final StrategyApiTemplate<List<LeagueRoundsDTO>, List<Round>> leagueRoundsTemplate;
-    private final SeasonJpaRepository seasonJpaRepository;
+    private final SeasonRepository seasonRepository;
 
-    public RoundSyncService(StrategyApiTemplate<List<LeagueRoundsDTO>, List<Round>> leagueRoundsTemplate, SeasonJpaRepository seasonJpaRepository) {
+    public RoundSyncService(StrategyApiTemplate<List<LeagueRoundsDTO>, List<Round>> leagueRoundsTemplate, SeasonRepository seasonRepository) {
         this.leagueRoundsTemplate = leagueRoundsTemplate;
-        this.seasonJpaRepository = seasonJpaRepository;
+        this.seasonRepository = seasonRepository;
     }
 
     public List<Round> saveRoundList() {
-        return seasonJpaRepository.findAll()
+        return seasonRepository.findAll()
                 .stream()
                 .map(season -> {
                     String tournamentRapidId = season.getTournamentEntity().getRapidTournamentId();

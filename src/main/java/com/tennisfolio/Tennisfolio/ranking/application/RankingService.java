@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-
 public class RankingService {
     private final RankingRepository rankingRepository;
     @Builder
