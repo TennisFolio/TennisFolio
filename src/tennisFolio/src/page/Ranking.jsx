@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import RankingTable from '../components/ranking/RankingTable';
 import RankingHeader from '../components/ranking/RankingHeader';
-import { base_server_url } from '../App';
+import { base_server_url } from '@/constants';
+
 import './ranking.css';
 
 function Ranking() {
