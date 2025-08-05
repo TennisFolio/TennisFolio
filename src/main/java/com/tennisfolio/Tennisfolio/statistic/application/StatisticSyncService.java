@@ -1,11 +1,11 @@
-package com.tennisfolio.Tennisfolio.match.application;
+package com.tennisfolio.Tennisfolio.statistic.application;
 
 import com.tennisfolio.Tennisfolio.infrastructure.api.base.StrategyApiTemplate;
 import com.tennisfolio.Tennisfolio.infrastructure.api.match.eventStatistics.EventsStatisticsDTO;
-import com.tennisfolio.Tennisfolio.match.domain.Statistic;
-import com.tennisfolio.Tennisfolio.match.repository.StatisticEntity;
+import com.tennisfolio.Tennisfolio.statistic.domain.Statistic;
+import com.tennisfolio.Tennisfolio.statistic.repository.StatisticEntity;
 import com.tennisfolio.Tennisfolio.match.repository.MatchRepository;
-import com.tennisfolio.Tennisfolio.match.repository.StatisticRepository;
+import com.tennisfolio.Tennisfolio.statistic.repository.StatisticRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -32,8 +32,8 @@ public class StatisticSyncService {
                     return eventsStatisticsTemplate.execute(rapidMatchId);
                 }).flatMap(list -> list != null ? list.stream() : Stream.empty())
                 .collect(Collectors.toList());
-        List<StatisticEntity> entities = toSave.stream().map(p -> StatisticEntity.fromModel(p)).toList();
-        statisticRepository.saveAll(entities);
+
+        statisticRepository.saveAll(toSave);
 
     }
 }

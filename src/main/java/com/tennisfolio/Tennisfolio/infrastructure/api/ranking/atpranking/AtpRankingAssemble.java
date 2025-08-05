@@ -28,7 +28,7 @@ public class AtpRankingAssemble implements EntityAssemble<List<AtpRankingApiDTO>
 
         List<Ranking> rankList = dto.stream().map(rank -> {
             Player player = playerService.getOrCreatePlayerByRapidId(rank.getTeam().getPlayerRapidId());
-            playerRepository.save(PlayerEntity.fromModel(player));
+            playerRepository.save(player);
             return new Ranking(rank, player);
         }).collect(Collectors.toList());
 

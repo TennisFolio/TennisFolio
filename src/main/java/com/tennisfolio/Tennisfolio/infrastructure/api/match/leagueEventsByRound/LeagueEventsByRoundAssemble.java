@@ -41,12 +41,11 @@ public class LeagueEventsByRoundAssemble implements EntityAssemble<List<LeagueEv
         Long roundType = Long.parseLong(params[2].toString());
         String slug = params[3].toString();
 
-        SeasonEntity seasonEntity = seasonRepository.findByRapidSeasonId(rapidSeasonId)
+        Season season = seasonRepository.findByRapidSeasonId(rapidSeasonId)
                 .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND));
 
-        Round round = roundRepository.findBySeasonEntityAndRoundAndSlug(seasonEntity,roundType,slug)
-                .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND))
-                .toModel();
+        Round round = roundRepository.findBySeasonAndRoundAndSlug(season,roundType,slug)
+                .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND));
 
         return dto.stream().map( events -> {
 

@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 @Repository
@@ -41,6 +42,11 @@ public class SeasonRepositoryImpl implements SeasonRepository{
     @Override
     public Set<String> findAllRapidIds() {
         return seasonJpaRepository.findAllRapidSeasonIds();
+    }
+
+    @Override
+    public Optional<Season> findByRapidSeasonId(String rapidId) {
+        return seasonJpaRepository.findByRapidSeasonId(rapidId).map(SeasonEntity::toModel);
     }
 
     @Override

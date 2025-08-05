@@ -1,6 +1,7 @@
 package com.tennisfolio.Tennisfolio.common;
 
-import com.tennisfolio.Tennisfolio.chat.repository.Chat;
+import com.tennisfolio.Tennisfolio.chat.domain.Chat;
+import com.tennisfolio.Tennisfolio.chat.repository.ChatEntity;
 import com.tennisfolio.Tennisfolio.util.ConversionUtil;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -24,7 +25,7 @@ public class ChatMessage {
         this.type = type;
     }
 
-    public ChatMessage(Chat chat){
+    public ChatMessage(ChatEntity chat){
         this.matchId = chat.getRapidMatchId();
         this.message = chat.getMessage();
         this.sender = chat.getNickName();

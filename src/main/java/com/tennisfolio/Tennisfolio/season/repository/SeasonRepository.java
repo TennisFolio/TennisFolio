@@ -4,6 +4,7 @@ import com.tennisfolio.Tennisfolio.Tournament.domain.Tournament;
 import com.tennisfolio.Tennisfolio.season.domain.Season;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 public interface SeasonRepository {
@@ -14,6 +15,8 @@ public interface SeasonRepository {
     List<Season> collect(List<Season> seasons);
 
     Set<String> findAllRapidIds();
+
+    Optional<Season> findByRapidSeasonId(String rapidId);
 
     boolean flushWhenFull();
 
