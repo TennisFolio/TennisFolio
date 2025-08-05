@@ -1,9 +1,11 @@
-ENV TZ=Asia/Seoul
-RUN apt-get update && \
-    apt-get install -y tzdata && \
-    ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
-    echo $TZ > /etc/timezone && \
-    apt-get clean
-ARG JAR_FILE=build/libs/*.jar
-COPY ${JAR_FILE} app.jar
-ENTRYPOINT ["java", "-jar", "/app.jar", "--spring.config.location=file:/app/application.properties"]
+# ✅ 1단계: Gradle 빌드
+FROM gradle:8.5-jdk17 AS builder
+WORKDIR /app
+COPY . .
+RUN gradle clean build -x test
+
+# ✅ 2단계: 실제 실행
+FROM openjdk:17-jdk-slim
+ARG JAR_FILE=app/build/libs/*.jar
+COPY --from=builder ${JAR_FILE} app.jar
+ENTRYPOINT ["java","-jar","/app.jar"]

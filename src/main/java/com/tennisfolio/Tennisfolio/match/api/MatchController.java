@@ -34,7 +34,6 @@ public class MatchController {
     }
     @Scheduled(fixedRate = 30000)
     public void getATPLiveEventsSchedule(){
-
         List<LiveMatchResponse> events = liveMatchService.getATPLiveEvents();
         messagingTemplate.convertAndSend("/topic/atp/liveMatches", events);
     }
