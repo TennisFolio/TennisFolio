@@ -10,10 +10,12 @@ import java.util.List;
 public class CategoryTournamentsTemplate extends StrategyApiTemplate<List<CategoryTournamentsDTO>, List<Tournament>> {
 
 
-    public CategoryTournamentsTemplate(ResponseParser<List<CategoryTournamentsDTO>> responseParser,
-                                       EntityMapper<List<CategoryTournamentsDTO>, List<Tournament>> entityMapper
+    public CategoryTournamentsTemplate(
+            ApiCaller apiCaller
+            , ResponseParser<List<CategoryTournamentsDTO>> responseParser
+            , EntityMapper<List<CategoryTournamentsDTO>, List<Tournament>> entityMapper
                                       ) {
-        super(responseParser, entityMapper, RapidApi.CATEGORYTOURNAMENTS);
+        super(apiCaller, responseParser, entityMapper, RapidApi.CATEGORYTOURNAMENTS);
 
     }
 

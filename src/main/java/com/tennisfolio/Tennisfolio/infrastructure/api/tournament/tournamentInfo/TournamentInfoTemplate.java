@@ -10,10 +10,11 @@ public class TournamentInfoTemplate extends StrategyApiTemplate<TournamentInfoDT
 
 
     public TournamentInfoTemplate(
-              ResponseParser<TournamentInfoDTO> tournamentInfoResponseParser
+              ApiCaller apiCaller
+            , ResponseParser<TournamentInfoDTO> tournamentInfoResponseParser
             , EntityMapper<TournamentInfoDTO, Tournament> tournamentInfoEntityMapper
             ) {
-        super(tournamentInfoResponseParser, tournamentInfoEntityMapper, RapidApi.TOURNAMENTINFO);
+        super(apiCaller, tournamentInfoResponseParser, tournamentInfoEntityMapper, RapidApi.TOURNAMENTINFO);
     }
 
 }

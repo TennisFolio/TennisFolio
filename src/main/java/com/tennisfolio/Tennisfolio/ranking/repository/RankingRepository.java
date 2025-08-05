@@ -1,26 +1,28 @@
 package com.tennisfolio.Tennisfolio.ranking.repository;
 
+import com.tennisfolio.Tennisfolio.ranking.domain.Ranking;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface RankingRepository {
 
-    RankingEntity getById(Long id);
+    Optional<Ranking> getById(Long id);
 
-    RankingEntity save(RankingEntity rankingEntity);
+    Ranking save(Ranking ranking);
 
-    List<RankingEntity> saveAll(List<RankingEntity> rankingEntities);
+    List<Ranking> saveAll(List<Ranking> rankings);
 
-    List<RankingEntity> findLatestRankings();
+    List<Ranking> findLatestRankings(Pageable pageable);
 
-    List<RankingEntity> findLatestRankings(Pageable pageable);
+    List<Ranking> findByLastUpdate(String lastUpdate);
 
-    List<RankingEntity> findByLastUpdate(String lastUpdate);
+    boolean existsByLastUpdate(String lastUpdate);
 
-    List<RankingEntity> collect(RankingEntity rankingEntity);
+    List<Ranking> collect(Ranking ranking);
 
-    List<RankingEntity> collect(List<RankingEntity> rankingEntity);
+    List<Ranking> collect(List<Ranking> rankings);
 
     boolean flushWhenFull();
 

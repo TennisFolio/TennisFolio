@@ -4,7 +4,7 @@
   width: 100%;
   background-color: #fafafa;
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .ranking-table {
@@ -44,7 +44,6 @@
 /* 랭킹 컬럼 강조 */
 .ranking-table td:nth-child(1) {
   font-weight: bold;
-  
 }
 
 .player-name {
@@ -53,22 +52,22 @@
   color: #222;
 }
 
-@media(max-width: 768px) {
+@media (max-width: 768px) {
   .ranking-table th,
   .ranking-table td {
     padding: 8px 12px;
     font-size: 12px;
   }
-  
+
   .ranking-table th {
-    font-size: 10px;;
-    font-weight : 800;
+    font-size: 10px;
+    font-weight: 800;
   }
-  
+
   .ranking-table td:nth-child(1) {
     font-size: 10px;
   }
-  
+
   .player-name {
     font-size: 12px;
   }

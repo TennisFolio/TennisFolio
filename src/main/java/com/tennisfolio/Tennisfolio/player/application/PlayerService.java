@@ -7,6 +7,7 @@ import com.tennisfolio.Tennisfolio.player.dto.TeamDetailsApiDTO;
 import com.tennisfolio.Tennisfolio.player.infrastructure.PlayerEntity;
 import com.tennisfolio.Tennisfolio.player.infrastructure.PlayerRepository;
 import jakarta.transaction.Transactional;
+import lombok.Builder;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
@@ -15,7 +16,9 @@ public class PlayerService {
     private final StrategyApiTemplate<TeamDetailsApiDTO, PlayerAggregate> teamDetailsTemplate;
     private final PlayerImageService playerImageService;
     private final PlayerRepository playerRepository;
-    public PlayerService(@Qualifier("teamDetailsTemplate") StrategyApiTemplate<TeamDetailsApiDTO, PlayerAggregate> teamDetailsTemplate, PlayerImageService playerImageService
+
+    @Builder
+    public PlayerService(StrategyApiTemplate<TeamDetailsApiDTO, PlayerAggregate> teamDetailsTemplate, PlayerImageService playerImageService
             , PlayerRepository playerRepository){
         this.teamDetailsTemplate = teamDetailsTemplate;
         this.playerImageService = playerImageService;
@@ -24,14 +27,14 @@ public class PlayerService {
 
     @Transactional
     public Player getOrCreatePlayerByRapidId(String rapidId) {
-        return playerRepository.findByRapidPlayerId(rapidId)
-                .orElseGet(() -> {
-                    Player player = teamDetailsTemplate.execute(rapidId).toPlayer();
-                    String path = playerImageService.fetchImage(rapidId);
-                    player.updateProfileImage(path);
-                    PlayerEntity playerEntity = PlayerEntity.fromModel(player);
-                    return playerRepository.save(playerEntity);
-                }).toModel();
+        if(!playerRepository.existsByRapidPlayerId(rapidId)){
+            Player player = teamDetailsTemplate.execute(rapidId).toPlayer();
+            String path = playerImageService.fetchImage(rapidId);
+            player.updateProfileImage(path);
+            return playerRepository.save(player);
+        }
+
+        return playerRepository.findByRapidPlayerId(rapidId).get();
     }
 
 

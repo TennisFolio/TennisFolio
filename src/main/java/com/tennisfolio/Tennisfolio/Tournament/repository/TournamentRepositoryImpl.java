@@ -20,18 +20,20 @@ public class TournamentRepositoryImpl implements TournamentRepository{
     }
 
     @Override
-    public TournamentEntity save(TournamentEntity tournament) {
-        return tournamentJpaRepository.save(tournament);
+    public Tournament save(Tournament tournament) {
+
+        return tournamentJpaRepository.save(TournamentEntity.fromModel(tournament)).toModel();
     }
 
     @Override
-    public List<TournamentEntity> saveAll(List<TournamentEntity> tournaments) {
-        return tournamentJpaRepository.saveAll(tournaments);
+    public List<Tournament> saveAll(List<Tournament> tournaments) {
+        List<TournamentEntity> entities = tournaments.stream().map(TournamentEntity::fromModel).toList();
+        return tournamentJpaRepository.saveAll(entities).stream().map(TournamentEntity::toModel).toList();
     }
 
     @Override
-    public List<TournamentEntity> findAll() {
-        return tournamentJpaRepository.findAll();
+    public List<Tournament> findAll() {
+        return tournamentJpaRepository.findAll().stream().map(TournamentEntity::toModel).toList();
     }
 
     @Override
@@ -40,21 +42,25 @@ public class TournamentRepositoryImpl implements TournamentRepository{
     }
 
     @Override
-    public List<TournamentEntity> findByRapidTournamentIds(List<String> ids) {
-        return tournamentJpaRepository.findByRapidTournamentIds(ids);
+    public List<Tournament> findByRapidTournamentIds(List<String> ids) {
+        return tournamentJpaRepository.findByRapidTournamentIds(ids).stream().map(TournamentEntity::toModel).toList();
     }
 
     @Override
-    public Optional<TournamentEntity> findByRapidTournamentId(String rapidId) {
-        return tournamentJpaRepository.findByRapidTournamentId(rapidId);
+    public Optional<Tournament> findByRapidTournamentId(String rapidId) {
+        return tournamentJpaRepository.findByRapidTournamentId(rapidId).map(TournamentEntity::toModel);
     }
     @Override
-    public List<TournamentEntity> collect(TournamentEntity tournament){
-        return bufferedBatchSaver.collect(tournament);
+    public List<Tournament> collect(Tournament tournament){
+        return bufferedBatchSaver.collect(TournamentEntity.fromModel(tournament))
+                .stream()
+                .map(TournamentEntity::toModel)
+                .toList();
     }
     @Override
-    public List<TournamentEntity> collect(List<TournamentEntity> tournaments){
-        return bufferedBatchSaver.collect(tournaments);
+    public List<Tournament> collect(List<Tournament> tournaments){
+        List<TournamentEntity> entities = tournaments.stream().map(TournamentEntity::fromModel).toList();
+        return bufferedBatchSaver.collect(entities).stream().map(TournamentEntity::toModel).toList();
     }
     @Override
     public boolean flushWhenFull(){

@@ -10,11 +10,11 @@ import org.springframework.stereotype.Component;
 public class TeamDetailsTemplate extends StrategyApiTemplate<TeamDetailsApiDTO, PlayerAggregate> {
 
 
-    public TeamDetailsTemplate(
-                               ResponseParser<TeamDetailsApiDTO> responseParser,
-                               EntityMapper<TeamDetailsApiDTO, PlayerAggregate> entityMapper
+    public TeamDetailsTemplate(ApiCaller apiCaller
+                               , ResponseParser<TeamDetailsApiDTO> responseParser
+                               , EntityMapper<TeamDetailsApiDTO, PlayerAggregate> entityMapper
                               ){
-        super(responseParser, entityMapper, RapidApi.TEAMDETAILS);
+        super(apiCaller, responseParser, entityMapper, RapidApi.TEAMDETAILS);
     }
 
 

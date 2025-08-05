@@ -10,10 +10,11 @@ import org.springframework.stereotype.Component;
 public class LeagueSeasonInfoTemplate extends StrategyApiTemplate<LeagueSeasonInfoDTO, Season> {
 
     public LeagueSeasonInfoTemplate(
-             ResponseParser<LeagueSeasonInfoDTO> leagueSeasonInfoParser
+              ApiCaller apiCaller
+            , ResponseParser<LeagueSeasonInfoDTO> leagueSeasonInfoParser
             , EntityMapper<LeagueSeasonInfoDTO, Season> leagueSeasonInfoEntityMapper
             ) {
-        super(leagueSeasonInfoParser, leagueSeasonInfoEntityMapper,  RapidApi.LEAGUESEASONINFO);
+        super(apiCaller, leagueSeasonInfoParser, leagueSeasonInfoEntityMapper,  RapidApi.LEAGUESEASONINFO);
 
     }
 }

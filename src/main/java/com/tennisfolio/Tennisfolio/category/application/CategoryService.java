@@ -22,10 +22,7 @@ public class CategoryService {
 
     public void saveCategory() {
         List<Category> categories = categoriesApiTemplate.execute("");
-        List<CategoryEntity> categoryEntities = categories
-                .stream()
-                .map(category -> CategoryEntity.fromModel(category))
-                .toList();
-        categoryRepository.saveAll(categoryEntities);
+        
+        categoryRepository.saveAll(categories);
     }
 }

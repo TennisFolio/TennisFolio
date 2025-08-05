@@ -13,11 +13,11 @@ import java.util.List;
 public class AtpRankingTemplate extends StrategyApiTemplate<List<AtpRankingApiDTO>, List<Ranking>> {
 
 
-    public AtpRankingTemplate(
-                              ResponseParser<List<AtpRankingApiDTO>> atpRankingResponseParser,
-                              EntityMapper<List<AtpRankingApiDTO>, List<Ranking>> atpRankingEntityMapper
+    public AtpRankingTemplate( ApiCaller apiCaller
+                              , ResponseParser<List<AtpRankingApiDTO>> atpRankingResponseParser
+                              , EntityMapper<List<AtpRankingApiDTO>, List<Ranking>> atpRankingEntityMapper
                               ) {
-        super(atpRankingResponseParser,atpRankingEntityMapper,RapidApi.ATPRANKINGS);
+        super(apiCaller, atpRankingResponseParser,atpRankingEntityMapper,RapidApi.ATPRANKINGS);
 
     }
 

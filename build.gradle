@@ -38,6 +38,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	implementation 'mysql:mysql-connector-java:8.0.33'
 	runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
+	implementation 'mysql:mysql-connector-java:8.0.33'
 }
 tasks.withType(JavaCompile) {
 	options.compilerArgs << "-parameters"

@@ -1,7 +1,7 @@
-import React from 'react'
+import React from 'react';
 import './RankingTable.css';
 import Flag from 'react-world-flags';
-function RankingTable({rankings}) {
+function RankingTable({ rankings }) {
   return (
     <div className="ranking-table-container">
       <table className="ranking-table">
@@ -16,38 +16,48 @@ function RankingTable({rankings}) {
         <tbody>
           {rankings.map((rank, index) => (
             <tr key={index}>
-              <td> 
+              <td>
                 <span style={{ fontSize: '16px', fontWeight: 'bold' }}>
                   {rank.curRanking}
                 </span>
                 {rank.gapRanking !== 0 && (
                   <span
                     style={{
-                      fontSize: '12px',
+                      fontSize: '10px',
                       color: rank.gapRanking < 0 ? 'red' : 'blue',
-                      marginLeft: '5px'
+                      marginLeft: '5px',
                     }}
-                    >
-                    {rank.gapRanking < 0 ? '▲' : '▼'} {Math.abs(rank.gapRanking)}
-                  </span>)}
+                  >
+                    {rank.gapRanking < 0 ? '▲' : '▼'}{' '}
+                    {Math.abs(rank.gapRanking)}
+                  </span>
+                )}
               </td>
-              <td><Flag code={rank.player.country} style={{ width: '24px', height: '16px' }}/></td>
-              <td><span className="player-name">{rank.player.playerName}</span></td>
-              <td> 
+              <td>
+                <Flag
+                  code={rank.player.country}
+                  style={{ width: '24px', height: '16px' }}
+                />
+              </td>
+              <td>
+                <span className="player-name">{rank.player.playerName}</span>
+              </td>
+              <td>
                 <span style={{ fontSize: '16px', fontWeight: 'bold' }}>
-                  {rank.curPoints}  
+                  {rank.curPoints}
                 </span>
                 {rank.gapPoints !== 0 && (
                   <span
-                      style={{
-                        fontSize: '12px',
-                        color: rank.gapPoints > 0 ? 'red' : 'blue',
-                        marginLeft: '5px'
-                      }}
-                    >
+                    style={{
+                      fontSize: '12px',
+                      color: rank.gapPoints > 0 ? 'red' : 'blue',
+                      marginLeft: '5px',
+                    }}
+                  >
                     {rank.gapPoints > 0 ? '▲' : '▼'} {Math.abs(rank.gapPoints)}
                   </span>
-              )}</td>
+                )}
+              </td>
             </tr>
           ))}
         </tbody>
@@ -56,4 +66,4 @@ function RankingTable({rankings}) {
   );
 }
 
-export default RankingTable
+export default RankingTable;

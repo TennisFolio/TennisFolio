@@ -3,6 +3,7 @@ package com.tennisfolio.Tennisfolio.Tournament.application;
 import com.tennisfolio.Tennisfolio.Tournament.domain.Tournament;
 import com.tennisfolio.Tennisfolio.Tournament.repository.TournamentEntity;
 import com.tennisfolio.Tennisfolio.Tournament.repository.TournamentRepository;
+import com.tennisfolio.Tennisfolio.category.domain.Category;
 import com.tennisfolio.Tennisfolio.category.repository.CategoryEntity;
 import com.tennisfolio.Tennisfolio.category.repository.CategoryRepository;
 import com.tennisfolio.Tennisfolio.infrastructure.api.base.StrategyApiTemplate;
@@ -53,7 +54,7 @@ public class TournamentSyncService {
         // DB에 저장된 category 조회
         List<String> categoryRapidIdList = categoryRepository.findByRapidCategoryIdNotIn(notInIds)
                 .stream()
-                .map(CategoryEntity::getRapidCategoryId)
+                .map(Category::getRapidCategoryId)
                 .collect(Collectors.toList());
 
         // 중복 제거를 위한 apiId 조회

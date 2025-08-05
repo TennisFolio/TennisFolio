@@ -26,6 +26,7 @@ public class RankingPlayerResponse {
         this.weight = player.getWeight();
         this.height = player.getHeight();
         this.image = player.getImage();
+        if(player.getCountry() != null)
         this.country = player.getCountry().getCountryCode();
 
     }
