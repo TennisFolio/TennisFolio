@@ -1,10 +1,11 @@
-import React from 'react';
+import React from 'react'
 import './playerResult.css';
-import { base_url } from '@/constants';
+import { base_url } from '../../App';
 
-function PlayerResult({ renderResultInfo }) {
+function PlayerResult({renderResultInfo}) {
+
   return (
-    <div className="test-result-container">
+        <div className="test-result-container">
       <h2 className="result-title">당신에게 어울리는 선수는</h2>
       <div className="player-card">
         <img
@@ -14,14 +15,12 @@ function PlayerResult({ renderResultInfo }) {
         />
         <div className="player-info">
           <h3 className="player-kor-name">{renderResultInfo.name}</h3>
-          <p className="player-eng-name">
-            {renderResultInfo.player.playerName}
-          </p>
+          <p className="player-eng-name">{renderResultInfo.player.playerName}</p>
           <p className="player-description">{renderResultInfo.description}</p>
         </div>
       </div>
     </div>
-  );
+  )
 }
 
-export default PlayerResult;
+export default PlayerResult

@@ -3,12 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { setCurrentTest } from '../../store/testSlice';
 import './testItemList.css';
-import { base_url } from '@/constants';
+import { base_url } from '../../App';
 
-function TestItemList({ testList }) {
+function TestItemList({testList}) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-
+  
   return (
     <div className="test-list-container">
       {testList.map((test) => (
@@ -17,7 +17,7 @@ function TestItemList({ testList }) {
           className="test-item"
           onClick={() => {
             dispatch(setCurrentTest(test));
-            navigate(`/test/${test.url}`);
+            navigate(`/test/${test.url}`)
           }}
         >
           {test.image && (
