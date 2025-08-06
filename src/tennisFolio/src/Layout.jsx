@@ -3,11 +3,13 @@ import React, { useEffect, useRef, useState } from 'react';
 import './Layout.css';
 import Navigation from './Navigation.jsx';
 import { useNavigate } from 'react-router-dom';
+import logo from './assets/tennisFolio_logo.png';
 import Footer from './Footer.jsx';
 
 function Layout({ children }) {
   const navigate = useNavigate();
   const [showHeader, setShowHeader] = useState(true);
+  const [sidebarVisible, setSidebarVisible] = useState(false);
   const lastScrollY = useRef(window.scrollY);
 
   useEffect(() => {
@@ -34,25 +36,31 @@ function Layout({ children }) {
       <header className={`header ${showHeader ? 'show' : 'hide'}`}>
         <div className="header-inner">
           <div className="logo" onClick={() => navigate('/')}>
-            TennisFolio
+            <img className="logo_img" src={logo} alt="TennisFolio" />
           </div>
+          <Navigation
+            sidebarVisible={sidebarVisible}
+            setSidebarVisible={setSidebarVisible}
+          />
         </div>
+        <div
+          className={`overlay ${sidebarVisible ? 'show' : ''}`}
+          onClick={() => setSidebarVisible(false)}
+        />
       </header>
 
       <div className="main">
-        <Navigation />
-
         <section className="contents">{children}</section>
-
-        <aside className="ad" />
+        {/* <aside className="ad" /> */}
       </div>
 
       <footer className="footer">
         <div
           style={{
-            backgroundColor: '#f8f8f8',
             padding: '20px',
             textAlign: 'center',
+            maxWidth: '1440px',
+            margin: '0 auto',
           }}
         >
           <h5>
@@ -77,8 +85,8 @@ function Layout({ children }) {
           <div>
             <a href="/privacy">개인정보 처리방침</a>
           </div>
+          <p>© 2025 TennisFolio. All rights reserved.</p>
         </div>
-        © 2025 TennisFolio. All rights reserved.
       </footer>
     </div>
   );

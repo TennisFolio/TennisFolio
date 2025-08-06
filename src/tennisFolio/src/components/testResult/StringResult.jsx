@@ -1,7 +1,7 @@
-import React from 'react'
+import React from 'react';
 import './stringResult.css';
-import { base_url } from '../../App';
-function StringResult({renderResultInfo}) {
+import { base_url } from '@/constants';
+function StringResult({ renderResultInfo }) {
   return (
     <div className="string-result-container">
       <h2 className="result-title">당신에게 어울리는 테니스 스트링은</h2>
@@ -21,5 +21,4 @@ function StringResult({renderResultInfo}) {
   );
 }
 
-
-export default StringResult
+export default StringResult;
