@@ -4,7 +4,7 @@ import { useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
-import { base_server_url } from '@/constants';
+import { base_server_url } from '../App';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 function LiveEventsDetail() {

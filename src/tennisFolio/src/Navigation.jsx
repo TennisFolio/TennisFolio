@@ -21,10 +21,10 @@ const NAV_ITEMS = [
   },
 ];
 
-function Navigation({ sidebarVisible, setSidebarVisible }) {
+function Navigation() {
   const navigate = useNavigate();
+  const [visible, setVisible] = useState(false);
   const [openSections, setOpenSections] = useState(new Set());
-  const [hoveredSection, setHoveredSection] = useState(null);
   const sidebarRef = useRef(null);
   const hamburgerRef = useRef(null);
 
@@ -41,8 +41,7 @@ function Navigation({ sidebarVisible, setSidebarVisible }) {
   };
 
   const handleNavigate = (path) => {
-    setSidebarVisible(false);
-    setHoveredSection(null);
+    setVisible(false);
     navigate(path);
   };
 
@@ -50,13 +49,13 @@ function Navigation({ sidebarVisible, setSidebarVisible }) {
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
-        sidebarVisible &&
+        visible &&
         sidebarRef.current &&
         !sidebarRef.current.contains(event.target) &&
         hamburgerRef.current &&
         !hamburgerRef.current.contains(event.target)
       ) {
-        setSidebarVisible(false);
+        setVisible(false);
       }
     };
 
@@ -64,51 +63,18 @@ function Navigation({ sidebarVisible, setSidebarVisible }) {
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [sidebarVisible, setSidebarVisible]);
+  }, [visible]);
 
   return (
     <>
-      {/* 데스크톱 네비게이션 */}
-      <nav className="desktop-nav">
-        {NAV_ITEMS.map((section, index) => (
-          <div
-            key={index}
-            className="nav-item"
-            onMouseEnter={() => setHoveredSection(index)}
-            onMouseLeave={() => setHoveredSection(null)}
-          >
-            <span className="nav-item-title">{section.title}</span>
-            <div
-              className={`dropdown ${hoveredSection === index ? 'show' : ''}`}
-            >
-              {section.children.map((item, i) => (
-                <div
-                  key={i}
-                  className="dropdown-item"
-                  onClick={() => handleNavigate(item.path)}
-                >
-                  {item.label}
-                </div>
-              ))}
-            </div>
-          </div>
-        ))}
-      </nav>
-
-      {/* 모바일 햄버거 버튼 */}
       <button
         ref={hamburgerRef}
         className="hamburger"
-        onClick={() => setSidebarVisible(!sidebarVisible)}
+        onClick={() => setVisible(!visible)}
       >
         ☰
       </button>
-
-      {/* 모바일 사이드바 */}
-      <aside
-        ref={sidebarRef}
-        className={`sidebar ${sidebarVisible ? 'show' : ''}`}
-      >
+      <aside ref={sidebarRef} className={`sidebar ${visible ? 'show' : ''}`}>
         {NAV_ITEMS.map((section, index) => (
           <div key={index} className="nav-section">
             <h5 className="nav-title" onClick={() => toggleSection(index)}>

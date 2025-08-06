@@ -4,8 +4,7 @@ import { useEffect, useRef } from 'react';
 import LiveEvents from '../components/main/LiveEvents';
 import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
-import { base_server_url } from '@/constants';
-
+import { base_server_url } from '../App';
 import axios from 'axios';
 import MetatagRenderer from '../components/MetatagRenderer';
 import { useParams } from 'react-router-dom';
