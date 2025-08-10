@@ -6,6 +6,11 @@ RUN gradle clean build -x test
 
 # ✅ 2단계: 실제 실행
 FROM openjdk:17-jdk-slim
+RUN apt-get update && apt-get install -y tzdata
+ENV TZ=Asia/Seoul
+RUN ln -sf /usr/share/zoneinfo/Asia/Seoul /etc/localtime && \
+    echo "Asia/Seoul" > /etc/timezone
+
 ARG JAR_FILE=app/build/libs/*.jar
 COPY --from=builder ${JAR_FILE} app.jar
 ENTRYPOINT ["java", "-jar", "/app.jar", "--spring.config.location=file:/app/application.properties"]
