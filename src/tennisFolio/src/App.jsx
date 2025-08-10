@@ -16,13 +16,6 @@ window.global ||= window;
 window.Buffer ||= Buffer;
 window.process ||= process;
 
-//export const base_url = "http://localhost:5173";
-//export const base_server_url = "http://localhost:8080";
-export const base_url = 'https://tennisfolio.net';
-export const base_server_url = "https://tennisfolio.net";
-//export const base_server_url = 'https://tennisfolio-stg.onrender.com';
-export const base_image_url = 'https://tennisfolio.net/img';
-
 function App() {
   return (
     <BrowserRouter>
