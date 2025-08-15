@@ -39,6 +39,9 @@ dependencies {
 	implementation 'mysql:mysql-connector-java:8.0.33'
 	runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
 	implementation 'mysql:mysql-connector-java:8.0.33'
+	implementation("org.springframework.boot:spring-boot-starter-aop")
+	implementation 'org.springframework.boot:spring-boot-starter-webflux' // WebClient
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
 }
 tasks.withType(JavaCompile) {
 	options.compilerArgs << "-parameters"
