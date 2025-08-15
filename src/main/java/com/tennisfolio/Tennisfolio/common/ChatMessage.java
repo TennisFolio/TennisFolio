@@ -25,12 +25,12 @@ public class ChatMessage {
         this.type = type;
     }
 
-    public ChatMessage(ChatEntity chat){
+    public ChatMessage(Chat chat){
         this.matchId = chat.getRapidMatchId();
         this.message = chat.getMessage();
         this.sender = chat.getNickName();
         this.userId = chat.getUserId();
-        this.timestamp = ConversionUtil.timestampToHHmm(chat.getCreateDt());
+        this.timestamp = ConversionUtil.timestampToHHmm(chat.getTimeStamp());
         this.type = chat.getType();
     }
 

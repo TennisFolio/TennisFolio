@@ -8,6 +8,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Builder
 @AllArgsConstructor
@@ -24,6 +26,8 @@ public class Chat {
     private String message;
 
     private String type;
+
+    private LocalDateTime timeStamp;
 
     public Chat(ChatMessage message){
         this.rapidMatchId = message.getMatchId();
