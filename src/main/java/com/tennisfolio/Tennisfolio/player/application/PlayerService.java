@@ -1,4 +1,5 @@
 package com.tennisfolio.Tennisfolio.player.application;
+import com.tennisfolio.Tennisfolio.common.aop.SkipLog;
 import com.tennisfolio.Tennisfolio.infrastructure.api.base.StrategyApiTemplate;
 import com.tennisfolio.Tennisfolio.player.domain.Player;
 import com.tennisfolio.Tennisfolio.player.domain.PlayerAggregate;
@@ -26,6 +27,7 @@ public class PlayerService {
     }
 
     @Transactional
+    @SkipLog
     public Player getOrCreatePlayerByRapidId(String rapidId) {
         if(!playerRepository.existsByRapidPlayerId(rapidId)){
             Player player = teamDetailsTemplate.execute(rapidId).toPlayer();

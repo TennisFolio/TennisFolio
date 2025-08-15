@@ -1,0 +1,15 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: tennisfolio:local
+    container_name: app
+    environment:
+      SPRING_PROFILES_ACTIVE: local
+      SPRING_CONFIG_ADDITIONAL_LOCATION: file:/app/application.properties
+      TZ: "Asia/Seoul"
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./src/main/resources/application.properties:/app/application.properties:ro

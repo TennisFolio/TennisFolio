@@ -40,3 +40,6 @@ application.properties
 .env
 .env.development
 .env.production
+
+### Log ###
+.log

@@ -1,0 +1,68 @@
+<configuration>
+
+    <!-- 공통 패턴 -->
+    <property name="LOG_PATTERN"
+              value="%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{36} traceId=%X{traceId} : %msg%n"/>
+
+    <!-- local: 파일 저장 (로컬 경로는 취향껏 변경) -->
+    <springProfile name="local">
+        <appender name="LOCAL_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+            <file>./_logs/local/app.log</file>
+            <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                <fileNamePattern>./_logs/local/app.%d{yyyy-MM-dd}.log</fileNamePattern>
+                <maxHistory>1</maxHistory>
+            </rollingPolicy>
+            <encoder><pattern>${LOG_PATTERN}</pattern></encoder>
+        </appender>
+
+        <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder><pattern>${LOG_PATTERN}</pattern></encoder>
+        </appender>
+
+        <!-- 우리 코드: 파일에도 남기고, root로 전파해서 콘솔 1번만 -->
+        <logger name="com.tennisfolio" level="INFO">
+            <appender-ref ref="LOCAL_FILE"/>
+        </logger>
+
+        <!-- root: 콘솔 1번만 -->
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+        </root>
+    </springProfile>
+
+    <!-- stg: 콘솔만 -->
+    <springProfile name="stg">
+        <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder><pattern>${LOG_PATTERN}</pattern></encoder>
+        </appender>
+        <root level="INFO"><appender-ref ref="CONSOLE"/></root>
+    </springProfile>
+
+    <!-- prod: 파일 저장(3일 보관) -->
+    <springProfile name="prod">
+        <appender name="PROD_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+            <file>/var/log/myapp/app.log</file>
+            <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                <fileNamePattern>/var/log/myapp/app.%d{yyyy-MM-dd}.gz</fileNamePattern>
+                <maxHistory>3</maxHistory>
+                <totalSizeCap>500MB</totalSizeCap>
+            </rollingPolicy>
+            <encoder><pattern>${LOG_PATTERN}</pattern></encoder>
+        </appender>
+
+        <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder><pattern>${LOG_PATTERN}</pattern></encoder>
+        </appender>
+
+        <!-- 우리 코드: 파일에도 남기고, root로 전파해서 콘솔 1번만 -->
+        <logger name="com.tennisfolio" level="INFO">
+            <appender-ref ref="LOCAL_FILE"/>
+        </logger>
+
+        <!-- root: 콘솔 1번만 -->
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+        </root>
+    </springProfile>
+
+</configuration>

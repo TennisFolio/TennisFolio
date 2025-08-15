@@ -5,6 +5,6 @@ import com.tennisfolio.Tennisfolio.common.ChatMessage;
 import java.util.List;
 
 public interface ChatService {
-    void saveChat(ChatMessage message);
+    ChatMessage saveChat(ChatMessage message);
     List<ChatMessage> getChatByMatchId(String matchId);
 }
