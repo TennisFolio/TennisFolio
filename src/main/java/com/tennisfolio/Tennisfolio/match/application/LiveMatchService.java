@@ -34,7 +34,7 @@ public class LiveMatchService {
         }
 
         return  apiDTO.stream()
-//                .filter(dto -> dto.getTournament().getCategory().isAtp())
+                .filter(dto -> dto.getTournament().getCategory().isAtp())
                 .map(this::getLiveMatchResponse)
                 .collect(Collectors.toList());
     }
