@@ -3,7 +3,7 @@ import SockJS from 'sockjs-client';
 import { Stomp } from '@stomp/stompjs';
 import './chatRoom.css';
 import { base_server_url } from '@/constants';
-import axios from 'axios';
+import { apiRequest } from '../../utils/apiClient';
 
 const MAX_LENGTH = 200;
 
@@ -34,7 +34,7 @@ function ChatRoom({ matchId = 'default-room' }) {
 
     const fetchData = async () => {
       try {
-        const response = await axios.get(
+        const response = await apiRequest.get(
           `${base_server_url}/api/chat/${matchId}`
         );
         if (response.data.code !== '0000') {

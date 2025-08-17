@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import { base_server_url } from '@/constants';
-import axios from 'axios';
+import { apiRequest } from '../utils/apiClient';
 import { useNavigate } from 'react-router-dom';
 function LiveEventsDetail() {
   const { matchId } = useParams();
@@ -14,7 +14,7 @@ function LiveEventsDetail() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(
+        const response = await apiRequest.get(
           `${base_server_url}/api/liveEvents/${matchId}`
         );
         if (response.data.code !== '0000') {

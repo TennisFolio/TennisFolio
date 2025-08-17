@@ -6,8 +6,7 @@ import { useParams } from 'react-router-dom';
 import TestResultRenderer from '../components/testResult/TestResultRenderer';
 import { setTestResult } from '../store/testSlice';
 import { setCurrentTest } from '../store/testSlice';
-import axios from 'axios';
-import { base_server_url } from '@/constants';
+import { apiRequest } from '../utils/apiClient';
 
 import ShareButtonGroup from '../components/testResult/ShareButtonGroup';
 import ResultButtonGroup from '../components/testResult/ResultButtonGroup';
@@ -30,8 +29,8 @@ function TestResult() {
       return;
     }
     if (!currentTest || currentTest === null || currentTest === undefined) {
-      axios
-        .get(`${base_server_url}/api/test/${param.category}`)
+      apiRequest
+        .get(`/api/test/${param.category}`)
         .then((res) => {
           if (res.data.code !== '0000') {
             alert('해당 테스트는 없습니다.');
@@ -47,10 +46,8 @@ function TestResult() {
 
     if (!testResult) {
       const fetchResultData = async () => {
-        axios
-          .get(
-            `${base_server_url}/api/test/${param.category}/result/${param.query}`
-          )
+        apiRequest
+          .get(`/api/test/${param.category}/result/${param.query}`)
           .then((res) => {
             if (res.data.code !== '0000') {
               alert('해당 결과는 없습니다.');

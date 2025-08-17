@@ -5,6 +5,7 @@ import Navigation from './Navigation.jsx';
 import { useNavigate } from 'react-router-dom';
 import logo from './assets/tennisFolio_logo.png';
 import Footer from './Footer.jsx';
+import LoadingMask from './components/common/LoadingMask.jsx';
 
 function Layout({ children }) {
   const navigate = useNavigate();
@@ -88,6 +89,9 @@ function Layout({ children }) {
           <p>© 2025 TennisFolio. All rights reserved.</p>
         </div>
       </footer>
+
+      {/* 로딩 마스크 */}
+      <LoadingMask />
     </div>
   );
 }
