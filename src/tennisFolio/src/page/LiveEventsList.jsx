@@ -6,7 +6,7 @@ import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import { base_server_url } from '@/constants';
 
-import axios from 'axios';
+import { apiRequest } from '../utils/apiClient';
 import MetatagRenderer from '../components/MetatagRenderer';
 import { useParams } from 'react-router-dom';
 function Main() {
@@ -17,8 +17,8 @@ function Main() {
   const category = param.category;
   // 초기 데이터 요청
   useEffect(() => {
-    axios
-      .get(`${base_server_url}/api/${category}/liveEvents`)
+    apiRequest
+      .get(`/api/${category}/liveEvents`)
       .then((res) => {
         setLiveEvents(res.data.data);
       })

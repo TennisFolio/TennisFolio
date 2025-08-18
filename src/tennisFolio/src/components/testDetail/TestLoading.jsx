@@ -1,7 +1,7 @@
 import React from 'react';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import axios from 'axios';
+import { apiRequest } from '../../utils/apiClient';
 import { base_server_url } from '@/constants';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
@@ -18,7 +18,7 @@ function TestLoading({ answerList }) {
 
   useEffect(() => {
     const fetchResult = async () => {
-      axios
+      apiRequest
         .post(`${base_server_url}/api/test/${category}/result`, answerList, {
           headers: {
             'Content-Type': 'application/json',

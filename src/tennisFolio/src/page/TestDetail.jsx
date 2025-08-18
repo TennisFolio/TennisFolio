@@ -2,8 +2,7 @@ import React from 'react';
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
-import axios from 'axios';
-import { base_server_url } from '@/constants';
+import { apiRequest } from '../utils/apiClient';
 
 import IntroRenderer from '../components/testDetail/IntroRenderer';
 import { clearTestResult } from '../store/testSlice';
@@ -21,8 +20,8 @@ function TestDetail() {
     dispatch(clearTestResult());
 
     if (!currentTest || currentTest === null || currentTest === undefined) {
-      axios
-        .get(`${base_server_url}/api/test/${category}`)
+      apiRequest
+        .get(`/api/test/${category}`)
         .then((res) => {
           if (res.data.code !== '0000') {
             alert('해당 테스트는 없습니다.');
@@ -37,8 +36,8 @@ function TestDetail() {
     }
 
     const fetchQuestionData = async () => {
-      axios
-        .get(`${base_server_url}/api/test/${category}/questions`)
+      apiRequest
+        .get(`/api/test/${category}/questions`)
         .then((res) => {
           if (res.data.code !== '0000') {
             return;
