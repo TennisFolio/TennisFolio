@@ -11,6 +11,7 @@ services:
       - "8080:8080"
     volumes:
       - ./src/main/resources/application.properties:/app/application.properties
+      - /var/log/tennisfolio:/var/log/tennisfolio
     networks:
       - tennisnet
 
