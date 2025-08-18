@@ -2,14 +2,13 @@ import React from 'react';
 import { useEffect, useState } from 'react';
 import TestHeader from '../components/testList/TestHeader';
 import TestItemList from '../components/testList/TestItemList';
-import axios from 'axios';
-import { base_server_url } from '@/constants';
+import { apiRequest } from '../utils/apiClient';
 
 function TestList() {
   const [testList, setTestList] = useState([]);
   useEffect(() => {
-    axios
-      .get(`${base_server_url}/api/test`)
+    apiRequest
+      .get('/api/test')
       .then((res) => setTestList(res.data.data))
       .catch((err) => console.log(err));
   }, []);

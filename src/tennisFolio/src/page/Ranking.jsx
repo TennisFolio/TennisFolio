@@ -1,15 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import RankingTable from '../components/ranking/RankingTable';
 import RankingHeader from '../components/ranking/RankingHeader';
-import { base_server_url } from '@/constants';
+import { apiRequest } from '../utils/apiClient';
 
 import './ranking.css';
 
 function Ranking() {
   const [rankings, setRankings] = useState([]);
   const [page, setPage] = useState(0);
-  const size = 20;
+  const size = 100;
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [isAllLoaded, setIsAllLoaded] = useState(false);
 
@@ -17,9 +16,7 @@ function Ranking() {
   useEffect(() => {
     const fetchInitial = async () => {
       try {
-        const res = await axios.get(`${base_server_url}/api/ranking`, {
-          params: { page: 0, size },
-        });
+        const res = await apiRequest.get('/api/ranking', { page: 0, size });
         setRankings(res.data.data);
         setPage(1);
         if (res.data.data.length < size) setIsAllLoaded(true);
@@ -35,9 +32,7 @@ function Ranking() {
   // 더보기 버튼 클릭 시
   const handleLoadMore = async () => {
     try {
-      const res = await axios.get(`${base_server_url}/api/ranking`, {
-        params: { page, size },
-      });
+      const res = await apiRequest.get('/api/ranking', { page, size });
       setRankings((prev) => [...prev, ...res.data.data]);
       setPage((prev) => prev + 1);
       if (res.data.data.length < size) setIsAllLoaded(true);
