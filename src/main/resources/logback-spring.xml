@@ -56,7 +56,7 @@
 
         <!-- 우리 코드: 파일에도 남기고, root로 전파해서 콘솔 1번만 -->
         <logger name="com.tennisfolio" level="INFO">
-            <appender-ref ref="LOCAL_FILE"/>
+            <appender-ref ref="PROD_FILE"/>
         </logger>
 
         <!-- root: 콘솔 1번만 -->

@@ -2,6 +2,9 @@ services:
   app:
     image: tennisfolio
     container_name: app
+    build:
+      context: .
+      dockerfile: Dockerfile
     environment:
       SPRING_PROFILES_ACTIVE: prod
     ports:
