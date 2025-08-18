@@ -41,9 +41,9 @@
     <!-- prod: 파일 저장(3일 보관) -->
     <springProfile name="prod">
         <appender name="PROD_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-            <file>/var/log/myapp/app.log</file>
+            <file>/var/log/tennisfolio/app.log</file>
             <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-                <fileNamePattern>/var/log/myapp/app.%d{yyyy-MM-dd}.gz</fileNamePattern>
+                <fileNamePattern>/var/log/tennisfolio/app.%d{yyyy-MM-dd}.gz</fileNamePattern>
                 <maxHistory>3</maxHistory>
                 <totalSizeCap>500MB</totalSizeCap>
             </rollingPolicy>
