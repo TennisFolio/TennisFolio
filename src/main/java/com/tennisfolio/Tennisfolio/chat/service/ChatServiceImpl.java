@@ -20,16 +20,18 @@ public class ChatServiceImpl implements ChatService{
     }
 
     @Override
-    public void saveChat(ChatMessage message) {
+    public ChatMessage saveChat(ChatMessage message) {
         Chat chat = new Chat(message);
 
-        chatRepository.save(chat);
+        Chat saveChat = chatRepository.save(chat);
+
+        return new ChatMessage(saveChat);
     }
 
     @Override
     public List<ChatMessage> getChatByMatchId(String matchId) {
         return chatRepository.findByRapidMatchId(matchId).stream()
-                .map(chat -> new ChatMessage(ChatEntity.fromModel(chat)))
+                .map(chat -> new ChatMessage(chat))
                 .collect(Collectors.toList());
     }
 }

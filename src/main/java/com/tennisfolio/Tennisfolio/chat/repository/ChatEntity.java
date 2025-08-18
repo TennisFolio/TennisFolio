@@ -46,6 +46,7 @@ public class ChatEntity extends BaseTimeEntity {
                 .nickName(nickName)
                 .message(message)
                 .type(type)
+                .timeStamp(getCreateDt())
                 .build();
     }
 }

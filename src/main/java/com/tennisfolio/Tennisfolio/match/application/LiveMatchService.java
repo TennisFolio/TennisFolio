@@ -1,17 +1,20 @@
 package com.tennisfolio.Tennisfolio.match.application;
 
 import com.tennisfolio.Tennisfolio.common.ExceptionCode;
+import com.tennisfolio.Tennisfolio.common.aop.SkipLog;
 import com.tennisfolio.Tennisfolio.exception.LiveMatchNotFoundException;
 import com.tennisfolio.Tennisfolio.infrastructure.api.base.StrategyApiTemplate;
 import com.tennisfolio.Tennisfolio.infrastructure.api.match.liveEvents.LiveEventsApiDTO;
 import com.tennisfolio.Tennisfolio.match.dto.LiveMatchResponse;
 import com.tennisfolio.Tennisfolio.player.application.PlayerService;
 import com.tennisfolio.Tennisfolio.player.domain.Player;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class LiveMatchService {
 
@@ -27,7 +30,7 @@ public class LiveMatchService {
         List<LiveEventsApiDTO> apiDTO = liveEventsTemplate.executeWithoutSave("");
 
         if(apiDTO == null || apiDTO.isEmpty()){
-            throw new LiveMatchNotFoundException(ExceptionCode.NOT_FOUND);
+            log.info("현재 진행중인 경기가 없습니다.");
         }
 
         return  apiDTO.stream()
@@ -39,7 +42,7 @@ public class LiveMatchService {
     public List<LiveMatchResponse> getWTALiveEvents(){
         List<LiveEventsApiDTO> apiDTO = liveEventsTemplate.executeWithoutSave("");
         if(apiDTO == null || apiDTO.isEmpty()){
-            throw new LiveMatchNotFoundException(ExceptionCode.NOT_FOUND);
+            log.info("현재 진행중인 경기가 없습니다.");
         }
 
         return apiDTO.stream()

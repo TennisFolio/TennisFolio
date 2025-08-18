@@ -25,7 +25,7 @@ public class LiveMatchResponse {
         this.rapidId = dto.getRapidId();
         this.tournamentName = dto.getTournament().getName();
         this.seasonName = dto.getSeason().getName();
-        this.roundName = dto.getRound().getName();
+        this.roundName = dto.getRound() != null ? dto.getRound().getName() : null;
         this.status = dto.getStatus().getDescription();
         this.homePlayer = new LiveMatchPlayerResponse(dto.getHomeTeam(), homePlayer);
         this.awayPlayer = new LiveMatchPlayerResponse(dto.getAwayTeam(), awayPlayer);
