@@ -21,6 +21,8 @@ public class PlayerEntity extends BaseTimeEntity {
     private String rapidPlayerId;
     @Column(name="PLAYER_NAME")
     private String playerName;
+    @Column(name="PLAYER_NAME_KR")
+    private String playerNameKr;
     @Column(name="BIRTH")
     private String birth;
     @Embedded
@@ -43,6 +45,7 @@ public class PlayerEntity extends BaseTimeEntity {
         playerEntity.playerId = player.getPlayerId();
         playerEntity.rapidPlayerId = player.getRapidPlayerId();
         playerEntity.playerName = player.getPlayerName();
+        playerEntity.playerNameKr = player.getPlayerNameKr();
         playerEntity.birth = player.getBirth();
         playerEntity.countryEntity = player.getCountry() != null
                 ? CountryEntity.fromModel(player.getCountry())
@@ -62,6 +65,7 @@ public class PlayerEntity extends BaseTimeEntity {
                 .playerId(playerId)
                 .rapidPlayerId(rapidPlayerId)
                 .playerName(playerName)
+                .playerNameKr(playerNameKr)
                 .birth(birth)
                 .country(countryEntity != null
                         ? countryEntity.toModel()

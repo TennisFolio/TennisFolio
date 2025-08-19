@@ -31,18 +31,21 @@ public class RankingServiceTest {
                 .playerId(1L)
                 .rapidPlayerId("1")
                 .playerName("Alcaraz")
+                .playerNameKr("알카라즈")
                 .build();
 
         Player player2 = Player.builder()
                 .playerId(2L)
                 .rapidPlayerId("2")
                 .playerName("Djokobic")
+                .playerNameKr("조코비치")
                 .build();
 
         Player player3 = Player.builder()
                 .playerId(3L)
                 .rapidPlayerId("3")
                 .playerName("Sinner")
+                .playerNameKr("시너")
                 .build();
 
         Ranking ranking1 = Ranking.builder()
@@ -98,6 +101,7 @@ public class RankingServiceTest {
         assertThat(rankings1.getPrePoints()).isEqualTo(900L);
         assertThat(rankings1.getRankingLastUpdated()).isEqualTo("20250731");
         assertThat(rankings1.getPlayer().getPlayerId()).isEqualTo(1L);
+        assertThat(rankings1.getPlayer().getPlayerNameKr()).isEqualTo("알카라즈");
 
         assertThat(rankings2.getRankingId()).isEqualTo(2L);
         assertThat(rankings2.getCurRanking()).isEqualTo(2L);
@@ -107,5 +111,6 @@ public class RankingServiceTest {
         assertThat(rankings2.getPrePoints()).isEqualTo(800L);
         assertThat(rankings2.getRankingLastUpdated()).isEqualTo("20250731");
         assertThat(rankings2.getPlayer().getPlayerId()).isEqualTo(2L);
+        assertThat(rankings2.getPlayer().getPlayerNameKr()).isEqualTo("조코비치");
     }
 }
