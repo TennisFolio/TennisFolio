@@ -10,6 +10,7 @@ public class RankingPlayerResponse {
     private Long playerId;
     private String rapidPlayerId;
     private String playerName;
+    private String playerNameKr;
     private String birth;
     private String TurnedPro;
     private String weight;
@@ -21,6 +22,7 @@ public class RankingPlayerResponse {
         this.playerId = player.getPlayerId();
         this.rapidPlayerId = player.getRapidPlayerId();
         this.playerName = player.getPlayerName();
+        this.playerNameKr = player.getPlayerNameKr();
         this.birth = player.getBirth();
         this.TurnedPro = player.getTurnedPro();
         this.weight = player.getWeight();
