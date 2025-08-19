@@ -19,6 +19,8 @@ public class Player {
 
     private String playerName;
 
+    private String playerNameKr;
+
     private String birth;
 
     private Country country;
