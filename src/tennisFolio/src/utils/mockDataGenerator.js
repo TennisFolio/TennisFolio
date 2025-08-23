@@ -1,3 +1,5 @@
+// 간단한 목 데이터 생성기
+
 const random = {
   arrayElement: (arr) => arr[Math.floor(Math.random() * arr.length)],
   number: (min, max) => Math.floor(Math.random() * (max - min + 1)) + min,
