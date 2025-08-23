@@ -8,7 +8,7 @@ import './ranking.css';
 function Ranking() {
   const [rankings, setRankings] = useState([]);
   const [page, setPage] = useState(0);
-  const size = 100;
+  const size = 40;
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [isAllLoaded, setIsAllLoaded] = useState(false);
 
@@ -41,18 +41,18 @@ function Ranking() {
     }
   };
 
-  if (isInitialLoading) {
-    return <div>Loading...</div>;
-  }
-
   return (
     <div>
       <RankingHeader lastUpdated={rankings[0]?.rankingLastUpdated} />
-      <RankingTable rankings={rankings} />
-      {!isAllLoaded && (
-        <button className="load-more-button" onClick={handleLoadMore}>
-          더 보기
-        </button>
+      {isInitialLoading ? null : ( // 공통 로딩 마스크가 표시됨
+        <>
+          <RankingTable rankings={rankings} />
+          {!isAllLoaded && (
+            <button className="load-more-button" onClick={handleLoadMore}>
+              더 보기
+            </button>
+          )}
+        </>
       )}
     </div>
   );
