@@ -1,18 +1,49 @@
 import axios from 'axios';
 import { store } from '../store/store';
 import { showLoading, hideLoading } from '../store/loadingSlice';
+import { selectMSWActive } from '../store/mswSlice';
 import { base_server_url } from '@/constants';
+
+// LiveEvents 관련 API인지 확인하는 함수
+const isLiveEventsAPI = (url) => {
+  return url.includes('/liveEvents') || url.includes('/liveEventsDetail');
+};
+
+// MSW가 활성화되었는지 확인하는 함수 (LiveEvents API에만 적용)
+const isMSWActiveForLiveEvents = (url) => {
+  if (import.meta.env.MODE !== 'development') return false;
+  if (!isLiveEventsAPI(url)) return false; // LiveEvents API가 아니면 MSW 사용 안함
+
+  // Redux store에서 MSW 상태 확인
+  const state = store.getState();
+  return selectMSWActive(state);
+};
 
 // axios 인스턴스 생성
 const apiClient = axios.create({
-  baseURL: base_server_url,
-  timeout: 10000,
+  baseURL: '', // 동적으로 설정
+  timeout: 20000,
 });
 
-// 요청 인터셉터 - 로딩 시작
+// 요청 인터셉터 - 로딩 시작 및 동적 baseURL 설정
 apiClient.interceptors.request.use(
   (config) => {
-    // 로딩 마스크가 필요한 요청인지 확인 (기본값: true)
+    // 개발 모드에서 LiveEvents API에만 MSW 적용
+    if (import.meta.env.MODE === 'development') {
+      const isLiveEvents = isLiveEventsAPI(config.url);
+      const mswActive = isMSWActiveForLiveEvents(config.url);
+
+      if (isLiveEvents) {
+        // LiveEvents API: MSW 상태에 따라 결정
+        config.baseURL = mswActive ? '' : base_server_url;
+      } else {
+        // 다른 API: 항상 실제 서버
+        config.baseURL = base_server_url;
+      }
+    } else {
+      config.baseURL = base_server_url;
+    }
+
     if (config.showLoading !== false) {
       store.dispatch(showLoading());
     }
