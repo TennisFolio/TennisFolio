@@ -4,7 +4,11 @@ import com.tennisfolio.Tennisfolio.exception.NotFoundException;
 import com.tennisfolio.Tennisfolio.infrastructure.api.base.EntityAssemble;
 import com.tennisfolio.Tennisfolio.common.ExceptionCode;
 import com.tennisfolio.Tennisfolio.exception.InvalidRequestException;
+import com.tennisfolio.Tennisfolio.infrastructure.api.match.liveEvents.ScoreDTO;
+import com.tennisfolio.Tennisfolio.infrastructure.api.match.liveEvents.TimeDTO;
 import com.tennisfolio.Tennisfolio.match.domain.Match;
+import com.tennisfolio.Tennisfolio.match.domain.Period;
+import com.tennisfolio.Tennisfolio.match.domain.Score;
 import com.tennisfolio.Tennisfolio.match.repository.MatchEntity;
 import com.tennisfolio.Tennisfolio.player.application.PlayerService;
 import com.tennisfolio.Tennisfolio.player.domain.Player;
@@ -55,7 +59,58 @@ public class LeagueEventsByRoundAssemble implements EntityAssemble<List<LeagueEv
             Player homePlayer = playerService.getOrCreatePlayerByRapidId(events.getHomeTeam().getRapidPlayerId());
             Player awayPlayer = playerService.getOrCreatePlayerByRapidId(events.getAwayTeam().getRapidPlayerId());
 
-            return new Match(events, round, homePlayer, awayPlayer);
+            ScoreDTO homeScoreDTO = events.getHomeScore();
+            Score homeScore = Score.builder()
+                    .set1(homeScoreDTO.getPeriod1())
+                    .set2(homeScoreDTO.getPeriod2())
+                    .set3(homeScoreDTO.getPeriod3())
+                    .set4(homeScoreDTO.getPeriod4())
+                    .set5(homeScoreDTO.getPeriod5())
+                    .set1Tie(homeScoreDTO.getPeriod1TieBreak())
+                    .set2Tie(homeScoreDTO.getPeriod2TieBreak())
+                    .set3Tie(homeScoreDTO.getPeriod3TieBreak())
+                    .set4Tie(homeScoreDTO.getPeriod4TieBreak())
+                    .set5Tie(homeScoreDTO.getPeriod5TieBreak())
+                    .build();
+
+            ScoreDTO awayScoreDTO = events.getAwayScore();
+            Score awayScore = Score.builder()
+                    .set1(awayScoreDTO.getPeriod1())
+                    .set2(awayScoreDTO.getPeriod2())
+                    .set3(awayScoreDTO.getPeriod3())
+                    .set4(awayScoreDTO.getPeriod4())
+                    .set5(awayScoreDTO.getPeriod5())
+                    .set1Tie(awayScoreDTO.getPeriod1TieBreak())
+                    .set2Tie(awayScoreDTO.getPeriod2TieBreak())
+                    .set3Tie(awayScoreDTO.getPeriod3TieBreak())
+                    .set4Tie(awayScoreDTO.getPeriod4TieBreak())
+                    .set5Tie(awayScoreDTO.getPeriod5TieBreak())
+                    .build();
+            TimeDTO timeSet = events.getTime();
+            Period periodSet = Period.builder()
+                    .set1(timeSet.getPeriod1())
+                    .set2(timeSet.getPeriod2())
+                    .set3(timeSet.getPeriod3())
+                    .set4(timeSet.getPeriod4())
+                    .set5(timeSet.getPeriod5())
+                    .build();
+
+            return Match.builder()
+                    .rapidMatchId(events.getRapidMatchId())
+                    .homeSeed(events.getHomeTeamSeed())
+                    .awaySeed(events.getAwayTeamSeed())
+                    .homeScore(events.getHomeScore().getCurrent())
+                    .awayScore(events.getAwayScore().getCurrent())
+                    .round(round)
+                    .homePlayer(homePlayer)
+                    .awayPlayer(awayPlayer)
+                    .homeSet(homeScore)
+                    .awaySet(awayScore)
+                    .periodSet(periodSet)
+                    .startTimeStamp(events.getStartTimestamp())
+                    .winner(events.getWinner())
+                    .build();
+
         }).collect(Collectors.toList());
 
 
