@@ -60,12 +60,11 @@ jobs:
           VITE_BASE_SERVER_URL=${{ secrets.VITE_BASE_SERVER_URL }}
           EOF
           
-      - name: Install dependencies
+      - name: Remove lock & install (legacy peer deps)
         run: |
+          rm -f package-lock.json
           npm cache clean --force
-          npm ci --legacy-peer-deps --registry=https://registry.npmjs.org/
-
-      
+          npm install --legacy-peer-deps --registry=https://registry.npmjs.org/
 
       - name: build
         run: CI=false npm run build
