@@ -6,10 +6,11 @@ import { base_image_url } from '@/constants';
 import { useParams } from 'react-router-dom';
 import SmartImage from './SmartImage';
 
-function LiveEvents({ liveEvents }) {
+function LiveEvents({ liveEvents, category: propCategory }) {
   const navigate = useNavigate();
   const param = useParams();
-  const category = param.category;
+  const category = propCategory || param.category;
+
   const OnClickDetailButton = (event) => {
     navigate(`/liveEvents/${event.rapidId}`);
   };
@@ -33,35 +34,35 @@ function LiveEvents({ liveEvents }) {
               <div className="teamBlock">
                 <SmartImage
                   base_url={base_image_url}
-                  imageName={event.homePlayer.playerImage}
-                  fallbackText={event.homePlayer.name}
+                  imageName={event.homePlayer?.playerImage}
+                  fallbackText={event.homePlayer?.playerName}
                 />
 
                 <div className="teamName">
-                  {event.homePlayer.playerName}({event.homePlayer.playerRanking}
-                  )
+                  {event.homePlayer?.playerName}(
+                  {event.homePlayer?.playerRanking})
                 </div>
               </div>
 
               <div className="setScore">
-                {event.homeScore.current} : {event.awayScore.current}
+                {event.homeScore?.current} : {event.awayScore?.current}
               </div>
 
               <div className="teamBlock">
                 <SmartImage
                   base_url={base_image_url}
-                  imageName={event.awayPlayer.playerImage}
-                  fallbackText={event.awayPlayer.name}
+                  imageName={event.awayPlayer?.playerImage}
+                  fallbackText={event.awayPlayer?.playerName}
                 />
                 <div className="teamName">
-                  {event.awayPlayer.playerName}({event.awayPlayer.playerRanking}
-                  )
+                  {event.awayPlayer?.playerName}(
+                  {event.awayPlayer?.playerRanking})
                 </div>
               </div>
             </div>
 
             <div className="pointScore">
-              {event.homeScore.point} : {event.awayScore.point}
+              {event.homeScore?.point} : {event.awayScore?.point}
             </div>
 
             <div className="eventTable">
@@ -80,10 +81,10 @@ function LiveEvents({ liveEvents }) {
                   <tr>
                     <td>
                       <span style={{ verticalAlign: 'middle' }}>
-                        {event.homePlayer.playerName}
+                        {event.homePlayer?.playerName}
                       </span>
                       <Flag
-                        code={event.homePlayer.playerCountryAlpha}
+                        code={event.homePlayer?.playerCountryAlpha}
                         style={{
                           width: '24px',
                           height: '16px',
@@ -92,17 +93,17 @@ function LiveEvents({ liveEvents }) {
                         }}
                       />
                     </td>
-                    {event.homeScore.periodScore.map((score, index) => (
+                    {event.homeScore?.periodScore.map((score, index) => (
                       <td key={index}>{score}</td>
                     ))}
                   </tr>
                   <tr>
                     <td>
                       <span style={{ verticalAlign: 'middle' }}>
-                        {event.awayPlayer.playerName}
+                        {event.awayPlayer?.playerName}
                       </span>
                       <Flag
-                        code={event.awayPlayer.playerCountryAlpha}
+                        code={event.awayPlayer?.playerCountryAlpha}
                         style={{
                           width: '24px',
                           height: '16px',
@@ -111,7 +112,7 @@ function LiveEvents({ liveEvents }) {
                         }}
                       />
                     </td>
-                    {event.awayScore.periodScore.map((score, index) => (
+                    {event.awayScore?.periodScore.map((score, index) => (
                       <td key={index}>{score}</td>
                     ))}
                   </tr>

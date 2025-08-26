@@ -1,0 +1,43 @@
+.msw-toggle-btn {
+  position: fixed;
+  top: 1.25rem;
+  right: 1.25rem;
+  z-index: 9999;
+  padding: 0.5rem 0.75rem;
+  color: white;
+  border: none;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  font-size: 0.75rem;
+  font-weight: bold;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.2);
+  transition: all 0.2s ease;
+}
+
+.msw-toggle-btn.active {
+  background-color: #4caf50;
+}
+
+.msw-toggle-btn.inactive {
+  background-color: #f44336;
+}
+
+.msw-toggle-btn:hover {
+  transform: translateY(-0.0625rem);
+  box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.3);
+}
+
+.msw-toggle-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.2);
+}
+
+/* 모바일 최적화 */
+@media (max-width: 480px) {
+  .msw-toggle-btn {
+    top: 1rem;
+    right: 1rem;
+    padding: 0.4rem 0.6rem;
+    font-size: 0.7rem;
+  }
+}
