@@ -28,23 +28,44 @@ jobs:
           cache-dependency-path: src/tennisFolio/package-lock.json
           registry-url: 'https://registry.npmjs.org'
 
+      - name: Debug npm config (before)
+        run: |
+          npm config ls -l
+          npm ping || true
+          cat ~/.npmrc || true
+          cat .npmrc || true
+
       - name: Normalize npm registry & auth
         run: |
           npm config set registry https://registry.npmjs.org/
           npm config delete always-auth || true
           npm config delete //registry.npmjs.org/:_authToken || true
-          npm config list
+          npm config delete //npm.pkg.github.com/:_authToken || true
+          
+      - name: Clear env tokens that can force auth
+        run: |
+          echo "NODE_AUTH_TOKEN=" >> $GITHUB_ENV
+          echo "NPM_TOKEN=" >> $GITHUB_ENV
+          echo "NPM_CONFIG_ALWAYS_AUTH=false" >> $GITHUB_ENV
+          echo "NPM_CONFIG_REGISTRY=https://registry.npmjs.org/" >> $GITHUB_ENV
+
+      - name: Debug npm config (after)
+        run: |
+          npm config ls -l
+          npm ping
 
       - name: Create .env.production
         run : |
           cat > .env.production << 'EOF'
           VITE_BASE_SERVER_URL=${{ secrets.VITE_BASE_SERVER_URL }}
           EOF
-
-      - name: npm install
+          
+      - name: Install dependencies
         run: |
           npm cache clean --force
-          npm ci --legacy-peer-deps
+          npm ci --legacy-peer-deps --registry=https://registry.npmjs.org/
+
+      
 
       - name: build
         run: CI=false npm run build
