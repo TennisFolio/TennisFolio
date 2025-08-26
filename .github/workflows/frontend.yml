@@ -18,7 +18,22 @@ jobs:
 
     steps:
       - name: git clone
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+
+      - name: Use Node.js 20 + npm cache
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: src/tennisFolio/package-lock.json
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Normalize npm registry & auth
+        run: |
+          npm config set registry https://registry.npmjs.org/
+          npm config delete always-auth || true
+          npm config delete //registry.npmjs.org/:_authToken || true
+          npm config list
 
       - name: Create .env.production
         run : |
@@ -29,7 +44,7 @@ jobs:
       - name: npm install
         run: |
           npm cache clean --force
-          npm install --legacy-peer-deps
+          npm ci --legacy-peer-deps
 
       - name: build
         run: CI=false npm run build
