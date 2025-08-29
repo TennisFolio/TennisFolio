@@ -5,6 +5,7 @@ import com.tennisfolio.Tennisfolio.common.aop.SkipLog;
 import com.tennisfolio.Tennisfolio.exception.LiveMatchNotFoundException;
 import com.tennisfolio.Tennisfolio.infrastructure.api.base.StrategyApiTemplate;
 import com.tennisfolio.Tennisfolio.infrastructure.api.match.liveEvents.LiveEventsApiDTO;
+import com.tennisfolio.Tennisfolio.match.domain.Match;
 import com.tennisfolio.Tennisfolio.match.dto.LiveMatchResponse;
 import com.tennisfolio.Tennisfolio.player.application.PlayerService;
 import com.tennisfolio.Tennisfolio.player.domain.Player;
@@ -18,54 +19,36 @@ import java.util.stream.Collectors;
 @Service
 public class LiveMatchService {
 
-    private final PlayerService playerService;
-    private final StrategyApiTemplate<List<LiveEventsApiDTO>, Void> liveEventsTemplate;
+    private final StrategyApiTemplate<List<LiveEventsApiDTO>, List<LiveMatchResponse>> liveEventsTemplate;
 
-    public LiveMatchService(PlayerService playerService, StrategyApiTemplate<List<LiveEventsApiDTO>, Void> liveEventsTemplate) {
-        this.playerService = playerService;
+    public LiveMatchService( StrategyApiTemplate<List<LiveEventsApiDTO>, List<LiveMatchResponse>> liveEventsTemplate) {
         this.liveEventsTemplate = liveEventsTemplate;
     }
 
     public List<LiveMatchResponse> getATPLiveEvents() {
-        List<LiveEventsApiDTO> apiDTO = liveEventsTemplate.executeWithoutSave("");
-
-        if(apiDTO == null || apiDTO.isEmpty()){
-            log.info("현재 진행중인 경기가 없습니다.");
-        }
-
-        return  apiDTO.stream()
-                .filter(dto -> dto.getTournament().getCategory().isAtp())
-                .map(this::getLiveMatchResponse)
+        return liveEventsTemplate.execute("")
+                .stream()
+                .filter(LiveMatchResponse::isAtp)
                 .collect(Collectors.toList());
+
     }
 
     public List<LiveMatchResponse> getWTALiveEvents(){
-        List<LiveEventsApiDTO> apiDTO = liveEventsTemplate.executeWithoutSave("");
-        if(apiDTO == null || apiDTO.isEmpty()){
-            log.info("현재 진행중인 경기가 없습니다.");
-        }
-
-        return apiDTO.stream()
-                .filter(dto -> dto.getTournament().getCategory().isWta())
-                .map(this::getLiveMatchResponse)
+        return liveEventsTemplate.execute("")
+                .stream()
+                .filter(LiveMatchResponse::isWta)
                 .collect(Collectors.toList());
     }
 
 
     public LiveMatchResponse getLiveEvent(String rapidMatchId) {
-        List<LiveEventsApiDTO> apiDTO = liveEventsTemplate.executeWithoutSave("");
 
-        return apiDTO.stream()
-                .map(this::getLiveMatchResponse)
-                .filter(dto -> rapidMatchId.equals(dto.getRapidId()))
+        return liveEventsTemplate.execute("")
+                .stream()
+                .filter(response -> rapidMatchId.equals(response.getRapidId()))
                 .findFirst()
                 .orElseThrow(() -> new LiveMatchNotFoundException(ExceptionCode.NOT_FOUND));
 
     }
 
-    private LiveMatchResponse getLiveMatchResponse(LiveEventsApiDTO dto){
-        Player homePlayer = playerService.getOrCreatePlayerByRapidId(dto.getHomeTeam().getRapidPlayerId());
-        Player awayPlayer = playerService.getOrCreatePlayerByRapidId(dto.getAwayTeam().getRapidPlayerId());
-        return new LiveMatchResponse(dto, homePlayer, awayPlayer);
-    }
 }

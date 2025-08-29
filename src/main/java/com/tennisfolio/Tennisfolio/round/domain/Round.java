@@ -22,10 +22,10 @@ public class Round {
 
     private String slug;
 
-    public Round(LeagueRoundsDTO dto, Season season){
+    public Round(Long round, String name, String slug, Season season){
         this.season = season;
-        this.round = dto.getRound();
-        this.name = dto.getName();
-        this.slug = dto.getSlug();
+        this.round = round;
+        this.name = name;
+        this.slug = slug;
     }
 }

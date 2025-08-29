@@ -1,6 +1,5 @@
 package com.tennisfolio.Tennisfolio.match.domain;
 
-import com.tennisfolio.Tennisfolio.infrastructure.api.match.leagueEventsByRound.LeagueEventsByRoundDTO;
 import com.tennisfolio.Tennisfolio.player.domain.Player;
 import com.tennisfolio.Tennisfolio.round.domain.Round;
 import lombok.AllArgsConstructor;
@@ -40,19 +39,20 @@ public class Match {
 
     private String winner;
 
-    public Match(LeagueEventsByRoundDTO dto, Round round, Player homePlayer, Player awayPlayer){
+    public Match(String rapidMatchId, String homeSeed, String awaySeed, Long homeScore, Long awayScore
+            , Round round, Player homePlayer, Player awayPlayer, Score homeSet, Score awaySet, Period periodSet, String startTimeStamp, String winner){
         this.round = round;
-        this.rapidMatchId = dto.getRapidMatchId();
-        this.homeScore = dto.getHomeScore().getCurrent();
-        this.awayScore = dto.getAwayScore().getCurrent();
-        this.homeSeed = dto.getHomeTeamSeed();
-        this.awaySeed = dto.getAwayTeamSeed();
+        this.rapidMatchId = rapidMatchId;
+        this.homeScore = homeScore;
+        this.awayScore = awayScore;
+        this.homeSeed = homeSeed;
+        this.awaySeed = awaySeed;
         this.homePlayer = homePlayer;
         this.awayPlayer = awayPlayer;
-        this.homeSet = new Score(dto.getHomeScore());
-        this.awaySet = new Score(dto.getAwayScore());
-        this.periodSet = new Period(dto.getTime());
-        this.startTimeStamp = dto.getStartTimestamp();
-        this.winner = dto.getWinner();
+        this.homeSet = homeSet;
+        this.awaySet = awaySet;
+        this.periodSet = periodSet;
+        this.startTimeStamp = startTimeStamp;
+        this.winner = winner;
     }
 }
