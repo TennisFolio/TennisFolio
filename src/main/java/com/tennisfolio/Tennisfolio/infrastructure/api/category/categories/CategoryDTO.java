@@ -16,12 +16,4 @@ public class CategoryDTO {
     private String name;
     @JsonProperty("slug")
     private String slug;
-
-    public boolean isAtp(){
-        return "atp".equals(slug);
-    }
-
-    public boolean isWta(){
-        return "wta".equals(slug);
-    }
 }

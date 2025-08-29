@@ -33,7 +33,7 @@ public class LeagueRoundsAssemble implements EntityAssemble<List<LeagueRoundsDTO
                 .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND));
 
         return dto.stream()
-                .map(round -> new Round(round, season))
+                .map(round -> new Round(round.getRound(), round.getName(), round.getSlug(), season))
                 .collect(Collectors.toList());
     }
 }

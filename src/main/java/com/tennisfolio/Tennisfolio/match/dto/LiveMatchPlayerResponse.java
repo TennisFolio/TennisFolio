@@ -8,7 +8,6 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 public class LiveMatchPlayerResponse {
-    private Long playerId;
     private String playerRapidId;
     private String playerName;
     private String playerImage;
@@ -17,7 +16,6 @@ public class LiveMatchPlayerResponse {
     private String playerCountryName;
 
     public LiveMatchPlayerResponse(TeamDTO dto, Player player){
-        this.playerId = player.getPlayerId();
         this.playerRapidId = player.getRapidPlayerId();
         this.playerName = dto.getName();
         this.playerImage = player.getImage();

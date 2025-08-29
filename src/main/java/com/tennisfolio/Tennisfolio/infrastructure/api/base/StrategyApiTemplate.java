@@ -32,7 +32,7 @@ public abstract class StrategyApiTemplate<T, E> {
         this.endpoint = endpoint;
     }
 
-    // api 조회 후 DB 저장
+    // api 조회 후 엔티티 변환
     public E execute(Object... params){
         // api 호출
         String responseStr = apiCaller.callApi(endpoint, params);
@@ -43,12 +43,5 @@ public abstract class StrategyApiTemplate<T, E> {
 
     }
 
-    // api 조회 후 화면에 응답
-    public T executeWithoutSave(String params){
-        // api호출
-        String responseStr = apiCaller.callApi(endpoint, params);
-        // response to DTO
-        return parser.parse(responseStr);
-    }
 
 }

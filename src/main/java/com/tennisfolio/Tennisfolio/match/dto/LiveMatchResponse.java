@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class LiveMatchResponse {
     private String rapidId;
+    private String category;
     private String tournamentName;
     private String seasonName;
     private String roundName;
@@ -23,6 +24,7 @@ public class LiveMatchResponse {
 
     public LiveMatchResponse(LiveEventsApiDTO dto, Player homePlayer, Player awayPlayer){
         this.rapidId = dto.getRapidId();
+        this.category = dto.getTournament().getCategory().getSlug();
         this.tournamentName = dto.getTournament().getName();
         this.seasonName = dto.getSeason().getName();
         this.roundName = dto.getRound() != null ? dto.getRound().getName() : null;
@@ -32,6 +34,14 @@ public class LiveMatchResponse {
         this.homeScore = new LiveMatchScoreResponse(dto.getHomeScore());
         this.awayScore = new LiveMatchScoreResponse(dto.getAwayScore());
         this.time = new LiveMatchTimeResponse(dto);
+    }
+
+    public boolean isAtp(){
+        return "atp".equals(category);
+    }
+
+    public boolean isWta(){
+        return "wta".equals(category);
     }
 
 
