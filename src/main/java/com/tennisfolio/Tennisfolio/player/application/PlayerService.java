@@ -10,6 +10,7 @@ import com.tennisfolio.Tennisfolio.player.infrastructure.PlayerRepository;
 import jakarta.transaction.Transactional;
 import lombok.Builder;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -26,14 +27,17 @@ public class PlayerService {
         this.playerRepository = playerRepository;
     }
 
-    @Transactional
     @SkipLog
     public Player getOrCreatePlayerByRapidId(String rapidId) {
         if(!playerRepository.existsByRapidPlayerId(rapidId)){
             Player player = teamDetailsTemplate.execute(rapidId).toPlayer();
             String path = playerImageService.fetchImage(rapidId);
             player.updateProfileImage(path);
-            return playerRepository.save(player);
+            try{
+                return playerRepository.save(player);
+            }catch(DataIntegrityViolationException e){
+                return playerRepository.findByRapidPlayerId(rapidId).orElseThrow();
+            }
         }
 
         return playerRepository.findByRapidPlayerId(rapidId).get();
