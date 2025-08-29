@@ -6,10 +6,12 @@ import com.tennisfolio.Tennisfolio.match.domain.Match;
 import com.tennisfolio.Tennisfolio.match.dto.LiveMatchResponse;
 import com.tennisfolio.Tennisfolio.player.application.PlayerService;
 import com.tennisfolio.Tennisfolio.player.domain.Player;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Component
 public class LiveEventsAssemble implements EntityAssemble<List<LiveEventsApiDTO>, List<LiveMatchResponse>> {
     private final PlayerService playerService;
 

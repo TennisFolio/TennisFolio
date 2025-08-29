@@ -16,7 +16,7 @@ public class LiveMatchPlayerResponse {
     private String playerCountryName;
 
     public LiveMatchPlayerResponse(TeamDTO dto, Player player){
-        this.playerRapidId = player.getRapidPlayerId().value();
+        this.playerRapidId = player.getRapidPlayerId();
         this.playerName = dto.getName();
         this.playerImage = player.getImage();
         this.playerRanking = dto.getRanking();
