@@ -2,6 +2,12 @@
 > 테니스 팬을 위한 **실시간 경기 + 선수 정보 + 추천 테스트** 통합 서비스  
 > 배포 링크: [https://tennisfolio.net](https://tennisfolio.net)
 
+## 팀 소개
+| 임재학 | 박태환 |
+|------|------|
+| [cosiw](https://github.com/cosiw) | [mekemeke94](https://github.com/mekemeke94) |
+| Backend | Frontend |
+
 ## 프로젝트 소개
 **TennisFolio**는 API 데이터를 가공하여 테니스 팬들이 실시간 경기 정보 및 선수 정보를 확인할 수 있도록 만든 사이트입니다.
 
