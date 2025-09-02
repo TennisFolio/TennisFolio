@@ -14,15 +14,20 @@ import com.tennisfolio.Tennisfolio.infrastructure.api.tournament.tournamentInfo.
 import com.tennisfolio.Tennisfolio.player.application.PlayerService;
 import com.tennisfolio.Tennisfolio.player.domain.Player;
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class TournamentSyncService {
     private final StrategyApiTemplate<List<CategoryTournamentsDTO>, List<Tournament>> categoryTournamentsApiTemplate;
     private final StrategyApiTemplate<TournamentInfoDTO, Tournament> tournamentInfoApiTemplate;
@@ -78,32 +83,71 @@ public class TournamentSyncService {
         tournamentRepository.flushAll();
     }
 
-    public void saveTournamentDetail(){
-
+    public void saveTournamentInfo(){
         List<Tournament> findTournaments = tournamentRepository.findAll();
+
         findTournaments
                 .stream()
-                .map(tournament -> {
-                    try{
-                        Tournament tournamentInfo = tournamentInfoApiTemplate.execute(tournament.getRapidTournamentId());
-                        Tournament leagueDetails = leagueDetailsApiTemplate.execute(tournament.getRapidTournamentId());
-                        if(tournamentInfo != null){
-                            tournamentInfo.mergeTournament(leagueDetails);
-                            tournamentRepository.collect(tournamentInfo);
-                            tournamentRepository.flushWhenFull();
-                        }
-                        return tournamentInfo;
-                    }catch(Exception e){
-                        e.printStackTrace();
-                        System.out.println(tournament.getRapidTournamentId());
-                    }
-
-                    return null;
-                })
+                .map(this::updateTournamentInfo)
+                .filter(Objects::nonNull)
                 .toList();
 
         tournamentRepository.flushAll();
+    }
 
+    private Tournament updateTournamentInfo(Tournament tournament){
+        String rapidId = tournament.getRapidTournamentId();
+        Tournament tournamentInfo = tournament;
+        boolean fetchedInfo = false;
 
+        if (tournament.needsTournamentInfo()) {
+            Tournament fetched = tournamentInfoApiTemplate.execute(rapidId);
+            if(fetched != null){
+                tournamentInfo = fetched;
+                fetchedInfo = true;
+            }else{
+                log.warn("tournamentInfoApiTemplate returned null for rapidId={}", rapidId);
+            }
+        }
+        if (fetchedInfo) {
+            tournamentRepository.collect(tournamentInfo);
+            tournamentRepository.flushWhenFull();
+        }
+
+        return (fetchedInfo) ? tournamentInfo : tournament;
+    }
+
+    public void saveLeagueDetails(){
+        List<Tournament> findTournaments = tournamentRepository.findAllWithPlayers();
+
+        findTournaments
+                .stream()
+                .map(this::updateLeagueDetails)
+                .filter(Objects::nonNull)
+                .toList();
+
+        tournamentRepository.flushAll();
+    }
+
+    private Tournament updateLeagueDetails(Tournament tournament){
+        String rapidId = tournament.getRapidTournamentId();
+        Tournament leagueDetails = tournament;
+        boolean fetchedLeagueDetials = false;
+
+        if (tournament.needsLeagueDetails()) {
+            Tournament fetched = leagueDetailsApiTemplate.execute(rapidId);
+            if(fetched != null){
+                fetchedLeagueDetials = true;
+            }else{
+                log.warn("leagueDetailsApiTemplate returned null for rapidId={}", rapidId);
+            }
+        }
+
+        if (fetchedLeagueDetials) {
+            tournamentRepository.collect(leagueDetails);
+            tournamentRepository.flushWhenFull();
+        }
+
+        return (fetchedLeagueDetials) ? leagueDetails : tournament;
     }
 }

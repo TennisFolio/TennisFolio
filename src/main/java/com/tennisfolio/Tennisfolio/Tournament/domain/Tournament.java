@@ -12,7 +12,6 @@ import lombok.Getter;
 
 @Getter
 @Builder
-@AllArgsConstructor
 public class Tournament{
 
     private Long tournamentId;
@@ -41,10 +40,20 @@ public class Tournament{
 
     public Tournament(){}
 
-    public Tournament(CategoryTournamentsDTO dto, Category category){
-        this.rapidTournamentId = dto.getTournamentRapidId();
-        this.tournamentName = dto.getTournamentName();
+    public Tournament(Long tournamentId, Category category, String rapidTournamentId, String matchType, String tournamentName, String city
+    , String groundType, String logo, String mostTitles, Player mostTitlePlayer, Player titleHolder, Long points){
+        this.tournamentId = tournamentId;
         this.category = category;
+        this.rapidTournamentId = rapidTournamentId;
+        this.matchType = matchType;
+        this.tournamentName = tournamentName;
+        this.city = city;
+        this.groundType = groundType;
+        this.logo = logo;
+        this.mostTitles = mostTitles;
+        this.mostTitlePlayer = mostTitlePlayer;
+        this.titleHolder = titleHolder;
+        this.points = points;
     }
 
     public void updateFromLeagueDetails(Player mostTitlePlayer, Player titleHolder, LeagueDetailsDTO dto){
@@ -54,10 +63,10 @@ public class Tournament{
         this.points = dto.getPoints();
     }
 
-    public void updateFromTournamentInfo(TournamentInfoDTO incoming){
-        this.city = incoming.getCity();
-        this.matchType = incoming.getMatchType();
-        this.groundType = incoming.getGroundType();
+    public void updateFromTournamentInfo(String city, String matchType, String groundType){
+        this.city = city;
+        this.matchType = matchType;
+        this.groundType = groundType;
     }
 
     public void mergeTournament(Tournament tournament){
@@ -65,6 +74,14 @@ public class Tournament{
         this.titleHolder = tournament.getTitleHolder();
         this.mostTitles = tournament.getMostTitles();
         this.points = tournament.getPoints();
+    }
+
+    public boolean needsTournamentInfo(){
+        return this.city == null && this.matchType == null && this.groundType == null;
+    }
+
+    public boolean needsLeagueDetails(){
+        return this.mostTitlePlayer == null && this.titleHolder == null && this.mostTitles == null && this.points == null;
     }
 
 }

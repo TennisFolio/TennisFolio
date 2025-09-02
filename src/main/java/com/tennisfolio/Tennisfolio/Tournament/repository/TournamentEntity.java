@@ -25,7 +25,7 @@ public class TournamentEntity extends BaseTimeEntity {
     )
     private Long tournamentId;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "CATEGORY_ID")
     private CategoryEntity categoryEntity;
 
@@ -66,7 +66,7 @@ public class TournamentEntity extends BaseTimeEntity {
         tournamentEntity.tournamentId = tournament.getTournamentId();
         tournamentEntity.categoryEntity = tournament.getCategory() != null
                 ? CategoryEntity.fromModel(tournament.getCategory())
-                : null;
+                : new CategoryEntity();
         tournamentEntity.rapidTournamentId = tournament.getRapidTournamentId();
         tournamentEntity.tournamentName = tournament.getTournamentName();
         return tournamentEntity;
@@ -77,7 +77,7 @@ public class TournamentEntity extends BaseTimeEntity {
         tournamentEntity.tournamentId = tournament.getTournamentId();
         tournamentEntity.categoryEntity = tournament.getCategory() != null
                 ? CategoryEntity.fromModel(tournament.getCategory())
-                : null;
+                : new CategoryEntity();
         tournamentEntity.rapidTournamentId = tournament.getRapidTournamentId();
         tournamentEntity.matchType = tournament.getMatchType();
         tournamentEntity.tournamentName = tournament.getTournamentName();
