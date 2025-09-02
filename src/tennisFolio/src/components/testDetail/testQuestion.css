@@ -1,6 +1,6 @@
 .question-form-container {
   max-width: 640px;
-  margin: 2rem auto;
+  margin: 1rem auto;
   padding: 1rem;
   font-family: 'Noto Sans KR', sans-serif;
 }
@@ -56,4 +56,38 @@
   font-size: 0.9rem;
   color: #666;
   margin-bottom: 0.5rem;
+  margin-top: 1rem;
+}
+
+/* 태블릿에서 조정 */
+@media (max-width: 1023px) and (min-width: 768px) {
+  .question-form-container {
+    margin: 1rem auto;
+  }
+
+  .question-card {
+    padding: 1.5rem;
+  }
+}
+
+/* 모바일에서 조정 */
+@media (max-width: 767px) {
+  .question-form-container {
+    margin: 0.5rem auto;
+    padding: 0.5rem;
+  }
+
+  .question-card {
+    padding: 1rem;
+  }
+
+  .question-title {
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+  }
+
+  .option-button {
+    padding: 0.8rem;
+    font-size: 0.9rem;
+  }
 }
