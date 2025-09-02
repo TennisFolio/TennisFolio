@@ -1,12 +1,21 @@
 import React from 'react';
 import { useEffect, useState } from 'react';
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
-import { apiRequest } from '../utils/apiClient';
-
 import IntroRenderer from '../components/testDetail/IntroRenderer';
 import { clearTestResult } from '../store/testSlice';
 import { setCurrentTest } from '../store/testSlice';
+
+// 테스트 데이터를 동적으로 가져오는 함수
+const getTestData = async (category) => {
+  try {
+    const testData = await import(`../assets/testAssets/${category}.json`);
+    return testData.default;
+  } catch (error) {
+    console.error(`Failed to load test data for category: ${category}`, error);
+    return null;
+  }
+};
 
 function TestDetail() {
   const { category } = useParams();
@@ -19,35 +28,46 @@ function TestDetail() {
     // 기존 테스트 결과 redux 초기화
     dispatch(clearTestResult());
 
-    if (!currentTest || currentTest === null || currentTest === undefined) {
-      apiRequest
-        .get(`/api/test/${category}`)
-        .then((res) => {
-          if (res.data.code !== '0000') {
-            alert('해당 테스트는 없습니다.');
-            navigate('/test');
-          }
-          dispatch(setCurrentTest(res.data.data));
-        })
-        .catch((err) => {
-          alert('해당 테스트는 없습니다.');
-          navigate('/test');
-        });
-    }
+    const loadTestData = async () => {
+      // 테스트 데이터 가져오기
+      const testData = await getTestData(category);
 
-    const fetchQuestionData = async () => {
-      apiRequest
-        .get(`/api/test/${category}/questions`)
-        .then((res) => {
-          if (res.data.code !== '0000') {
-            return;
-          }
-          setQuestionList(res.data.data);
-        })
-        .catch((err) => {});
+      if (!testData) {
+        alert('해당 테스트는 없습니다.');
+        navigate('/test');
+        return;
+      }
+
+      console.log('currentTest', currentTest);
+      if (!currentTest || currentTest === null || currentTest === undefined) {
+        const testInfo = {
+          testCategoryId: `${category}-test`,
+          url: testData.info.mainUrl,
+          title: testData.info.mainTitle,
+          testCategoryName: testData.info.mainTitle,
+          description: testData.info.description,
+          testType: testData.info.testType,
+          testData: testData,
+          image: testData.info.image,
+        };
+        dispatch(setCurrentTest(testInfo));
+      }
+
+      // JSON 파일에서 질문 데이터 설정 (구조 변환)
+      const formattedQuestions = testData.questions.map((question, index) => ({
+        order: index + 1,
+        question: question.question,
+        testOption: question.testOption.map((option, optIndex) => ({
+          optionId: optIndex + 1,
+          optionText: option.content,
+          target: option.target,
+        })),
+      }));
+      setQuestionList(formattedQuestions);
     };
-    fetchQuestionData();
-  }, []);
+
+    loadTestData();
+  }, [category, currentTest, dispatch, navigate]);
 
   return (
     <div>
