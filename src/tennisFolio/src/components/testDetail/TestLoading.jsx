@@ -1,41 +1,47 @@
 import React from 'react';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { apiRequest } from '../../utils/apiClient';
-import { base_server_url } from '@/constants';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { setTestResult } from '../../store/testSlice';
 import loadingAnimation from '../../assets/loading-animation.json';
 import Lottie from 'lottie-react';
+import { calculateTestResult } from '../../utils/testCalculator.js';
+
+// 테스트 데이터를 동적으로 가져오는 함수
+const getTestData = async (category) => {
+  try {
+    const testData = await import(`../../assets/testAssets/${category}.json`);
+    return testData.default;
+  } catch (error) {
+    console.error(`Failed to load test data for category: ${category}`, error);
+    return null;
+  }
+};
 
 function TestLoading({ answerList }) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { category } = useParams();
 
-  const loadingTime = 3700; //ms
+  const loadingTime = 1000; //ms
 
   useEffect(() => {
-    const fetchResult = async () => {
-      apiRequest
-        .post(`${base_server_url}/api/test/${category}/result`, answerList, {
-          headers: {
-            'Content-Type': 'application/json',
-            Accept: 'application/json',
-          },
-        })
-        .then((res) => {
-          if (res.data.code !== '0000') {
-            console.error('테스트 데이터 조회 실패', res);
-            return;
-          }
+    const loadAndCalculateResult = async () => {
+      const testData = await getTestData(category);
 
-          dispatch(setTestResult(res.data.data));
-        });
+      if (!testData) {
+        console.error(`테스트 데이터를 찾을 수 없습니다: ${category}`);
+        navigate('/test');
+        return;
+      }
+
+      const result = calculateTestResult(answerList, testData);
+      dispatch(setTestResult(result));
     };
-    fetchResult();
-  }, []);
+
+    loadAndCalculateResult();
+  }, [answerList, category, dispatch, navigate]);
 
   const testResult = useSelector((state) => state.test.testResult);
   useEffect(() => {
@@ -46,7 +52,7 @@ function TestLoading({ answerList }) {
     return () => {
       clearTimeout(timeout);
     };
-  }, [testResult, loadingTime]);
+  }, [testResult, loadingTime, category, navigate]);
 
   return (
     <div
@@ -61,7 +67,12 @@ function TestLoading({ answerList }) {
         animationData={loadingAnimation}
         loop={true}
         autoplay={true}
-        style={{ height: 250, width: 250 }}
+        style={{
+          width: 120,
+          height: 120,
+          marginBottom: '1rem',
+          filter: 'sepia(1) hue-rotate(40deg) saturate(1.8) brightness(1.2)',
+        }}
       />
     </div>
   );

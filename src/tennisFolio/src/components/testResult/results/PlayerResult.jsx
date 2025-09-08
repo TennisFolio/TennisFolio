@@ -14,9 +14,7 @@ function PlayerResult({ renderResultInfo }) {
         />
         <div className="player-info">
           <h3 className="player-kor-name">{renderResultInfo.name}</h3>
-          <p className="player-eng-name">
-            {renderResultInfo.player.playerName}
-          </p>
+          <p className="player-eng-name">{renderResultInfo.playerName}</p>
           <p className="player-description">{renderResultInfo.description}</p>
         </div>
       </div>
