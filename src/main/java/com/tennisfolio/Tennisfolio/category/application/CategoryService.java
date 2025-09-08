@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class CategoryService {
@@ -21,9 +23,28 @@ public class CategoryService {
     }
 
     public void saveCategory() {
-        List<Category> categories = categoriesApiTemplate.execute("");
-        
-        categoryRepository.saveAll(categories);
+        List<Category> incoming = categoriesApiTemplate.execute("");
+
+        if (incoming.isEmpty()) return;
+
+        List<String> ids = incoming.stream()
+                .map(Category::getRapidCategoryId)
+                .toList();
+
+        // 이미 있는 것들 조회
+        List<Category> existing = categoryRepository.findByRapidCategoryIdIn(ids);
+        Set<String> existingIds = existing.stream()
+                .map(Category::getRapidCategoryId)
+                .collect(Collectors.toSet());
+
+        // 신규만 저장
+        List<Category> toSave = incoming.stream()
+                .filter(c -> !existingIds.contains(c.getRapidCategoryId()))
+                .toList();
+
+        if (!toSave.isEmpty()) {
+            categoryRepository.saveAll(toSave);
+        }
     }
 
     public List<Category> getByRapidCategoryIdNotIn(List<String> rapidIds){
