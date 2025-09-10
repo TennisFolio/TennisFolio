@@ -69,13 +69,6 @@ public class Tournament{
         this.groundType = groundType;
     }
 
-    public void mergeTournament(Tournament tournament){
-        this.mostTitlePlayer = tournament.getMostTitlePlayer();
-        this.titleHolder = tournament.getTitleHolder();
-        this.mostTitles = tournament.getMostTitles();
-        this.points = tournament.getPoints();
-    }
-
     public boolean needsTournamentInfo(){
         return this.city == null && this.matchType == null && this.groundType == null;
     }

@@ -34,7 +34,6 @@ public class TournamentSyncService {
     private final StrategyApiTemplate<LeagueDetailsDTO, Tournament> leagueDetailsApiTemplate;
     private final CategoryService categoryService;
     private final TournamentRepository tournamentRepository;
-    private final TransactionTemplate transactionTemplate;
 
 
     public TournamentSyncService(StrategyApiTemplate<List<CategoryTournamentsDTO>,
@@ -42,14 +41,13 @@ public class TournamentSyncService {
                                  StrategyApiTemplate<TournamentInfoDTO, Tournament> tournamentInfoApiTemplate,
                                  StrategyApiTemplate<LeagueDetailsDTO, Tournament> leagueDetailsApiTemplate,
                                  CategoryService categoryService,
-                                 TournamentRepository tournamentRepository,
-                                 PlatformTransactionManager transactionManager) {
+                                 TournamentRepository tournamentRepository
+                                 ) {
         this.categoryTournamentsApiTemplate = categoryTournamentsApiTemplate;
         this.tournamentInfoApiTemplate = tournamentInfoApiTemplate;
         this.leagueDetailsApiTemplate = leagueDetailsApiTemplate;
         this.categoryService = categoryService;
         this.tournamentRepository = tournamentRepository;
-        this.transactionTemplate = new TransactionTemplate(transactionManager);
     }
 
 
@@ -98,23 +96,20 @@ public class TournamentSyncService {
     private Tournament updateTournamentInfo(Tournament tournament){
         String rapidId = tournament.getRapidTournamentId();
         Tournament tournamentInfo = tournament;
-        boolean fetchedInfo = false;
 
         if (tournament.needsTournamentInfo()) {
             Tournament fetched = tournamentInfoApiTemplate.execute(rapidId);
             if(fetched != null){
                 tournamentInfo = fetched;
-                fetchedInfo = true;
+                tournamentRepository.collect(tournamentInfo);
+                tournamentRepository.flushWhenFull();
+                return tournamentInfo;
             }else{
                 log.warn("tournamentInfoApiTemplate returned null for rapidId={}", rapidId);
             }
-        }
-        if (fetchedInfo) {
-            tournamentRepository.collect(tournamentInfo);
-            tournamentRepository.flushWhenFull();
-        }
 
-        return (fetchedInfo) ? tournamentInfo : tournament;
+        }
+        return tournament;
     }
 
     public void saveLeagueDetails(){
@@ -131,23 +126,20 @@ public class TournamentSyncService {
 
     private Tournament updateLeagueDetails(Tournament tournament){
         String rapidId = tournament.getRapidTournamentId();
-        Tournament leagueDetails = tournament;
-        boolean fetchedLeagueDetials = false;
 
         if (tournament.needsLeagueDetails()) {
             Tournament fetched = leagueDetailsApiTemplate.execute(rapidId);
             if(fetched != null){
-                fetchedLeagueDetials = true;
+                tournamentRepository.collect(fetched);
+                tournamentRepository.flushWhenFull();
+                return fetched;
             }else{
                 log.warn("leagueDetailsApiTemplate returned null for rapidId={}", rapidId);
+
             }
         }
+        return tournament;
 
-        if (fetchedLeagueDetials) {
-            tournamentRepository.collect(leagueDetails);
-            tournamentRepository.flushWhenFull();
-        }
-
-        return (fetchedLeagueDetials) ? leagueDetails : tournament;
     }
+
 }

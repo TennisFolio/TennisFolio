@@ -8,16 +8,7 @@ import com.tennisfolio.Tennisfolio.infrastructure.api.category.categories.Catego
 import com.tennisfolio.Tennisfolio.mock.FakeApiCaller;
 import com.tennisfolio.Tennisfolio.mock.FakeCategoryRepository;
 import com.tennisfolio.Tennisfolio.mock.categories.FakeCategoriesApiTemplate;
-import com.tennisfolio.Tennisfolio.mock.categories.FakeCategoriesEntityMapper;
-import com.tennisfolio.Tennisfolio.mock.teamDetails.FakeTeamDetailsApiTemplate;
-import com.tennisfolio.Tennisfolio.mock.teamDetails.FakeTeamDetailsEntityMapper;
-import com.tennisfolio.Tennisfolio.mock.teamDetails.FakeTeamDetailsResponseParser;
-import com.tennisfolio.Tennisfolio.player.domain.PlayerAggregate;
-import com.tennisfolio.Tennisfolio.player.dto.TeamDetailsApiDTO;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,7 +22,32 @@ public class CategoryServiceTest {
     // api
     ResponseParser<List<CategoryDTO>> fakeResponseParser = resp -> List.of();
 
-    EntityMapper<List<CategoryDTO>, List<Category>> fakeEntityMapper = new FakeCategoriesEntityMapper();
+    EntityMapper<List<CategoryDTO>, List<Category>> fakeEntityMapper = (categoryList, params) -> {
+        Category category4 = Category.builder()
+            .rapidCategoryId("213")
+            .categoryName("ITF Women")
+            .categorySlug("itf-women")
+            .build();
+
+        Category category5 = Category.builder()
+                .rapidCategoryId("785")
+                .categoryName("ITF Men")
+                .categorySlug("itf-men")
+                .build();
+
+        Category category6 = Category.builder()
+                .rapidCategoryId("871")
+                .categoryName("WTA 125")
+                .categorySlug("wta-125")
+                .build();
+
+        List<Category> categories = new ArrayList<>();
+        categories.add(category4);
+        categories.add(category5);
+        categories.add(category6);
+
+        return categories;
+    };
 
     ApiCaller fakeApiCaller = new FakeApiCaller();
 
