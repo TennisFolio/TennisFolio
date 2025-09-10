@@ -14,22 +14,26 @@ import com.tennisfolio.Tennisfolio.infrastructure.api.tournament.tournamentInfo.
 import com.tennisfolio.Tennisfolio.player.application.PlayerService;
 import com.tennisfolio.Tennisfolio.player.domain.Player;
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class TournamentSyncService {
     private final StrategyApiTemplate<List<CategoryTournamentsDTO>, List<Tournament>> categoryTournamentsApiTemplate;
     private final StrategyApiTemplate<TournamentInfoDTO, Tournament> tournamentInfoApiTemplate;
     private final StrategyApiTemplate<LeagueDetailsDTO, Tournament> leagueDetailsApiTemplate;
     private final CategoryService categoryService;
     private final TournamentRepository tournamentRepository;
-    private final TransactionTemplate transactionTemplate;
 
 
     public TournamentSyncService(StrategyApiTemplate<List<CategoryTournamentsDTO>,
@@ -37,14 +41,13 @@ public class TournamentSyncService {
                                  StrategyApiTemplate<TournamentInfoDTO, Tournament> tournamentInfoApiTemplate,
                                  StrategyApiTemplate<LeagueDetailsDTO, Tournament> leagueDetailsApiTemplate,
                                  CategoryService categoryService,
-                                 TournamentRepository tournamentRepository,
-                                 PlatformTransactionManager transactionManager) {
+                                 TournamentRepository tournamentRepository
+                                 ) {
         this.categoryTournamentsApiTemplate = categoryTournamentsApiTemplate;
         this.tournamentInfoApiTemplate = tournamentInfoApiTemplate;
         this.leagueDetailsApiTemplate = leagueDetailsApiTemplate;
         this.categoryService = categoryService;
         this.tournamentRepository = tournamentRepository;
-        this.transactionTemplate = new TransactionTemplate(transactionManager);
     }
 
 
@@ -78,32 +81,65 @@ public class TournamentSyncService {
         tournamentRepository.flushAll();
     }
 
-    public void saveTournamentDetail(){
-
+    public void saveTournamentInfo(){
         List<Tournament> findTournaments = tournamentRepository.findAll();
+
         findTournaments
                 .stream()
-                .map(tournament -> {
-                    try{
-                        Tournament tournamentInfo = tournamentInfoApiTemplate.execute(tournament.getRapidTournamentId());
-                        Tournament leagueDetails = leagueDetailsApiTemplate.execute(tournament.getRapidTournamentId());
-                        if(tournamentInfo != null){
-                            tournamentInfo.mergeTournament(leagueDetails);
-                            tournamentRepository.collect(tournamentInfo);
-                            tournamentRepository.flushWhenFull();
-                        }
-                        return tournamentInfo;
-                    }catch(Exception e){
-                        e.printStackTrace();
-                        System.out.println(tournament.getRapidTournamentId());
-                    }
-
-                    return null;
-                })
+                .map(this::updateTournamentInfo)
+                .filter(Objects::nonNull)
                 .toList();
 
         tournamentRepository.flushAll();
+    }
 
+    private Tournament updateTournamentInfo(Tournament tournament){
+        String rapidId = tournament.getRapidTournamentId();
+        Tournament tournamentInfo = tournament;
+
+        if (tournament.needsTournamentInfo()) {
+            Tournament fetched = tournamentInfoApiTemplate.execute(rapidId);
+            if(fetched != null){
+                tournamentInfo = fetched;
+                tournamentRepository.collect(tournamentInfo);
+                tournamentRepository.flushWhenFull();
+                return tournamentInfo;
+            }else{
+                log.warn("tournamentInfoApiTemplate returned null for rapidId={}", rapidId);
+            }
+
+        }
+        return tournament;
+    }
+
+    public void saveLeagueDetails(){
+        List<Tournament> findTournaments = tournamentRepository.findAllWithPlayers();
+
+        findTournaments
+                .stream()
+                .map(this::updateLeagueDetails)
+                .filter(Objects::nonNull)
+                .toList();
+
+        tournamentRepository.flushAll();
+    }
+
+    private Tournament updateLeagueDetails(Tournament tournament){
+        String rapidId = tournament.getRapidTournamentId();
+
+        if (tournament.needsLeagueDetails()) {
+            Tournament fetched = leagueDetailsApiTemplate.execute(rapidId);
+            if(fetched != null){
+                tournamentRepository.collect(fetched);
+                tournamentRepository.flushWhenFull();
+                return fetched;
+            }else{
+                log.warn("leagueDetailsApiTemplate returned null for rapidId={}", rapidId);
+
+            }
+        }
+        return tournament;
 
     }
+
 }

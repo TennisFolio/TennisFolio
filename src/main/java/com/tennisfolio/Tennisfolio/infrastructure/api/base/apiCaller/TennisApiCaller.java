@@ -57,7 +57,7 @@ public class TennisApiCaller implements ApiCaller {
                 for(Object param : params){
                     System.out.println(param);
                 }
-                throw new Exception();
+                return null;
             }
 
             return decodeResponse(response);
