@@ -63,4 +63,10 @@ public class LiveEventsApiDTO {
         }
     }
 
+    public boolean isAtpEvent() {
+        return tournament != null
+                && tournament.getCategory() != null
+                && "atp".equalsIgnoreCase(tournament.getCategory().getSlug());
+    }
+
 }
