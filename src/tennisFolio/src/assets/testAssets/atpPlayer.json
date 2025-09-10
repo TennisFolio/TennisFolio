@@ -1,0 +1,219 @@
+{
+  "info": {
+    "mainTitle": "ATP 선수 테스트",
+    "description": "내 스타일에 맞는 선수는 누가 있을까?",
+    "mainUrl": "atpPlayer",
+    "testType": "ATPPLAYER",
+    "image": "/img/test/atpPlayerTest.png"
+  },
+  "questions": [
+    {
+      "question": "당신의 경기 스타일은 어떤가요?",
+      "testOption": [
+        {
+          "target": ["7", "2", "3"],
+          "content": "강하게 밀어붙이는 공격 스타일"
+        },
+        {
+          "target": ["1", "4", "9"],
+          "content": "지치지 않는 랠리형 수비 플레이"
+        },
+        {
+          "target": ["6", "11", "12"],
+          "content": "창의적인 전술과 네트 플레이"
+        }
+      ]
+    },
+    {
+      "question": "당신이 가장 자신 있는 코트는?",
+      "testOption": [
+        { "target": ["1", "3", "10"], "content": "하드코트" },
+        { "target": ["2", "9", "6"], "content": "클레이코트" },
+        { "target": ["8", "11", "12"], "content": "잔디코트/실내코트" }
+      ]
+    },
+    {
+      "question": "중요한 순간, 당신의 멘탈은?",
+      "testOption": [
+        { "target": ["1", "3", "4"], "content": "차분하게 집중을 유지" },
+        { "target": ["2", "5", "6"], "content": "감정 표현으로 흐름을 바꿈" },
+        { "target": ["7", "8", "11"], "content": "분석적이고 냉정한 판단" }
+      ]
+    },
+    {
+      "question": "가장 강한 기술은 무엇인가요?",
+      "testOption": [
+        { "target": ["2", "7", "3"], "content": "포핸드" },
+        { "target": ["1", "4", "9"], "content": "백핸드" },
+        { "target": ["8", "10", "11"], "content": "서브/네트 플레이" }
+      ]
+    },
+    {
+      "question": "지고 있을 때 당신의 반응은?",
+      "testOption": [
+        { "target": ["3", "5", "2"], "content": "더욱 강하게 공격한다" },
+        { "target": ["1", "9", "4"], "content": "안정적으로 길게 끌고 간다" },
+        { "target": ["6", "11", "8"], "content": "전술을 바꾸며 변화를 시도" }
+      ]
+    },
+    {
+      "question": "당신이 추구하는 플레이 감성은?",
+      "testOption": [
+        { "target": ["2", "7", "5"], "content": "공격성과 카리스마" },
+        { "target": ["1", "4", "3"], "content": "차분하고 철저한 계산" },
+        { "target": ["6", "12", "11"], "content": "유연한 전술" }
+      ]
+    },
+    {
+      "question": "가장 좋아하는 플레이 리듬은?",
+      "testOption": [
+        { "target": ["2", "3", "7"], "content": "빠르게 몰아붙이는 흐름" },
+        { "target": ["1", "9", "4"], "content": "상대를 지치게 만드는 운영" },
+        {
+          "target": ["11", "6", "12"],
+          "content": "느리게 끌고 가다 타이밍을 노림"
+        }
+      ]
+    },
+    {
+      "question": "상대가 강할 때 당신은?",
+      "testOption": [
+        { "target": ["2", "5", "3"], "content": "정면 승부" },
+        { "target": ["4", "1", "9"], "content": "길고 안정적인 랠리" },
+        { "target": ["6", "11", "8"], "content": "전술로 타이밍을 흔듦" }
+      ]
+    },
+    {
+      "question": "즐겨 사용하는 샷 유형은?",
+      "testOption": [
+        { "target": ["2", "7", "3"], "content": "강한 스핀/포핸드" },
+        { "target": ["1", "4", "9"], "content": "플랫한 백핸드와 수비력" },
+        { "target": ["6", "11", "12"], "content": "슬라이스, 드롭샷" }
+      ]
+    },
+    {
+      "question": "좋아하는 실제 선수 스타일은?",
+      "testOption": [
+        { "target": ["2", "5", "7"], "content": "나달 스타일" },
+        { "target": ["1", "4", "9"], "content": "조코비치 스타일" },
+        { "target": ["6", "11", "12"], "content": "페더러 스타일" }
+      ]
+    },
+    {
+      "question": "승부처에서 어떤 선택을 하나요?",
+      "testOption": [
+        { "target": ["2", "3", "7"], "content": "강한 한 방으로 마무리" },
+        { "target": ["1", "4", "9"], "content": "긴 랠리 후 기회 포착" },
+        { "target": ["12", "11", "6"], "content": "각을 만들어낸다" }
+      ]
+    },
+    {
+      "question": "전체적인 경기 성향은?",
+      "testOption": [
+        { "target": ["5", "2", "3"], "content": "공격적이고 주도적" },
+        { "target": ["1", "4", "9"], "content": "수비적이고 끈기 있는" },
+        { "target": ["6", "11", "12"], "content": "창의적이고 유연한" }
+      ]
+    }
+  ],
+  "results": [
+    {
+      "target": "1",
+      "rapidPlayerId": "13231",
+      "playerName": "노박 조코비치",
+      "image": "/img/test/atpPlayer/13231.png",
+      "query": "shqkr",
+      "description": "강한 멘탈과 철벽 수비를 가진 전략가"
+    },
+
+    {
+      "target": "2",
+      "rapidPlayerId": "13228",
+      "playerName": "카를로스 알카라스",
+      "image": "/img/test/atpPlayer/13228.png",
+      "query": "dkfzk",
+      "description": "폭발적인 공격력과 빠른 움직임을 가진 신세대 스타"
+    },
+    {
+      "target": "3",
+      "rapidPlayerId": "13227",
+      "playerName": "야닉 시너",
+      "image": "/img/test/atpPlayer/13227.png",
+      "query": "tlsj",
+      "description": "정교한 스트로크와 안정적인 경기 운영을 갖춘 플레이어"
+    },
+    {
+      "target": "4",
+      "rapidPlayerId": "13237",
+      "playerName": "다니일 메드베데프",
+      "image": "/img/test/atpPlayer/13237.png",
+      "query": "apepv",
+      "description": "독특한 수비력과 지능적인 경기 운영의 마스터"
+    },
+
+    {
+      "target": "5",
+      "rapidPlayerId": "13235",
+      "playerName": "홀거 루네",
+      "image": "/img/test/atpPlayer/13235.png",
+      "query": "fnsp",
+      "description": "감정이 풍부한 에너제틱한 플레이어"
+    },
+    {
+      "target": "6",
+      "rapidPlayerId": "13252",
+      "playerName": "스테파노스 치치파스",
+      "image": "/img/test/atpPlayer/13252.png",
+      "query": "tmxpvkshtm",
+      "description": "창의적인 경기 운영과 네트 플레이를 강조하는 스타일"
+    },
+    {
+      "target": "7",
+      "rapidPlayerId": "13241",
+      "playerName": "안드레이 루블레프",
+      "image": "/img/test/atpPlayer/13241.png",
+      "query": "dksemfpdl",
+      "description": "강한 포핸드와 공격적인 베이스라인 플레이"
+    },
+    {
+      "target": "8",
+      "rapidPlayerId": "13229",
+      "playerName": "알렉산더 즈베레프",
+      "image": "/img/test/atpPlayer/13229.png",
+      "query": "dkffprtksej",
+      "description": "강한 서브와 안정적인 스트로크를 갖춘 선수"
+    },
+    {
+      "target": "9",
+      "rapidPlayerId": "13242",
+      "playerName": "캐스퍼 루드",
+      "image": "/img/test/atpPlayer/13242.png",
+      "query": "zotmvj",
+      "description": "클레이코트에서 강한 근성과 긴 랠리를 중시하는 플레이어"
+    },
+    {
+      "target": "10",
+      "rapidPlayerId": "13233",
+      "playerName": "테일러 프리츠",
+      "image": "/img/test/atpPlayer/13233.png",
+      "query": "xpdlffj",
+      "description": "강력한 서브와 빠른 공격을 선호하는 선수"
+    },
+    {
+      "target": "11",
+      "rapidPlayerId": "13257",
+      "playerName": "후베르트 후르카치",
+      "image": "/img/test/atpPlayer/13257.png",
+      "query": "gnfmzkcl",
+      "description": "네트 플레이와 빠른 리액션을 특징으로 하는 스타일"
+    },
+    {
+      "target": "12",
+      "rapidPlayerId": "13255",
+      "playerName": "펠릭스 오제알리아심",
+      "image": "/img/test/atpPlayer/13255.png",
+      "query": "dhwpdkffl",
+      "description": "다재다능한 플레이를 펼치는 유연한 선수"
+    }
+  ]
+}

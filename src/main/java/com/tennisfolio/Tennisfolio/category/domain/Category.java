@@ -24,12 +24,6 @@ public class Category {
     private String categorySlug;
 
 
-    public Category(CategoryDTO dto){
-        this.rapidCategoryId = dto.getRapidId();
-        this.categoryName = dto.getName();
-        this.categorySlug = dto.getSlug();
-    }
-
     public void updateFrom(Category incoming){
         this.rapidCategoryId = incoming.getRapidCategoryId();
         this.categoryName = incoming.getCategoryName();

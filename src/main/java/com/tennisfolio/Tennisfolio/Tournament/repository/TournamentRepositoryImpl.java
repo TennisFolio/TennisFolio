@@ -18,7 +18,7 @@ public class TournamentRepositoryImpl implements TournamentRepository{
     private final BufferedBatchSaver<TournamentEntity> bufferedBatchSaver;
     public TournamentRepositoryImpl(TournamentJpaRepository tournamentJpaRepository, TransactionTemplate transactionTemplate) {
         this.tournamentJpaRepository = tournamentJpaRepository;
-        this.bufferedBatchSaver = new BufferedBatchSaver<>(tournamentJpaRepository, 1000,transactionTemplate);
+        this.bufferedBatchSaver = new BufferedBatchSaver<>(tournamentJpaRepository, 100,transactionTemplate);
     }
 
     @Override
@@ -36,6 +36,11 @@ public class TournamentRepositoryImpl implements TournamentRepository{
     @Override
     public List<Tournament> findAll() {
         return tournamentJpaRepository.findAll().stream().map(TournamentEntity::toModelBaseOnly).toList();
+    }
+
+    @Override
+    public List<Tournament> findAllWithPlayers() {
+        return tournamentJpaRepository.findAllBy().stream().map(TournamentEntity::toModel).toList();
     }
 
     @Override
@@ -58,6 +63,12 @@ public class TournamentRepositoryImpl implements TournamentRepository{
     public Optional<Tournament> findByRapidTournamentId(String rapidId) {
         return tournamentJpaRepository.findByRapidTournamentId(rapidId).map(TournamentEntity::toModelBaseOnly);
     }
+
+    @Override
+    public Optional<Tournament> findWithCategoryByRapidTournamentId(String rapidId) {
+        return tournamentJpaRepository.findWithCategoryByRapidTournamentId(rapidId).map(TournamentEntity::toModel);
+    }
+
     @Override
     public List<Tournament> collect(Tournament tournament){
         return bufferedBatchSaver.collect(TournamentEntity.fromModel(tournament))

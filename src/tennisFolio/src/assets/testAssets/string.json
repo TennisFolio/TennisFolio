@@ -1,0 +1,205 @@
+{
+  "info": {
+    "mainTitle": "스트링 테스트",
+    "description": "나와 어울리는 스트링은 뭘까?",
+    "mainUrl": "string",
+    "testType": "STRING",
+    "image": "/img/test/stringTest.png"
+  },
+  "questions": [
+    {
+      "question": "라켓을 휘두를 때 느낌은 어떤가요?",
+      "testOption": [
+        { "target": ["1", "2", "3"], "content": "빠르고 강하게" },
+        { "target": ["6", "12", "7"], "content": "부드럽게" },
+        { "target": ["4", "11", "5"], "content": "중간" }
+      ]
+    },
+    {
+      "question": "손목이나 팔에 통증이 있나요?",
+      "testOption": [
+        { "target": ["6", "10", "12"], "content": "자주 있다" },
+        { "target": ["11", "4", "7"], "content": "가끔" },
+        { "target": ["1", "3", "2"], "content": "없다" }
+      ]
+    },
+    {
+      "question": "가장 중요하게 생각하는 요소는?",
+      "testOption": [
+        { "target": ["2", "3", "5"], "content": "스핀" },
+        { "target": ["6", "10", "7"], "content": "부드러움" },
+        { "target": ["9", "8", "11"], "content": "타구감" }
+      ]
+    },
+    {
+      "question": "플레이 스타일은 어떤가요?",
+      "testOption": [
+        { "target": ["1", "2", "3"], "content": "공격적" },
+        { "target": ["4", "7", "12"], "content": "수비적" },
+        { "target": ["11", "5", "6"], "content": "올라운더" }
+      ]
+    },
+    {
+      "question": "샷 스타일은 어떤가요?",
+      "testOption": [
+        { "target": ["3", "5", "2"], "content": "탑스핀" },
+        { "target": ["4", "7", "6"], "content": "플랫" },
+        { "target": ["11", "8", "9"], "content": "다양한 구질" }
+      ]
+    },
+    {
+      "question": "주로 사용하는 라켓은?",
+      "testOption": [
+        { "target": ["2", "3", "5"], "content": "스핀형 라켓" },
+        { "target": ["4", "7", "12"], "content": "컨트롤형 라켓" },
+        { "target": ["1", "8", "11"], "content": "파워형 라켓" }
+      ]
+    },
+    {
+      "question": "원하는 타구감은?",
+      "testOption": [
+        { "target": ["1", "3", "2"], "content": "단단한 타구감" },
+        { "target": ["10", "6", "12"], "content": "부드러운 타구감" },
+        { "target": ["8", "11", "9"], "content": "반발력" }
+      ]
+    },
+    {
+      "question": "스트링 텐션은 어떤 쪽을 선호하나요?",
+      "testOption": [
+        { "target": ["4", "5", "7"], "content": "텐션 높음" },
+        { "target": ["8", "9", "11"], "content": "텐션 낮음" },
+        { "target": ["3", "6", "12"], "content": "중간" }
+      ]
+    },
+    {
+      "question": "경기 빈도는 어느 정도인가요?",
+      "testOption": [
+        { "target": ["2", "1", "3"], "content": "주 3회 이상" },
+        { "target": ["6", "7", "5"], "content": "주 1~2회" },
+        { "target": ["8", "10", "12"], "content": "가끔" }
+      ]
+    },
+    {
+      "question": "스트링 유지력에 대해 어떻게 생각하나요?",
+      "testOption": [
+        { "target": ["1", "4", "11"], "content": "유지력 중요" },
+        { "target": ["3", "5", "6"], "content": "자주 바꿈" },
+        { "target": ["9", "10", "8"], "content": "감각 우선" }
+      ]
+    },
+    {
+      "question": "가격에 대한 민감도는?",
+      "testOption": [
+        { "target": ["9", "10", "1"], "content": "고가도 OK" },
+        { "target": ["5", "7", "8"], "content": "가성비" },
+        { "target": ["4", "11", "6"], "content": "중간" }
+      ]
+    },
+    {
+      "question": "주로 사용하는 코트 유형은?",
+      "testOption": [
+        { "target": ["1", "2", "3"], "content": "하드코트" },
+        { "target": ["5", "4", "11"], "content": "클레이코트" },
+        { "target": ["12", "7", "10"], "content": "실내/기타" }
+      ]
+    }
+  ],
+  "results": [
+    {
+      "target": "1",
+      "stringType": "poly",
+      "modelName": "Luxilon ALU Power",
+      "image": "/img/test/string/ALUPower.webp",
+      "query": "dkffnvkdnj",
+      "description": "탄성 좋은 반발력과 컨트롤의 조화, 프로 선수 다수가 사용"
+    },
+    {
+      "target": "2",
+      "stringType": "poly",
+      "modelName": "Babolat RPM Blast",
+      "image": "/img/test/string/RPMBlast.webp",
+      "query": "dkfvldpa",
+      "description": "탁월한 스핀 성능, 라파엘 나달이 사용하는 스트링"
+    },
+    {
+      "target": "3",
+      "stringType": "poly",
+      "modelName": "Solinco Hyper-G",
+      "image": "/img/test/string/Hyper-g.webp",
+      "query": "gkdlvjwl",
+      "description": "스핀과 컨트롤 모두 우수한 4각 폴리스트링"
+    },
+    {
+      "target": "4",
+      "stringType": "poly",
+      "modelName": "Yonex Poly Tour Pro",
+      "image": "/img/test/string/PolyTourPro.webp",
+      "query": "vhfflxndjvmfh",
+      "description": "부드럽고 일관된 타구감, 팔 부담이 적음"
+    },
+    {
+      "target": "5",
+      "stringType": "poly",
+      "modelName": "Tecnifibre Black Code",
+      "image": "/img/test/string/BlackCode.webp",
+      "query": "qmfforzhem",
+      "description": "스핀 성능과 부드러움을 동시에 추구하는 유연한 폴리"
+    },
+    {
+      "target": "6",
+      "stringType": "multi",
+      "modelName": "Wilson NXT",
+      "image": "/img/test/string/NXT.webp",
+      "query": "dpsdprtmxl",
+      "description": "멀티필라멘트로 부드럽고 팔에 부담이 거의 없음"
+    },
+    {
+      "target": "7",
+      "stringType": "multi",
+      "modelName": "Head Velocity MLT",
+      "image": "/img/test/string/VelocityMLT.webp",
+      "query": "qpffhtlxl",
+      "description": "컨트롤 중심의 멀티필라멘트, 안정적인 반발력"
+    },
+    {
+      "target": "8",
+      "stringType": "multi",
+      "modelName": "Gamma Live Wire XP",
+      "image": "/img/test/string/LiveWireXP.webp",
+      "query": "dhkdldj",
+      "description": "반발력이 뛰어난 파워 중심 멀티 스트링"
+    },
+    {
+      "target": "9",
+      "stringType": "natural",
+      "modelName": "Wilson Natural Gut",
+      "image": "/img/test/string/NaturalGut.webp",
+      "query": "spcbfjfrjxm",
+      "description": "최상급 타구감과 반발력을 자랑하는 천연 스트링"
+    },
+    {
+      "target": "10",
+      "stringType": "natural",
+      "modelName": "Babolat Touch VS",
+      "image": "/img/test/string/TouchVS.webp",
+      "query": "xjclqmdldptm",
+      "description": "부드러움과 타구감 모두 우수한 내추럴 거트"
+    },
+    {
+      "target": "11",
+      "stringType": "hybrid",
+      "modelName": "Luxilon Element",
+      "image": "/img/test/string/LuxilonElement.webp",
+      "query": "dpfflapsxm",
+      "description": "부드러움과 파워의 조화, 하이브리드용으로도 인기"
+    },
+    {
+      "target": "12",
+      "stringType": "multi",
+      "modelName": "Yonex Rexis Comfort",
+      "image": "/img/test/string/RexisComfort.webp",
+      "query": "zjavhxm",
+      "description": "부드럽고 반발력 있는 멀티 스트링, 팔 부담 감소"
+    }
+  ]
+}

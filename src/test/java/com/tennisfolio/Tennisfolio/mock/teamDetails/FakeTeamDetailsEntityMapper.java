@@ -20,7 +20,7 @@ public class FakeTeamDetailsEntityMapper implements EntityMapper<TeamDetailsApiD
                 .prizeCurrentAmount(100L)
                 .prizeCurrentCurrency("EUR")
                 .prizeTotalAmount(1000L)
-                .prizeCurrentCurrency("EUR")
+                .prizeTotalCurrency("EUR")
                 .build();
 
         return new PlayerAggregate(player, playerPrize);

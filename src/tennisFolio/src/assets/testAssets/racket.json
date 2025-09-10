@@ -1,0 +1,205 @@
+{
+  "info": {
+    "mainTitle": "라켓 테스트",
+    "description": "나와 어울리는 라켓은 뭘까?",
+    "mainUrl": "racket",
+    "testType": "RACKET",
+    "image": "/img/test/racketTest.png"
+  },
+  "questions": [
+    {
+      "question": "테니스를 얼마나 쳤나요?",
+      "testOption": [
+        { "target": ["4", "10", "8"], "content": "입문자예요" },
+        { "target": ["1", "6", "9"], "content": "3년 이상 쳤어요" },
+        { "target": ["3", "5", "12"], "content": "7년 이상 쳤어요" }
+      ]
+    },
+    {
+      "question": "가장 중요하게 생각하는 건?",
+      "testOption": [
+        { "target": ["1", "4", "2"], "content": "파워" },
+        { "target": ["3", "7", "11"], "content": "컨트롤" },
+        { "target": ["10", "8", "6"], "content": "편안함" }
+      ]
+    },
+    {
+      "question": "스윙 속도는 어떤 편인가요?",
+      "testOption": [
+        { "target": ["5", "3", "2"], "content": "빠르게 칩니다" },
+        { "target": ["8", "6", "9"], "content": "중간 정도예요 " },
+        { "target": ["4", "10", "7"], "content": "느린 편이에요" }
+      ]
+    },
+    {
+      "question": "타구감에서 중요한 건?",
+      "testOption": [
+        { "target": ["5", "11", "3"], "content": "묵직함" },
+        { "target": ["4", "8", "6"], "content": "부드러움" },
+        { "target": ["2", "9", "12"], "content": "스핀 느낌" }
+      ]
+    },
+    {
+      "question": "손목/팔에 무리가 있나요?",
+      "testOption": [
+        { "target": ["4", "10", "8"], "content": "자주 아파요" },
+        { "target": ["6", "7", "1"], "content": "가끔 불편해요" },
+        { "target": ["5", "3", "2"], "content": "전혀 문제없어요" }
+      ]
+    },
+    {
+      "question": "라켓을 휘두를 때 원하는 느낌은?",
+      "testOption": [
+        { "target": ["7", "4", "9"], "content": "가볍고 빠르게" },
+        { "target": ["5", "3", "11"], "content": "단단하고 묵직하게" },
+        { "target": ["8", "10", "6"], "content": "부드럽고 안정감 있게" }
+      ]
+    },
+    {
+      "question": "당신의 성향은?",
+      "testOption": [
+        { "target": ["2", "5", "12"], "content": "공격적" },
+        { "target": ["4", "6", "8"], "content": "수비적" },
+        { "target": ["1", "3", "7"], "content": "올라운더" }
+      ]
+    },
+    {
+      "question": "가장 많이 사용하는 샷은?",
+      "testOption": [
+        { "target": ["2", "9", "7"], "content": "탑스핀" },
+        { "target": ["3", "5", "12"], "content": "플랫샷" },
+        { "target": ["11", "6", "4"], "content": "슬라이스/전술" }
+      ]
+    },
+    {
+      "question": "코트 유형은?",
+      "testOption": [
+        { "target": ["1", "5", "3"], "content": "하드코트" },
+        { "target": ["2", "7", "11"], "content": "클레이코트" },
+        { "target": ["8", "4", "10"], "content": "실내/기타" }
+      ]
+    },
+    {
+      "question": "어떤 경기 스타일을 선호하나요?",
+      "testOption": [
+        { "target": ["5", "7", "6"], "content": "네트 플레이/발리" },
+        { "target": ["3", "4", "1"], "content": "베이스라인 랠리" },
+        { "target": ["2", "9", "12"], "content": "위너 노리는 타입" }
+      ]
+    },
+    {
+      "question": "좋아하는 선수 스타일은?",
+      "testOption": [
+        { "target": ["2", "9", "11"], "content": "나달/루드" },
+        { "target": ["5", "12", "7"], "content": "페더러/알카라즈" },
+        { "target": ["6", "8", "3"], "content": "조코비치/메드베데프" }
+      ]
+    },
+    {
+      "question": "최종적으로 고르고 싶은 라켓 느낌은?",
+      "testOption": [
+        { "target": ["1", "6", "3"], "content": "다재다능하고 무난한" },
+        { "target": ["2", "9", "12"], "content": "스핀이나 위력 중심" },
+        { "target": ["4", "8", "10"], "content": "부드럽고 편안한" }
+      ]
+    }
+  ],
+  "results": [
+    {
+      "target": "1",
+      "brand": "Babolat",
+      "modelName": "Pure Drive",
+      "image": "/img/test/racket/pure_drive.webp",
+      "query": "vbdjemfkdlqm",
+      "description": "파워와 스핀을 모두 갖춘 올라운드 라켓, 공격적인 플레이에 적합"
+    },
+    {
+      "target": "2",
+      "brand": "Babolat",
+      "modelName": "Pure Aero",
+      "image": "/img/test/racket/babolat_Pure_Aero.webp",
+      "query": "vbdjdpdjfh",
+      "description": "극대화된 스핀 성능과 빠른 스윙 속도, 강한 탑스핀 구사에 유리."
+    },
+    {
+      "target": "3",
+      "brand": "Wilson",
+      "modelName": "Blade 98",
+      "image": "/img/test/racket/blade98.webp",
+      "query": "qmffpdlem",
+      "description": "정교한 컨트롤과 타구감이 특징, 네트 플레이와 안정된 스트로크에 적합."
+    },
+    {
+      "target": "4",
+      "brand": "Wilson",
+      "modelName": "Clash 100",
+      "image": "/img/test/racket/clash100.webp",
+      "query": "zmffotl",
+      "description": "팔에 부담이 적고 유연한 프레임, 부드러운 타구감을 원하는 사용자에게 추천."
+    },
+    {
+      "target": "5",
+      "brand": "Wilson",
+      "modelName": "Pro Staff 97",
+      "image": "/img/test/racket/prostaff97.webp",
+      "query": "vmfhtmxovm",
+      "description": "클래식한 타구감과 높은 정밀도, 올코트 전략가 스타일에 어울림."
+    },
+    {
+      "target": "6",
+      "brand": "HEAD",
+      "modelName": "Speed MP",
+      "image": "/img/test/racket/speedMp.webp",
+      "query": "tmvlemdpavl",
+      "description": "밸런스 좋은 파워와 컨트롤, 다양한 상황에 유연하게 대응 가능한 만능형 라켓."
+    },
+    {
+      "target": "7",
+      "brand": "HEAD",
+      "modelName": "Radical MP",
+      "image": "/img/test/racket/redicalMp.webp",
+      "query": "fpelzjfdpavl",
+      "description": "월한 조작성과 균형감, 전술적인 플레이어에게 적합한 라켓."
+    },
+    {
+      "target": "8",
+      "brand": "Yonex",
+      "modelName": "Ezone 100",
+      "image": "/img/test/racket/Ezone100.webp",
+      "query": "dlwhsqor",
+      "description": "부드럽고 안정적인 타구감, 넓은 스윗스팟으로 실수를 줄여주는 라켓."
+    },
+    {
+      "target": "9",
+      "brand": "Yonex",
+      "modelName": "Vcore 100",
+      "image": "/img/test/racket/Vcore 100.webp",
+      "query": "qmdlzhdjqor",
+      "description": "강력한 스핀과 민첩한 반응 속도, 베이스라인에서 공격적인 플레이에 효과적."
+    },
+    {
+      "target": "10",
+      "brand": "Prince",
+      "modelName": "Beast 100",
+      "image": "/img/test/racket/Beast100.webp",
+      "query": "qltmxmqor",
+      "description": "파워 중심의 플레이어에게 적합, 안정적인 반발력과 스핀 제공."
+    },
+    {
+      "target": "11",
+      "brand": "Dunlop",
+      "modelName": "CX 200",
+      "image": "/img/test/racket/CX200.webp",
+      "query": "tldprtmdlqor",
+      "description": "컨트롤 중심의 정밀한 샷 구사에 유리, 빠른 템포의 경기에 최적화."
+    },
+    {
+      "target": "12",
+      "brand": "Tecnifibre",
+      "modelName": "T-Fight 300",
+      "image": "/img/test/racket/TFight300.webp",
+      "query": "xlvmffkdlxm",
+      "description": "프로 수준의 파워와 안정성, 스트로크와 발리 모두에 균형 잡힌 성능 제공."
+    }
+  ]
+}
