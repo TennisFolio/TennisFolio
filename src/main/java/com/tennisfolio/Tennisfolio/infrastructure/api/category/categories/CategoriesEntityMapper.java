@@ -12,7 +12,13 @@ public class CategoriesEntityMapper implements EntityMapper<List<CategoryDTO>, L
 
     @Override
     public List<Category> map(List<CategoryDTO> dto, Object... params) {
-        return dto.stream().map(Category::new)
+        return dto.stream().map(categoryDTO -> {
+            return Category.builder()
+                    .rapidCategoryId(categoryDTO.getRapidId())
+                    .categoryName(categoryDTO.getName())
+                    .categorySlug(categoryDTO.getSlug())
+                    .build();
+                })
                 .collect(Collectors.toList());
     }
 }

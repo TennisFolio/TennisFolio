@@ -14,11 +14,14 @@ public interface TournamentRepository {
 
     List<Tournament> findAll();
 
+    List<Tournament> findAllWithPlayers();
+
     Set<String> findAllRapidIds();
 
     List<Tournament> findByRapidTournamentIds(List<String> ids);
     List<Tournament> findByCategoryIn(List<Category> ids);
     Optional<Tournament> findByRapidTournamentId(String rapidId);
+    Optional<Tournament> findWithCategoryByRapidTournamentId(String rapidId);
 
     List<Tournament> collect(Tournament tournament);
 

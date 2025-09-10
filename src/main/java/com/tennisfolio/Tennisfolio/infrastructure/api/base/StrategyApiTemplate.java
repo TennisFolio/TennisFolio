@@ -36,6 +36,7 @@ public abstract class StrategyApiTemplate<T, E> {
     public E execute(Object... params){
         // api 호출
         String responseStr = apiCaller.callApi(endpoint, params);
+        if(responseStr == null || responseStr.isBlank()) return null;
         // response to DTO
         T dto = parser.parse(responseStr);
         // DTO to Entity

@@ -30,7 +30,18 @@ public class CategoryTournamentsAssemble implements EntityAssemble<List<Category
 
         return dto.stream()
                 .map(tournament -> {
-                    return new Tournament(tournament, findCategory);
+                    Category category = Category.builder()
+                            .categoryId(findCategory.getCategoryId())
+                            .rapidCategoryId(findCategory.getRapidCategoryId())
+                            .categoryName(findCategory.getCategoryName())
+                            .categorySlug(findCategory.getCategorySlug())
+                            .build();
+                    return Tournament.builder()
+                            .category(category)
+                            .rapidTournamentId(tournament.getTournamentRapidId())
+                            .tournamentName(tournament.getTournamentName())
+                            .build();
+
                 })
                 .collect(Collectors.toList());
     }

@@ -23,11 +23,25 @@ public class TournamentController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @PostMapping("/detail")
-    public ResponseEntity<ResponseDTO> saveTournamentDetail(){
+    @PostMapping("/info")
+    public ResponseEntity<ResponseDTO> saveTournamentInfo(){
         ResponseDTO responseDTO;
         try{
-            tournamentSyncService.saveTournamentDetail();
+            tournamentSyncService.saveTournamentInfo();
+            responseDTO = ResponseDTO.success();
+        }catch(Exception e){
+            responseDTO = ResponseDTO.error("500", e.getMessage());
+        }
+
+
+        return new ResponseEntity<>(responseDTO, HttpStatus.OK);
+    }
+
+    @PostMapping("/details")
+    public ResponseEntity<ResponseDTO> saveLeagueDetails(){
+        ResponseDTO responseDTO;
+        try{
+            tournamentSyncService.saveLeagueDetails();
             responseDTO = ResponseDTO.success();
         }catch(Exception e){
             responseDTO = ResponseDTO.error("500", e.getMessage());
