@@ -34,7 +34,9 @@ public class LiveEventsResponseParser implements ResponseParser<List<LiveEventsA
 
                 dto.scoreNullToZero();
 
-                eventList.add(dto);
+                if(dto.isAtpEvent()){
+                    eventList.add(dto);
+                }
 
             }
 

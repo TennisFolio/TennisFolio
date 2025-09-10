@@ -29,18 +29,18 @@ public class PlayerService {
 
     @SkipLog
     public Player getOrCreatePlayerByRapidId(String rapidId) {
-        if(!playerRepository.existsByRapidPlayerId(rapidId)){
-            Player player = teamDetailsTemplate.execute(rapidId).toPlayer();
-            String path = playerImageService.fetchImage(rapidId);
-            player.updateProfileImage(path);
-            try{
-                return playerRepository.save(player);
-            }catch(DataIntegrityViolationException e){
-                return playerRepository.findByRapidPlayerId(rapidId).orElseThrow();
-            }
-        }
-
-        return playerRepository.findByRapidPlayerId(rapidId).get();
+        return playerRepository.findByRapidPlayerId(rapidId)
+                .orElseGet(() -> {
+                    Player player = teamDetailsTemplate.execute(rapidId).toPlayer();
+                    String path = playerImageService.fetchImage(rapidId);
+                    player.updateProfileImage(path);
+                    try {
+                        return playerRepository.save(player);
+                    } catch(DataIntegrityViolationException e) {
+                        return playerRepository.findByRapidPlayerId(rapidId)
+                                .orElseThrow(() -> new IllegalStateException("Failed to create or find player, rapidId=" + rapidId));
+                    }
+                });
     }
 
 
