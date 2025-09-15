@@ -34,10 +34,7 @@ public class LiveEventsResponseParser implements ResponseParser<List<LiveEventsA
 
                 dto.scoreNullToZero();
 
-                if(dto.isAtpEvent()){
-                    eventList.add(dto);
-                }
-
+                eventList.add(dto);
             }
 
             eventList.sort(Comparator.comparingInt(LiveEventsApiDTO::getTotalRanking));
