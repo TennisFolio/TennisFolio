@@ -69,4 +69,10 @@ public class LiveEventsApiDTO {
                 && "atp".equalsIgnoreCase(tournament.getCategory().getSlug());
     }
 
+    public boolean isWtaEvent() {
+        return tournament != null
+                && tournament.getCategory() != null
+                && "wta".equalsIgnoreCase(tournament.getCategory().getSlug());
+    }
+
 }
