@@ -24,6 +24,9 @@ public class LiveEventsAssemble implements EntityAssemble<List<LiveEventsApiDTO>
         if(dto == null || dto.isEmpty()){
             return List.of();
         }
+        //atp, wta만 전달
+        dto = dto.stream().filter(p -> p.isAtpEvent() || p.isWtaEvent()).toList();
+        
         return dto.stream()
                 .map(this::getLiveMatchResponse)
                 .collect(Collectors.toList());
