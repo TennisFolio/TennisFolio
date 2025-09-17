@@ -14,6 +14,7 @@ function RacketResult({ renderResultInfo }) {
         <div className="racket-info">
           <h3 className="racket-name">{renderResultInfo.name}</h3>
           <p className="racket-brand">브랜드: {renderResultInfo.brand}</p>
+          <p className="racket-brand">모델명: {renderResultInfo.modelName}</p>
           <p className="racket-description">{renderResultInfo.description}</p>
         </div>
       </div>
