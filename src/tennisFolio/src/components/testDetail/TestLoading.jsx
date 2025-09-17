@@ -7,6 +7,7 @@ import { setTestResult } from '../../store/testSlice';
 import loadingAnimation from '../../assets/loading-animation.json';
 import Lottie from 'lottie-react';
 import { calculateTestResult } from '../../utils/testCalculator.js';
+import { calculateNTRPResult } from '../../utils/NTRPCalculator.js';
 
 // 테스트 데이터를 동적으로 가져오는 함수
 const getTestData = async (category) => {
@@ -36,7 +37,10 @@ function TestLoading({ answerList }) {
         return;
       }
 
-      const result = calculateTestResult(answerList, testData);
+      const result =
+        category === 'ntrp'
+          ? calculateNTRPResult(answerList, testData)
+          : calculateTestResult(answerList, testData);
       dispatch(setTestResult(result));
     };
 

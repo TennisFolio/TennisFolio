@@ -3,7 +3,7 @@ import './testResultRenderer.css';
 import PlayerResult from '../results/PlayerResult';
 import StringResult from '../results/StringResult';
 import RacketResult from '../results/RacketResult';
-
+import NTRPResult from '../results/NTRPResult';
 import { useSelector } from 'react-redux';
 
 function TestResultRenderer({ renderResultInfo }) {
@@ -16,6 +16,8 @@ function TestResultRenderer({ renderResultInfo }) {
     return <StringResult renderResultInfo={renderResultInfo} />;
   } else if (currentTest.url === 'racket') {
     return <RacketResult renderResultInfo={renderResultInfo} />;
+  } else if (currentTest.url === 'ntrp') {
+    return <NTRPResult renderResultInfo={renderResultInfo} />;
   }
 }
 

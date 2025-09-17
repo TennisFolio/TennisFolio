@@ -8,7 +8,7 @@ function TestList() {
 
   useEffect(() => {
     const loadAllTests = async () => {
-      const testCategories = ['racket', 'string', 'atpPlayer'];
+      const testCategories = ['racket', 'string', 'atpPlayer', 'ntrp'];
       const loadedTests = [];
 
       for (const category of testCategories) {
