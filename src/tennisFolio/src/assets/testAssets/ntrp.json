@@ -1,0 +1,403 @@
+{
+  "info": {
+    "mainTitle": "NTRP 자가 진단 테스트",
+    "description": "나의 테니스 실력은 어떻게 될까?",
+    "mainUrl": "ntrp",
+    "testType": "NTRP",
+    "image": "/img/test/ntrp.png"
+  },
+  "questions": [
+    {
+      "question": "스트로크(포·백) 안정감은?",
+      "testOption": [
+        {
+          "content": "느린 랠리 3구 이하, 자세가 자주 무너짐",
+          "score": 1,
+          "category": "stroke"
+        },
+        {
+          "content": "느린~중간 랠리 3~5구 유지",
+          "score": 2,
+          "category": "stroke"
+        },
+        {
+          "content": "중간 속도 6~10구 유지, 기본 컨트롤",
+          "score": 3,
+          "category": "stroke"
+        },
+        {
+          "content": "빠른 랠리에서도 10구+ 유지",
+          "score": 4,
+          "category": "stroke"
+        },
+        {
+          "content": "페이스 흡수·변환, 깊이/코스 정확",
+          "score": 5,
+          "category": "stroke"
+        }
+      ]
+    },
+    {
+      "question": "서브/리턴 수준은?",
+      "testOption": [
+        {
+          "content": "더블폴트 잦고, 리턴이 짧게 뜨거나 길게 나감",
+          "score": 1,
+          "category": "serve_return"
+        },
+        {
+          "content": "세컨드 서브 안정, 리턴으로 랠리 진입",
+          "score": 2,
+          "category": "serve_return"
+        },
+        {
+          "content": "1서브 안정(코스 단순), 리턴 방향 전환 가끔",
+          "score": 3,
+          "category": "serve_return"
+        },
+        {
+          "content": "1서브로 우위 확보, 리턴으로 주도",
+          "score": 4,
+          "category": "serve_return"
+        },
+        {
+          "content": "구질·코스 다양화(슬라이스/킥/와이드)로 패턴 설계",
+          "score": 5,
+          "category": "serve_return"
+        }
+      ]
+    },
+    {
+      "question": "포핸드의 공격/수비 전환 능력은?",
+      "testOption": [
+        {
+          "content": "넘기기 급급, 에러 잦음",
+          "score": 1,
+          "category": "stroke"
+        },
+        {
+          "content": "안정 위주, 가끔 위닝샷",
+          "score": 2,
+          "category": "stroke"
+        },
+        {
+          "content": "스핀 활용으로 깊게 압박",
+          "score": 3,
+          "category": "stroke"
+        },
+        {
+          "content": "상대에 맞춰 패턴 설계·각 만들기",
+          "score": 4,
+          "category": "stroke"
+        },
+        {
+          "content": "속도·스핀·각 조합으로 포인트 종결",
+          "score": 5,
+          "category": "stroke"
+        }
+      ]
+    },
+    {
+      "question": "백핸드(원/투핸드) 완성도는?",
+      "testOption": [
+        {
+          "content": "자주 끊기거나 짧아짐, 수비 넘김 위주",
+          "score": 1,
+          "category": "stroke"
+        },
+        { "content": "랠리 유지 무난", "score": 2, "category": "stroke" },
+        {
+          "content": "크로스/다운더라인 선택 구사",
+          "score": 3,
+          "category": "stroke"
+        },
+        {
+          "content": "속도·깊이로 압박 가능",
+          "score": 4,
+          "category": "stroke"
+        },
+        {
+          "content": "공격 전환·각도 생성 능숙(무기화)",
+          "score": 5,
+          "category": "stroke"
+        }
+      ]
+    },
+    {
+      "question": "네트 플레이(발리) 자신감은?",
+      "testOption": [
+        {
+          "content": "전진 거의 안 함, 발리 미스 많음",
+          "score": 1,
+          "category": "net"
+        },
+        { "content": "쉬운 볼은 처리", "score": 2, "category": "net" },
+        {
+          "content": "기회 시 어프로치·하이발리 마무리",
+          "score": 3,
+          "category": "net"
+        },
+        { "content": "계획적으로 전진해 득점", "score": 4, "category": "net" },
+        {
+          "content": "S&V·드롭-로브 콤보 등 전술적 네트 플레이",
+          "score": 5,
+          "category": "net"
+        }
+      ]
+    },
+    {
+      "question": "오버헤드/스매시 처리 능력은?",
+      "testOption": [
+        { "content": "타점 불안, 에러 잦음", "score": 1, "category": "net" },
+        {
+          "content": "기본 마무리 가능(정면/높은 볼)",
+          "score": 2,
+          "category": "net"
+        },
+        { "content": "각/깊이로 안전 득점", "score": 3, "category": "net" },
+        {
+          "content": "어려운 볼(뒤로 물러나며) 처리 가능",
+          "score": 4,
+          "category": "net"
+        },
+        {
+          "content": "역방향·런닝·발밑 처리까지 안정적",
+          "score": 5,
+          "category": "net"
+        }
+      ]
+    },
+    {
+      "question": "풋워크·체력(랠리 지속력)은?",
+      "testOption": [
+        {
+          "content": "몇 포인트 지나면 호흡 무너짐",
+          "score": 1,
+          "category": "fitness"
+        },
+        {
+          "content": "한 세트 소화가 버겁다",
+          "score": 2,
+          "category": "fitness"
+        },
+        {
+          "content": "일반 경기(싱글/복식) 무난히 소화",
+          "score": 3,
+          "category": "fitness"
+        },
+        {
+          "content": "긴 랠리·타이브레이크도 안정",
+          "score": 4,
+          "category": "fitness"
+        },
+        {
+          "content": "페이스 조절로 체력 우위 창출",
+          "score": 5,
+          "category": "fitness"
+        }
+      ]
+    },
+    {
+      "question": "전술 전환/페이스 조절은?",
+      "testOption": [
+        {
+          "content": "패턴 불안정, 상대 실수 대기",
+          "score": 1,
+          "category": "tactics"
+        },
+        {
+          "content": "리듬 조절 시도(스핀/속도)",
+          "score": 2,
+          "category": "tactics"
+        },
+        {
+          "content": "상대 스타일 맞춤 전술 변경",
+          "score": 3,
+          "category": "tactics"
+        },
+        {
+          "content": "게임 플랜 준비·실행(플랜B 포함)",
+          "score": 4,
+          "category": "tactics"
+        },
+        {
+          "content": "포인트 설계·유도 능숙(서브 패턴/3구 설계)",
+          "score": 5,
+          "category": "tactics"
+        }
+      ]
+    },
+    {
+      "question": "복식 포지셔닝·호흡(동호회 기준)은?",
+      "testOption": [
+        {
+          "content": "역할만 겨우, 포지션 겹침 잦음",
+          "score": 1,
+          "category": "doubles"
+        },
+        {
+          "content": "기본 대형 유지·단순 콜",
+          "score": 2,
+          "category": "doubles"
+        },
+        {
+          "content": "포지션 조정·포처·로브 대응",
+          "score": 3,
+          "category": "doubles"
+        },
+        {
+          "content": "포처 타이밍·중앙 커버 체계적",
+          "score": 4,
+          "category": "doubles"
+        },
+        {
+          "content": "I/오스트레일리안 등 세트플레이 운용",
+          "score": 5,
+          "category": "doubles"
+        }
+      ]
+    },
+    {
+      "question": "멘탈/압박 상황 의사결정은?",
+      "testOption": [
+        { "content": "안전 위주로 넘김", "score": 1, "category": "mental" },
+        {
+          "content": "리스크 관리하나 주저함",
+          "score": 2,
+          "category": "mental"
+        },
+        {
+          "content": "중요 포인트에서도 패턴 유지",
+          "score": 3,
+          "category": "mental"
+        },
+        {
+          "content": "서브/리턴에서 패턴 설계로 주도권",
+          "score": 4,
+          "category": "mental"
+        },
+        {
+          "content": "흐름 읽고 과감·합리적 선택으로 전환",
+          "score": 5,
+          "category": "mental"
+        }
+      ]
+    },
+    {
+      "question": "실전 성적(클럽 리그/지역 대회) 체감은?",
+      "testOption": [
+        {
+          "content": "게임 진행·스코어링이 낯섦",
+          "score": 1,
+          "category": "competition"
+        },
+        {
+          "content": "동호회 경기에서 가끔 승리",
+          "score": 2,
+          "category": "competition"
+        },
+        {
+          "content": "동급 이상과 접전·승리 경험",
+          "score": 3,
+          "category": "competition"
+        },
+        {
+          "content": "중상급 그룹 상대로도 승리 빈번",
+          "score": 4,
+          "category": "competition"
+        },
+        {
+          "content": "상급/오픈 대회에서 꾸준히 상위권",
+          "score": 5,
+          "category": "competition"
+        }
+      ]
+    },
+    {
+      "question": "코트·환경 적응력(실내/야외/바람/야간)은?",
+      "testOption": [
+        {
+          "content": "환경 바뀌면 에러 급증",
+          "score": 1,
+          "category": "adaptability"
+        },
+        {
+          "content": "2~3게임 내에 적응",
+          "score": 2,
+          "category": "adaptability"
+        },
+        {
+          "content": "바람·조도에 맞춰 구질/코스 조정",
+          "score": 3,
+          "category": "adaptability"
+        },
+        {
+          "content": "바운스·조도·바람을 계산해 유리한 랠리",
+          "score": 4,
+          "category": "adaptability"
+        },
+        {
+          "content": "환경을 활용해 전술적 우위 창출",
+          "score": 5,
+          "category": "adaptability"
+        }
+      ]
+    }
+  ],
+  "results": [
+    {
+      "target": "1",
+      "label": "레벨 1.0",
+      "image": "/img/test/ntrp/ntrp1.webp",
+      "description": "입문 단계. 기본 스윙·규칙 학습이 필요합니다."
+    },
+    {
+      "target": "1.5",
+      "label": "레벨 1.5",
+      "image": "/img/test/ntrp/ntrp1.webp",
+      "description": "기초 동작 숙달 중. 느린 랠리에서 안정성을 높여보세요."
+    },
+    {
+      "target": "2",
+      "label": "레벨 2.0",
+      "image": "/img/test/ntrp/ntrp2.webp",
+      "description": "천천한 랠리 유지 가능. 게임 진행·서브 안정화가 과제."
+    },
+    {
+      "target": "2.5",
+      "label": "레벨 2.5",
+      "image": "/img/test/ntrp/ntrp2.webp",
+      "description": "중간 페이스 적응 단계. 코스·깊이 컨트롤 연습 권장."
+    },
+    {
+      "target": "3",
+      "label": "레벨 3.0",
+      "image": "/img/test/ntrp/ntrp3.webp",
+      "description": "랠리와 전환이 안정. 네트 진입과 전술 전환을 추가."
+    },
+    {
+      "target": "3.5",
+      "label": "레벨 3.5",
+      "image": "/img/test/ntrp/ntrp3.webp",
+      "description": "공격·수비 밸런스 양호. 서브 구질/리턴 다양화 시도."
+    },
+    {
+      "target": "4",
+      "label": "레벨 4.0",
+      "image": "/img/test/ntrp/ntrp4.webp",
+      "description": "강한 페이스에서도 안정. 전진 마무리와 콤비 플레이."
+    },
+    {
+      "target": "4.5",
+      "label": "레벨 4.5",
+      "image": "/img/test/ntrp/ntrp4.webp",
+      "description": "상급권 경쟁력. 환경·상대에 따른 플랜B 운용."
+    },
+    {
+      "target": "5",
+      "label": "레벨 5.0",
+      "image": "/img/test/ntrp/ntrp5.webp",
+      "description": "전 영역 고완성도. 지역/오픈 대회 상위권 경쟁."
+    }
+  ]
+}
