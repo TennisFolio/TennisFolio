@@ -7,6 +7,8 @@ import com.tennisfolio.Tennisfolio.category.application.CategoryService;
 import com.tennisfolio.Tennisfolio.category.domain.Category;
 import com.tennisfolio.Tennisfolio.category.repository.CategoryEntity;
 import com.tennisfolio.Tennisfolio.category.repository.CategoryRepository;
+import com.tennisfolio.Tennisfolio.infrastructure.api.base.ApiWorker;
+import com.tennisfolio.Tennisfolio.infrastructure.api.base.RapidApi;
 import com.tennisfolio.Tennisfolio.infrastructure.api.base.StrategyApiTemplate;
 import com.tennisfolio.Tennisfolio.infrastructure.api.tournament.categoryTournaments.CategoryTournamentsDTO;
 import com.tennisfolio.Tennisfolio.infrastructure.api.tournament.leagueDetails.LeagueDetailsDTO;
@@ -29,23 +31,16 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 public class TournamentSyncService {
-    private final StrategyApiTemplate<List<CategoryTournamentsDTO>, List<Tournament>> categoryTournamentsApiTemplate;
-    private final StrategyApiTemplate<TournamentInfoDTO, Tournament> tournamentInfoApiTemplate;
-    private final StrategyApiTemplate<LeagueDetailsDTO, Tournament> leagueDetailsApiTemplate;
+    private final ApiWorker apiWorker;
     private final CategoryService categoryService;
     private final TournamentRepository tournamentRepository;
 
 
-    public TournamentSyncService(StrategyApiTemplate<List<CategoryTournamentsDTO>,
-                                 List<Tournament>> categoryTournamentsApiTemplate,
-                                 StrategyApiTemplate<TournamentInfoDTO, Tournament> tournamentInfoApiTemplate,
-                                 StrategyApiTemplate<LeagueDetailsDTO, Tournament> leagueDetailsApiTemplate,
-                                 CategoryService categoryService,
-                                 TournamentRepository tournamentRepository
-                                 ) {
-        this.categoryTournamentsApiTemplate = categoryTournamentsApiTemplate;
-        this.tournamentInfoApiTemplate = tournamentInfoApiTemplate;
-        this.leagueDetailsApiTemplate = leagueDetailsApiTemplate;
+    public TournamentSyncService(
+            ApiWorker apiWorker,
+            CategoryService categoryService,
+            TournamentRepository tournamentRepository) {
+        this.apiWorker = apiWorker;
         this.categoryService = categoryService;
         this.tournamentRepository = tournamentRepository;
     }
@@ -67,8 +62,7 @@ public class TournamentSyncService {
         // 카테고리별 토너먼트 리스트
         categoryRapidIdList
                 .stream()
-                // api 조회
-                .map(rapidId -> categoryTournamentsApiTemplate.execute(rapidId))
+                .map(rapidId -> apiWorker.<List<Tournament>, List<Tournament>>process(RapidApi.CATEGORYTOURNAMENTS, rapidId))
                 .flatMap(List::stream)
                 .filter(tournament -> !existingKeys.contains(tournament.getRapidTournamentId()))
                 .forEach(tournament -> {
@@ -98,7 +92,7 @@ public class TournamentSyncService {
         Tournament tournamentInfo = tournament;
 
         if (tournament.needsTournamentInfo()) {
-            Tournament fetched = tournamentInfoApiTemplate.execute(rapidId);
+            Tournament fetched = apiWorker.process(RapidApi.TOURNAMENTINFO, rapidId);
             if(fetched != null){
                 tournamentInfo = fetched;
                 tournamentRepository.collect(tournamentInfo);
@@ -128,7 +122,7 @@ public class TournamentSyncService {
         String rapidId = tournament.getRapidTournamentId();
 
         if (tournament.needsLeagueDetails()) {
-            Tournament fetched = leagueDetailsApiTemplate.execute(rapidId);
+            Tournament fetched = apiWorker.process(RapidApi.LEAGUEDETAILS, rapidId);
             if(fetched != null){
                 tournamentRepository.collect(fetched);
                 tournamentRepository.flushWhenFull();

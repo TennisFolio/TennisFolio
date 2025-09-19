@@ -15,13 +15,17 @@ public class LiveMatchPlayerResponse {
     private String playerCountryAlpha;
     private String playerCountryName;
 
-    public LiveMatchPlayerResponse(TeamDTO dto, Player player){
-        this.playerRapidId = player.getRapidPlayerId();
+    public LiveMatchPlayerResponse(TeamDTO dto){
+        this.playerRapidId = dto.getRapidPlayerId();
         this.playerName = dto.getName();
-        this.playerImage = player.getImage();
         this.playerRanking = dto.getRanking();
         this.playerCountryAlpha = dto.getCountry().getAlpha();
         this.playerCountryName = dto.getCountry().getName();
+
+    }
+
+    public void setPlayerInfo(String playerImage){
+        this.playerImage = playerImage;
 
     }
 }

@@ -14,6 +14,7 @@ public class LiveMatchResponse {
     private String seasonName;
     private String roundName;
     private String status;
+
     private LiveMatchPlayerResponse homePlayer;
     private LiveMatchPlayerResponse awayPlayer;
     private LiveMatchScoreResponse homeScore;
@@ -22,18 +23,23 @@ public class LiveMatchResponse {
 
 
 
-    public LiveMatchResponse(LiveEventsApiDTO dto, Player homePlayer, Player awayPlayer){
+    public LiveMatchResponse(LiveEventsApiDTO dto){
         this.rapidId = dto.getRapidId();
         this.category = dto.getTournament().getCategory().getSlug();
         this.tournamentName = dto.getTournament().getName();
         this.seasonName = dto.getSeason().getName();
         this.roundName = dto.getRound() != null ? dto.getRound().getName() : null;
         this.status = dto.getStatus().getDescription();
-        this.homePlayer = new LiveMatchPlayerResponse(dto.getHomeTeam(), homePlayer);
-        this.awayPlayer = new LiveMatchPlayerResponse(dto.getAwayTeam(), awayPlayer);
+        this.homePlayer = new LiveMatchPlayerResponse(dto.getHomeTeam());
+        this.awayPlayer = new LiveMatchPlayerResponse(dto.getAwayTeam());
         this.homeScore = new LiveMatchScoreResponse(dto.getHomeScore());
         this.awayScore = new LiveMatchScoreResponse(dto.getAwayScore());
         this.time = new LiveMatchTimeResponse(dto);
+    }
+
+    public void setPlayerImage(String homePlayerImage, String awayPlayerImage){
+        this.homePlayer.setPlayerInfo(homePlayerImage);
+        this.awayPlayer.setPlayerInfo(awayPlayerImage);
     }
 
     public boolean isAtp(){
