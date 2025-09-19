@@ -55,6 +55,10 @@ public class TournamentSyncServiceTest {
     @Mock
     ResponseParser<LeagueDetailsDTO> leagueParser;
 
+
+
+    List<StrategyApiTemplate<?, ?>> strategies = new ArrayList<>();
+
     private StrategyApiTemplate<List<CategoryTournamentsDTO>, List<Tournament>> categoryTemplate;
     private StrategyApiTemplate<TournamentInfoDTO, Tournament> infoTemplate;
     private StrategyApiTemplate<LeagueDetailsDTO, Tournament> leagueTemplate;
@@ -78,7 +82,13 @@ public class TournamentSyncServiceTest {
         infoTemplate = new FakeTournamentInfo(apiCaller, tournamentInfoParser, fakeTournamentInfoMapper, RapidApi.TOURNAMENTINFO);
         leagueTemplate = new FakeLeagueDetails(apiCaller, leagueParser, fakeLeagueDetailsMapper, RapidApi.LEAGUEDETAILS);
 
-        service = new TournamentSyncService(categoryTemplate, infoTemplate, leagueTemplate, categoryService, fakeTournamentRepository);
+        strategies.add(categoryTemplate);
+        strategies.add(infoTemplate);
+        strategies.add(leagueTemplate);
+
+        ApiWorker apiWorker = new ApiWorker(strategies);
+
+        service = new TournamentSyncService(apiWorker, categoryService, fakeTournamentRepository);
     }
 
     @Test
