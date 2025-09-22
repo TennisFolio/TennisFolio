@@ -15,6 +15,7 @@ function ChatRoom({ matchId = 'default-room' }) {
   );
   const clientRef = useRef(null);
   const bottomRef = useRef(null);
+  const lastSentTime = useRef(0);
 
   function getOrCreateUserId() {
     let id = localStorage.getItem('chatUserId');
@@ -114,6 +115,14 @@ function ChatRoom({ matchId = 'default-room' }) {
 
   const sendMessage = () => {
     if (!input.trim()) return;
+
+    // 디바운스: 500ms 내 중복 전송 방지
+    const now = Date.now();
+    if (now - lastSentTime.current < 500) {
+      setInput(''); // 중복 전송이어도 입력창은 비우기
+      return;
+    }
+    lastSentTime.current = now;
 
     const userId = localStorage.getItem('chatUserId');
     const message = {
