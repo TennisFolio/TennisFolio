@@ -19,4 +19,8 @@ public class TournamentQueryService {
     public List<Tournament> getByCategory(List<Category> categories){
         return tournamentRepository.findByCategoryIn(categories);
     }
+
+    public List<Tournament> getAllTournament(){
+        return tournamentRepository.findAll();
+    }
 }

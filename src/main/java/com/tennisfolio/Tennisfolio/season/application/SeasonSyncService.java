@@ -6,6 +6,8 @@ import com.tennisfolio.Tennisfolio.Tournament.repository.TournamentEntity;
 import com.tennisfolio.Tennisfolio.Tournament.repository.TournamentRepository;
 import com.tennisfolio.Tennisfolio.category.application.CategoryService;
 import com.tennisfolio.Tennisfolio.category.domain.Category;
+import com.tennisfolio.Tennisfolio.infrastructure.api.base.ApiWorker;
+import com.tennisfolio.Tennisfolio.infrastructure.api.base.RapidApi;
 import com.tennisfolio.Tennisfolio.infrastructure.api.season.leagueSeasons.LeagueSeasonsDTO;
 import com.tennisfolio.Tennisfolio.infrastructure.repository.TournamentJpaRepository;
 import com.tennisfolio.Tennisfolio.infrastructure.api.base.StrategyApiTemplate;
@@ -22,21 +24,17 @@ import java.util.stream.Collectors;
 
 @Service
 public class SeasonSyncService {
-    private final StrategyApiTemplate<List<LeagueSeasonsDTO>, List<Season>> leagueSeasonsTemplate;
-    private final StrategyApiTemplate<LeagueSeasonInfoDTO, Season> leagueSeasonInfoTemplate;
+    private final ApiWorker apiWorker;
     private final TournamentQueryService tournamentQueryService;
     private final SeasonRepository seasonRepository;
-    private final CategoryService categoryService;
 
-    public SeasonSyncService(StrategyApiTemplate<List<LeagueSeasonsDTO>, List<Season>> leagueSeasonsTemplate
-            , StrategyApiTemplate<LeagueSeasonInfoDTO, Season> leagueSeasonInfoTemplate
+    public SeasonSyncService(ApiWorker apiWorker
             , TournamentQueryService tournamentQueryService
-            , SeasonRepository seasonRepository, CategoryService categoryService) {
-        this.leagueSeasonsTemplate = leagueSeasonsTemplate;
-        this.leagueSeasonInfoTemplate = leagueSeasonInfoTemplate;
+            , SeasonRepository seasonRepository
+    ) {
+        this.apiWorker = apiWorker;
         this.tournamentQueryService = tournamentQueryService;
         this.seasonRepository = seasonRepository;
-        this.categoryService = categoryService;
     }
 
 
@@ -44,15 +42,13 @@ public class SeasonSyncService {
 
         Set<String> existingKeys = seasonRepository.findAllRapidIds();
         List<String> failedRapidIds = new ArrayList<>();
-        // ATP, WTA, United Cup, WTA125, Davis Cup
-        List<String> categoryRapidIds = List.of("3","6","76","871","1705");
-        List<Category> categories = categoryService.getByRapidCategoryId(categoryRapidIds);
 
-        tournamentQueryService.getByCategory(categories).stream()
+        tournamentQueryService.getAllTournament().stream()
+                .filter(tournament -> tournament.getCategory().isSupportedCategory())
                 .map(Tournament::getRapidTournamentId)
-                .forEach(rapidId -> {
+                .forEach(tournamentRapidId -> {
                     try{
-                        List<Season> seasonList = leagueSeasonsTemplate.execute(rapidId);
+                        List<Season> seasonList = apiWorker.process(RapidApi.LEAGUESEASONS, tournamentRapidId);
                         List<Season> newSeasons = seasonList.stream()
                                 .filter(season -> !existingKeys.contains(season.getRapidSeasonId()))
                                 .filter(Season::isSince2019)
@@ -61,7 +57,7 @@ public class SeasonSyncService {
                         seasonRepository.flushWhenFull();
                     }catch(Exception e){
                         e.printStackTrace();
-                        failedRapidIds.add(rapidId);
+                        failedRapidIds.add(tournamentRapidId);
                     }
                 });
         seasonRepository.flushAll();
@@ -78,7 +74,7 @@ public class SeasonSyncService {
                         try{
                             String tournamentRapidId = season.getTournament().getRapidTournamentId();
                             String seasonRapidId = season.getRapidSeasonId();
-                            Season leagueSeasonInfo = leagueSeasonInfoTemplate.execute(tournamentRapidId, seasonRapidId);
+                            Season leagueSeasonInfo = apiWorker.process(RapidApi.LEAGUESEASONINFO, tournamentRapidId, seasonRapidId);
                             seasonRepository.collect(leagueSeasonInfo);
                             seasonRepository.flushWhenFull();
 

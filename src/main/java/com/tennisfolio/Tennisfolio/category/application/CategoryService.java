@@ -47,6 +47,10 @@ public class CategoryService {
         }
     }
 
+    public List<Category> getAllCategoryList(){
+        return categoryRepository.findAll();
+    }
+
     public List<Category> getByRapidCategoryIdNotIn(List<String> rapidIds){
         return categoryRepository.findByRapidCategoryIdNotIn(rapidIds);
     }
