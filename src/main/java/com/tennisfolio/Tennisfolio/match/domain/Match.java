@@ -55,4 +55,5 @@ public class Match {
         this.startTimeStamp = startTimeStamp;
         this.winner = winner;
     }
+
 }
