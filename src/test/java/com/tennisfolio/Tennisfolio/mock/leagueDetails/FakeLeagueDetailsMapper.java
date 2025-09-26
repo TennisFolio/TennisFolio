@@ -1,6 +1,7 @@
 package com.tennisfolio.Tennisfolio.mock.leagueDetails;
 
 import com.tennisfolio.Tennisfolio.Tournament.domain.Tournament;
+import com.tennisfolio.Tennisfolio.fixtures.PlayerFixtures;
 import com.tennisfolio.Tennisfolio.fixtures.TournamentFixtures;
 import com.tennisfolio.Tennisfolio.infrastructure.api.base.EntityMapper;
 import com.tennisfolio.Tennisfolio.infrastructure.api.tournament.leagueDetails.LeagueDetailsDTO;
@@ -9,8 +10,8 @@ import com.tennisfolio.Tennisfolio.player.domain.Player;
 public class FakeLeagueDetailsMapper implements EntityMapper<LeagueDetailsDTO, Tournament> {
     @Override
     public Tournament map(LeagueDetailsDTO dto, Object... params) {
-        Player alcaraz = TournamentFixtures.alcaraz();
-        Player nadal = TournamentFixtures.nadal();
+        Player alcaraz = PlayerFixtures.alcaraz();
+        Player nadal = PlayerFixtures.nadal();
 
         return Tournament
                 .builder()

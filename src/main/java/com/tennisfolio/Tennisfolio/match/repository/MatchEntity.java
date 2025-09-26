@@ -15,8 +15,15 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class MatchEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name="MATCH_ID")
+    @GeneratedValue(strategy= GenerationType.TABLE, generator = "match_gen")
+    @TableGenerator(
+            name="match_gen",
+            table="TB_SEQUENCES",
+            pkColumnName = "TABLE_ID",
+            valueColumnName = "NEXT_VAL",
+            pkColumnValue = "MATCH_ID",
+            allocationSize = 1000
+    )
     private Long matchId;
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="ROUND_ID")

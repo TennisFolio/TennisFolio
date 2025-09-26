@@ -6,45 +6,12 @@ import com.tennisfolio.Tennisfolio.player.domain.Player;
 
 public class TournamentFixtures {
 
-    // Players
-    public static Player nadal() {
-        return Player.builder()
-                .rapidPlayerId("14486")
-                .playerName("Rafael Nadal")
-                .playerNameKr("라파엘 나달")
-                .build();
-    }
-
-    public static Player alcaraz() {
-        return Player.builder()
-                .rapidPlayerId("275923")
-                .playerName("Alcaraz")
-                .playerNameKr("알카라즈")
-                .build();
-    }
-
-    // Categories
-    public static Category atp() {
-        return Category.builder()
-                .rapidCategoryId("3")
-                .categoryName("ATP")
-                .categorySlug("atp")
-                .build();
-    }
-
-    public static Category wta() {
-        return Category.builder()
-                .rapidCategoryId("6")
-                .categoryName("WTA")
-                .categorySlug("wta")
-                .build();
-    }
 
     // Tournaments
     public static Tournament rolandGarrosATP() {
         return Tournament.builder()
                 .rapidTournamentId("2480")
-                .category(atp())
+                .category(CategoryFixtures.atp())
                 .tournamentName("Roland Garros")
                 .build();
     }
@@ -52,7 +19,7 @@ public class TournamentFixtures {
     public static Tournament rolandGarrosWTA() {
         return Tournament.builder()
                 .rapidTournamentId("2577")
-                .category(wta())
+                .category(CategoryFixtures.wta())
                 .tournamentName("Roland Garros")
                 .city("Paris")
                 .groundType("Clay")
@@ -62,7 +29,7 @@ public class TournamentFixtures {
     public static Tournament wimbledonATP() {
         return Tournament.builder()
                 .rapidTournamentId("2361")
-                .category(atp())
+                .category(CategoryFixtures.atp())
                 .tournamentName("Wimbledon")
                 .build();
     }
@@ -70,7 +37,7 @@ public class TournamentFixtures {
     public static Tournament wimbledonWTA() {
         return Tournament.builder()
                 .rapidTournamentId("2600")
-                .category(wta())
+                .category(CategoryFixtures.wta())
                 .tournamentName("Wimbledon")
                 .city("London")
                 .groundType("Grass")

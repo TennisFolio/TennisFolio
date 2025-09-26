@@ -50,7 +50,7 @@ public class FakeRoundRepository implements RoundRepository {
     @Override
     public boolean flushWhenFull() {
         if(batch.size() >= batchSize){
-            flushAll();
+            flushBatch();
             return true;
         }
         return false;

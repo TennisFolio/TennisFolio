@@ -31,9 +31,13 @@ public class PlayerService {
     public Player getOrCreatePlayerByRapidId(String rapidId) {
         return playerRepository.findByRapidPlayerId(rapidId)
                 .orElseGet(() -> {
-                    Player player = teamDetailsTemplate.execute(rapidId).toPlayer();
-                    String path = playerImageService.fetchImage(rapidId);
-                    player.updateProfileImage(path);
+                    PlayerAggregate aggregate = teamDetailsTemplate.execute(rapidId);
+                    if (aggregate == null) {
+                        return null;
+                    }
+                    Player player = aggregate.toPlayer();
+//                    String path = playerImageService.fetchImage(rapidId);
+//                    player.updateProfileImage(path);
                     try {
                         return playerRepository.save(player);
                     } catch(DataIntegrityViolationException e) {
