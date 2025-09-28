@@ -5,7 +5,7 @@ function NTRPResult({ renderResultInfo }) {
   const { label, description, image } = renderResultInfo;
   return (
     <div className="ntrp-result-container">
-      <h2 className="result-title">당신의 점수는?</h2>
+      <h2 className="result-title">당신의 NTRP는?</h2>
       <div className="ntrp-card">
         <img src={`${base_url}${image}`} className="ntrp-image" />
         <div className="ntrp-info">
