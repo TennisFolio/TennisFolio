@@ -2,13 +2,7 @@ import React from 'react';
 import { useEffect, useState } from 'react';
 import './testQuestion.css';
 import { arrayShuffler } from '../../tools/tools';
-function TestQuestion({
-  setMode,
-  currentTest,
-  questionList,
-  answerList,
-  setAnswerList,
-}) {
+function TestQuestion({ setMode, questionList, answerList, setAnswerList }) {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const handleAnswerSelect = (questionOrder, optionId) => {
@@ -39,7 +33,7 @@ function TestQuestion({
           {questionList[currentIndex]?.testOption &&
             arrayShuffler(currentQuestion?.testOption)?.map((opt) => (
               <button
-                key={opt.optionId}
+                key={`${currentIndex}-${opt.optionId}`}
                 className={`option-button ${
                   answerList[currentQuestion.order - 1] === opt.optionId
                     ? 'selected'
