@@ -14,7 +14,6 @@ function ChatRoom({ matchId = 'default-room' }) {
     () => `User-${Math.floor(Math.random() * 10000)}`
   );
   const clientRef = useRef(null);
-  const bottomRef = useRef(null);
   const lastSentTime = useRef(0);
 
   function getOrCreateUserId() {
@@ -155,14 +154,6 @@ function ChatRoom({ matchId = 'default-room' }) {
     }
   };
 
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({
-      behavior: 'smooth',
-      block: 'nearest',
-      inline: 'nearest',
-    });
-  }, [messages]);
-
   return (
     <div className="chat-container">
       <div className="chat-header">🗨️ Live Chat</div>
@@ -189,7 +180,6 @@ function ChatRoom({ matchId = 'default-room' }) {
             </div>
           );
         })}
-        <div ref={bottomRef}></div>
       </div>
       <div className="chat-input-area">
         <input
