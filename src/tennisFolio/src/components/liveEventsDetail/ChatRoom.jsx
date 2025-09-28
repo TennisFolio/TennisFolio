@@ -15,6 +15,7 @@ function ChatRoom({ matchId = 'default-room' }) {
   );
   const clientRef = useRef(null);
   const lastSentTime = useRef(0);
+  const bottomRef = useRef(null);
 
   function getOrCreateUserId() {
     let id = localStorage.getItem('chatUserId');
@@ -145,6 +146,15 @@ function ChatRoom({ matchId = 'default-room' }) {
       );
     }
     setInput('');
+
+    // 사용자가 메시지를 보낼 때만 스크롤을 맨 아래로 이동
+    setTimeout(() => {
+      bottomRef.current?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'nearest',
+        inline: 'nearest',
+      });
+    }, 100);
   };
 
   const handleKeyDown = (e) => {
@@ -166,8 +176,6 @@ function ChatRoom({ matchId = 'default-room' }) {
               className={`chat-bubble-container ${isMine ? 'mine' : 'theirs'}`}
             >
               <div className={`bubble-row ${isMine ? 'mine' : 'theirs'}`}>
-                {isMine && <div className="chat-time">{msg.timestamp}</div>}
-
                 <div className={`chat-bubble ${isMine ? 'mine' : 'theirs'}`}>
                   <div className="chat-meta">
                     <span className="sender">{msg.sender}</span>
@@ -175,11 +183,12 @@ function ChatRoom({ matchId = 'default-room' }) {
                   <div className="chat-text">{msg.message}</div>
                 </div>
 
-                {!isMine && <div className="chat-time">{msg.timestamp}</div>}
+                {<div className="chat-time">{msg.timestamp}</div>}
               </div>
             </div>
           );
         })}
+        <div ref={bottomRef}></div>
       </div>
       <div className="chat-input-area">
         <input
@@ -194,7 +203,9 @@ function ChatRoom({ matchId = 'default-room' }) {
           onKeyDown={handleKeyDown}
         />
         <div className="chat-length-indicator">
-          {input.length} / {MAX_LENGTH}
+          <div>
+            {input.length} / {MAX_LENGTH}
+          </div>
         </div>
         <button onClick={sendMessage} className="chat-button">
           전송
