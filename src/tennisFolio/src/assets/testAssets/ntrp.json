@@ -349,55 +349,64 @@
       "target": "1",
       "label": "레벨 1.0",
       "image": "/img/test/ntrp/ntrp1.webp",
-      "description": "입문 단계. 기본 스윙·규칙 학습이 필요합니다."
+      "description": "입문 단계. 기본 스윙·규칙 학습이 필요합니다.",
+      "query": "ntrp1-beginner-7a8b9c"
     },
     {
       "target": "1.5",
       "label": "레벨 1.5",
       "image": "/img/test/ntrp/ntrp1.webp",
-      "description": "기초 동작 숙달 중. 느린 랠리에서 안정성을 높여보세요."
+      "description": "기초 동작 숙달 중. 느린 랠리에서 안정성을 높여보세요.",
+      "query": "ntrp15-basic-4d5e6f"
     },
     {
       "target": "2",
       "label": "레벨 2.0",
       "image": "/img/test/ntrp/ntrp2.webp",
-      "description": "천천한 랠리 유지 가능. 게임 진행·서브 안정화가 과제."
+      "description": "천천한 랠리 유지 가능. 게임 진행·서브 안정화가 과제.",
+      "query": "ntrp2-steady-1g2h3i"
     },
     {
       "target": "2.5",
       "label": "레벨 2.5",
       "image": "/img/test/ntrp/ntrp2.webp",
-      "description": "중간 페이스 적응 단계. 코스·깊이 컨트롤 연습 권장."
+      "description": "중간 페이스 적응 단계. 코스·깊이 컨트롤 연습 권장.",
+      "query": "ntrp25-adapt-8j9k0l"
     },
     {
       "target": "3",
       "label": "레벨 3.0",
       "image": "/img/test/ntrp/ntrp3.webp",
-      "description": "랠리와 전환이 안정. 네트 진입과 전술 전환을 추가."
+      "description": "랠리와 전환이 안정. 네트 진입과 전술 전환을 추가.",
+      "query": "ntrp3-stable-5m6n7o"
     },
     {
       "target": "3.5",
       "label": "레벨 3.5",
       "image": "/img/test/ntrp/ntrp3.webp",
-      "description": "공격·수비 밸런스 양호. 서브 구질/리턴 다양화 시도."
+      "description": "공격·수비 밸런스 양호. 서브 구질/리턴 다양화 시도.",
+      "query": "ntrp35-balance-2p3q4r"
     },
     {
       "target": "4",
       "label": "레벨 4.0",
       "image": "/img/test/ntrp/ntrp4.webp",
-      "description": "강한 페이스에서도 안정. 전진 마무리와 콤비 플레이."
+      "description": "강한 페이스에서도 안정. 전진 마무리와 콤비 플레이.",
+      "query": "ntrp4-strong-9s0t1u"
     },
     {
       "target": "4.5",
       "label": "레벨 4.5",
       "image": "/img/test/ntrp/ntrp4.webp",
-      "description": "상급권 경쟁력. 환경·상대에 따른 플랜B 운용."
+      "description": "상급권 경쟁력. 환경·상대에 따른 플랜B 운용.",
+      "query": "ntrp45-advanced-6v7w8x"
     },
     {
       "target": "5",
       "label": "레벨 5.0",
       "image": "/img/test/ntrp/ntrp5.webp",
-      "description": "전 영역 고완성도. 지역/오픈 대회 상위권 경쟁."
+      "description": "전 영역 고완성도. 지역/오픈 대회 상위권 경쟁.",
+      "query": "ntrp5-expert-3y4z5a"
     }
   ]
 }
