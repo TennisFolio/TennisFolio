@@ -34,8 +34,17 @@ public class LiveEventsAssemble implements EntityAssemble<List<LiveEventsApiDTO>
     }
 
     private LiveMatchResponse getLiveMatchResponse(LiveEventsApiDTO dto){
-        Player homePlayer = playerService.getOrCreatePlayerByRapidId(dto.getHomeTeam().getRapidPlayerId());
-        Player awayPlayer = playerService.getOrCreatePlayerByRapidId(dto.getAwayTeam().getRapidPlayerId());
-        return new LiveMatchResponse(dto, homePlayer, awayPlayer);
+        Player homePlayer = Player.builder()
+                .rapidPlayerId(dto.getHomeTeam().getRapidPlayerId())
+                .playerName(dto.getHomeTeam().getName())
+                .build();
+
+        Player awayPlayer = Player.builder()
+                .rapidPlayerId(dto.getAwayTeam().getRapidPlayerId())
+                .playerName(dto.getAwayTeam().getName())
+                .build();
+//        Player homePlayer = playerService.getOrCreatePlayerByRapidId(dto.getHomeTeam().getRapidPlayerId());
+//        Player awayPlayer = playerService.getOrCreatePlayerByRapidId(dto.getAwayTeam().getRapidPlayerId());
+        return new LiveMatchResponse(dto);
     }
 }

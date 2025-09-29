@@ -32,29 +32,56 @@ function LiveEventsDetail() {
     };
 
     fetchData();
-  }, [matchId]);
+  }, [matchId, navigate]);
 
   useEffect(() => {
-    const socket = new SockJS(`${base_server_url}/ws`);
-    const client = new Client({
-      webSocketFactory: () => socket,
-      reconnectDelay: 10000,
-      onConnect: () => {
-        client.subscribe(`/topic/liveMatch/${matchId}`, (message) => {
-          const data = JSON.parse(message.body);
-          setLiveEvent(data);
-        });
-      },
-      onStompError: (frame) => {
-        console.error('STOMP 오류: ', frame);
-      },
-    });
+    // 개발 모드에서는 웹소켓 대신 목데이터로 실시간 업데이트 시뮬레이션
+    if (import.meta.env.DEV) {
+      const simulateRealTimeUpdates = () => {
+        const updateInterval = setInterval(() => {
+          if (liveEvent) {
+            setLiveEvent((prevEvent) => ({
+              ...prevEvent,
+              homeScore: {
+                ...prevEvent.homeScore,
+                point: ['0', '15', '30', '40'][Math.floor(Math.random() * 4)],
+              },
+              awayScore: {
+                ...prevEvent.awayScore,
+                point: ['0', '15', '30', '40'][Math.floor(Math.random() * 4)],
+              },
+            }));
+          }
+        }, 5000); // 5초마다 스코어 업데이트
 
-    client.activate();
-    return () => {
-      if (client.active) client.deactivate();
-    };
-  }, [matchId]);
+        return updateInterval;
+      };
+
+      const intervalId = simulateRealTimeUpdates();
+      return () => clearInterval(intervalId);
+    } else {
+      // 프로덕션 모드에서는 실제 웹소켓 연결
+      const socket = new SockJS(`${base_server_url}/ws`);
+      const client = new Client({
+        webSocketFactory: () => socket,
+        reconnectDelay: 10000,
+        onConnect: () => {
+          client.subscribe(`/topic/liveMatch/${matchId}`, (message) => {
+            const data = JSON.parse(message.body);
+            setLiveEvent(data);
+          });
+        },
+        onStompError: (frame) => {
+          console.error('STOMP 오류: ', frame);
+        },
+      });
+
+      client.activate();
+      return () => {
+        if (client.active) client.deactivate();
+      };
+    }
+  }, [matchId, liveEvent]);
   return (
     <div>
       {liveEvent ? (

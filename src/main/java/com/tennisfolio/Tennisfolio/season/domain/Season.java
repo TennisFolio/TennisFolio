@@ -54,4 +54,9 @@ public class Season {
         }
 
     }
+
+
+    public boolean isSameSeason(String rapidSeasonId){
+        return this.rapidSeasonId.equals(rapidSeasonId);
+    }
 }

@@ -44,5 +44,9 @@ public abstract class StrategyApiTemplate<T, E> {
 
     }
 
+    public RapidApi getEndPoint(){
+        return endpoint;
+    }
+
 
 }

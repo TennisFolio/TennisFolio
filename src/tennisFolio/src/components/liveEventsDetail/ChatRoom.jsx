@@ -14,6 +14,7 @@ function ChatRoom({ matchId = 'default-room' }) {
     () => `User-${Math.floor(Math.random() * 10000)}`
   );
   const clientRef = useRef(null);
+  const lastSentTime = useRef(0);
   const bottomRef = useRef(null);
 
   function getOrCreateUserId() {
@@ -29,9 +30,6 @@ function ChatRoom({ matchId = 'default-room' }) {
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   }
   useEffect(() => {
-    const socket = new SockJS(`${base_server_url}/ws`);
-    const client = Stomp.over(socket);
-
     const fetchData = async () => {
       try {
         const response = await apiRequest.get(
@@ -58,23 +56,73 @@ function ChatRoom({ matchId = 'default-room' }) {
     fetchData();
     getOrCreateUserId();
 
-    client.connect({}, () => {
-      client.subscribe(`/topic/match.${matchId}`, (msg) => {
-        const received = JSON.parse(msg.body);
-        setMessages((prev) => [...prev, received]);
-      });
-      clientRef.current = client;
-    });
+    // 개발 모드에서는 웹소켓 대신 목데이터로 채팅 시뮬레이션
+    if (import.meta.env.DEV) {
+      const mockMessages = [
+        '와 이 경기 진짜 박진감 넘치네요!',
+        '알카라즈 폼이 정말 좋아요 🎾',
+        '조코비치도 만만치 않네',
+        '이번 세트는 누가 가져갈까요?',
+        '테니스 최고!',
+        '실시간으로 보니까 더 재밌어요',
+        '다음 포인트가 중요할 것 같아요',
+      ];
 
-    return () => {
-      if (clientRef.current) {
-        clientRef.current.disconnect();
-      }
-    };
+      const mockUsers = ['임재학', '박태환', '윤선아', '이서영', '김현우'];
+
+      const simulateChat = () => {
+        const chatInterval = setInterval(() => {
+          const randomMessage =
+            mockMessages[Math.floor(Math.random() * mockMessages.length)];
+          const randomUser =
+            mockUsers[Math.floor(Math.random() * mockUsers.length)];
+          const newMessage = {
+            matchId,
+            sender: randomUser,
+            userId: `mock-${Math.random()}`,
+            timestamp: formatToMinuteSecond(new Date().toISOString()),
+            message: randomMessage,
+            type: 'TALK',
+          };
+          setMessages((prev) => [...prev, newMessage]);
+        }, 8000); // 8초마다 새 메시지
+
+        return chatInterval;
+      };
+
+      const intervalId = simulateChat();
+      return () => clearInterval(intervalId);
+    } else {
+      // 프로덕션 모드에서는 실제 웹소켓 연결
+      const socket = new SockJS(`${base_server_url}/ws`);
+      const client = Stomp.over(socket);
+
+      client.connect({}, () => {
+        client.subscribe(`/topic/match.${matchId}`, (msg) => {
+          const received = JSON.parse(msg.body);
+          setMessages((prev) => [...prev, received]);
+        });
+        clientRef.current = client;
+      });
+
+      return () => {
+        if (clientRef.current) {
+          clientRef.current.disconnect();
+        }
+      };
+    }
   }, [matchId]);
 
   const sendMessage = () => {
     if (!input.trim()) return;
+
+    // 디바운스: 500ms 내 중복 전송 방지
+    const now = Date.now();
+    if (now - lastSentTime.current < 500) {
+      setInput(''); // 중복 전송이어도 입력창은 비우기
+      return;
+    }
+    lastSentTime.current = now;
 
     const userId = localStorage.getItem('chatUserId');
     const message = {
@@ -85,22 +133,36 @@ function ChatRoom({ matchId = 'default-room' }) {
       message: input,
       type: 'TALK',
     };
-    clientRef.current.send(
-      `/app/chat.send/${matchId}`,
-      {},
-      JSON.stringify(message)
-    );
+
+    if (import.meta.env.DEV) {
+      // 개발 모드에서는 로컬 상태에 바로 추가
+      setMessages((prev) => [...prev, message]);
+    } else {
+      // 프로덕션 모드에서는 실제 웹소켓으로 전송
+      clientRef.current.send(
+        `/app/chat.send/${matchId}`,
+        {},
+        JSON.stringify(message)
+      );
+    }
     setInput('');
+
+    // 사용자가 메시지를 보낼 때만 스크롤을 맨 아래로 이동
+    setTimeout(() => {
+      bottomRef.current?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'nearest',
+        inline: 'nearest',
+      });
+    }, 100);
   };
 
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
-
-  function formatTime(isoString) {
-    const date = new Date(isoString);
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  }
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  };
 
   return (
     <div className="chat-container">
@@ -114,8 +176,6 @@ function ChatRoom({ matchId = 'default-room' }) {
               className={`chat-bubble-container ${isMine ? 'mine' : 'theirs'}`}
             >
               <div className={`bubble-row ${isMine ? 'mine' : 'theirs'}`}>
-                {isMine && <div className="chat-time">{msg.timestamp}</div>}
-
                 <div className={`chat-bubble ${isMine ? 'mine' : 'theirs'}`}>
                   <div className="chat-meta">
                     <span className="sender">{msg.sender}</span>
@@ -123,7 +183,7 @@ function ChatRoom({ matchId = 'default-room' }) {
                   <div className="chat-text">{msg.message}</div>
                 </div>
 
-                {!isMine && <div className="chat-time">{msg.timestamp}</div>}
+                {<div className="chat-time">{msg.timestamp}</div>}
               </div>
             </div>
           );
@@ -140,10 +200,12 @@ function ChatRoom({ matchId = 'default-room' }) {
             }
           }}
           placeholder="메시지를 입력하세요"
-          onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
+          onKeyDown={handleKeyDown}
         />
         <div className="chat-length-indicator">
-          {input.length} / {MAX_LENGTH}
+          <div>
+            {input.length} / {MAX_LENGTH}
+          </div>
         </div>
         <button onClick={sendMessage} className="chat-button">
           전송

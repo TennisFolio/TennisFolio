@@ -12,8 +12,8 @@ function StringResult({ renderResultInfo }) {
           className="string-image"
         />
         <div className="string-info">
-          <h3 className="string-name">{renderResultInfo.name}</h3>
-          <p className="string-type">타입: {renderResultInfo.stringType}</p>
+          <h3 className="string-name">{renderResultInfo.modelName}</h3>
+          <p className="string-type">{renderResultInfo.stringType}</p>
           <p className="string-description">{renderResultInfo.description}</p>
         </div>
       </div>
