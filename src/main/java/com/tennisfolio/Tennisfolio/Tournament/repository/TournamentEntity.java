@@ -119,6 +119,7 @@ public class TournamentEntity extends BaseTimeEntity {
     public Tournament toModelBaseOnly(){
         return Tournament.builder()
                 .tournamentId(tournamentId)
+                .category(categoryEntity != null ? categoryEntity.toModel() : null)
                 .rapidTournamentId(rapidTournamentId)
                 .matchType(matchType)
                 .tournamentName(tournamentName)
