@@ -1,4 +1,4 @@
-package com.tennisfolio.Tennisfolio.infrastructure.api.match.eventStatistics;
+package com.tennisfolio.Tennisfolio.infrastructure.api.statistic.eventStatistics;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;

@@ -93,14 +93,14 @@ public class MatchEntity {
     public static MatchEntity fromModel(Match match) {
         MatchEntity matchEntity = new MatchEntity();
         matchEntity.matchId = match.getMatchId();
-        matchEntity.roundEntity = RoundEntity.fromModel(match.getRound());
+        matchEntity.roundEntity = match.getRound() != null? RoundEntity.fromModel(match.getRound()) : null;
         matchEntity.rapidMatchId = match.getRapidMatchId();
         matchEntity.homeSeed = match.getHomeSeed();
         matchEntity.awaySeed = match.getAwaySeed();
         matchEntity.homeScore = match.getHomeScore();
         matchEntity.awayScore = match.getAwayScore();
-        matchEntity.homePlayer = PlayerEntity.fromModel(match.getHomePlayer());
-        matchEntity.awayPlayer = PlayerEntity.fromModel(match.getAwayPlayer());
+        matchEntity.homePlayer = match.getHomePlayer() != null? PlayerEntity.fromModel(match.getHomePlayer()) : null;
+        matchEntity.awayPlayer = match.getAwayPlayer() != null? PlayerEntity.fromModel(match.getAwayPlayer()) : null;
         matchEntity.homeSet = match.getHomeSet();
         matchEntity.awaySet = match.getAwaySet();
         matchEntity.periodSet = match.getPeriodSet();
@@ -121,6 +121,22 @@ public class MatchEntity {
                 .awayScore(awayScore)
                 .homePlayer(homePlayer.toModel())
                 .awayPlayer(awayPlayer.toModel())
+                .homeSet(homeSet)
+                .awaySet(awaySet)
+                .periodSet(periodSet)
+                .startTimeStamp(startTimeStamp)
+                .winner(winner)
+                .build();
+    }
+
+    public Match toModelBaseOnly(){
+        return Match.builder()
+                .matchId(matchId)
+                .rapidMatchId(rapidMatchId)
+                .homeSeed(homeSeed)
+                .awaySeed(awaySeed)
+                .homeScore(homeScore)
+                .awayScore(awayScore)
                 .homeSet(homeSet)
                 .awaySet(awaySet)
                 .periodSet(periodSet)

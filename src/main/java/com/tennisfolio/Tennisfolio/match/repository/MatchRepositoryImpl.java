@@ -27,7 +27,7 @@ public class MatchRepositoryImpl implements MatchRepository{
 
     @Override
     public List<Match> findAll() {
-        return matchJpaRepository.findAll().stream().map(MatchEntity::toModel).toList();
+        return matchJpaRepository.findAll().stream().map(MatchEntity::toModelBaseOnly).toList();
     }
 
     @Override

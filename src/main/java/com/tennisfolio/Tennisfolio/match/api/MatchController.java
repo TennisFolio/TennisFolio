@@ -71,10 +71,4 @@ public class MatchController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @PostMapping("/statistic")
-    public ResponseEntity<ResponseDTO> saveStatistic(){
-        statisticSyncService.saveStatisticList();
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
-
 }
