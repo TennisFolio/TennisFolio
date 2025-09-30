@@ -16,6 +16,9 @@ import java.util.Set;
 
 public interface TournamentJpaRepository extends JpaRepository<TournamentEntity, Long> {
 
+    @Query("SELECT t FROM TournamentEntity t JOIN FETCH t.categoryEntity c ")
+    List<TournamentEntity> findAll();
+
     @EntityGraph(attributePaths = {"mostTitlePlayer", "titleHolder"})
     List<TournamentEntity> findAllBy();
 
