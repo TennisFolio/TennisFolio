@@ -1,5 +1,6 @@
 package com.tennisfolio.Tennisfolio.statistic.repository;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.tennisfolio.Tennisfolio.common.Entity.BaseTimeEntity;
 import com.tennisfolio.Tennisfolio.match.repository.MatchEntity;
 import com.tennisfolio.Tennisfolio.statistic.domain.Statistic;
@@ -13,8 +14,15 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class StatisticEntity extends BaseTimeEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name="STAT_ID")
+    @GeneratedValue(strategy= GenerationType.TABLE, generator = "statistic_gen")
+    @TableGenerator(
+            name = "statistic_gen",
+            table= "TB_SEQUENCES",
+            pkColumnName= "TABLE_ID",
+            valueColumnName= "NEXT_VAL",
+            pkColumnValue = "STAT_ID",
+            allocationSize = 1000
+    )
     private Long statId;
     @ManyToOne
     @JoinColumn(name="MATCH_ID")
@@ -31,6 +39,10 @@ public class StatisticEntity extends BaseTimeEntity {
     private Long homeValue;
     @Column(name="AWAY_VALUE")
     private Long awayValue;
+    @Column(name="HOME_TOTAL")
+    private Long homeTotal;
+    @Column(name="AWAY_TOTAL")
+    private Long awayTotal;
 
 
     public static StatisticEntity fromModel(Statistic statistic) {
@@ -43,7 +55,8 @@ public class StatisticEntity extends BaseTimeEntity {
         statisticEntity.metric = statistic.getMetric();
         statisticEntity.homeValue = statistic.getHomeValue();
         statisticEntity.awayValue = statistic.getAwayValue();
-
+        statisticEntity.homeTotal = statistic.getHomeTotal();
+        statisticEntity.awayTotal = statistic.getAwayTotal();
         return statisticEntity;
     }
 
@@ -56,6 +69,8 @@ public class StatisticEntity extends BaseTimeEntity {
                 .metric(metric)
                 .homeValue(homeValue)
                 .awayValue(awayValue)
+                .homeTotal(homeTotal)
+                .awayTotal(awayTotal)
                 .build();
     }
 
