@@ -1,6 +1,6 @@
 package com.tennisfolio.Tennisfolio.statistic.domain;
 
-import com.tennisfolio.Tennisfolio.infrastructure.api.match.eventStatistics.StatisticsDTO;
+import com.tennisfolio.Tennisfolio.infrastructure.api.statistic.eventStatistics.StatisticsDTO;
 import com.tennisfolio.Tennisfolio.match.domain.Match;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -27,14 +27,20 @@ public class Statistic {
 
     private Long awayValue;
 
+    private Long homeTotal;
+
+    private Long awayTotal;
+
     public Statistic(String period, StatisticsDTO dto, Match match){
         this.match = match;
         this.period = period;
         this.groupName = dto.getName();
         this.statDirection = dto.getStatisticsType();
-        this.metric = dto.getName();
+        this.metric = dto.getMetric();
         this.homeValue = dto.getHomeValue();
         this.awayValue = dto.getAwayValue();
+        this.homeTotal = dto.getHomeTotal();
+        this.awayTotal = dto.getAwayTotal();
 
     }
 }

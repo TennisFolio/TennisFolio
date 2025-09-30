@@ -18,7 +18,7 @@ public class StatisticController {
         this.statisticSyncService = statisticSyncService;
     }
 
-    @PostMapping("/")
+    @PostMapping("")
     public ResponseEntity<ResponseDTO> saveStatistic(){
         statisticSyncService.saveStatisticList();
         return new ResponseEntity<>(HttpStatus.OK);

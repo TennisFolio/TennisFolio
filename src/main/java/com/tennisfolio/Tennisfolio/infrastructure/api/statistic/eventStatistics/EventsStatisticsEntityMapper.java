@@ -1,4 +1,4 @@
-package com.tennisfolio.Tennisfolio.infrastructure.api.match.eventStatistics;
+package com.tennisfolio.Tennisfolio.infrastructure.api.statistic.eventStatistics;
 
 import com.tennisfolio.Tennisfolio.infrastructure.api.base.EntityAssemble;
 import com.tennisfolio.Tennisfolio.infrastructure.api.base.EntityMapper;

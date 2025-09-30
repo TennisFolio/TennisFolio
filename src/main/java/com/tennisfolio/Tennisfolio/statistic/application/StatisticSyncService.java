@@ -1,13 +1,16 @@
 package com.tennisfolio.Tennisfolio.statistic.application;
 
+import com.tennisfolio.Tennisfolio.infrastructure.api.base.ApiWorker;
+import com.tennisfolio.Tennisfolio.infrastructure.api.base.RapidApi;
 import com.tennisfolio.Tennisfolio.infrastructure.api.base.StrategyApiTemplate;
-import com.tennisfolio.Tennisfolio.infrastructure.api.match.eventStatistics.EventsStatisticsDTO;
+import com.tennisfolio.Tennisfolio.infrastructure.api.statistic.eventStatistics.EventsStatisticsDTO;
 import com.tennisfolio.Tennisfolio.statistic.domain.Statistic;
-import com.tennisfolio.Tennisfolio.statistic.repository.StatisticEntity;
 import com.tennisfolio.Tennisfolio.match.repository.MatchRepository;
 import com.tennisfolio.Tennisfolio.statistic.repository.StatisticRepository;
 import org.springframework.stereotype.Service;
+import software.amazon.awssdk.utils.CollectionUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -15,25 +18,38 @@ import java.util.stream.Stream;
 @Service
 public class StatisticSyncService {
 
-    private final StrategyApiTemplate<List<EventsStatisticsDTO>, List<Statistic>> eventsStatisticsTemplate;
+    private final ApiWorker apiWorker;
     private final MatchRepository matchRepository;
     private final StatisticRepository statisticRepository;
-    public StatisticSyncService(StrategyApiTemplate<List<EventsStatisticsDTO>, List<Statistic>> eventsStatisticsTemplate, MatchRepository matchRepository, StatisticRepository statisticRepository) {
-        this.eventsStatisticsTemplate = eventsStatisticsTemplate;
+    public StatisticSyncService( ApiWorker apiWorker, MatchRepository matchRepository, StatisticRepository statisticRepository) {
+        this.apiWorker = apiWorker;
         this.matchRepository = matchRepository;
         this.statisticRepository = statisticRepository;
     }
 
     public void saveStatisticList() {
-        List<Statistic> toSave = matchRepository.findAll()
+        List<String> failedRapidIds = new ArrayList<>();
+        matchRepository.findAll()
                 .stream()
-                .map(match -> {
-                    String rapidMatchId = match.getRapidMatchId();
-                    return eventsStatisticsTemplate.execute(rapidMatchId);
-                }).flatMap(list -> list != null ? list.stream() : Stream.empty())
-                .collect(Collectors.toList());
+                .forEach(match -> {
+                    try{
+                        String rapidMatchId = match.getRapidMatchId();
 
-        statisticRepository.saveAll(toSave);
+                        if(!statisticRepository.findByMatch(match).isEmpty()){
+                            return;
+                        }
+                        List<Statistic> statistics = apiWorker.process(RapidApi.EVENTSTATISTICS, rapidMatchId);
+                        statisticRepository.collect(statistics);
+                        statisticRepository.flushWhenFull();
+                    }catch(Exception e){
+                        e.printStackTrace();
+                        failedRapidIds.add(match.getRapidMatchId());
+                    }
+                });
+
+        System.out.println("failedRapidIds: " + failedRapidIds);
+
+        statisticRepository.flushAll();
 
     }
 }
