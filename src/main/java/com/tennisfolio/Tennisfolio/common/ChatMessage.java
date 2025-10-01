@@ -30,7 +30,7 @@ public class ChatMessage {
         this.message = chat.getMessage();
         this.sender = chat.getNickName();
         this.userId = chat.getUserId();
-        this.timestamp = ConversionUtil.timestampToHHmm(chat.getTimeStamp());
+        this.timestamp = ConversionUtil.timestampToYYYYMMDDHHMMSS(chat.getTimeStamp());
         this.type = chat.getType();
     }
 
