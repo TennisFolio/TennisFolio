@@ -34,4 +34,13 @@ public class ConversionUtil {
         return formattedTime;
 
     }
+
+    public static String timestampToYYYYMMDDHHMMSS(LocalDateTime timestamp){
+        DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+
+        String formattedTime = timestamp.format(outputFormatter);
+
+        return formattedTime;
+
+    }
 }
