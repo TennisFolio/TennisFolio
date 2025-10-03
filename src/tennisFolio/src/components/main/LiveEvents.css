@@ -133,6 +133,7 @@
   padding: 1.5rem;
   transition: transform 0.2s;
   width: 100%;
+  min-width: 400px;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
@@ -233,6 +234,7 @@
 
 .eventTable table {
   width: 100%;
+  min-width: 350px;
   border-collapse: collapse;
   font-size: 14px;
   min-height: 170px;
@@ -305,6 +307,10 @@
     font-size: 1.1rem;
     min-width: 2.5rem;
   }
+
+  .eventTable table {
+    min-width: 250px;
+  }
 }
 
 /* 모바일 크기 */
@@ -322,6 +328,7 @@
     margin-bottom: 1rem;
     padding: 1rem;
     border-radius: 0.75rem;
+    min-width: 280px;
   }
 
   .tournamentName {
