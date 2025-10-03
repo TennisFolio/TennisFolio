@@ -78,10 +78,10 @@ export function generateLiveEvent() {
     awayScores.push(random.number(0, 6));
   }
 
-  // 나머지 세트는 빈 값으로 채우기 (항상 총 5개가 되도록)
+  // 나머지 세트는 0으로 채우기 (항상 총 5개가 되도록)
   while (homeScores.length < 5) {
-    homeScores.push(''); // 빈 문자열
-    awayScores.push('');
+    homeScores.push(0);
+    awayScores.push(0);
   }
 
   // 세트 스코어 문자열 생성 (완료된 세트들만)

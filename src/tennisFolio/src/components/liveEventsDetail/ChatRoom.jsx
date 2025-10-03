@@ -25,9 +25,25 @@ function ChatRoom({ matchId = 'default-room' }) {
     }
   }
 
-  function formatToMinuteSecond(isoString) {
-    const date = new Date(isoString);
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  // YYYYMMDDhhmmss 형식의 문자열을 "hh:mm" 포맷으로 변환
+  function formatToMinuteSecond(yyyymmddhhmmss) {
+    if (!yyyymmddhhmmss || yyyymmddhhmmss.length !== 14) return '';
+    const year = yyyymmddhhmmss.slice(0, 4);
+    const month = yyyymmddhhmmss.slice(4, 6);
+    const day = yyyymmddhhmmss.slice(6, 8);
+    const hour = yyyymmddhhmmss.slice(8, 10);
+    const minute = yyyymmddhhmmss.slice(10, 12);
+    // const second = yyyymmddhhmmss.slice(12, 14); // 필요시 사용
+
+    // Date 객체로 변환 (로컬 타임존 기준)
+    const date = new Date(`${year}-${month}-${day}T${hour}:${minute}:00`);
+
+    // "hh:mm" 형식으로 반환
+    return date.toLocaleTimeString([], {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    });
   }
   useEffect(() => {
     const fetchData = async () => {
@@ -76,11 +92,20 @@ function ChatRoom({ matchId = 'default-room' }) {
             mockMessages[Math.floor(Math.random() * mockMessages.length)];
           const randomUser =
             mockUsers[Math.floor(Math.random() * mockUsers.length)];
+          const now = new Date();
+          const timestamp =
+            now.getFullYear().toString() +
+            (now.getMonth() + 1).toString().padStart(2, '0') +
+            now.getDate().toString().padStart(2, '0') +
+            now.getHours().toString().padStart(2, '0') +
+            now.getMinutes().toString().padStart(2, '0') +
+            now.getSeconds().toString().padStart(2, '0');
+
           const newMessage = {
             matchId,
             sender: randomUser,
             userId: `mock-${Math.random()}`,
-            timestamp: formatToMinuteSecond(new Date().toISOString()),
+            timestamp: timestamp,
             message: randomMessage,
             type: 'TALK',
           };
@@ -117,19 +142,28 @@ function ChatRoom({ matchId = 'default-room' }) {
     if (!input.trim()) return;
 
     // 디바운스: 500ms 내 중복 전송 방지
-    const now = Date.now();
-    if (now - lastSentTime.current < 500) {
+    const nowTime = Date.now();
+    if (nowTime - lastSentTime.current < 500) {
       setInput(''); // 중복 전송이어도 입력창은 비우기
       return;
     }
-    lastSentTime.current = now;
+    lastSentTime.current = nowTime;
 
     const userId = localStorage.getItem('chatUserId');
+    const now = new Date();
+    const timestamp =
+      now.getFullYear().toString() +
+      (now.getMonth() + 1).toString().padStart(2, '0') +
+      now.getDate().toString().padStart(2, '0') +
+      now.getHours().toString().padStart(2, '0') +
+      now.getMinutes().toString().padStart(2, '0') +
+      now.getSeconds().toString().padStart(2, '0');
+
     const message = {
       matchId,
       sender: nickname,
       userId: userId,
-      timestamp: formatToMinuteSecond(new Date().toISOString()),
+      timestamp: timestamp,
       message: input,
       type: 'TALK',
     };
@@ -183,7 +217,11 @@ function ChatRoom({ matchId = 'default-room' }) {
                   <div className="chat-text">{msg.message}</div>
                 </div>
 
-                {<div className="chat-time">{msg.timestamp}</div>}
+                {
+                  <div className="chat-time">
+                    {formatToMinuteSecond(msg.timestamp)}
+                  </div>
+                }
               </div>
             </div>
           );

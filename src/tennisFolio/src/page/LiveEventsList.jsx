@@ -17,6 +17,7 @@ function Main() {
   const clientRef = useRef(null);
   const param = useParams();
   const category = param.category;
+  const emptyEventTestArray = [];
 
   // 개발 모드 확인
   const isDevelopment = import.meta.env.MODE === 'development';
@@ -91,6 +92,7 @@ function Main() {
       <MetatagRenderer />
       {/* LiveEvents 페이지에서만 MSW 토글 표시 */}
       {isDevelopment && <MSWToggle />}
+      {/* <LiveEvents liveEvents={emptyEventTestArray} /> */}
       <LiveEvents liveEvents={liveEvents} />
     </>
   );
