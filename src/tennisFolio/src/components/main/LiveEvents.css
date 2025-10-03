@@ -235,6 +235,7 @@
   width: 100%;
   border-collapse: collapse;
   font-size: 14px;
+  min-height: 170px;
 }
 
 .eventTable th,
@@ -369,6 +370,7 @@
   .eventTable table {
     font-size: 0.75rem;
     min-width: 100%;
+    min-height: none;
   }
 
   .eventTable th,
