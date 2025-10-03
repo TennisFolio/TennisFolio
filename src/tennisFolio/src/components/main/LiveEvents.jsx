@@ -104,6 +104,30 @@ function LiveEvents({ liveEvents }) {
 
                   const setsToShow = isFiveSetMatch ? 5 : 3;
 
+                  // 각 세트의 승자를 판단하는 함수
+                  const getSetWinner = (setIndex) => {
+                    const homeScore = event.homeScore?.periodScore[setIndex];
+                    const awayScore = event.awayScore?.periodScore[setIndex];
+
+                    // 해당 세트가 끝났는지 확인 (다음 세트에 점수가 있을 때만)
+                    const isSetCompleted =
+                      setIndex < setsToShow - 1
+                        ? event.homeScore?.periodScore[setIndex + 1] !== 0 ||
+                          event.awayScore?.periodScore[setIndex + 1] !== 0
+                        : false; // 마지막 세트는 완료 여부를 알 수 없으므로 색칠하지 않음
+
+                    if (
+                      !isSetCompleted ||
+                      (homeScore === 0 && awayScore === 0)
+                    ) {
+                      return null; // 세트가 아직 끝나지 않았거나 시작되지 않음
+                    }
+
+                    if (homeScore > awayScore) return 'home';
+                    if (awayScore > homeScore) return 'away';
+                    return null; // 동점 (일반적으로 발생하지 않음)
+                  };
+
                   return (
                     <table>
                       <thead>
@@ -132,9 +156,26 @@ function LiveEvents({ liveEvents }) {
                           </td>
                           {event.homeScore?.periodScore
                             .slice(0, setsToShow)
-                            .map((score, index) => (
-                              <td key={index}>{score}</td>
-                            ))}
+                            .map((score, index) => {
+                              const winner = getSetWinner(index);
+                              return (
+                                <td
+                                  key={index}
+                                  style={{
+                                    backgroundColor:
+                                      winner === 'home'
+                                        ? '#43cea2'
+                                        : 'transparent',
+                                    color:
+                                      winner === 'home' ? 'white' : 'inherit',
+                                    fontWeight:
+                                      winner === 'home' ? 'bold' : 'normal',
+                                  }}
+                                >
+                                  {score}
+                                </td>
+                              );
+                            })}
                         </tr>
                         <tr>
                           <td>
@@ -153,9 +194,26 @@ function LiveEvents({ liveEvents }) {
                           </td>
                           {event.awayScore?.periodScore
                             .slice(0, setsToShow)
-                            .map((score, index) => (
-                              <td key={index}>{score}</td>
-                            ))}
+                            .map((score, index) => {
+                              const winner = getSetWinner(index);
+                              return (
+                                <td
+                                  key={index}
+                                  style={{
+                                    backgroundColor:
+                                      winner === 'away'
+                                        ? '#43cea2'
+                                        : 'transparent',
+                                    color:
+                                      winner === 'away' ? 'white' : 'inherit',
+                                    fontWeight:
+                                      winner === 'away' ? 'bold' : 'normal',
+                                  }}
+                                >
+                                  {score}
+                                </td>
+                              );
+                            })}
                         </tr>
                       </tbody>
                     </table>
