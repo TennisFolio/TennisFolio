@@ -27,7 +27,6 @@ function LiveEvents({ liveEvents }) {
                 <div className="tournamentHeader">
                   <div className="tournamentName">{event.tournamentName}</div>
                   <div className="roundName">{event.roundName}</div>
-                  {/* <div className="status">{event.status}</div> */}
                 </div>
 
                 <div className="eventHeader">
@@ -43,10 +42,7 @@ function LiveEvents({ liveEvents }) {
                       {event.homePlayer?.playerRanking})
                     </div>
                   </div>
-                  {/* 
-                  <div className="setScore">
-                    {event.homeScore?.current} : {event.awayScore?.current}
-                  </div> */}
+
                   <div className="setScore">
                     {event.homeScore?.point} : {event.awayScore?.point}
                   </div>
@@ -65,58 +61,71 @@ function LiveEvents({ liveEvents }) {
                 </div>
 
                 <div className="eventTable">
-                  <table>
-                    <thead>
-                      <tr>
-                        <th></th>
-                        <th>SET1</th>
-                        <th>SET2</th>
-                        <th>SET3</th>
-                        <th>SET4</th>
-                        <th>SET5</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td>
-                          <span style={{ verticalAlign: 'middle' }}>
-                            {event.homePlayer?.playerName}
-                          </span>
-                          <Flag
-                            code={event.homePlayer?.playerCountryAlpha}
-                            style={{
-                              width: '24px',
-                              height: '16px',
-                              verticalAlign: 'middle',
-                              marginLeft: '4px',
-                            }}
-                          />
-                        </td>
-                        {event.homeScore?.periodScore.map((score, index) => (
-                          <td key={index}>{score}</td>
-                        ))}
-                      </tr>
-                      <tr>
-                        <td>
-                          <span style={{ verticalAlign: 'middle' }}>
-                            {event.awayPlayer?.playerName}
-                          </span>
-                          <Flag
-                            code={event.awayPlayer?.playerCountryAlpha}
-                            style={{
-                              width: '24px',
-                              height: '16px',
-                              verticalAlign: 'middle',
-                              marginLeft: '4px',
-                            }}
-                          />
-                        </td>
-                        {event.awayScore?.periodScore.map((score, index) => (
-                          <td key={index}>{score}</td>
-                        ))}
-                      </tr>
-                    </tbody>
-                  </table>
+                  {(() => {
+                    // 4세트 점수가 있는지 확인 (homeScore와 awayScore 모두 4세트가 0이 아니면 5세트 경기)
+                    const isFiveSetMatch =
+                      event.homeScore?.periodScore[3] !== 0 ||
+                      event.awayScore?.periodScore[3] !== 0;
+
+                    const setsToShow = isFiveSetMatch ? 5 : 3;
+
+                    return (
+                      <table>
+                        <thead>
+                          <tr>
+                            <th></th>
+                            {Array.from({ length: setsToShow }, (_, index) => (
+                              <th key={index}>SET{index + 1}</th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr>
+                            <td>
+                              <span style={{ verticalAlign: 'middle' }}>
+                                {event.homePlayer?.playerName}
+                              </span>
+                              <Flag
+                                code={event.homePlayer?.playerCountryAlpha}
+                                style={{
+                                  width: '24px',
+                                  height: '16px',
+                                  verticalAlign: 'middle',
+                                  marginLeft: '4px',
+                                }}
+                              />
+                            </td>
+                            {event.homeScore?.periodScore
+                              .slice(0, setsToShow)
+                              .map((score, index) => (
+                                <td key={index}>{score}</td>
+                              ))}
+                          </tr>
+                          <tr>
+                            <td>
+                              <span style={{ verticalAlign: 'middle' }}>
+                                {event.awayPlayer?.playerName}
+                              </span>
+                              <Flag
+                                code={event.awayPlayer?.playerCountryAlpha}
+                                style={{
+                                  width: '24px',
+                                  height: '16px',
+                                  verticalAlign: 'middle',
+                                  marginLeft: '4px',
+                                }}
+                              />
+                            </td>
+                            {event.awayScore?.periodScore
+                              .slice(0, setsToShow)
+                              .map((score, index) => (
+                                <td key={index}>{score}</td>
+                              ))}
+                          </tr>
+                        </tbody>
+                      </table>
+                    );
+                  })()}
                 </div>
                 <button
                   className="eventButton"
