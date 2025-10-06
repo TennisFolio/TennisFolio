@@ -39,16 +39,6 @@ public class LeagueEventsByRoundDTO {
     @JsonProperty("startTimestamp")
     private String startTimestamp;
 
-    public void nullToZero(){
-        homeScore.nullToZero();
-        awayScore.nullToZero();
-    }
 
-    public void convertTime() {
-        if (time != null) {
-            time.convertPeriods();
-            time.convertCurrentPeriodStartTimestamp();
-        }
-        this.startTimestamp = ConversionUtil.timestampToYyyyMMdd(this.startTimestamp);
-    }
+
 }

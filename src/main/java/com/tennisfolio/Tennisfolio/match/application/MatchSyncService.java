@@ -40,7 +40,6 @@ public class MatchSyncService {
                         Long roundNum = round.getRound();
                         if(round.getSlug() == null) return;
                         String slug = round.getSlug();
-
                         List<Match> matches =  apiWorker.process(RapidApi.LEAGUEEVENETBYROUND,rapidTournamentId, rapidSeasonId, roundNum, slug);
                         List<Match> newMatches = matches.stream()
                                 .filter(match -> !existingKeys.contains(match.getRapidMatchId()))

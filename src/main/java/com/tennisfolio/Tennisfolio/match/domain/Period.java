@@ -1,6 +1,7 @@
 package com.tennisfolio.Tennisfolio.match.domain;
 
 import com.tennisfolio.Tennisfolio.infrastructure.api.match.liveEvents.TimeDTO;
+import com.tennisfolio.Tennisfolio.util.ConversionUtil;
 import jakarta.persistence.Embeddable;
 import lombok.Builder;
 import lombok.Getter;
@@ -24,5 +25,14 @@ public class Period {
         this.set5 = set5;
 
     }
+
+    public void convertPeriods() {
+        this.set1 = ConversionUtil.secondToMinute(this.set1);
+        this.set2 = ConversionUtil.secondToMinute(this.set2);
+        this.set3 = ConversionUtil.secondToMinute(this.set3);
+        this.set4 = ConversionUtil.secondToMinute(this.set4);
+        this.set5 = ConversionUtil.secondToMinute(this.set5);
+    }
+
 }
 

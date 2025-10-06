@@ -90,6 +90,9 @@ public class MatchEntity {
     @Column(name="WINNER")
     private String winner;
 
+    @Column(name="STATUS")
+    private String status;
+
     public static MatchEntity fromModel(Match match) {
         MatchEntity matchEntity = new MatchEntity();
         matchEntity.matchId = match.getMatchId();
@@ -106,6 +109,7 @@ public class MatchEntity {
         matchEntity.periodSet = match.getPeriodSet();
         matchEntity.startTimeStamp = match.getStartTimeStamp();
         matchEntity.winner = match.getWinner();
+        matchEntity.status = match.getStatus();
 
         return matchEntity;
     }
@@ -126,6 +130,7 @@ public class MatchEntity {
                 .periodSet(periodSet)
                 .startTimeStamp(startTimeStamp)
                 .winner(winner)
+                .status(status)
                 .build();
     }
 
@@ -142,6 +147,7 @@ public class MatchEntity {
                 .periodSet(periodSet)
                 .startTimeStamp(startTimeStamp)
                 .winner(winner)
+                .status(status)
                 .build();
     }
 }
