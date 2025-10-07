@@ -21,11 +21,11 @@ public class LiveMatchScoreResponse {
         this.display = dto.getDisplay();
         this.point = dto.getPoint();
         this.periodScore.addAll(List.of(
-                dto.getPeriod1(),
-                dto.getPeriod2(),
-                dto.getPeriod3(),
-                dto.getPeriod4(),
-                dto.getPeriod5()
+                dto.getPeriod1() == null? 0L : dto.getPeriod1(),
+                dto.getPeriod2() == null? 0L : dto.getPeriod2(),
+                dto.getPeriod3() == null? 0L : dto.getPeriod3(),
+                dto.getPeriod4() == null? 0L : dto.getPeriod4(),
+                dto.getPeriod5() == null? 0L : dto.getPeriod5()
         ));
 
     }
