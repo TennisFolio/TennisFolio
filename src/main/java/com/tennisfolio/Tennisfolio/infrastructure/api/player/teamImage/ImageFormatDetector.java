@@ -16,7 +16,7 @@ public class ImageFormatDetector {
             case "image/jpeg" -> ".jpg";
             case "image/png" -> ".png";
             case "image/webp" -> ".webp";
-            default -> throw new IllegalArgumentException("지원하지 않는 이미지 포맷입니다.");
+            default -> "";
         };
     }
 }

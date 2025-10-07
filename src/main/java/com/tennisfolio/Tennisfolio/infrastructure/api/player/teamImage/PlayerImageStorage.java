@@ -19,6 +19,9 @@ public class PlayerImageStorage {
 
         String imageName = ImageDirectory.PLAYER.getDirectory() + fileName;
         String ext = formatDetector.detectExtension(data);
+
+        if("".equals(ext)) return "player/default";
+
         String key = imageName + ext;
         String contentType = formatDetector.detectMime(data);
         s3Uploader.upload(data, key, contentType);

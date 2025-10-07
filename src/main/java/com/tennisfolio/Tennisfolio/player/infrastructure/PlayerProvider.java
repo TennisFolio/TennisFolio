@@ -5,7 +5,10 @@ import com.tennisfolio.Tennisfolio.infrastructure.api.base.RapidApi;
 import com.tennisfolio.Tennisfolio.infrastructure.api.player.teamImage.PlayerImageService;
 import com.tennisfolio.Tennisfolio.player.domain.Player;
 import com.tennisfolio.Tennisfolio.player.domain.PlayerAggregate;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
+
+import java.util.Optional;
 
 @Component
 public class PlayerProvider {
@@ -22,11 +25,17 @@ public class PlayerProvider {
     public Player provide(String rapidId){
         return playerRepository.findByRapidPlayerId(rapidId)
                 .orElseGet(() -> {
-                    PlayerAggregate agg =apiWorker.process(RapidApi.TEAMDETAILS, rapidId);
-                    Player player = agg.toPlayer();
-                    String path = playerImageService.fetchImage(rapidId);
-                    player.updateProfileImage(path);
-                    return player;
+                    try{
+                        PlayerAggregate agg =apiWorker.process(RapidApi.TEAMDETAILS, rapidId);
+                        Player player = agg.toPlayer();
+                        String path = playerImageService.fetchImage(rapidId);
+                        player.updateProfileImage(path);
+
+                        return playerRepository.save(player);
+                    }catch(DataIntegrityViolationException e){
+                        return playerRepository.findByRapidPlayerId(rapidId).orElseThrow(() -> e);
+                    }
+
                 });
     }
 }
