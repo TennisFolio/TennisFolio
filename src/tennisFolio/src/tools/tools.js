@@ -21,25 +21,34 @@ export function arrayShuffler(array) {
  * 테니스 세트의 승자를 판단하는 함수
  * @param {Object} event - 경기 이벤트 객체
  * @param {number} setIndex - 세트 인덱스 (0부터 시작)
- * @param {number} setsToShow - 표시할 총 세트 수
  * @returns {string|null} - 'home', 'away', 또는 null
  */
-export function getSetWinner(event, setIndex, setsToShow) {
+export function getSetWinner(event, setIndex) {
   const homeScore = event.homeScore?.periodScore[setIndex];
   const awayScore = event.awayScore?.periodScore[setIndex];
 
-  // 해당 세트가 끝났는지 확인 (다음 세트에 점수가 있을 때만)
-  const isSetCompleted =
-    setIndex < setsToShow - 1
-      ? event.homeScore?.periodScore[setIndex + 1] !== 0 ||
-        event.awayScore?.periodScore[setIndex + 1] !== 0
-      : false; // 마지막 세트는 완료 여부를 알 수 없으므로 색칠하지 않음
-
-  if (!isSetCompleted || (homeScore === 0 && awayScore === 0)) {
-    return null; // 세트가 아직 끝나지 않았거나 시작되지 않음
+  // 점수가 없으면 시작되지 않은 세트
+  if (homeScore === 0 && awayScore === 0) {
+    return null;
   }
 
+  // 테니스 세트 승리 조건:
+  // 1. 6점 이상을 먼저 획득
+  // 2. 상대방과 최소 2점 차이
+  // 예: 6-0, 6-1, 6-2, 6-3, 6-4, 7-5, 7-6 등
+
+  const scoreDiff = Math.abs(homeScore - awayScore);
+  const maxScore = Math.max(homeScore, awayScore);
+
+  // 세트가 완료되었는지 확인
+  const isSetCompleted = maxScore >= 6 && scoreDiff >= 2;
+
+  if (!isSetCompleted) {
+    return null; // 세트가 아직 진행 중 (예: 6-5, 6-6)
+  }
+
+  // 세트가 완료되었으면 승자 반환
   if (homeScore > awayScore) return 'home';
   if (awayScore > homeScore) return 'away';
-  return null; // 동점 (일반적으로 발생하지 않음)
+  return null;
 }
