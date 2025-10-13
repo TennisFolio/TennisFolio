@@ -78,7 +78,7 @@ function EventCard({ event }) {
                   {event.homeScore.periodScore
                     .slice(0, setsToShow)
                     .map((score, index) => {
-                      const winner = getSetWinner(event, index, setsToShow);
+                      const winner = getSetWinner(event, index);
                       return (
                         <td
                           key={index}
@@ -112,7 +112,7 @@ function EventCard({ event }) {
                   {event.awayScore.periodScore
                     .slice(0, setsToShow)
                     .map((score, index) => {
-                      const winner = getSetWinner(event, index, setsToShow);
+                      const winner = getSetWinner(event, index);
                       return (
                         <td
                           key={index}
