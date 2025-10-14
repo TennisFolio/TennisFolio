@@ -125,7 +125,23 @@ function ChatRoom({ matchId = 'default-room' }) {
       client.connect({}, () => {
         client.subscribe(`/topic/match.${matchId}`, (msg) => {
           const received = JSON.parse(msg.body);
-          setMessages((prev) => [...prev, received]);
+
+          // 중복 메시지 필터링 (같은 userId + timestamp + message 조합)
+          setMessages((prev) => {
+            const isDuplicate = prev.some(
+              (existingMsg) =>
+                existingMsg.userId === received.userId &&
+                existingMsg.timestamp === received.timestamp &&
+                existingMsg.message === received.message
+            );
+
+            if (isDuplicate) {
+              console.log('⚠️ 중복 메시지 무시:', received);
+              return prev;
+            }
+
+            return [...prev, received];
+          });
         });
         clientRef.current = client;
       });
@@ -172,7 +188,7 @@ function ChatRoom({ matchId = 'default-room' }) {
       // MSW 모드에서는 로컬 상태에 바로 추가
       setMessages((prev) => [...prev, message]);
     } else {
-      // MSW 비활성화 시 실제 웹소켓으로 전송
+      // MSW 비활성화 시 실제 웹소켓으로 전송 (서버에서 브로드캐스트로 다시 받음)
       if (clientRef.current) {
         clientRef.current.send(
           `/app/chat.send/${matchId}`,
@@ -180,6 +196,7 @@ function ChatRoom({ matchId = 'default-room' }) {
           JSON.stringify(message)
         );
       }
+      // 웹소켓 모드에서는 서버에서 브로드캐스트로 받을 예정이므로 로컬에 추가하지 않음
     }
     setInput('');
 
