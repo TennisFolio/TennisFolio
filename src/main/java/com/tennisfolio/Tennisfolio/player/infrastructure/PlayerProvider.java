@@ -27,15 +27,17 @@ public class PlayerProvider {
                 .orElseGet(() -> {
                     try{
                         PlayerAggregate agg =apiWorker.process(RapidApi.TEAMDETAILS, rapidId);
+                        if(agg == null) return null;
                         Player player = agg.toPlayer();
                         String path = playerImageService.fetchImage(rapidId);
                         player.updateProfileImage(path);
-
-                        return playerRepository.save(player);
-                    }catch(DataIntegrityViolationException e){
-                        return playerRepository.findByRapidPlayerId(rapidId).orElseThrow(() -> e);
+                        Player savePlayer = playerRepository.save(player);
+                        return savePlayer;
+                    }catch(Exception e){
+                        e.printStackTrace();
+                        System.out.println("playerProvide Error : " + rapidId);
                     }
-
+                    return null;
                 });
     }
 }

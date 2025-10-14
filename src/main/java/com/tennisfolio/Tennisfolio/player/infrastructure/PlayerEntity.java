@@ -14,8 +14,15 @@ import lombok.NoArgsConstructor;
 public class PlayerEntity extends BaseTimeEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name="PLAYER_ID")
+    @GeneratedValue(strategy= GenerationType.TABLE, generator = "player_gen")
+    @TableGenerator(
+            name="player_gen",
+            table="TB_SEQUENCES",
+            pkColumnName = "TABLE_ID",
+            valueColumnName = "NEXT_VAL",
+            pkColumnValue = "PLAYER_ID",
+            allocationSize = 1000
+    )
     private Long playerId;
     @Column(name="RAPID_PLAYER_ID")
     private String rapidPlayerId;

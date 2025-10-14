@@ -7,6 +7,7 @@ import com.tennisfolio.Tennisfolio.ranking.dto.RankingResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,6 +26,7 @@ public class RankingController {
     }
 
     @PostMapping("/ranking")
+    @Scheduled(cron = "0 30 9 * * MON", zone = "Asia/Seoul")
     public ResponseEntity<ResponseDTO> saveAtpRankings(){
         rankingSyncService.saveAtpRanking();
         return new ResponseEntity(ResponseDTO.success(),HttpStatus.OK);

@@ -14,8 +14,8 @@ import java.util.List;
 public class LeagueEventsByRoundResponseParser implements ResponseParser<List<LeagueEventsByRoundDTO>> {
     private final ObjectMapper objectMapper;
 
-    public LeagueEventsByRoundResponseParser(ObjectMapper objectMapper) {
-        this.objectMapper = objectMapper;
+    public LeagueEventsByRoundResponseParser() {
+        this.objectMapper = new ObjectMapper();
     }
 
     @Override

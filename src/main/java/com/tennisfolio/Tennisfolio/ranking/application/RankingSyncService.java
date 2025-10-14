@@ -2,7 +2,11 @@ package com.tennisfolio.Tennisfolio.ranking.application;
 
 import com.tennisfolio.Tennisfolio.common.ExceptionCode;
 import com.tennisfolio.Tennisfolio.exception.NotFoundException;
+import com.tennisfolio.Tennisfolio.infrastructure.api.base.ApiWorker;
+import com.tennisfolio.Tennisfolio.infrastructure.api.base.RapidApi;
 import com.tennisfolio.Tennisfolio.infrastructure.api.base.StrategyApiTemplate;
+import com.tennisfolio.Tennisfolio.player.domain.Player;
+import com.tennisfolio.Tennisfolio.player.infrastructure.PlayerProvider;
 import com.tennisfolio.Tennisfolio.ranking.domain.Ranking;
 import com.tennisfolio.Tennisfolio.ranking.repository.RankingEntity;
 import com.tennisfolio.Tennisfolio.ranking.dto.AtpRankingApiDTO;
@@ -16,24 +20,31 @@ import java.util.List;
 @Service
 public class RankingSyncService {
 
-    private final StrategyApiTemplate<List<AtpRankingApiDTO>, List<Ranking>> rankingApiTemplate;
+    private final ApiWorker apiWorker;
     private final RankingRepository rankingRepository;
+    private final PlayerProvider playerProvider;
 
     @Builder
-    public RankingSyncService(StrategyApiTemplate<List<AtpRankingApiDTO>, List<Ranking>> rankingApiTemplate, RankingRepository rankingRepository) {
-        this.rankingApiTemplate = rankingApiTemplate;
+    public RankingSyncService(ApiWorker apiWorker, RankingRepository rankingRepository, PlayerProvider playerProvider) {
+        this.apiWorker = apiWorker;
         this.rankingRepository = rankingRepository;
+        this.playerProvider = playerProvider;
     }
 
     @Transactional
     public void saveAtpRanking() {
-        List<Ranking> rankingList = rankingApiTemplate.execute("");
+        List<Ranking> rankingList = apiWorker.process(RapidApi.ATPRANKINGS);
         String lastUpdate = rankingList.stream()
                 .findFirst()
                 .map(Ranking::getLastUpdate)
                 .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND));
 
         if(rankingRepository.existsByLastUpdate(lastUpdate)) return;
+
+        rankingList.stream().forEach(p -> {
+            Player findPlayer = playerProvider.provide(p.getPlayer().getRapidPlayerId());
+            p.updatePlayer(findPlayer);
+        });
 
         rankingRepository.collect(rankingList);
         rankingRepository.flushAll();

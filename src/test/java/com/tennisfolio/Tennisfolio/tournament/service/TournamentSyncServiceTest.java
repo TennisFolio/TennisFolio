@@ -6,13 +6,18 @@ import com.tennisfolio.Tennisfolio.Tournament.repository.TournamentRepository;
 import com.tennisfolio.Tennisfolio.category.application.CategoryService;
 import com.tennisfolio.Tennisfolio.category.domain.Category;
 import com.tennisfolio.Tennisfolio.category.repository.CategoryRepository;
+import com.tennisfolio.Tennisfolio.fixtures.PlayerFixtures;
 import com.tennisfolio.Tennisfolio.fixtures.TournamentFixtures;
 import com.tennisfolio.Tennisfolio.infrastructure.api.base.*;
 import com.tennisfolio.Tennisfolio.infrastructure.api.category.categories.CategoryDTO;
+import com.tennisfolio.Tennisfolio.infrastructure.api.player.teamImage.PlayerImageService;
+import com.tennisfolio.Tennisfolio.infrastructure.api.player.teamImage.PlayerImageStorage;
+import com.tennisfolio.Tennisfolio.infrastructure.api.player.teamImage.TeamImageDownloader;
 import com.tennisfolio.Tennisfolio.infrastructure.api.tournament.categoryTournaments.CategoryTournamentsDTO;
 import com.tennisfolio.Tennisfolio.infrastructure.api.tournament.leagueDetails.LeagueDetailsDTO;
 import com.tennisfolio.Tennisfolio.infrastructure.api.tournament.tournamentInfo.TournamentInfoDTO;
 import com.tennisfolio.Tennisfolio.mock.FakeApiCaller;
+import com.tennisfolio.Tennisfolio.mock.FakePlayerRepository;
 import com.tennisfolio.Tennisfolio.mock.FakeTournamentRepository;
 import com.tennisfolio.Tennisfolio.mock.atpRanking.FakeAtpRankingEntityMapper;
 import com.tennisfolio.Tennisfolio.mock.atpRanking.FakeAtpRankingResponseParser;
@@ -20,9 +25,15 @@ import com.tennisfolio.Tennisfolio.mock.categoryTournaments.FakeCategoryTourname
 import com.tennisfolio.Tennisfolio.mock.categoryTournaments.FakeCategoryTournamentsApiTemplate;
 import com.tennisfolio.Tennisfolio.mock.leagueDetails.FakeLeagueDetails;
 import com.tennisfolio.Tennisfolio.mock.leagueDetails.FakeLeagueDetailsMapper;
+import com.tennisfolio.Tennisfolio.mock.teamDetails.FakeTeamDetailsApiTemplate;
+import com.tennisfolio.Tennisfolio.mock.teamDetails.FakeTeamDetailsEntityMapper;
 import com.tennisfolio.Tennisfolio.mock.tournamentInfo.FakeTournamentInfo;
 import com.tennisfolio.Tennisfolio.mock.tournamentInfo.FakeTournamentInfoMapper;
 import com.tennisfolio.Tennisfolio.player.domain.Player;
+import com.tennisfolio.Tennisfolio.player.domain.PlayerAggregate;
+import com.tennisfolio.Tennisfolio.player.dto.TeamDetailsApiDTO;
+import com.tennisfolio.Tennisfolio.player.infrastructure.PlayerProvider;
+import com.tennisfolio.Tennisfolio.player.infrastructure.PlayerRepository;
 import com.tennisfolio.Tennisfolio.ranking.domain.Ranking;
 import com.tennisfolio.Tennisfolio.ranking.dto.AtpRankingApiDTO;
 import org.junit.jupiter.api.BeforeEach;
@@ -47,13 +58,7 @@ public class TournamentSyncServiceTest {
     CategoryService categoryService;
 
     @Mock
-    ResponseParser<List<CategoryTournamentsDTO>> categoryParser;
-
-    @Mock
-    ResponseParser<TournamentInfoDTO> tournamentInfoParser;
-
-    @Mock
-    ResponseParser<LeagueDetailsDTO> leagueParser;
+    private ResponseParser parser;
 
 
 
@@ -62,33 +67,38 @@ public class TournamentSyncServiceTest {
     private StrategyApiTemplate<List<CategoryTournamentsDTO>, List<Tournament>> categoryTemplate;
     private StrategyApiTemplate<TournamentInfoDTO, Tournament> infoTemplate;
     private StrategyApiTemplate<LeagueDetailsDTO, Tournament> leagueTemplate;
+    private StrategyApiTemplate<TeamDetailsApiDTO, PlayerAggregate> teamDetailsTemplate;
 
     private EntityMapper<List<CategoryTournamentsDTO>, List<Tournament>> fakeCategoryTournamentMapper = new FakeCategoryTournamentMapper();
     private EntityMapper<TournamentInfoDTO, Tournament> fakeTournamentInfoMapper = new FakeTournamentInfoMapper();
     private EntityMapper<LeagueDetailsDTO, Tournament> fakeLeagueDetailsMapper = new FakeLeagueDetailsMapper();
+    private EntityMapper<TeamDetailsApiDTO, PlayerAggregate> fakeTeamDetailsMapper = new FakeTeamDetailsEntityMapper();
 
     private TournamentRepository fakeTournamentRepository = new FakeTournamentRepository();
+
+    @Mock
+    private PlayerProvider playerProvider;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
 
         // stub 파서 응답
-        when(categoryParser.parse(any())).thenReturn(List.of(new CategoryTournamentsDTO()));
-        when(tournamentInfoParser.parse(any())).thenReturn(new TournamentInfoDTO());
-        when(leagueParser.parse(any())).thenReturn(new LeagueDetailsDTO());
         when(categoryService.getByRapidCategoryIdNotIn(any())).thenReturn(List.of(Category.builder().categoryId(1L).rapidCategoryId("3").build()));
-        categoryTemplate = new FakeCategoryTournamentsApiTemplate(apiCaller, categoryParser, fakeCategoryTournamentMapper, RapidApi.CATEGORYTOURNAMENTS);
-        infoTemplate = new FakeTournamentInfo(apiCaller, tournamentInfoParser, fakeTournamentInfoMapper, RapidApi.TOURNAMENTINFO);
-        leagueTemplate = new FakeLeagueDetails(apiCaller, leagueParser, fakeLeagueDetailsMapper, RapidApi.LEAGUEDETAILS);
 
-        strategies.add(categoryTemplate);
-        strategies.add(infoTemplate);
-        strategies.add(leagueTemplate);
+        categoryTemplate = new FakeCategoryTournamentsApiTemplate(apiCaller, parser, fakeCategoryTournamentMapper, RapidApi.CATEGORYTOURNAMENTS);
+        infoTemplate = new FakeTournamentInfo(apiCaller, parser, fakeTournamentInfoMapper, RapidApi.TOURNAMENTINFO);
+        leagueTemplate = new FakeLeagueDetails(apiCaller, parser, fakeLeagueDetailsMapper, RapidApi.LEAGUEDETAILS);
+        teamDetailsTemplate = new FakeTeamDetailsApiTemplate(apiCaller, parser, fakeTeamDetailsMapper, RapidApi.TEAMDETAILS);
+
+        strategies.addAll(List.of(categoryTemplate, infoTemplate, leagueTemplate, teamDetailsTemplate));
 
         ApiWorker apiWorker = new ApiWorker(strategies);
 
-        service = new TournamentSyncService(apiWorker, categoryService, fakeTournamentRepository);
+        service = new TournamentSyncService(apiWorker, categoryService, fakeTournamentRepository, playerProvider);
+
+       when(playerProvider.provide("275923")).thenReturn(PlayerFixtures.alcaraz());
+       when(playerProvider.provide("14486")).thenReturn(PlayerFixtures.nadal());
     }
 
     @Test

@@ -46,4 +46,9 @@ public class CategoryRepositoryImpl implements CategoryRepository{
     public Category save(Category category) {
         return categoryJpaRepository.save(CategoryEntity.fromModel(category)).toModel();
     }
+
+    @Override
+    public void flush() {
+        categoryJpaRepository.flush();
+    }
 }

@@ -36,8 +36,8 @@ public class PlayerService {
                         return null;
                     }
                     Player player = aggregate.toPlayer();
-//                    String path = playerImageService.fetchImage(rapidId);
-//                    player.updateProfileImage(path);
+                    String path = playerImageService.fetchImage(rapidId);
+                    player.updateProfileImage(path);
                     try {
                         return playerRepository.save(player);
                     } catch(DataIntegrityViolationException e) {

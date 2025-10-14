@@ -12,8 +12,16 @@ public class ConversionUtil {
         if(timestamp == null) return "";
         long seconds = Long.parseLong(timestamp);
         return Instant.ofEpochSecond(seconds)
-                .atZone(ZoneId.systemDefault())
+                .atZone(ZoneId.of("Asia/Seoul"))
                 .format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+    }
+
+    public static String timestampToYyyyMMddHHMMSS(String timestamp){
+        if(timestamp == null) return "";
+        long seconds = Long.parseLong(timestamp);
+        return Instant.ofEpochSecond(seconds)
+                .atZone(ZoneId.of("Asia/Seoul"))
+                .format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
     }
 
     public static String secondToMinute(String secondsStr){

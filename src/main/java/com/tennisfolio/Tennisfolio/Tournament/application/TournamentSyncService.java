@@ -15,6 +15,7 @@ import com.tennisfolio.Tennisfolio.infrastructure.api.tournament.leagueDetails.L
 import com.tennisfolio.Tennisfolio.infrastructure.api.tournament.tournamentInfo.TournamentInfoDTO;
 import com.tennisfolio.Tennisfolio.player.application.PlayerService;
 import com.tennisfolio.Tennisfolio.player.domain.Player;
+import com.tennisfolio.Tennisfolio.player.infrastructure.PlayerProvider;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -34,15 +35,17 @@ public class TournamentSyncService {
     private final ApiWorker apiWorker;
     private final CategoryService categoryService;
     private final TournamentRepository tournamentRepository;
+    private final PlayerProvider playerProvider;
 
 
     public TournamentSyncService(
             ApiWorker apiWorker,
             CategoryService categoryService,
-            TournamentRepository tournamentRepository) {
+            TournamentRepository tournamentRepository, PlayerProvider playerProvider) {
         this.apiWorker = apiWorker;
         this.categoryService = categoryService;
         this.tournamentRepository = tournamentRepository;
+        this.playerProvider = playerProvider;
     }
 
 
@@ -124,6 +127,9 @@ public class TournamentSyncService {
         if (tournament.needsLeagueDetails()) {
             Tournament fetched = apiWorker.process(RapidApi.LEAGUEDETAILS, rapidId);
             if(fetched != null){
+                Player titleHolder = playerProvider.provide(fetched.getTitleHolder().getRapidPlayerId());
+                Player mostTitlePlayer = playerProvider.provide(fetched.getMostTitlePlayer().getRapidPlayerId());
+                fetched.updateTitles(mostTitlePlayer, titleHolder);
                 tournamentRepository.collect(fetched);
                 tournamentRepository.flushWhenFull();
                 return fetched;

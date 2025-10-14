@@ -9,11 +9,12 @@ import java.util.Set;
 
 public interface MatchRepository {
     Optional<Match> findByRapidMatchId(String rapidMatchId);
+    Match save(Match match);
     List<Match> findAll();
     Set<String> findAllRapidIds();
     List<Match> collect(Match match);
     List<Match> collect(List<Match> matches);
     boolean flushWhenFull();
-
     boolean flushAll();
+    void flush();
 }

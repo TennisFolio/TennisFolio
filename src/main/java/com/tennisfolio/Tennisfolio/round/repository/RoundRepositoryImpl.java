@@ -26,6 +26,11 @@ public class RoundRepositoryImpl implements RoundRepository{
     }
 
     @Override
+    public Round save(Round round) {
+        return roundJpaRepository.save(RoundEntity.fromModel(round)).toModel();
+    }
+
+    @Override
     public List<Round> findAll() {
         return roundJpaRepository.findAll().stream().map(RoundEntity::toModel).toList();
     }
@@ -48,6 +53,11 @@ public class RoundRepositoryImpl implements RoundRepository{
     }
 
     @Override
+    public Optional<Round> findBySeasonAndRound(Season season, Long round) {
+        return roundJpaRepository.findBySeasonEntityAndRound(SeasonEntity.fromModel(season), round).map(RoundEntity::toModel);
+    }
+
+    @Override
     public List<Round> collect(List<Round> rounds) {
         List<RoundEntity> entities = rounds.stream().map(RoundEntity::fromModel).toList();
         return bufferedBatchSaver.collect(entities).stream().map(RoundEntity::toModel).toList();
@@ -61,5 +71,10 @@ public class RoundRepositoryImpl implements RoundRepository{
     @Override
     public boolean flushAll() {
         return bufferedBatchSaver.flushAll();
+    }
+
+    @Override
+    public void flush() {
+        roundJpaRepository.flush();
     }
 }

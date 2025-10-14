@@ -26,18 +26,20 @@ public class LeagueDetailsAssemble implements EntityAssemble<LeagueDetailsDTO, T
     @Override
     public Tournament assemble(LeagueDetailsDTO dto, Object... params) {
         Tournament tournament = tournamentRepository.findWithCategoryByRapidTournamentId(dto.getRapidId())
-                .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND));
+                .orElse(Tournament.builder().rapidTournamentId(dto.getRapidId()).build());
 
         Player mostTitlePlayer = null;
         if (dto.getMostTitlePlayerRapidId().isPresent()) {
-            mostTitlePlayer = playerService.getOrCreatePlayerByRapidId(dto.getMostTitlePlayerRapidId().get());
+            mostTitlePlayer = Player.builder().rapidPlayerId(dto.getMostTitlePlayerRapidId().get()).build();
+
         }
 
         Player titleHolder = null;
         if (dto.getTitleHolder() != null && dto.getTitleHolder().getRapidId() != null) {
-            titleHolder = playerService.getOrCreatePlayerByRapidId(dto.getTitleHolder().getRapidId());
+            titleHolder = Player.builder().rapidPlayerId(dto.getTitleHolder().getRapidId()).build();
+
         }
-        tournament.updateFromLeagueDetails(mostTitlePlayer, titleHolder, dto);
+        tournament.updateFromLeagueDetails(mostTitlePlayer, titleHolder, dto.getMostTitles(), dto.getPoints());
 
         return tournament;
     }

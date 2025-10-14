@@ -13,6 +13,7 @@ import java.util.Set;
 
 public interface RoundJpaRepository extends JpaRepository<RoundEntity, Long> {
     Optional<RoundEntity> findBySeasonEntityAndRoundAndSlug(SeasonEntity seasonEntity, Long round, String slug);
+    Optional<RoundEntity> findBySeasonEntityAndRound(SeasonEntity seasonEntity, Long round);
     @Query("SELECT r.seasonEntity, r.round FROM RoundEntity r")
     Set<Pair<SeasonEntity,String>> findAllSeasonRoundPairs();
 }

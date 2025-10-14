@@ -40,10 +40,14 @@ public class Season {
         this.year = dto.getYear();
     }
 
-    public void updateFromLeagueSeasonInfo(LeagueSeasonInfoDTO dto){
-        this.totalPrize = dto.getTotalPrizeMoney() == null ? 0L : dto.getTotalPrizeMoney();
-        this.totalPrizeCurrency = dto.getCurrency();
-        this.competitors = dto.getCompetitors();
+    public void updateFromLeagueSeasonInfo(Long totalPrize, String totalPrizeCurrency, Long competitors){
+        this.totalPrize =totalPrize == null ? 0L : totalPrize;
+        this.totalPrizeCurrency = totalPrizeCurrency;
+        this.competitors = competitors;
+    }
+
+    public void updateTournament(Tournament tournament){
+        this.tournament = tournament;
     }
 
     public boolean isSince2019(){
@@ -53,6 +57,10 @@ public class Season {
             return false;
         }
 
+    }
+
+    public boolean isNew(){
+        return seasonId == null;
     }
 
 

@@ -9,12 +9,14 @@ import java.util.Optional;
 import java.util.Set;
 
 public interface RoundRepository {
+    Round save(Round round);
     List<Round> findAll();
     Set<Pair<Season, String>> findAllSeasonRoundPairs();
     Optional<Round> findBySeasonAndRoundAndSlug(Season season, Long round, String slug);
+    Optional<Round> findBySeasonAndRound(Season season, Long round);
     List<Round> collect(Round round);
     List<Round> collect(List<Round> rounds);
     boolean flushWhenFull();
-
     boolean flushAll();
+    void flush();
 }

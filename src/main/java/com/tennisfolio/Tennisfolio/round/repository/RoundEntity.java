@@ -22,7 +22,7 @@ public class RoundEntity {
             allocationSize = 1000
     )
     private Long roundId;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "SEASON_ID")
     private SeasonEntity seasonEntity;
     @Column(name = "ROUND")
