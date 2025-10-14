@@ -1,7 +1,10 @@
 package com.tennisfolio.Tennisfolio.match.domain;
 
+import com.tennisfolio.Tennisfolio.Tournament.domain.Tournament;
+import com.tennisfolio.Tennisfolio.category.domain.Category;
 import com.tennisfolio.Tennisfolio.player.domain.Player;
 import com.tennisfolio.Tennisfolio.round.domain.Round;
+import com.tennisfolio.Tennisfolio.season.domain.Season;
 import com.tennisfolio.Tennisfolio.util.ConversionUtil;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -70,6 +73,30 @@ public class Match {
             periodSet.convertPeriods();
         }
         startTimeStamp = ConversionUtil.timestampToYyyyMMddHHMMSS(startTimeStamp);
+    }
+
+    public Season getSeason(){
+        return round != null ? round.getSeason() : null;
+    }
+
+    public Tournament getTournament(){
+        return round != null && round.getSeason() != null
+                ? round.getSeason().getTournament() : null;
+    }
+
+    public Category getCategory(){
+        return round != null && round.getSeason() != null && round.getSeason().getTournament() != null
+                ? getTournament().getCategory() : null;
+
+    }
+
+    public void updatePlayer(Player homePlayer, Player awayPlayer){
+        this.homePlayer = homePlayer;
+        this.awayPlayer = awayPlayer;
+    }
+
+    public void updateRound(Round round){
+        this.round = round;
     }
 
 }

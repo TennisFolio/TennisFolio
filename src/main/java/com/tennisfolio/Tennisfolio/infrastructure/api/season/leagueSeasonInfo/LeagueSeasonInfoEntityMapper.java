@@ -19,9 +19,9 @@ public class LeagueSeasonInfoEntityMapper implements EntityMapper<LeagueSeasonIn
         String seasonRapidID = params[1].toString();
 
         Season season = seasonRepository.findByRapidSeasonId(seasonRapidID)
-                .orElseThrow(() -> new IllegalArgumentException("조회되는 데이터가 없습니다."));
+                        .orElse(Season.builder().rapidSeasonId(seasonRapidID).build());
 
-        season.updateFromLeagueSeasonInfo(dto);
+        season.updateFromLeagueSeasonInfo(dto.getTotalPrizeMoney(), dto.getCurrency(), dto.getCompetitors());
 
         return season;
     }

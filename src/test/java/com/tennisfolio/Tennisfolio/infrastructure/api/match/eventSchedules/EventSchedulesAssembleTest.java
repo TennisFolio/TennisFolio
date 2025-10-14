@@ -1,9 +1,11 @@
 package com.tennisfolio.Tennisfolio.infrastructure.api.match.eventSchedules;
 
 import com.tennisfolio.Tennisfolio.Tournament.repository.TournamentRepository;
+import com.tennisfolio.Tennisfolio.category.repository.CategoryRepository;
 import com.tennisfolio.Tennisfolio.infrastructure.api.base.EntityAssemble;
 import com.tennisfolio.Tennisfolio.infrastructure.api.match.leagueEventsByRound.LeagueEventsByRoundDTO;
 import com.tennisfolio.Tennisfolio.match.domain.Match;
+import com.tennisfolio.Tennisfolio.mock.FakeCategoryRepository;
 import com.tennisfolio.Tennisfolio.mock.FakeRoundRepository;
 import com.tennisfolio.Tennisfolio.mock.FakeSeasonRepository;
 import com.tennisfolio.Tennisfolio.mock.FakeTournamentRepository;
@@ -23,6 +25,7 @@ import static org.assertj.core.groups.Tuple.tuple;
 
 public class EventSchedulesAssembleTest {
     private EventSchedulesAssemble assembler;
+    private CategoryRepository fakeCategoryRepository = new FakeCategoryRepository();
     private TournamentRepository fakeTournamentRepository = new FakeTournamentRepository();
     private SeasonRepository fakeSeasonRepository = new FakeSeasonRepository();
     private RoundRepository fakeRoundRepository = new FakeRoundRepository();
@@ -30,7 +33,7 @@ public class EventSchedulesAssembleTest {
 
     @BeforeEach
     public void init(){
-        assembler = new EventSchedulesAssemble(fakeTournamentRepository, fakeSeasonRepository, fakeRoundRepository);
+        assembler = new EventSchedulesAssemble(fakeCategoryRepository, fakeTournamentRepository, fakeSeasonRepository, fakeRoundRepository);
     }
 
     @Test
@@ -49,8 +52,10 @@ public class EventSchedulesAssembleTest {
                 .extracting(Match::getRapidMatchId, p -> p.getRound().getRound(), p -> p.getHomePlayer().getRapidPlayerId(), p -> p.getAwayPlayer().getRapidPlayerId(),
                         p -> p.getStartTimeStamp())
                 .containsExactlyInAnyOrder(
-                        tuple("14762084", "6", "57163", "63606", "20251006114000"),
-                        tuple("14762081", "6", "157456", "163504", "20251006204000")
+                        tuple("14762084", 6L, "57163", "63606", "20251006193000"),
+                        tuple("14762081", 6L, "157456", "163504", "20251006204000"),
+                        tuple("14762035", 5L, "280151", "170946", "20251007133000"),
+                        tuple("14762037", 5L, "289146", "283070", "20251007144000")
                 );
 
     }

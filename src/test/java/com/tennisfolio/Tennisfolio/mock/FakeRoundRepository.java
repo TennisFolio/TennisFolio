@@ -7,13 +7,22 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 public class FakeRoundRepository implements RoundRepository {
 
     private final Map<Long, Round> data = new ConcurrentHashMap<>();
     private final int batchSize = 3;
+    private final AtomicLong seq = new AtomicLong(1);
     private final List<Round> batch = Collections.synchronizedList(new ArrayList<>());
+
+    @Override
+    public Round save(Round round) {
+        data.put(seq.getAndIncrement(), round);
+        return round;
+
+    }
 
     @Override
     public List<Round> findAll() {
@@ -30,9 +39,18 @@ public class FakeRoundRepository implements RoundRepository {
     public Optional<Round> findBySeasonAndRoundAndSlug(Season season, Long round, String slug) {
         return data.values()
                 .stream()
-                .filter(p -> p.getSeason().getSeasonId().equals(season.getSeasonId()) &&
+                .filter(p -> p.getSeason().equals(season) &&
                 p.getRound().equals(round) &&
-                p.getSlug().equals(slug)).findFirst();
+                p.getSlug().equals(slug))
+                .findFirst();
+    }
+
+    @Override
+    public Optional<Round> findBySeasonAndRound(Season season, Long round) {
+        return data.values()
+                .stream()
+                .filter(p -> p.getSeason().equals(season) && p.getRound().equals(round))
+                .findFirst();
     }
 
     @Override
@@ -63,6 +81,11 @@ public class FakeRoundRepository implements RoundRepository {
             return true;
         }
         return false;
+    }
+
+    @Override
+    public void flush() {
+
     }
 
     private void flushBatch() {

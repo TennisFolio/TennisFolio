@@ -12,4 +12,5 @@ public interface CategoryRepository {
     Optional<Category> findByRapidCategoryId(String rapidId);
     List<Category> saveAll(List<Category> categories);
     Category save(Category category);
+    void flush();
 }

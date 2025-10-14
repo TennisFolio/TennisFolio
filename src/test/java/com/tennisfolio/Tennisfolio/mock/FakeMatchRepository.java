@@ -6,16 +6,23 @@ import com.tennisfolio.Tennisfolio.season.domain.Season;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 public class FakeMatchRepository implements MatchRepository {
     private final Map<Long, Match> data = new ConcurrentHashMap<>();
     private final int batchSize = 3;
+    private final AtomicLong seq = new AtomicLong(1);
     private final List<Match> batch = Collections.synchronizedList(new ArrayList<>());
 
     @Override
     public Optional<Match> findByRapidMatchId(String rapidMatchId) {
         return data.values().stream().filter(p -> rapidMatchId.equals(p.getRapidMatchId())).findFirst();
+    }
+
+    @Override
+    public Match save(Match match) {
+        return data.put(seq.getAndIncrement(), match);
     }
 
     @Override
@@ -56,6 +63,11 @@ public class FakeMatchRepository implements MatchRepository {
             return true;
         }
         return false;
+    }
+
+    @Override
+    public void flush() {
+
     }
 
     private void flushBatch() {

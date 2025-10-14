@@ -11,6 +11,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -68,6 +69,17 @@ public class MatchController {
     @PostMapping("/match")
     public ResponseEntity<ResponseDTO> saveMatch(){
         matchSyncService.saveMatchList();
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @Scheduled(cron= "0 0 0,12 * * *", zone = "Asia/Seoul")
+    @PostMapping("/event")
+    public ResponseEntity<ResponseDTO> saveEventSchedule(){
+        LocalDate twoDaysLater = LocalDate.now().plusDays(2);
+        String year = String.valueOf(twoDaysLater.getYear());
+        String month = String.format("%02d", twoDaysLater.getMonthValue());
+        String day = String.format("%02d", twoDaysLater.getDayOfMonth());
+        matchSyncService.saveEventSchedule(year, month, day);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 

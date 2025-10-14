@@ -44,4 +44,14 @@ public class RoundFixtures {
                 .slug("finals")
                 .build();
     }
+
+    public static Round wimbledonMen2025QuarterFinal(){
+        return Round.builder()
+                .roundId(5L)
+                .season(SeasonInfoFixtures.wimbledonMen2025())
+                .round(27L)
+                .name("Quarterfinals")
+                .slug("quarterfinals")
+                .build();
+    }
 }

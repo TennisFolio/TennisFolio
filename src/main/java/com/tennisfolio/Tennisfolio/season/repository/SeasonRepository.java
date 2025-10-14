@@ -9,16 +9,12 @@ import java.util.Set;
 
 public interface SeasonRepository {
     List<Season> findAll();
-
+    Season save(Season season);
     List<Season> collect(Season season);
-
     List<Season> collect(List<Season> seasons);
-
     Set<String> findAllRapidIds();
-
     Optional<Season> findByRapidSeasonId(String rapidId);
-
     boolean flushWhenFull();
-
     boolean flushAll();
+    void flush();
 }

@@ -25,7 +25,7 @@ public class MatchEntity {
             allocationSize = 1000
     )
     private Long matchId;
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="ROUND_ID")
     private RoundEntity roundEntity;
     @Column(name="RAPID_MATCH_ID")

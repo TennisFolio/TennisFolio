@@ -1,5 +1,6 @@
 package com.tennisfolio.Tennisfolio.season.repository;
 
+import com.tennisfolio.Tennisfolio.Tournament.repository.TournamentEntity;
 import com.tennisfolio.Tennisfolio.infrastructure.repository.SeasonJpaRepository;
 import com.tennisfolio.Tennisfolio.infrastructure.saver.BufferedBatchSaver;
 import com.tennisfolio.Tennisfolio.season.domain.Season;
@@ -23,6 +24,11 @@ public class SeasonRepositoryImpl implements SeasonRepository{
     @Override
     public List<Season> findAll() {
         return seasonJpaRepository.findAll().stream().map(SeasonEntity::toModel).toList();
+    }
+
+    @Override
+    public Season save(Season season) {
+        return seasonJpaRepository.save(SeasonEntity.fromModel(season)).toModel();
     }
 
     @Override
@@ -57,5 +63,10 @@ public class SeasonRepositoryImpl implements SeasonRepository{
     @Override
     public boolean flushAll() {
         return bufferedBatchSaver.flushAll();
+    }
+
+    @Override
+    public void flush() {
+        seasonJpaRepository.flush();
     }
 }

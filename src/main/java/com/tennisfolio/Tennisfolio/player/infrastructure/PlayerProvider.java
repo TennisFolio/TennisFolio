@@ -22,11 +22,19 @@ public class PlayerProvider {
     public Player provide(String rapidId){
         return playerRepository.findByRapidPlayerId(rapidId)
                 .orElseGet(() -> {
-                    PlayerAggregate agg =apiWorker.process(RapidApi.TEAMDETAILS, rapidId);
-                    Player player = agg.toPlayer();
-                    String path = playerImageService.fetchImage(rapidId);
-                    player.updateProfileImage(path);
-                    return player;
+                    try{
+                        PlayerAggregate agg =apiWorker.process(RapidApi.TEAMDETAILS, rapidId);
+                        if(agg == null) return null;
+                        Player player = agg.toPlayer();
+                        String path = playerImageService.fetchImage(rapidId);
+                        player.updateProfileImage(path);
+                        Player savePlayer = playerRepository.save(player);
+                        return savePlayer;
+                    }catch(Exception e){
+                        e.printStackTrace();
+                        System.out.println("playerProvide Error : " + rapidId);
+                    }
+                    return null;
                 });
     }
 }
