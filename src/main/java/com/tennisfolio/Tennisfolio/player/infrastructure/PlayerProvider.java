@@ -5,7 +5,10 @@ import com.tennisfolio.Tennisfolio.infrastructure.api.base.RapidApi;
 import com.tennisfolio.Tennisfolio.infrastructure.api.player.teamImage.PlayerImageService;
 import com.tennisfolio.Tennisfolio.player.domain.Player;
 import com.tennisfolio.Tennisfolio.player.domain.PlayerAggregate;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
+
+import java.util.Optional;
 
 @Component
 public class PlayerProvider {

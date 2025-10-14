@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useSelector } from 'react-redux';
 import SockJS from 'sockjs-client';
 import { Stomp } from '@stomp/stompjs';
 import './chatRoom.css';
 import { base_server_url } from '@/constants';
 import { apiRequest } from '../../utils/apiClient';
+import { selectMSWActive } from '../../store/mswSlice';
 
 const MAX_LENGTH = 200;
 
@@ -16,6 +18,7 @@ function ChatRoom({ matchId = 'default-room' }) {
   const clientRef = useRef(null);
   const lastSentTime = useRef(0);
   const bottomRef = useRef(null);
+  const isMSWActive = useSelector(selectMSWActive);
 
   function getOrCreateUserId() {
     let id = localStorage.getItem('chatUserId');
@@ -72,8 +75,8 @@ function ChatRoom({ matchId = 'default-room' }) {
     fetchData();
     getOrCreateUserId();
 
-    // 개발 모드에서는 웹소켓 대신 목데이터로 채팅 시뮬레이션
-    if (import.meta.env.DEV) {
+    // MSW가 활성화되어 있으면 웹소켓 대신 목데이터로 채팅 시뮬레이션
+    if (isMSWActive) {
       const mockMessages = [
         '와 이 경기 진짜 박진감 넘치네요!',
         '알카라즈 폼이 정말 좋아요 🎾',
@@ -86,39 +89,36 @@ function ChatRoom({ matchId = 'default-room' }) {
 
       const mockUsers = ['임재학', '박태환', '윤선아', '이서영', '김현우'];
 
-      const simulateChat = () => {
-        const chatInterval = setInterval(() => {
-          const randomMessage =
-            mockMessages[Math.floor(Math.random() * mockMessages.length)];
-          const randomUser =
-            mockUsers[Math.floor(Math.random() * mockUsers.length)];
-          const now = new Date();
-          const timestamp =
-            now.getFullYear().toString() +
-            (now.getMonth() + 1).toString().padStart(2, '0') +
-            now.getDate().toString().padStart(2, '0') +
-            now.getHours().toString().padStart(2, '0') +
-            now.getMinutes().toString().padStart(2, '0') +
-            now.getSeconds().toString().padStart(2, '0');
+      const chatInterval = setInterval(() => {
+        const randomMessage =
+          mockMessages[Math.floor(Math.random() * mockMessages.length)];
+        const randomUser =
+          mockUsers[Math.floor(Math.random() * mockUsers.length)];
+        const now = new Date();
+        const timestamp =
+          now.getFullYear().toString() +
+          (now.getMonth() + 1).toString().padStart(2, '0') +
+          now.getDate().toString().padStart(2, '0') +
+          now.getHours().toString().padStart(2, '0') +
+          now.getMinutes().toString().padStart(2, '0') +
+          now.getSeconds().toString().padStart(2, '0');
 
-          const newMessage = {
-            matchId,
-            sender: randomUser,
-            userId: `mock-${Math.random()}`,
-            timestamp: timestamp,
-            message: randomMessage,
-            type: 'TALK',
-          };
-          setMessages((prev) => [...prev, newMessage]);
-        }, 8000); // 8초마다 새 메시지
+        const newMessage = {
+          matchId,
+          sender: randomUser,
+          userId: `mock-${Math.random()}`,
+          timestamp: timestamp,
+          message: randomMessage,
+          type: 'TALK',
+        };
+        setMessages((prev) => [...prev, newMessage]);
+      }, 8000); // 8초마다 새 메시지
 
-        return chatInterval;
+      return () => {
+        clearInterval(chatInterval);
       };
-
-      const intervalId = simulateChat();
-      return () => clearInterval(intervalId);
     } else {
-      // 프로덕션 모드에서는 실제 웹소켓 연결
+      // MSW가 비활성화되어 있으면 실제 웹소켓 연결
       const socket = new SockJS(`${base_server_url}/ws`);
       const client = Stomp.over(socket);
 
@@ -136,7 +136,7 @@ function ChatRoom({ matchId = 'default-room' }) {
         }
       };
     }
-  }, [matchId]);
+  }, [matchId, isMSWActive]);
 
   const sendMessage = () => {
     if (!input.trim()) return;
@@ -168,16 +168,18 @@ function ChatRoom({ matchId = 'default-room' }) {
       type: 'TALK',
     };
 
-    if (import.meta.env.DEV) {
-      // 개발 모드에서는 로컬 상태에 바로 추가
+    if (isMSWActive) {
+      // MSW 모드에서는 로컬 상태에 바로 추가
       setMessages((prev) => [...prev, message]);
     } else {
-      // 프로덕션 모드에서는 실제 웹소켓으로 전송
-      clientRef.current.send(
-        `/app/chat.send/${matchId}`,
-        {},
-        JSON.stringify(message)
-      );
+      // MSW 비활성화 시 실제 웹소켓으로 전송
+      if (clientRef.current) {
+        clientRef.current.send(
+          `/app/chat.send/${matchId}`,
+          {},
+          JSON.stringify(message)
+        );
+      }
     }
     setInput('');
 

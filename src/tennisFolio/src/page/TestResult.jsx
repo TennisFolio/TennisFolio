@@ -65,10 +65,22 @@ function TestResult() {
         dispatch(setCurrentTest(testInfo));
       }
 
-      // testResult가 없으면 로컬에서 계산
-      if (!testResult && answerList && answerList.length > 0) {
-        const calculatedResult = calculateTestResult(answerList, testData);
-        dispatch(setTestResult(calculatedResult));
+      // testResult가 없으면 처리
+      if (!testResult) {
+        // answerList가 있으면 계산
+        if (answerList && answerList.length > 0) {
+          const calculatedResult = calculateTestResult(answerList, testData);
+          dispatch(setTestResult(calculatedResult));
+        } else {
+          // answerList가 없으면 query로 직접 찾기
+          const result = testData.results.find((r) => r.query === param.query);
+          if (result) {
+            dispatch(setTestResult(result));
+          } else {
+            alert('유효하지 않은 결과입니다.');
+            navigate(`/test/${param.category}`);
+          }
+        }
       }
     };
 
