@@ -39,7 +39,7 @@ public class LeagueDetailsAssemble implements EntityAssemble<LeagueDetailsDTO, T
             titleHolder = Player.builder().rapidPlayerId(dto.getTitleHolder().getRapidId()).build();
 
         }
-        tournament.updateFromLeagueDetails(mostTitlePlayer, titleHolder, dto.getMostTitles(), dto.getPoints());
+        tournament.updateFromLeagueDetails(mostTitlePlayer, titleHolder, dto.getMostTitles(), dto.getPoints(), dto.getStartTimestamp(), dto.getEndTimestamp());
 
         return tournament;
     }

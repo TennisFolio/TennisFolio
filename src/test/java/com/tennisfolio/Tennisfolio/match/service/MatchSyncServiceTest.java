@@ -182,6 +182,57 @@ public class MatchSyncServiceTest {
 
         assertThat(findTournament.getTournamentName()).isEqualTo("Wimbledon");
         assertThat(findSeason.getYear()).isEqualTo("2025");
+        assertThat(findSeason.getStartTimestamp()).isEqualTo("1750636800");
+        assertThat(findSeason.getEndTimestamp()).isEqualTo("1752364800");
+        assertThat(findRound.getName()).isEqualTo("Quarterfinals");
+
+
+    }
+
+    @Test
+    public void 토너먼트만_있을때_시즌에_timestamp_저장(){
+        String year = "2025";
+        String month = "10";
+        String day = "11";
+
+        fakeTournamentRepository.save(TournamentFixtures.wimbledonATP());
+        matchSyncService.saveEventSchedule(year, month, day);
+
+        Tournament findTournament = fakeTournamentRepository.findByRapidTournamentId(TournamentFixtures.wimbledonATP().getRapidTournamentId()).get();
+        Season findSeason = fakeSeasonRepository.findByRapidSeasonId(SeasonFixtures.wimbledonMen2025().getRapidSeasonId()).get();
+        Round findRound = fakeRoundRepository.findBySeasonAndRoundAndSlug(findSeason,
+                RoundFixtures.wimbledonMen2025QuarterFinal().getRound(),
+                RoundFixtures.wimbledonMen2025QuarterFinal().getSlug()).get();
+
+        assertThat(findTournament.getTournamentName()).isEqualTo("Wimbledon");
+        assertThat(findSeason.getYear()).isEqualTo("2025");
+        assertThat(findSeason.getStartTimestamp()).isEqualTo("1750636800");
+        assertThat(findSeason.getEndTimestamp()).isEqualTo("1752364800");
+        assertThat(findRound.getName()).isEqualTo("Quarterfinals");
+
+
+    }
+
+    @Test
+    public void 토너먼트과_시즌이_있을때_시즌에_timestamp_저장(){
+        String year = "2025";
+        String month = "10";
+        String day = "11";
+
+        fakeTournamentRepository.save(TournamentFixtures.wimbledonATP());
+        fakeSeasonRepository.save(SeasonFixtures.wimbledonMen2025());
+        matchSyncService.saveEventSchedule(year, month, day);
+
+        Tournament findTournament = fakeTournamentRepository.findByRapidTournamentId(TournamentFixtures.wimbledonATP().getRapidTournamentId()).get();
+        Season findSeason = fakeSeasonRepository.findByRapidSeasonId(SeasonFixtures.wimbledonMen2025().getRapidSeasonId()).get();
+        Round findRound = fakeRoundRepository.findBySeasonAndRoundAndSlug(findSeason,
+                RoundFixtures.wimbledonMen2025QuarterFinal().getRound(),
+                RoundFixtures.wimbledonMen2025QuarterFinal().getSlug()).get();
+
+        assertThat(findTournament.getTournamentName()).isEqualTo("Wimbledon");
+        assertThat(findSeason.getYear()).isEqualTo("2025");
+        assertThat(findSeason.getStartTimestamp()).isEqualTo("1750636800");
+        assertThat(findSeason.getEndTimestamp()).isEqualTo("1752364800");
         assertThat(findRound.getName()).isEqualTo("Quarterfinals");
 
 

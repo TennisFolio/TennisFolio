@@ -20,13 +20,11 @@ public class MatchController {
     private final LiveMatchService liveMatchService;
     private final SimpMessagingTemplate messagingTemplate;
     private final MatchSyncService matchSyncService;
-    private final StatisticSyncService statisticSyncService;
 
-    public MatchController(LiveMatchService liveMatchService, SimpMessagingTemplate messagingTemplate, MatchSyncService matchSyncService, StatisticSyncService statisticSyncService){
+    public MatchController(LiveMatchService liveMatchService, SimpMessagingTemplate messagingTemplate, MatchSyncService matchSyncService){
         this.liveMatchService = liveMatchService;
         this.messagingTemplate = messagingTemplate;
         this.matchSyncService = matchSyncService;
-        this.statisticSyncService = statisticSyncService;
     }
     @GetMapping("/atp/liveEvents")
     public ResponseEntity<ResponseDTO<List<LiveMatchResponse>>> getATPLiveEvents(){

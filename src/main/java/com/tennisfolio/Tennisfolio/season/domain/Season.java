@@ -31,6 +31,10 @@ public class Season {
 
     private Long competitors;
 
+    private String startTimestamp;
+
+    private String endTimestamp;
+
     private static final int FIRST_VALID_YEAR = 2019;
 
     public Season(LeagueSeasonsDTO dto, Tournament tournament){
@@ -44,6 +48,11 @@ public class Season {
         this.totalPrize =totalPrize == null ? 0L : totalPrize;
         this.totalPrizeCurrency = totalPrizeCurrency;
         this.competitors = competitors;
+    }
+
+    public void updateTimestamp(){
+        this.startTimestamp = tournament.getStartTimestamp() != null? tournament.getStartTimestamp() : "";
+        this.endTimestamp = tournament.getEndTimestamp() != null? tournament.getEndTimestamp() : "";
     }
 
     public void updateTournament(Tournament tournament){

@@ -92,24 +92,20 @@ public class MatchSyncService {
 
             Round round = findOrSaveRound(match, season);
 
-            tournament.updateCategory(category);
-            season.updateTournament(tournament);
-            round.updateSeason(season);
+//            tournament.updateCategory(category);
+//            season.updateTournament(tournament);
+//            round.updateSeason(season);
             match.updateRound(round);
 
             Player homePlayer = playerProvider.provide(match.getHomePlayer().getRapidPlayerId());
             Player awayPlayer = playerProvider.provide(match.getAwayPlayer().getRapidPlayerId());
-
+            roundRepository.flush();
             match.updatePlayer(homePlayer, awayPlayer);
 
             System.out.println("TournamentId: " + match.getTournament().getTournamentId());
             System.out.println("SeasonId: " + match.getSeason().getSeasonId());
             System.out.println("RoundId: " + match.getRound().getRoundId());
-            categoryRepository.flush();
-            tournamentRepository.flush();
-            seasonRepository.flush();
-            roundRepository.flush();
-            matchRepository.flush();
+
             matchRepository.save(match);
         });
 
@@ -130,12 +126,15 @@ public class MatchSyncService {
                 .orElseGet(() -> {
                     Tournament newTournament = match.getTournament();
 
-                    newTournament = requestTournamentInfo(newTournament, rapidTournamentId);
+                    requestTournamentInfo(newTournament, rapidTournamentId);
 
-                    newTournament = requestLeagueDetails(newTournament, rapidTournamentId);
+                    requestLeagueDetails(newTournament, rapidTournamentId);
 
                     newTournament.updateCategory(category);
-                    return tournamentRepository.save(newTournament);
+
+                    Tournament savedTournament = tournamentRepository.save(newTournament);
+                    savedTournament.updateTimestamp(newTournament.getStartTimestamp(), newTournament.getEndTimestamp());
+                    return savedTournament;
 
                 });
 
@@ -161,7 +160,9 @@ public class MatchSyncService {
             if(leagueDetails.isTitleHolderExists()){
                 titleHolder = playerProvider.provide(leagueDetails.getTitleHolder().getRapidPlayerId());
             }
-            newTournament.updateFromLeagueDetails(mostTitleHolder, titleHolder, leagueDetails.getMostTitles(), leagueDetails.getPoints());
+            newTournament.updateFromLeagueDetails(mostTitleHolder, titleHolder,
+                    leagueDetails.getMostTitles(), leagueDetails.getPoints(),
+                    leagueDetails.getStartTimestamp(), leagueDetails.getEndTimestamp());
         }
         return newTournament;
     }
@@ -170,6 +171,8 @@ public class MatchSyncService {
         Season season = seasonRepository.findByRapidSeasonId(match.getSeason().getRapidSeasonId())
                 .map(existing -> {
                     existing.updateTournament(tournament);
+                    requestLeagueDetails(tournament, tournament.getRapidTournamentId());
+                    existing.updateTimestamp();
                     return existing;
                 })
                 .orElseGet(() -> {
@@ -177,6 +180,7 @@ public class MatchSyncService {
                     newSeason.updateTournament(tournament);
 
                     newSeason = requestLeagueSeasonInfo(newSeason, tournament.getRapidTournamentId());
+                    newSeason.updateTimestamp();
                     return seasonRepository.save(newSeason);
 
                 });

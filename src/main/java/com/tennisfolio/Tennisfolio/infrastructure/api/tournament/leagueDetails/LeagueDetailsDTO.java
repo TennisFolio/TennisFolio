@@ -23,6 +23,10 @@ public class LeagueDetailsDTO {
     private List<LeagueDetailsPlayerDTO> mostTitlesTeams;
     @JsonProperty("tennisPoints")
     private Long points;
+    @JsonProperty("startDateTimestamp")
+    private String startTimestamp;
+    @JsonProperty("endDateTimestamp")
+    private String endTimestamp;
 
     public Optional<String> getMostTitlePlayerRapidId(){
         return Optional.ofNullable(mostTitlesTeams)
