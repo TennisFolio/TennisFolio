@@ -13,11 +13,18 @@ public class FakeSeasonRepository implements SeasonRepository {
 
     private final Map<Long, Season> data = new ConcurrentHashMap<>();
     private final int batchSize = 3;
+    private final AtomicLong seq = new AtomicLong(1);
     private final List<Season> batch = Collections.synchronizedList(new ArrayList<>());
 
     @Override
     public List<Season> findAll() {
         return data.values().stream().toList();
+    }
+
+    @Override
+    public Season save(Season season) {
+        data.put(seq.getAndIncrement(), season);
+        return season;
     }
 
     @Override
@@ -60,11 +67,20 @@ public class FakeSeasonRepository implements SeasonRepository {
         return false;
     }
 
+    @Override
+    public void flush() {
+
+    }
+
     private void flushBatch() {
         for (var season : batch) {
             long seasonId = season.getSeasonId();
             data.put(seasonId, season); // 중복이면 자동 덮어쓰기
         }
         batch.clear();
+    }
+
+    public void deleteAll(){
+        data.clear();
     }
 }

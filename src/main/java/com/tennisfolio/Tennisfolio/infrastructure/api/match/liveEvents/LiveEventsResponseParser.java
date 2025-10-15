@@ -28,11 +28,6 @@ public class LiveEventsResponseParser implements ResponseParser<List<LiveEventsA
 
             for(JsonNode event : eventsNode){
                 LiveEventsApiDTO dto = objectMapper.treeToValue(event, LiveEventsApiDTO.class);
-                
-                // 책임을 DTO 내부로 이동
-                dto.convertTime();
-
-                dto.scoreNullToZero();
 
                 eventList.add(dto);
             }

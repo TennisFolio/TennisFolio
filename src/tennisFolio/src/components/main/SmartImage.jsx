@@ -8,8 +8,16 @@ function SmartImage({ base_url, imageName, fallbackText }) {
   const isMSWActive = useSelector(selectMSWActive);
   const isDevelopment = import.meta.env.MODE === 'development';
 
+  // imageName 유효성 체크
+  const hasValidImageName =
+    imageName && imageName !== 'null' && imageName !== 'undefined';
+
   // MSW 상태에 따라 이미지 소스 결정
   const sources = (() => {
+    if (!hasValidImageName) {
+      return [];
+    }
+
     if (isDevelopment && isMSWActive) {
       // MSW 활성화 시: public 폴더의 테스트 이미지 사용
       return [`/images/${imageName}`];
@@ -38,12 +46,16 @@ function SmartImage({ base_url, imageName, fallbackText }) {
     const img = new Image();
     img.src = sources[step];
 
-    img.onload = () => setSrc(sources[step]);
-    img.onerror = () => setStep((prev) => prev + 1);
+    img.onload = () => {
+      setSrc(sources[step]);
+    };
+    img.onerror = () => {
+      setStep((prev) => prev + 1);
+    };
   }, [step, sources]);
 
-  if (step >= sources.length) {
-    // 모든 이미지 로딩 실패 시 fallback 표시
+  // imageName이 없거나 모든 이미지 로딩 실패 시 fallback 표시
+  if (!hasValidImageName || step >= sources.length) {
     return (
       <div
         className="playerFallback"

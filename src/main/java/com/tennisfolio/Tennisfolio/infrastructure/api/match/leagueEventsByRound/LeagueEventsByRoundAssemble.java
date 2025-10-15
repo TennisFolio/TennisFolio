@@ -51,10 +51,7 @@ public class LeagueEventsByRoundAssemble implements EntityAssemble<List<LeagueEv
         Round round = roundRepository.findBySeasonAndRoundAndSlug(season,roundType,slug)
                 .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND));
 
-        return dto.stream().map( events -> {
-
-            events.nullToZero();
-            events.convertTime();
+        List<Match> matches = dto.stream().map( events -> {
 
             Player homePlayer = playerService.getOrCreatePlayerByRapidId(events.getHomeTeam().getRapidPlayerId());
             Player awayPlayer = playerService.getOrCreatePlayerByRapidId(events.getAwayTeam().getRapidPlayerId());
@@ -113,6 +110,11 @@ public class LeagueEventsByRoundAssemble implements EntityAssemble<List<LeagueEv
 
         }).collect(Collectors.toList());
 
+        return matches.stream().map(p -> {
+            p.nullToZero();
+            p.convertTime();
+            return p;
+        }).toList();
 
 
     }

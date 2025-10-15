@@ -35,4 +35,54 @@ public class PlayerFixtures {
                 .playerNameKr("야닉 시너")
                 .build();
     }
+
+    public static Player fritz(){
+        return Player.builder()
+                .rapidPlayerId("136042")
+                .playerName("Taylor Fritz")
+                .playerNameKr("테일러 프리츠")
+                .build();
+    }
+
+    public static Player khachanov(){
+        return Player.builder()
+                .rapidPlayerId("90080")
+                .playerName("Karen Khachanov")
+                .playerNameKr("카렌 카차노프")
+                .build();
+    }
+
+    public static Player norrie(){
+        return Player.builder()
+                .rapidPlayerId("95935")
+                .playerName("Cameron Norrie")
+                .playerNameKr("캐머런 노리")
+                .build();
+    }
+
+    public static Player shelton(){
+        return Player.builder()
+                .rapidPlayerId("385485")
+                .playerName("Ben Shelton")
+                .playerNameKr("벤 쉘튼")
+                .build();
+    }
+
+    public static Player cobolli(){
+        return Player.builder()
+                .rapidPlayerId("273680")
+                .playerName("Flavio Cobolli")
+                .playerNameKr("플라비오 코볼리")
+                .build();
+    }
+
+    public static Player djokovic(){
+        return Player.builder()
+                .rapidPlayerId("14882")
+                .playerName("Novak Djokovic")
+                .playerNameKr("노박 조코비치")
+                .build();
+    }
+
+
 }

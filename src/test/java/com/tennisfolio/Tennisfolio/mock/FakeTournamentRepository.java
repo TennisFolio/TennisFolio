@@ -149,4 +149,9 @@ public class FakeTournamentRepository implements TournamentRepository {
         return false;
 
     }
+
+    @Override
+    public void flush() {
+
+    }
 }

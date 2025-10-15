@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useSelector } from 'react-redux';
 import SockJS from 'sockjs-client';
 import { Stomp } from '@stomp/stompjs';
 import './chatRoom.css';
 import { base_server_url } from '@/constants';
 import { apiRequest } from '../../utils/apiClient';
+import { selectMSWActive } from '../../store/mswSlice';
 
 const MAX_LENGTH = 200;
 
@@ -16,6 +18,7 @@ function ChatRoom({ matchId = 'default-room' }) {
   const clientRef = useRef(null);
   const lastSentTime = useRef(0);
   const bottomRef = useRef(null);
+  const isMSWActive = useSelector(selectMSWActive);
 
   function getOrCreateUserId() {
     let id = localStorage.getItem('chatUserId');
@@ -25,9 +28,25 @@ function ChatRoom({ matchId = 'default-room' }) {
     }
   }
 
-  function formatToMinuteSecond(isoString) {
-    const date = new Date(isoString);
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  // YYYYMMDDhhmmss 형식의 문자열을 "hh:mm" 포맷으로 변환
+  function formatToMinuteSecond(yyyymmddhhmmss) {
+    if (!yyyymmddhhmmss || yyyymmddhhmmss.length !== 14) return '';
+    const year = yyyymmddhhmmss.slice(0, 4);
+    const month = yyyymmddhhmmss.slice(4, 6);
+    const day = yyyymmddhhmmss.slice(6, 8);
+    const hour = yyyymmddhhmmss.slice(8, 10);
+    const minute = yyyymmddhhmmss.slice(10, 12);
+    // const second = yyyymmddhhmmss.slice(12, 14); // 필요시 사용
+
+    // Date 객체로 변환 (로컬 타임존 기준)
+    const date = new Date(`${year}-${month}-${day}T${hour}:${minute}:00`);
+
+    // "hh:mm" 형식으로 반환
+    return date.toLocaleTimeString([], {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    });
   }
   useEffect(() => {
     const fetchData = async () => {
@@ -56,8 +75,8 @@ function ChatRoom({ matchId = 'default-room' }) {
     fetchData();
     getOrCreateUserId();
 
-    // 개발 모드에서는 웹소켓 대신 목데이터로 채팅 시뮬레이션
-    if (import.meta.env.DEV) {
+    // MSW가 활성화되어 있으면 웹소켓 대신 목데이터로 채팅 시뮬레이션
+    if (isMSWActive) {
       const mockMessages = [
         '와 이 경기 진짜 박진감 넘치네요!',
         '알카라즈 폼이 정말 좋아요 🎾',
@@ -70,37 +89,59 @@ function ChatRoom({ matchId = 'default-room' }) {
 
       const mockUsers = ['임재학', '박태환', '윤선아', '이서영', '김현우'];
 
-      const simulateChat = () => {
-        const chatInterval = setInterval(() => {
-          const randomMessage =
-            mockMessages[Math.floor(Math.random() * mockMessages.length)];
-          const randomUser =
-            mockUsers[Math.floor(Math.random() * mockUsers.length)];
-          const newMessage = {
-            matchId,
-            sender: randomUser,
-            userId: `mock-${Math.random()}`,
-            timestamp: formatToMinuteSecond(new Date().toISOString()),
-            message: randomMessage,
-            type: 'TALK',
-          };
-          setMessages((prev) => [...prev, newMessage]);
-        }, 8000); // 8초마다 새 메시지
+      const chatInterval = setInterval(() => {
+        const randomMessage =
+          mockMessages[Math.floor(Math.random() * mockMessages.length)];
+        const randomUser =
+          mockUsers[Math.floor(Math.random() * mockUsers.length)];
+        const now = new Date();
+        const timestamp =
+          now.getFullYear().toString() +
+          (now.getMonth() + 1).toString().padStart(2, '0') +
+          now.getDate().toString().padStart(2, '0') +
+          now.getHours().toString().padStart(2, '0') +
+          now.getMinutes().toString().padStart(2, '0') +
+          now.getSeconds().toString().padStart(2, '0');
 
-        return chatInterval;
+        const newMessage = {
+          matchId,
+          sender: randomUser,
+          userId: `mock-${Math.random()}`,
+          timestamp: timestamp,
+          message: randomMessage,
+          type: 'TALK',
+        };
+        setMessages((prev) => [...prev, newMessage]);
+      }, 8000); // 8초마다 새 메시지
+
+      return () => {
+        clearInterval(chatInterval);
       };
-
-      const intervalId = simulateChat();
-      return () => clearInterval(intervalId);
     } else {
-      // 프로덕션 모드에서는 실제 웹소켓 연결
+      // MSW가 비활성화되어 있으면 실제 웹소켓 연결
       const socket = new SockJS(`${base_server_url}/ws`);
       const client = Stomp.over(socket);
 
       client.connect({}, () => {
         client.subscribe(`/topic/match.${matchId}`, (msg) => {
           const received = JSON.parse(msg.body);
-          setMessages((prev) => [...prev, received]);
+
+          // 중복 메시지 필터링 (같은 userId + timestamp + message 조합)
+          setMessages((prev) => {
+            const isDuplicate = prev.some(
+              (existingMsg) =>
+                existingMsg.userId === received.userId &&
+                existingMsg.timestamp === received.timestamp &&
+                existingMsg.message === received.message
+            );
+
+            if (isDuplicate) {
+              console.log('⚠️ 중복 메시지 무시:', received);
+              return prev;
+            }
+
+            return [...prev, received];
+          });
         });
         clientRef.current = client;
       });
@@ -111,39 +152,51 @@ function ChatRoom({ matchId = 'default-room' }) {
         }
       };
     }
-  }, [matchId]);
+  }, [matchId, isMSWActive]);
 
   const sendMessage = () => {
     if (!input.trim()) return;
 
     // 디바운스: 500ms 내 중복 전송 방지
-    const now = Date.now();
-    if (now - lastSentTime.current < 500) {
+    const nowTime = Date.now();
+    if (nowTime - lastSentTime.current < 500) {
       setInput(''); // 중복 전송이어도 입력창은 비우기
       return;
     }
-    lastSentTime.current = now;
+    lastSentTime.current = nowTime;
 
     const userId = localStorage.getItem('chatUserId');
+    const now = new Date();
+    const timestamp =
+      now.getFullYear().toString() +
+      (now.getMonth() + 1).toString().padStart(2, '0') +
+      now.getDate().toString().padStart(2, '0') +
+      now.getHours().toString().padStart(2, '0') +
+      now.getMinutes().toString().padStart(2, '0') +
+      now.getSeconds().toString().padStart(2, '0');
+
     const message = {
       matchId,
       sender: nickname,
       userId: userId,
-      timestamp: formatToMinuteSecond(new Date().toISOString()),
+      timestamp: timestamp,
       message: input,
       type: 'TALK',
     };
 
-    if (import.meta.env.DEV) {
-      // 개발 모드에서는 로컬 상태에 바로 추가
+    if (isMSWActive) {
+      // MSW 모드에서는 로컬 상태에 바로 추가
       setMessages((prev) => [...prev, message]);
     } else {
-      // 프로덕션 모드에서는 실제 웹소켓으로 전송
-      clientRef.current.send(
-        `/app/chat.send/${matchId}`,
-        {},
-        JSON.stringify(message)
-      );
+      // MSW 비활성화 시 실제 웹소켓으로 전송 (서버에서 브로드캐스트로 다시 받음)
+      if (clientRef.current) {
+        clientRef.current.send(
+          `/app/chat.send/${matchId}`,
+          {},
+          JSON.stringify(message)
+        );
+      }
+      // 웹소켓 모드에서는 서버에서 브로드캐스트로 받을 예정이므로 로컬에 추가하지 않음
     }
     setInput('');
 
@@ -183,7 +236,11 @@ function ChatRoom({ matchId = 'default-room' }) {
                   <div className="chat-text">{msg.message}</div>
                 </div>
 
-                {<div className="chat-time">{msg.timestamp}</div>}
+                {
+                  <div className="chat-time">
+                    {formatToMinuteSecond(msg.timestamp)}
+                  </div>
+                }
               </div>
             </div>
           );

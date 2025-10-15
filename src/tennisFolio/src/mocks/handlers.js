@@ -66,8 +66,8 @@ export const handlers = [
         matchId,
         sender: '우성환',
         userId: 'user-1',
-        timestamp: '14:30',
-        message: '임재학선수 오늘 경기력 정말 최악이네요!',
+        timestamp: '20251003143000',
+        message: '임재학선수 오늘 경기력 정말 최고네요!',
         type: 'TALK',
       },
     ];

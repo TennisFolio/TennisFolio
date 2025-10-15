@@ -24,15 +24,4 @@ public class TimeDTO {
     @JsonProperty("currentPeriodStartTimestamp")
     private String currentPeriodStartTimestamp;
 
-    public void convertPeriods() {
-        this.period1 = ConversionUtil.secondToMinute(this.period1);
-        this.period2 = ConversionUtil.secondToMinute(this.period2);
-        this.period3 = ConversionUtil.secondToMinute(this.period3);
-        this.period4 = ConversionUtil.secondToMinute(this.period4);
-        this.period5 = ConversionUtil.secondToMinute(this.period5);
-    }
-
-    public void convertCurrentPeriodStartTimestamp() {
-        this.currentPeriodStartTimestamp = ConversionUtil.timestampToYyyyMMdd(this.currentPeriodStartTimestamp);
-    }
 }

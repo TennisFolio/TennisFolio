@@ -56,4 +56,9 @@ public class FakeCategoryRepository implements CategoryRepository {
         data.put(saved.getCategoryId(), saved);
         return saved;
     }
+
+    @Override
+    public void flush() {
+
+    }
 }

@@ -34,4 +34,16 @@ public class Score {
         this.set5Tie = set5Tie;
 
     }
+    public void nullToZero(){
+        if(this.set1 == null) this.set1 = 0L;
+        if(this.set2 == null) this.set2 = 0L;
+        if(this.set3 == null) this.set3 = 0L;
+        if(this.set4 == null) this.set4 = 0L;
+        if(this.set5 == null) this.set5 = 0L;
+        if(this.set1Tie == null) this.set1Tie = 0L;
+        if(this.set2Tie == null) this.set2Tie = 0L;
+        if(this.set3Tie == null) this.set3Tie = 0L;
+        if(this.set4Tie == null) this.set4Tie = 0L;
+        if(this.set5Tie == null) this.set5Tie = 0L;
+    }
 }

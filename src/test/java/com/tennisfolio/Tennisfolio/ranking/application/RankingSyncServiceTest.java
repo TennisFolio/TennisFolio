@@ -1,35 +1,70 @@
 package com.tennisfolio.Tennisfolio.ranking.application;
 
 import com.tennisfolio.Tennisfolio.infrastructure.api.base.*;
+import com.tennisfolio.Tennisfolio.infrastructure.api.player.teamImage.PlayerImageService;
 import com.tennisfolio.Tennisfolio.mock.FakeApiCaller;
+import com.tennisfolio.Tennisfolio.mock.FakePlayerRepository;
 import com.tennisfolio.Tennisfolio.mock.FakeRankingRepository;
 import com.tennisfolio.Tennisfolio.mock.atpRanking.FakeAtpRankingApiTemplate;
 import com.tennisfolio.Tennisfolio.mock.atpRanking.FakeAtpRankingEntityMapper;
 import com.tennisfolio.Tennisfolio.mock.atpRanking.FakeAtpRankingResponseParser;
+import com.tennisfolio.Tennisfolio.mock.teamDetails.FakeTeamDetailsApiTemplate;
+import com.tennisfolio.Tennisfolio.mock.teamDetails.FakeTeamDetailsEntityMapper;
+import com.tennisfolio.Tennisfolio.player.domain.PlayerAggregate;
+import com.tennisfolio.Tennisfolio.player.dto.TeamDetailsApiDTO;
+import com.tennisfolio.Tennisfolio.player.infrastructure.PlayerProvider;
+import com.tennisfolio.Tennisfolio.player.infrastructure.PlayerRepository;
 import com.tennisfolio.Tennisfolio.ranking.domain.Ranking;
 import com.tennisfolio.Tennisfolio.ranking.dto.AtpRankingApiDTO;
 import com.tennisfolio.Tennisfolio.ranking.repository.RankingRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
 
 public class RankingSyncServiceTest {
 
-    private RankingSyncService rankingSyncService;
+     RankingSyncService rankingSyncService;
     ApiCaller fakeApiCaller = new FakeApiCaller();
     EntityMapper<List<AtpRankingApiDTO>, List<Ranking>> fakeAtpRankingEntityMapper = new FakeAtpRankingEntityMapper();
-    ResponseParser<List<AtpRankingApiDTO>> fakeAtpRankingResponseParser = new FakeAtpRankingResponseParser();
-    StrategyApiTemplate<List<AtpRankingApiDTO>, List<Ranking>> fakeAtpRankingApiTemplate = new FakeAtpRankingApiTemplate(fakeApiCaller, fakeAtpRankingResponseParser, fakeAtpRankingEntityMapper, RapidApi.ATPRANKINGS);
+    @Mock
+    ResponseParser parser;
+
     RankingRepository rankingRepository = new FakeRankingRepository();
+    PlayerRepository playerRepository = new FakePlayerRepository();
+
+    EntityMapper<TeamDetailsApiDTO, PlayerAggregate> fakeTeamDetailsMapper = new FakeTeamDetailsEntityMapper();
+
+    @Mock
+    PlayerImageService playerImageService;
+
 
     @BeforeEach
     void setUp(){
+        MockitoAnnotations.openMocks(this);
+
+        StrategyApiTemplate<List<AtpRankingApiDTO>, List<Ranking>> fakeAtpRankingApiTemplate = new FakeAtpRankingApiTemplate(fakeApiCaller, parser, fakeAtpRankingEntityMapper, RapidApi.ATPRANKINGS);
+        StrategyApiTemplate<TeamDetailsApiDTO, PlayerAggregate> teamDetailsApi = new FakeTeamDetailsApiTemplate(fakeApiCaller, parser, fakeTeamDetailsMapper, RapidApi.TEAMDETAILS);
+
+        List<StrategyApiTemplate<?,?>> strategyApiTemplates = new ArrayList<>();
+        strategyApiTemplates.add(fakeAtpRankingApiTemplate);
+        strategyApiTemplates.add(teamDetailsApi);
+        ApiWorker apiWorker = new ApiWorker(strategyApiTemplates);
+        when(playerImageService.fetchImage("1")).thenReturn("/player/1");
+        when(playerImageService.fetchImage("2")).thenReturn("/player/2");
+        when(playerImageService.fetchImage("3")).thenReturn("/player/3");
+
+        PlayerProvider playerProvider = new PlayerProvider(playerRepository, playerImageService, apiWorker);
         this.rankingSyncService = RankingSyncService.builder()
-                .rankingApiTemplate(fakeAtpRankingApiTemplate)
+                .apiWorker(apiWorker)
                 .rankingRepository(rankingRepository)
+                .playerProvider(playerProvider)
                 .build();
 
     }

@@ -1,22 +1,31 @@
 .live-events {
-  max-width: 900px;
+  max-width: 1400px;
   margin: 0 auto;
-  padding: 1.25rem;
   font-family: 'Segoe UI', sans-serif;
   width: 100%;
   box-sizing: border-box;
 }
 
+.events-grid {
+  display: grid;
+  gap: 2rem;
+  grid-template-columns: repeat(3, 1fr);
+}
+
 .live-title {
   font-size: 2rem;
-  font-weight: bold;
-  color: #2c3e50;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100px;
+  margin-bottom: 20px;
+  background: linear-gradient(90deg, #43cea2 2%, #185a9d 100%);
+  color: white;
+  border-radius: 5px;
+  font-size: 1.75rem;
+  padding: 1rem;
   text-align: center;
-  margin-bottom: 2rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 0.25rem solid #3498db;
-  letter-spacing: 0.05rem;
-  line-height: 1.4;
 }
 
 .no-events-message {
@@ -27,15 +36,114 @@
   font-style: italic;
 }
 
+/* Alternative Content Styles */
+.alternative-content {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 2rem;
+  margin-top: 2rem;
+  padding: 0 1rem;
+}
+
+.content-card {
+  background: #fff;
+  border-radius: 1rem;
+  box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.1);
+  padding: 2.5rem;
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+  min-height: 120px;
+}
+
+.content-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.15);
+  border-color: #43cea2;
+}
+
+.card-icon {
+  font-size: 3rem;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(135deg, #43cea2 0%, #185a9d 100%);
+  border-radius: 50%;
+  color: white;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.card-content {
+  flex: 1;
+}
+
+.card-content h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.card-content p {
+  margin: 0;
+  color: #7f8c8d;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+/* 모바일 반응형 */
+@media (max-width: 768px) {
+  .alternative-content {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    padding: 0 0.5rem;
+  }
+
+  .content-card {
+    padding: 2rem;
+    gap: 1.5rem;
+    min-height: 100px;
+  }
+
+  .card-icon {
+    width: 70px;
+    height: 70px;
+    font-size: 2.2rem;
+  }
+
+  .card-content h3 {
+    font-size: 1.3rem;
+  }
+
+  .card-content p {
+    font-size: 0.95rem;
+  }
+}
+
 .eventCard {
   background: #fff;
   border-radius: 1rem;
   box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.1);
-  margin-bottom: 2rem;
   padding: 1.5rem;
   transition: transform 0.2s;
   width: 100%;
+  min-width: 400px;
   box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  margin-bottom: 30px;
+}
+
+.eventCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
 }
 
 .tournamentHeader {
@@ -95,13 +203,17 @@
   margin-top: 0.5rem;
   word-break: break-word;
   line-height: 1.2;
+  min-height: 2.4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .setScore {
   flex: 0 0 auto;
   font-size: 1.5rem;
   font-weight: bold;
-  color: #0a66c2;
+  color: #185a9d;
   text-align: center;
   min-width: 3rem;
   padding: 0 0.5rem;
@@ -122,8 +234,10 @@
 
 .eventTable table {
   width: 100%;
+  min-width: 350px;
   border-collapse: collapse;
   font-size: 14px;
+  min-height: 170px;
 }
 
 .eventTable th,
@@ -141,9 +255,10 @@
 
 .eventButton {
   display: block;
-  margin: 16px auto 0;
+  margin: auto auto 0;
+  margin-top: 16px;
   padding: 10px 24px;
-  background-color: #0a66c2;
+  background-color: #185a9d;
   color: white;
   border: none;
   border-radius: 24px;
@@ -156,14 +271,27 @@
   background-color: #084d99;
 }
 
-/* 태블릿 크기 */
-@media (max-width: 768px) {
+/* 태블릿 크기 (2개씩) */
+@media (max-width: 1199px) and (min-width: 768px) {
+  .events-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+}
+
+/* 태블릿 세로 및 모바일 (1개씩) */
+@media (max-width: 767px) {
+  .events-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
   .live-events {
     padding: 1rem;
   }
 
   .live-title {
-    font-size: 1.75rem;
+    font-size: 1.45rem;
   }
 
   .playerImg img {
@@ -179,6 +307,10 @@
     font-size: 1.1rem;
     min-width: 2.5rem;
   }
+
+  .eventTable table {
+    min-width: 250px;
+  }
 }
 
 /* 모바일 크기 */
@@ -188,7 +320,7 @@
   }
 
   .live-title {
-    font-size: 1.5rem;
+    font-size: 1.15rem;
     margin-bottom: 1rem;
   }
 
@@ -196,6 +328,7 @@
     margin-bottom: 1rem;
     padding: 1rem;
     border-radius: 0.75rem;
+    min-width: 280px;
   }
 
   .tournamentName {
@@ -244,6 +377,7 @@
   .eventTable table {
     font-size: 0.75rem;
     min-width: 100%;
+    min-height: none;
   }
 
   .eventTable th,

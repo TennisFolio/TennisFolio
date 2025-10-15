@@ -56,11 +56,11 @@ public class Tournament{
         this.points = points;
     }
 
-    public void updateFromLeagueDetails(Player mostTitlePlayer, Player titleHolder, LeagueDetailsDTO dto){
+    public void updateFromLeagueDetails(Player mostTitlePlayer, Player titleHolder, String mostTitles, Long points){
         this.mostTitlePlayer = mostTitlePlayer;
         this.titleHolder = titleHolder;
-        this.mostTitles = dto.getMostTitles();
-        this.points = dto.getPoints();
+        this.mostTitles = mostTitles;
+        this.points = points;
     }
 
     public void updateFromTournamentInfo(String city, String matchType, String groundType){
@@ -69,12 +69,29 @@ public class Tournament{
         this.groundType = groundType;
     }
 
+    public void updateCategory(Category category){
+        this.category = category;
+    }
+
+    public void updateTitles(Player mostTitlePlayer, Player titleHolder){
+        this.mostTitlePlayer = mostTitlePlayer;
+        this.titleHolder = titleHolder;
+    }
+
     public boolean needsTournamentInfo(){
         return this.city == null && this.matchType == null && this.groundType == null;
     }
 
     public boolean needsLeagueDetails(){
         return this.mostTitlePlayer == null && this.titleHolder == null && this.mostTitles == null && this.points == null;
+    }
+
+    public boolean isMostTitlePlayerExists(){
+        return this.getMostTitlePlayer() != null;
+    }
+
+    public boolean isTitleHolderExists(){
+        return this.getTitleHolder() != null;
     }
 
 }

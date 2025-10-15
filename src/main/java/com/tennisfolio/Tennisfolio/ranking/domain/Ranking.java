@@ -40,4 +40,8 @@ public class Ranking {
         this.lastUpdate = rapidDTO.getUpdateTime();
 
     }
+
+    public void updatePlayer(Player player){
+        this.player = player;
+    }
 }

@@ -26,6 +26,11 @@ public class MatchRepositoryImpl implements MatchRepository{
     }
 
     @Override
+    public Match save(Match match) {
+        return matchJpaRepository.save(MatchEntity.fromModel(match)).toModel();
+    }
+
+    @Override
     public List<Match> findAll() {
         return matchJpaRepository.findAll().stream().map(MatchEntity::toModelBaseOnly).toList();
     }
@@ -55,5 +60,10 @@ public class MatchRepositoryImpl implements MatchRepository{
     @Override
     public boolean flushAll() {
         return bufferedBatchSaver.flushAll();
+    }
+
+    @Override
+    public void flush() {
+        matchJpaRepository.flush();
     }
 }

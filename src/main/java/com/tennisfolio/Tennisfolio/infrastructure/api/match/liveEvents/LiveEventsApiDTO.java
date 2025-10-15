@@ -34,18 +34,6 @@ public class LiveEventsApiDTO {
     @JsonProperty("startTimestamp")
     private String startTime;
 
-    public void convertTime() {
-        if (time != null) {
-            time.convertPeriods();
-            time.convertCurrentPeriodStartTimestamp();
-        }
-        this.startTime = ConversionUtil.timestampToYyyyMMdd(this.startTime);
-    }
-
-    public void scoreNullToZero() {
-        homeScore.nullToZero();
-        awayScore.nullToZero();
-    }
 
     public int getTotalRanking(){
         long home = parseRanking(homeTeam.getRanking());

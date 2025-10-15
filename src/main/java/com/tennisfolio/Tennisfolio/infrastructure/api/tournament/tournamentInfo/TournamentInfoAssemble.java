@@ -20,14 +20,12 @@ public class TournamentInfoAssemble implements EntityAssemble<TournamentInfoDTO,
 
     @Override
     public Tournament assemble(TournamentInfoDTO dto, Object... params) {
-        return tournamentRepository.findWithCategoryByRapidTournamentId(dto.getTournament().getRapidId())
-                .map(
-                tournament -> {
-                    tournament.updateFromTournamentInfo(dto.getCity(), dto.getMatchType(), dto.getGroundType());
+        Tournament findTournament =  tournamentRepository.findWithCategoryByRapidTournamentId(dto.getTournament().getRapidId())
+        .orElse(Tournament.builder().rapidTournamentId(dto.getTournament().getRapidId()).build());
 
-                    return tournament;
-                }
-        ).orElseThrow(() -> new IllegalArgumentException("조회되는 데이터가 없습니다."));
+        findTournament.updateFromTournamentInfo(dto.getCity(), dto.getMatchType(), dto.getGroundType());
+
+        return findTournament;
 
     }
 }

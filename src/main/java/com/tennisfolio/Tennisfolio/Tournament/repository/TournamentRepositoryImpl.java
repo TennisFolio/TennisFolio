@@ -23,8 +23,8 @@ public class TournamentRepositoryImpl implements TournamentRepository{
 
     @Override
     public Tournament save(Tournament tournament) {
-
         return tournamentJpaRepository.save(TournamentEntity.fromModel(tournament)).toModel();
+
     }
 
     @Override
@@ -88,5 +88,10 @@ public class TournamentRepositoryImpl implements TournamentRepository{
     @Override
     public boolean flushAll(){
         return bufferedBatchSaver.flushAll();
+    }
+
+    @Override
+    public void flush() {
+        tournamentJpaRepository.flush();
     }
 }
