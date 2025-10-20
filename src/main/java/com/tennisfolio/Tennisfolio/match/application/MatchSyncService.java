@@ -21,6 +21,9 @@ import com.tennisfolio.Tennisfolio.season.repository.SeasonRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
+import java.time.Clock;
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -36,8 +39,9 @@ public class MatchSyncService {
     private final MatchRepository matchRepository;
     private final ApiWorker apiWorker;
     private final PlayerProvider playerProvider;
+    private final Clock clock;
 
-    public MatchSyncService(CategoryRepository categoryRepository, TournamentRepository tournamentRepository, SeasonRepository seasonRepository, RoundRepository roundRepository, MatchRepository matchRepository, ApiWorker apiWorker, PlayerProvider playerProvider) {
+    public MatchSyncService(CategoryRepository categoryRepository, TournamentRepository tournamentRepository, SeasonRepository seasonRepository, RoundRepository roundRepository, MatchRepository matchRepository, ApiWorker apiWorker, PlayerProvider playerProvider, Clock clock) {
         this.categoryRepository = categoryRepository;
         this.tournamentRepository = tournamentRepository;
         this.seasonRepository = seasonRepository;
@@ -45,6 +49,7 @@ public class MatchSyncService {
         this.matchRepository = matchRepository;
         this.apiWorker = apiWorker;
         this.playerProvider = playerProvider;
+        this.clock = clock;
     }
 
     public void saveMatchList() {
@@ -77,10 +82,20 @@ public class MatchSyncService {
     }
 
     @Transactional
-    public void saveEventSchedule(String year, String month, String day){
-        List<Match> events = apiWorker.process(RapidApi.EVENTSCHEDULES, day, month, year);
+    public void saveEventSchedule(){
+        List<Match> allEvents = new ArrayList<>();
 
-        events.stream()
+        for (int i = 0; i <= 2; i++) {
+            LocalDate date = LocalDate.now(clock).plusDays(i);
+            String year = String.valueOf(date.getYear());
+            String month = String.format("%02d", date.getMonthValue());
+            String day = String.format("%02d", date.getDayOfMonth());
+
+            List<Match> events = apiWorker.process(RapidApi.EVENTSCHEDULES, day, month, year);
+            allEvents.addAll(events);
+        }
+
+        allEvents.stream()
                 .filter(match -> match.getTournament().getCategory().isSupportedCategory())
                 .forEach(match -> {
 
@@ -92,24 +107,20 @@ public class MatchSyncService {
 
             Round round = findOrSaveRound(match, season);
 
-            tournament.updateCategory(category);
-            season.updateTournament(tournament);
-            round.updateSeason(season);
+//            tournament.updateCategory(category);
+//            season.updateTournament(tournament);
+//            round.updateSeason(season);
             match.updateRound(round);
 
             Player homePlayer = playerProvider.provide(match.getHomePlayer().getRapidPlayerId());
             Player awayPlayer = playerProvider.provide(match.getAwayPlayer().getRapidPlayerId());
-
+            roundRepository.flush();
             match.updatePlayer(homePlayer, awayPlayer);
 
             System.out.println("TournamentId: " + match.getTournament().getTournamentId());
             System.out.println("SeasonId: " + match.getSeason().getSeasonId());
             System.out.println("RoundId: " + match.getRound().getRoundId());
-            categoryRepository.flush();
-            tournamentRepository.flush();
-            seasonRepository.flush();
-            roundRepository.flush();
-            matchRepository.flush();
+
             matchRepository.save(match);
         });
 
@@ -125,32 +136,41 @@ public class MatchSyncService {
         Tournament tournament =  tournamentRepository.findByRapidTournamentId(rapidTournamentId)
                 .map(existing -> {
                     existing.updateCategory(category);
-                    return existing;
+                    if(existing.needsTournamentInfo()){
+                        requestTournamentInfo(existing, rapidTournamentId);
+                    }
+                    if(existing.needsLeagueDetails()){
+                        requestLeagueDetails(existing, rapidTournamentId);
+                    }
+
+                    return tournamentRepository.save(existing);
                 })
                 .orElseGet(() -> {
                     Tournament newTournament = match.getTournament();
 
-                    newTournament = requestTournamentInfo(newTournament, rapidTournamentId);
+                    requestTournamentInfo(newTournament, rapidTournamentId);
 
-                    newTournament = requestLeagueDetails(newTournament, rapidTournamentId);
+                    requestLeagueDetails(newTournament, rapidTournamentId);
 
                     newTournament.updateCategory(category);
-                    return tournamentRepository.save(newTournament);
+
+                    Tournament savedTournament = tournamentRepository.save(newTournament);
+                    savedTournament.updateTimestamp(newTournament.getStartTimestamp(), newTournament.getEndTimestamp());
+                    return savedTournament;
 
                 });
 
         return tournament;
     }
 
-    private Tournament requestTournamentInfo(Tournament newTournament, String rapidTournamentId){
+    private void requestTournamentInfo(Tournament newTournament, String rapidTournamentId){
         Tournament tournamentInfo = apiWorker.process(RapidApi.TOURNAMENTINFO, rapidTournamentId);
         if(tournamentInfo != null){
             newTournament.updateFromTournamentInfo(tournamentInfo.getCity(), tournamentInfo.getMatchType(), tournamentInfo.getGroundType());
         }
-        return newTournament;
     }
 
-    private Tournament requestLeagueDetails(Tournament newTournament, String rapidTournamentId){
+    private void requestLeagueDetails(Tournament newTournament, String rapidTournamentId){
         Tournament leagueDetails = apiWorker.process(RapidApi.LEAGUEDETAILS, rapidTournamentId);
         Player mostTitleHolder = null;
         Player titleHolder = null;
@@ -161,22 +181,32 @@ public class MatchSyncService {
             if(leagueDetails.isTitleHolderExists()){
                 titleHolder = playerProvider.provide(leagueDetails.getTitleHolder().getRapidPlayerId());
             }
-            newTournament.updateFromLeagueDetails(mostTitleHolder, titleHolder, leagueDetails.getMostTitles(), leagueDetails.getPoints());
+            newTournament.updateFromLeagueDetails(mostTitleHolder, titleHolder,
+                    leagueDetails.getMostTitles(), leagueDetails.getPoints(),
+                    leagueDetails.getStartTimestamp(), leagueDetails.getEndTimestamp());
         }
-        return newTournament;
     }
 
     private Season findOrSaveSeason(Match match, Tournament tournament){
+        String rapidTournamentId = tournament.getRapidTournamentId();
+
         Season season = seasonRepository.findByRapidSeasonId(match.getSeason().getRapidSeasonId())
                 .map(existing -> {
                     existing.updateTournament(tournament);
-                    return existing;
+                    requestLeagueDetails(tournament, rapidTournamentId);
+                    existing.updateTimestamp();
+
+                    if(existing.needsLeagueSeasonInfo()){
+                        requestLeagueSeasonInfo(existing, rapidTournamentId);
+                    }
+                    return seasonRepository.save(existing);
                 })
                 .orElseGet(() -> {
                     Season newSeason = match.getSeason();
                     newSeason.updateTournament(tournament);
 
-                    newSeason = requestLeagueSeasonInfo(newSeason, tournament.getRapidTournamentId());
+                    requestLeagueSeasonInfo(newSeason, rapidTournamentId);
+                    newSeason.updateTimestamp();
                     return seasonRepository.save(newSeason);
 
                 });
@@ -184,14 +214,12 @@ public class MatchSyncService {
         return season;
     }
 
-    private Season requestLeagueSeasonInfo(Season newSeason, String rapidTournamentId){
+    private void requestLeagueSeasonInfo(Season newSeason, String rapidTournamentId){
         Season leagueSeasonInfo = apiWorker.process(RapidApi.LEAGUESEASONINFO, rapidTournamentId, newSeason.getRapidSeasonId());
         if(leagueSeasonInfo != null){
             System.out.println(rapidTournamentId + " " + newSeason.getRapidSeasonId());
             newSeason.updateFromLeagueSeasonInfo(leagueSeasonInfo.getTotalPrize(),leagueSeasonInfo.getTotalPrizeCurrency(),leagueSeasonInfo.getCompetitors());
         }
-
-        return newSeason;
 
     }
 

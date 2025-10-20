@@ -25,15 +25,12 @@ import static org.assertj.core.groups.Tuple.tuple;
 
 public class EventSchedulesAssembleTest {
     private EventSchedulesAssemble assembler;
-    private CategoryRepository fakeCategoryRepository = new FakeCategoryRepository();
-    private TournamentRepository fakeTournamentRepository = new FakeTournamentRepository();
-    private SeasonRepository fakeSeasonRepository = new FakeSeasonRepository();
-    private RoundRepository fakeRoundRepository = new FakeRoundRepository();
+
     private EventSchedulesResponseParser parser = new EventSchedulesResponseParser();
 
     @BeforeEach
     public void init(){
-        assembler = new EventSchedulesAssemble(fakeCategoryRepository, fakeTournamentRepository, fakeSeasonRepository, fakeRoundRepository);
+        assembler = new EventSchedulesAssemble();
     }
 
     @Test
@@ -50,7 +47,7 @@ public class EventSchedulesAssembleTest {
 
         assertThat(matchList)
                 .extracting(Match::getRapidMatchId, p -> p.getRound().getRound(), p -> p.getHomePlayer().getRapidPlayerId(), p -> p.getAwayPlayer().getRapidPlayerId(),
-                        p -> p.getStartTimeStamp())
+                        p -> p.getStartTimestamp())
                 .containsExactlyInAnyOrder(
                         tuple("14762084", 6L, "57163", "63606", "20251006193000"),
                         tuple("14762081", 6L, "157456", "163504", "20251006204000"),

@@ -13,7 +13,7 @@ public class EventSchedulesFixtures {
                 .round(RoundFixtures.wimbledonMen2025QuarterFinal())
                 .homePlayer(PlayerFixtures.fritz())
                 .awayPlayer(PlayerFixtures.khachanov())
-                .startTimeStamp("20251011080000")
+                .startTimestamp("20251011080000")
                 .build();
     }
 
@@ -24,7 +24,7 @@ public class EventSchedulesFixtures {
                 .round(RoundFixtures.wimbledonMen2025QuarterFinal())
                 .homePlayer(PlayerFixtures.norrie())
                 .awayPlayer(PlayerFixtures.alcaraz())
-                .startTimeStamp("20251011100000")
+                .startTimestamp("20251011100000")
                 .build();
     }
 
@@ -35,7 +35,7 @@ public class EventSchedulesFixtures {
                 .round(RoundFixtures.wimbledonMen2025QuarterFinal())
                 .homePlayer(PlayerFixtures.sinner())
                 .awayPlayer(PlayerFixtures.shelton())
-                .startTimeStamp("20251011120000")
+                .startTimestamp("20251011120000")
                 .build();
     }
 
@@ -46,7 +46,7 @@ public class EventSchedulesFixtures {
                 .round(RoundFixtures.wimbledonMen2025QuarterFinal())
                 .homePlayer(PlayerFixtures.cobolli())
                 .awayPlayer(PlayerFixtures.djokovic())
-                .startTimeStamp("20251011140000")
+                .startTimestamp("20251011140000")
                 .build();
     }
 

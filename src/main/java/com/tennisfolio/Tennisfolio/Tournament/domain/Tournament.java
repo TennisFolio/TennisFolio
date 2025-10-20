@@ -38,10 +38,14 @@ public class Tournament{
 
     private Long points;
 
+    private String startTimestamp;
+
+    private String endTimestamp;
+
     public Tournament(){}
 
     public Tournament(Long tournamentId, Category category, String rapidTournamentId, String matchType, String tournamentName, String city
-    , String groundType, String logo, String mostTitles, Player mostTitlePlayer, Player titleHolder, Long points){
+    , String groundType, String logo, String mostTitles, Player mostTitlePlayer, Player titleHolder, Long points, String startTimestamp, String endTimestamp){
         this.tournamentId = tournamentId;
         this.category = category;
         this.rapidTournamentId = rapidTournamentId;
@@ -54,19 +58,28 @@ public class Tournament{
         this.mostTitlePlayer = mostTitlePlayer;
         this.titleHolder = titleHolder;
         this.points = points;
+        this.startTimestamp = startTimestamp;
+        this.endTimestamp = endTimestamp;
     }
 
-    public void updateFromLeagueDetails(Player mostTitlePlayer, Player titleHolder, String mostTitles, Long points){
+    public void updateFromLeagueDetails(Player mostTitlePlayer, Player titleHolder, String mostTitles, Long points, String startTimestamp, String endTimestamp){
         this.mostTitlePlayer = mostTitlePlayer;
         this.titleHolder = titleHolder;
         this.mostTitles = mostTitles;
         this.points = points;
+        this.startTimestamp = startTimestamp;
+        this.endTimestamp = endTimestamp;
     }
 
     public void updateFromTournamentInfo(String city, String matchType, String groundType){
         this.city = city;
         this.matchType = matchType;
         this.groundType = groundType;
+    }
+
+    public void updateTimestamp(String startTimestamp, String endTimestamp){
+        this.startTimestamp = startTimestamp;
+        this.endTimestamp = endTimestamp;
     }
 
     public void updateCategory(Category category){

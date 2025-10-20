@@ -22,7 +22,7 @@ public class FakeMatchRepository implements MatchRepository {
 
     @Override
     public Match save(Match match) {
-        return data.put(seq.getAndIncrement(), match);
+        return data.put(match.getMatchId(), match);
     }
 
     @Override
