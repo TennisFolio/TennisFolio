@@ -4,6 +4,7 @@ import com.tennisfolio.Tennisfolio.Tournament.domain.Tournament;
 import com.tennisfolio.Tennisfolio.Tournament.repository.TournamentEntity;
 import com.tennisfolio.Tennisfolio.infrastructure.api.season.leagueSeasonInfo.LeagueSeasonInfoDTO;
 import com.tennisfolio.Tennisfolio.infrastructure.api.season.leagueSeasons.LeagueSeasonsDTO;
+import com.tennisfolio.Tennisfolio.util.ConversionUtil;
 import jakarta.persistence.Column;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -51,8 +52,12 @@ public class Season {
     }
 
     public void updateTimestamp(){
-        this.startTimestamp = tournament.getStartTimestamp() != null? tournament.getStartTimestamp() : "";
-        this.endTimestamp = tournament.getEndTimestamp() != null? tournament.getEndTimestamp() : "";
+
+        this.startTimestamp = tournament.getStartTimestamp() != null?
+                ConversionUtil.timestampToYyyyMMddHHMMSS(tournament.getStartTimestamp()) : "";
+
+        this.endTimestamp = tournament.getEndTimestamp() != null?
+                ConversionUtil.timestampToYyyyMMddHHMMSS(tournament.getEndTimestamp()) : "";
     }
 
     public void updateTournament(Tournament tournament){
@@ -68,6 +73,9 @@ public class Season {
 
     }
 
+    public boolean needsLeagueSeasonInfo(){
+        return totalPrize == null && totalPrizeCurrency == null && competitors == null && startTimestamp == null && endTimestamp == null;
+    }
     public boolean isNew(){
         return seasonId == null;
     }

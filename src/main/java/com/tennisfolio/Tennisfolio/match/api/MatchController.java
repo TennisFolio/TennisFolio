@@ -73,11 +73,8 @@ public class MatchController {
     @Scheduled(cron= "0 0 0,12 * * *", zone = "Asia/Seoul")
     @PostMapping("/event")
     public ResponseEntity<ResponseDTO> saveEventSchedule(){
-        LocalDate twoDaysLater = LocalDate.now().plusDays(2);
-        String year = String.valueOf(twoDaysLater.getYear());
-        String month = String.format("%02d", twoDaysLater.getMonthValue());
-        String day = String.format("%02d", twoDaysLater.getDayOfMonth());
-        matchSyncService.saveEventSchedule(year, month, day);
+
+        matchSyncService.saveEventSchedule();
         return new ResponseEntity<>(HttpStatus.OK);
     }
 

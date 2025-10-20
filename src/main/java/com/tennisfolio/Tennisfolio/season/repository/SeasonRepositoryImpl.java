@@ -18,7 +18,7 @@ public class SeasonRepositoryImpl implements SeasonRepository{
 
     public SeasonRepositoryImpl(SeasonJpaRepository seasonJpaRepository, TransactionTemplate transactionTemplate) {
         this.seasonJpaRepository = seasonJpaRepository;
-        this.bufferedBatchSaver = new BufferedBatchSaver<>(seasonJpaRepository, 1000, transactionTemplate);
+        this.bufferedBatchSaver = new BufferedBatchSaver<>(seasonJpaRepository, 100, transactionTemplate);
     }
 
     @Override

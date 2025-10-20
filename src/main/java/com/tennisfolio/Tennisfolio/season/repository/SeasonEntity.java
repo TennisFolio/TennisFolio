@@ -24,7 +24,7 @@ public class SeasonEntity extends BaseTimeEntity {
             pkColumnName = "TABLE_ID",
             valueColumnName = "NEXT_VAL",
             pkColumnValue = "SEASON_ID",
-            allocationSize = 1000
+            allocationSize = 100
     )
     private Long seasonId;
     @ManyToOne(fetch = FetchType.LAZY)

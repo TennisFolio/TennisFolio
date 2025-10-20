@@ -21,7 +21,7 @@ public class StatisticEntity extends BaseTimeEntity {
             pkColumnName= "TABLE_ID",
             valueColumnName= "NEXT_VAL",
             pkColumnValue = "STAT_ID",
-            allocationSize = 1000
+            allocationSize = 100
     )
     private Long statId;
     @ManyToOne

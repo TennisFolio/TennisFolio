@@ -104,7 +104,7 @@ public class LeagueEventsByRoundAssemble implements EntityAssemble<List<LeagueEv
                     .homeSet(homeScore)
                     .awaySet(awayScore)
                     .periodSet(periodSet)
-                    .startTimeStamp(events.getStartTimestamp())
+                    .startTimestamp(events.getStartTimestamp())
                     .winner(events.getWinner())
                     .build();
 

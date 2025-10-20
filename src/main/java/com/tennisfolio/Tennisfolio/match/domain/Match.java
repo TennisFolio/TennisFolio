@@ -39,14 +39,14 @@ public class Match {
 
     private Period periodSet;
 
-    private String startTimeStamp;
+    private String startTimestamp;
 
     private String winner;
 
     private String status;
 
     public Match(String rapidMatchId, String homeSeed, String awaySeed, Long homeScore, Long awayScore
-            , Round round, Player homePlayer, Player awayPlayer, Score homeSet, Score awaySet, Period periodSet, String startTimeStamp, String winner, String status){
+            , Round round, Player homePlayer, Player awayPlayer, Score homeSet, Score awaySet, Period periodSet, String startTimestamp, String winner, String status){
         this.round = round;
         this.rapidMatchId = rapidMatchId;
         this.homeScore = homeScore;
@@ -58,7 +58,7 @@ public class Match {
         this.homeSet = homeSet;
         this.awaySet = awaySet;
         this.periodSet = periodSet;
-        this.startTimeStamp = startTimeStamp;
+        this.startTimestamp = startTimestamp;
         this.winner = winner;
         this.status = status;
     }
@@ -72,7 +72,7 @@ public class Match {
         if (periodSet != null) {
             periodSet.convertPeriods();
         }
-        startTimeStamp = ConversionUtil.timestampToYyyyMMddHHMMSS(startTimeStamp);
+        startTimestamp = ConversionUtil.timestampToYyyyMMddHHMMSS(startTimestamp);
     }
 
     public Season getSeason(){

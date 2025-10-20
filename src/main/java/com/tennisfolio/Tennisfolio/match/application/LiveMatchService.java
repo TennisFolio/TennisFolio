@@ -73,6 +73,13 @@ public class LiveMatchService {
                 .stream()
                 .filter(response -> rapidMatchId.equals(response.getRapidId()))
                 .findFirst()
+                .map(p ->{
+                    String homePlayerImage = playerProvider.provide(p.getHomePlayer().getPlayerRapidId()).getImage();
+                    String awayPlayerImage = playerProvider.provide(p.getAwayPlayer().getPlayerRapidId()).getImage();
+
+                    p.setPlayerImage(homePlayerImage, awayPlayerImage);
+                    return p;
+                })
                 .orElseThrow(() -> new LiveMatchNotFoundException(ExceptionCode.NOT_FOUND));
 
     }
