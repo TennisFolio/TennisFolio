@@ -21,7 +21,7 @@ public class PlayerEntity extends BaseTimeEntity {
             pkColumnName = "TABLE_ID",
             valueColumnName = "NEXT_VAL",
             pkColumnValue = "PLAYER_ID",
-            allocationSize = 1000
+            allocationSize = 10
     )
     private Long playerId;
     @Column(name="RAPID_PLAYER_ID")

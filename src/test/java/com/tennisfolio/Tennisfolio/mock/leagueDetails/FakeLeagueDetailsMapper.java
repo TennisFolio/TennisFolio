@@ -21,6 +21,8 @@ public class FakeLeagueDetailsMapper implements EntityMapper<LeagueDetailsDTO, T
                 .mostTitles("7")
                 .titleHolder(alcaraz)
                 .points(2000L)
+                .startTimestamp("1750636800")
+                .endTimestamp("1752364800")
                 .build();
     }
 }

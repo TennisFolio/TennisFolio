@@ -22,7 +22,7 @@ public class RoundRepositoryImpl implements RoundRepository{
 
     public RoundRepositoryImpl(RoundJpaRepository roundJpaRepository, TransactionTemplate transactionTemplate) {
         this.roundJpaRepository = roundJpaRepository;
-        this.bufferedBatchSaver = new BufferedBatchSaver<>(roundJpaRepository, 1000, transactionTemplate);
+        this.bufferedBatchSaver = new BufferedBatchSaver<>(roundJpaRepository, 100, transactionTemplate);
     }
 
     @Override

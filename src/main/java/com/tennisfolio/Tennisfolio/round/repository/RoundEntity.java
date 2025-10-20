@@ -19,7 +19,7 @@ public class RoundEntity {
             pkColumnName = "TABLE_ID",
             valueColumnName = "NEXT_VAL",
             pkColumnValue = "ROUND_ID",
-            allocationSize = 1000
+            allocationSize = 100
     )
     private Long roundId;
     @ManyToOne(fetch = FetchType.LAZY)

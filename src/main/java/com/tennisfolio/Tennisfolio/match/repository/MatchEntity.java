@@ -85,7 +85,7 @@ public class MatchEntity {
     private Period periodSet;
 
     @Column(name="START_TIMESTAMP")
-    private String startTimeStamp;
+    private String startTimestamp;
 
     @Column(name="WINNER")
     private String winner;
@@ -107,7 +107,7 @@ public class MatchEntity {
         matchEntity.homeSet = match.getHomeSet();
         matchEntity.awaySet = match.getAwaySet();
         matchEntity.periodSet = match.getPeriodSet();
-        matchEntity.startTimeStamp = match.getStartTimeStamp();
+        matchEntity.startTimestamp = match.getStartTimestamp();
         matchEntity.winner = match.getWinner();
         matchEntity.status = match.getStatus();
 
@@ -128,7 +128,7 @@ public class MatchEntity {
                 .homeSet(homeSet)
                 .awaySet(awaySet)
                 .periodSet(periodSet)
-                .startTimeStamp(startTimeStamp)
+                .startTimestamp(startTimestamp)
                 .winner(winner)
                 .status(status)
                 .build();
@@ -145,7 +145,7 @@ public class MatchEntity {
                 .homeSet(homeSet)
                 .awaySet(awaySet)
                 .periodSet(periodSet)
-                .startTimeStamp(startTimeStamp)
+                .startTimestamp(startTimestamp)
                 .winner(winner)
                 .status(status)
                 .build();

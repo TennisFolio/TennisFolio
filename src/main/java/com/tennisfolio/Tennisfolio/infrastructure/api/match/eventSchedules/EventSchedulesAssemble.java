@@ -26,17 +26,7 @@ import java.util.stream.Collectors;
 
 @Component
 public class EventSchedulesAssemble implements EntityAssemble<List<EventSchedulesDTO>, List<Match>> {
-    private final CategoryRepository categoryRepository;
-    private final TournamentRepository tournamentRepository;
-    private final SeasonRepository seasonRepository;
-    private final RoundRepository roundRepository;
 
-    public EventSchedulesAssemble(CategoryRepository categoryRepository, TournamentRepository tournamentRepository, SeasonRepository seasonRepository, RoundRepository roundRepository) {
-        this.categoryRepository = categoryRepository;
-        this.tournamentRepository = tournamentRepository;
-        this.seasonRepository = seasonRepository;
-        this.roundRepository = roundRepository;
-    }
 
     @Override
     public List<Match> assemble(List<EventSchedulesDTO> dto, Object... params) {
@@ -44,7 +34,9 @@ public class EventSchedulesAssemble implements EntityAssemble<List<EventSchedule
             throw new InvalidRequestException(ExceptionCode.INVALID_REQUEST);
         }
 
-        List<Match> matches = dto.stream().map( events-> {
+        List<Match> matches = dto.stream()
+                .filter(events -> findCategory(events).isSupportedCategory())
+                .map( events-> {
 
             Category category = findCategory(events);
 
@@ -78,7 +70,7 @@ public class EventSchedulesAssemble implements EntityAssemble<List<EventSchedule
                     .awaySet(awayScore)
                     .periodSet(periodSet)
                     .status(status)
-                    .startTimeStamp(events.getStartTimestamp())
+                    .startTimestamp(events.getStartTimestamp())
                     .build();
         }).collect(Collectors.toList());
 
@@ -93,48 +85,39 @@ public class EventSchedulesAssemble implements EntityAssemble<List<EventSchedule
     private Category findCategory(EventSchedulesDTO events){
         CategoryDTO category = events.getTournament().getCategory();
 
-        return categoryRepository.findByRapidCategoryId(category.getRapidId())
-                .orElse(Category.builder()
-                        .rapidCategoryId(category.getRapidId())
-                        .categorySlug(category.getSlug())
-                        .categoryName(category.getName())
-                        .build());
+        return Category.builder()
+                .rapidCategoryId(category.getRapidId())
+                .categorySlug(category.getSlug())
+                .categoryName(category.getName())
+                .build();
     }
 
     private Tournament findTournament(EventSchedulesDTO events, Category category){
-        return tournamentRepository.findByRapidTournamentId(events.getTournament().getRapidId())
-                .orElse(Tournament.builder()
+
+        return Tournament.builder()
                         .rapidTournamentId(events.getTournament().getRapidId())
                         .tournamentName(events.getTournament().getName())
                         .category(category)
-                        .build());
+                        .build();
     }
 
     private Season findSeason(EventSchedulesDTO events, Tournament tournament){
-        return seasonRepository.findByRapidSeasonId(events.getSeason().getRapidId())
-                .orElse(Season.builder()
-                        .rapidSeasonId(events.getSeason().getRapidId())
-                        .seasonName(events.getSeason().getName())
-                        .year(events.getSeason().getYear())
-                        .tournament(tournament).build());
+
+        return Season.builder()
+                .rapidSeasonId(events.getSeason().getRapidId())
+                .seasonName(events.getSeason().getName())
+                .year(events.getSeason().getYear())
+                .tournament(tournament).build();
     }
 
     private Round findRound(EventSchedulesDTO events, Season season){
-        if(season.isNew()){
-            return Round.builder()
-                    .season(season)
-                    .round(events.getRound().getRound())
-                    .name(events.getRound().getName())
-                    .slug(events.getRound().getSlug())
-                    .build();
-        }
-        return roundRepository.findBySeasonAndRoundAndSlug(season,events.getRound().getRound(),events.getRound().getSlug())
-                .orElse(Round.builder()
-                        .season(season)
-                        .round(events.getRound().getRound())
-                        .name(events.getRound().getName())
-                        .slug(events.getRound().getSlug())
-                        .build());
+
+        return Round.builder()
+                .season(season)
+                .round(events.getRound().getRound())
+                .name(events.getRound().getName())
+                .slug(events.getRound().getSlug())
+                .build();
     }
 
     private Score scoreBuilder(ScoreDTO scoreDTO){

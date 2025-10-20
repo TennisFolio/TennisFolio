@@ -24,7 +24,7 @@ public class SeasonEntity extends BaseTimeEntity {
             pkColumnName = "TABLE_ID",
             valueColumnName = "NEXT_VAL",
             pkColumnValue = "SEASON_ID",
-            allocationSize = 1000
+            allocationSize = 100
     )
     private Long seasonId;
     @ManyToOne(fetch = FetchType.LAZY)
@@ -42,6 +42,10 @@ public class SeasonEntity extends BaseTimeEntity {
     private String totalPrizeCurrency;
     @Column(name="COMPETITORS")
     private Long competitors;
+    @Column(name="START_TIMESTAMP")
+    private String startTimestamp;
+    @Column(name="END_TIMESTAMP")
+    private String endTimestamp;
 
 
     public static SeasonEntity fromModel(Season season) {
@@ -54,6 +58,8 @@ public class SeasonEntity extends BaseTimeEntity {
         seasonEntity.totalPrize = season.getTotalPrize();
         seasonEntity.totalPrizeCurrency = season.getTotalPrizeCurrency();
         seasonEntity.competitors = season.getCompetitors();
+        seasonEntity.startTimestamp = season.getStartTimestamp();
+        seasonEntity.endTimestamp = season.getEndTimestamp();
 
         return seasonEntity;
     }
@@ -68,6 +74,8 @@ public class SeasonEntity extends BaseTimeEntity {
                 .totalPrize(totalPrize)
                 .totalPrizeCurrency(totalPrizeCurrency)
                 .competitors(competitors)
+                .startTimestamp(startTimestamp)
+                .endTimestamp(endTimestamp)
                 .build();
     }
 
@@ -80,6 +88,8 @@ public class SeasonEntity extends BaseTimeEntity {
                 .totalPrize(totalPrize)
                 .totalPrizeCurrency(totalPrizeCurrency)
                 .competitors(competitors)
+                .startTimestamp(startTimestamp)
+                .endTimestamp(endTimestamp)
                 .build();
     }
 }

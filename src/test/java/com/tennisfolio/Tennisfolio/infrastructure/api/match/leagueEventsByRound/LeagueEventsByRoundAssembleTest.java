@@ -69,7 +69,7 @@ public class LeagueEventsByRoundAssembleTest {
 
         assertThat(matchList)
                 .extracting(Match::getRapidMatchId, p -> p.getRound().getSlug(), p -> p.getHomePlayer().getRapidPlayerId(), p -> p.getAwayPlayer().getRapidPlayerId(),
-                        p -> p.getStartTimeStamp())
+                        p -> p.getStartTimestamp())
                 .containsExactlyInAnyOrder(
                         tuple("10983951", "semifinals", "90080", "122366", "20230127123000"),
                         tuple("10983950", "semifinals", "14882", "138546", "20230127173000")

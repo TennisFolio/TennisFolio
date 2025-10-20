@@ -37,6 +37,9 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.time.Clock;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -67,6 +70,11 @@ public class MatchSyncServiceTest {
     @Mock
     private ResponseParser parser;
 
+    Clock fixedClock = Clock.fixed(
+            LocalDate.of(2025, 10, 9).atStartOfDay(ZoneId.systemDefault()).toInstant(),
+            ZoneId.systemDefault()
+    );
+
 
 
     @BeforeEach
@@ -95,7 +103,7 @@ public class MatchSyncServiceTest {
 
         apiWorker = new ApiWorker(strategies);
 
-        matchSyncService = new MatchSyncService(fakeCategoryRepository, fakeTournamentRepository, fakeSeasonRepository, fakeRoundRepository, fakeMatchRepository, apiWorker, playerProvider);
+        matchSyncService = new MatchSyncService(fakeCategoryRepository, fakeTournamentRepository, fakeSeasonRepository, fakeRoundRepository, fakeMatchRepository, apiWorker, playerProvider, fixedClock);
 
     }
 
@@ -147,17 +155,14 @@ public class MatchSyncServiceTest {
         fakeRoundRepository.collect(List.of(RoundFixtures.wimbledonMen2025Final(), RoundFixtures.wimbledonMen2025SemiFinal(), RoundFixtures.rolandGarrosMen2025Final(), RoundFixtures.rolandGarrosMen2025SemiFinal()));
         fakeRoundRepository.flushAll();
 
-        String year = "2025";
-        String month = "10";
-        String day = "11";
 
-        matchSyncService.saveEventSchedule(year, month, day);
+        matchSyncService.saveEventSchedule();
 
         List<Match> saved = fakeMatchRepository.findAll();
 
         assertThat(saved).hasSize(4);  // 중복 제거 확인
         assertThat(saved)
-                .extracting(Match::getRapidMatchId, Match::getStartTimeStamp)
+                .extracting(Match::getRapidMatchId, Match::getStartTimestamp)
                 .containsExactlyInAnyOrder(
                         tuple("1", "20251011080000"),
                         tuple("2", "20251011100000"),
@@ -168,11 +173,8 @@ public class MatchSyncServiceTest {
 
     @Test
     public void 토너먼트_시즌_라운드가_없으면_새로_DB에_저장(){
-        String year = "2025";
-        String month = "10";
-        String day = "11";
 
-        matchSyncService.saveEventSchedule(year, month, day);
+        matchSyncService.saveEventSchedule();
 
         Tournament findTournament = fakeTournamentRepository.findByRapidTournamentId(TournamentFixtures.wimbledonATP().getRapidTournamentId()).get();
         Season findSeason = fakeSeasonRepository.findByRapidSeasonId(SeasonFixtures.wimbledonMen2025().getRapidSeasonId()).get();
@@ -182,6 +184,51 @@ public class MatchSyncServiceTest {
 
         assertThat(findTournament.getTournamentName()).isEqualTo("Wimbledon");
         assertThat(findSeason.getYear()).isEqualTo("2025");
+        assertThat(findSeason.getStartTimestamp()).isEqualTo("20250623090000");
+        assertThat(findSeason.getEndTimestamp()).isEqualTo("20250713090000");
+        assertThat(findRound.getName()).isEqualTo("Quarterfinals");
+
+
+    }
+
+    @Test
+    public void 토너먼트만_있을때_시즌에_timestamp_저장(){
+
+        fakeTournamentRepository.save(TournamentFixtures.wimbledonATP());
+        matchSyncService.saveEventSchedule();
+
+        Tournament findTournament = fakeTournamentRepository.findByRapidTournamentId(TournamentFixtures.wimbledonATP().getRapidTournamentId()).get();
+        Season findSeason = fakeSeasonRepository.findByRapidSeasonId(SeasonFixtures.wimbledonMen2025().getRapidSeasonId()).get();
+        Round findRound = fakeRoundRepository.findBySeasonAndRoundAndSlug(findSeason,
+                RoundFixtures.wimbledonMen2025QuarterFinal().getRound(),
+                RoundFixtures.wimbledonMen2025QuarterFinal().getSlug()).get();
+
+        assertThat(findTournament.getTournamentName()).isEqualTo("Wimbledon");
+        assertThat(findSeason.getYear()).isEqualTo("2025");
+        assertThat(findSeason.getStartTimestamp()).isEqualTo("20250623090000");
+        assertThat(findSeason.getEndTimestamp()).isEqualTo("20250713090000");
+        assertThat(findRound.getName()).isEqualTo("Quarterfinals");
+
+
+    }
+
+    @Test
+    public void 토너먼트과_시즌이_있을때_시즌에_timestamp_저장(){
+
+        fakeTournamentRepository.save(TournamentFixtures.wimbledonATP());
+        fakeSeasonRepository.save(SeasonFixtures.wimbledonMen2025());
+        matchSyncService.saveEventSchedule();
+
+        Tournament findTournament = fakeTournamentRepository.findByRapidTournamentId(TournamentFixtures.wimbledonATP().getRapidTournamentId()).get();
+        Season findSeason = fakeSeasonRepository.findByRapidSeasonId(SeasonFixtures.wimbledonMen2025().getRapidSeasonId()).get();
+        Round findRound = fakeRoundRepository.findBySeasonAndRoundAndSlug(findSeason,
+                RoundFixtures.wimbledonMen2025QuarterFinal().getRound(),
+                RoundFixtures.wimbledonMen2025QuarterFinal().getSlug()).get();
+
+        assertThat(findTournament.getTournamentName()).isEqualTo("Wimbledon");
+        assertThat(findSeason.getYear()).isEqualTo("2025");
+        assertThat(findSeason.getStartTimestamp()).isEqualTo("20250623090000");
+        assertThat(findSeason.getEndTimestamp()).isEqualTo("20250713090000");
         assertThat(findRound.getName()).isEqualTo("Quarterfinals");
 
 

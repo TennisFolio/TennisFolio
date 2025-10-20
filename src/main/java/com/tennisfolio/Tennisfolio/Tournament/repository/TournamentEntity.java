@@ -21,7 +21,7 @@ public class TournamentEntity extends BaseTimeEntity {
             pkColumnName= "TABLE_ID",
             valueColumnName= "NEXT_VAL",
             pkColumnValue = "TOURNAMENT_ID",
-            allocationSize = 1000
+            allocationSize = 100
     )
     private Long tournamentId;
 
