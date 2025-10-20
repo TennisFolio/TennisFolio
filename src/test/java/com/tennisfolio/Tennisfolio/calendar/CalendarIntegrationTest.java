@@ -1,10 +1,13 @@
 package com.tennisfolio.Tennisfolio.calendar;
 
+import com.tennisfolio.Tennisfolio.infrastructure.api.base.ApiCaller;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -22,6 +25,9 @@ class CalendarIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @MockitoBean
+    private ApiCaller apiCaller;
 
     @Test
     void 달력_데이터_조회_성공() throws Exception{
