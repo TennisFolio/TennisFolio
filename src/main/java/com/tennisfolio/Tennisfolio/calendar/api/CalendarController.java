@@ -40,7 +40,13 @@ public class CalendarController {
     }
 
     @GetMapping("/detail")
-    public ResponseEntity<ResponseDTO<List<MatchScheduleResponse>>> getMatchSchedule(@RequestParam(value="date", required =false) String date){
+    public ResponseEntity<ResponseDTO<List<MatchScheduleResponse>>> getMatchSchedule(
+            @RequestParam(value="date", required =false) String date,
+            @RequestParam(value="seasonId") Long seasonId){
+
+        if(seasonId == null || seasonId == 0L){
+            return ResponseEntity.badRequest().body(ResponseDTO.error("MISSING_SEASON_ID", "seasonId 파라미터는 필수입니다."));
+        }
         if(date == null || date.isBlank()){
             return ResponseEntity.badRequest().body(ResponseDTO.error("MISSING_DATE_PARAM", "date 파라미터는 필수입니다."));
         }
@@ -50,7 +56,7 @@ public class CalendarController {
         }
 
         ResponseDTO<List<MatchScheduleResponse>> res =
-                ResponseDTO.success(calendarService.getMatchSchedule(date));
+                ResponseDTO.success(calendarService.getMatchSchedule(date, seasonId));
 
         return ResponseEntity.ok(res);
     }
