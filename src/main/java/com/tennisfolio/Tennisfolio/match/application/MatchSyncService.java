@@ -85,6 +85,34 @@ public class MatchSyncService {
     public void saveEventSchedule(){
         List<Match> allEvents = new ArrayList<>();
 
+        fetchUpcomingMatchSchedules(allEvents);
+
+        allEvents.stream()
+                .filter(match -> match.getTournament().getCategory().isSupportedCategory())
+                .filter(match -> matchRepository.findByRapidMatchId(match.getRapidMatchId()).isEmpty())
+                .forEach(match -> {
+
+                    Category category = findOrSaveCategory(match);
+
+                    Tournament tournament = findOrSaveTournament(match, category);
+
+                    Season season = findOrSaveSeason(match, tournament);
+
+                    Round round = findOrSaveRound(match, season);
+
+                    match.updateRound(round);
+
+                    Player homePlayer = playerProvider.provide(match.getHomePlayer().getRapidPlayerId());
+                    Player awayPlayer = playerProvider.provide(match.getAwayPlayer().getRapidPlayerId());
+                    roundRepository.flush();
+                    match.updatePlayer(homePlayer, awayPlayer);
+
+                    matchRepository.save(match);
+                });
+
+    }
+
+    private void fetchUpcomingMatchSchedules(List<Match> allEvents) {
         for (int i = 0; i <= 2; i++) {
             LocalDate date = LocalDate.now(clock).plusDays(i);
             String year = String.valueOf(date.getYear());
@@ -94,36 +122,6 @@ public class MatchSyncService {
             List<Match> events = apiWorker.process(RapidApi.EVENTSCHEDULES, day, month, year);
             allEvents.addAll(events);
         }
-
-        allEvents.stream()
-                .filter(match -> match.getTournament().getCategory().isSupportedCategory())
-                .forEach(match -> {
-
-            Category category = findOrSaveCategory(match);
-
-            Tournament tournament = findOrSaveTournament(match, category);
-
-            Season season = findOrSaveSeason(match, tournament);
-
-            Round round = findOrSaveRound(match, season);
-
-//            tournament.updateCategory(category);
-//            season.updateTournament(tournament);
-//            round.updateSeason(season);
-            match.updateRound(round);
-
-            Player homePlayer = playerProvider.provide(match.getHomePlayer().getRapidPlayerId());
-            Player awayPlayer = playerProvider.provide(match.getAwayPlayer().getRapidPlayerId());
-            roundRepository.flush();
-            match.updatePlayer(homePlayer, awayPlayer);
-
-            System.out.println("TournamentId: " + match.getTournament().getTournamentId());
-            System.out.println("SeasonId: " + match.getSeason().getSeasonId());
-            System.out.println("RoundId: " + match.getRound().getRoundId());
-
-            matchRepository.save(match);
-        });
-
     }
 
     private Category findOrSaveCategory(Match match){

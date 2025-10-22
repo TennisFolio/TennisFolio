@@ -49,8 +49,8 @@ public class Match {
             , Round round, Player homePlayer, Player awayPlayer, Score homeSet, Score awaySet, Period periodSet, String startTimestamp, String winner, String status){
         this.round = round;
         this.rapidMatchId = rapidMatchId;
-        this.homeScore = homeScore;
-        this.awayScore = awayScore;
+        this.homeScore = homeScore == null? 0L : homeScore;
+        this.awayScore = awayScore == null? 0L : awayScore;
         this.homeSeed = homeSeed;
         this.awaySeed = awaySeed;
         this.homePlayer = homePlayer;

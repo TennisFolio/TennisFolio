@@ -37,5 +37,8 @@ public class ScoreDTO {
     @JsonProperty("period5TieBreak")
     private Long period5TieBreak;
 
+    public Long getCurrent(){
+        return this.current == null ? 0L : this.current;
+    }
 
 }

@@ -25,7 +25,7 @@ public class Round {
 
     public Round(Long round, String name, String slug, Season season){
         this.season = season;
-        this.round = round;
+        this.round = round == null? 0L : round;
         this.name = name;
         this.slug = slug;
     }
