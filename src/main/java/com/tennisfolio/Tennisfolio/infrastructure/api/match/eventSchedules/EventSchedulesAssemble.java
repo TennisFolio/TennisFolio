@@ -102,7 +102,6 @@ public class EventSchedulesAssemble implements EntityAssemble<List<EventSchedule
     }
 
     private Season findSeason(EventSchedulesDTO events, Tournament tournament){
-
         return Season.builder()
                 .rapidSeasonId(events.getSeason().getRapidId())
                 .seasonName(events.getSeason().getName())
@@ -111,6 +110,12 @@ public class EventSchedulesAssemble implements EntityAssemble<List<EventSchedule
     }
 
     private Round findRound(EventSchedulesDTO events, Season season){
+
+        if(events.getRound() == null)
+            return Round.builder()
+                    .season(season)
+                    .round(0L)
+                    .build();
 
         return Round.builder()
                 .season(season)

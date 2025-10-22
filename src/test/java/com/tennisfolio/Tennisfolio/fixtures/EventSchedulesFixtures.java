@@ -10,6 +10,8 @@ public class EventSchedulesFixtures {
         return Match.builder()
                 .matchId(1L)
                 .rapidMatchId("1")
+                .homeScore(0L)
+                .awayScore(0L)
                 .round(RoundFixtures.wimbledonMen2025QuarterFinal())
                 .homePlayer(PlayerFixtures.fritz())
                 .awayPlayer(PlayerFixtures.khachanov())
@@ -21,6 +23,8 @@ public class EventSchedulesFixtures {
         return Match.builder()
                 .matchId(2L)
                 .rapidMatchId("2")
+                .homeScore(0L)
+                .awayScore(0L)
                 .round(RoundFixtures.wimbledonMen2025QuarterFinal())
                 .homePlayer(PlayerFixtures.norrie())
                 .awayPlayer(PlayerFixtures.alcaraz())
@@ -32,6 +36,8 @@ public class EventSchedulesFixtures {
         return Match.builder()
                 .matchId(3L)
                 .rapidMatchId("3")
+                .homeScore(0L)
+                .awayScore(0L)
                 .round(RoundFixtures.wimbledonMen2025QuarterFinal())
                 .homePlayer(PlayerFixtures.sinner())
                 .awayPlayer(PlayerFixtures.shelton())
@@ -43,10 +49,27 @@ public class EventSchedulesFixtures {
         return Match.builder()
                 .matchId(4L)
                 .rapidMatchId("4")
+                .homeScore(1L)
+                .awayScore(3L)
+                .winner("2")
                 .round(RoundFixtures.wimbledonMen2025QuarterFinal())
                 .homePlayer(PlayerFixtures.cobolli())
                 .awayPlayer(PlayerFixtures.djokovic())
                 .startTimestamp("20251011140000")
+                .build();
+    }
+
+    public static Match wimbledonMen2025Duplicated(){
+        return Match.builder()
+                .matchId(5L)
+                .rapidMatchId("4")
+                .round(RoundFixtures.wimbledonMen2025QuarterFinal())
+                .homePlayer(PlayerFixtures.cobolli())
+                .awayPlayer(PlayerFixtures.djokovic())
+                .startTimestamp("20251011140000")
+                .homeScore(3L)
+                .awayScore(2L)
+                .winner("1")
                 .build();
     }
 

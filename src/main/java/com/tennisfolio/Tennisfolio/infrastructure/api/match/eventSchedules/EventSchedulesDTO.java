@@ -37,4 +37,6 @@ public class EventSchedulesDTO {
     private TimeDTO time;
     @JsonProperty("startTimestamp")
     private String startTimestamp;
+    @JsonProperty("winnerCode")
+    private String winner;
 }

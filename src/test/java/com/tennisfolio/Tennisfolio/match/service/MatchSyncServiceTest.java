@@ -162,12 +162,12 @@ public class MatchSyncServiceTest {
 
         assertThat(saved).hasSize(4);  // 중복 제거 확인
         assertThat(saved)
-                .extracting(Match::getRapidMatchId, Match::getStartTimestamp)
-                .containsExactlyInAnyOrder(
-                        tuple("1", "20251011080000"),
-                        tuple("2", "20251011100000"),
-                        tuple("3", "20251011120000"),
-                        tuple("4", "20251011140000")
+                .extracting(Match::getRapidMatchId, Match::getStartTimestamp, Match::getWinner, Match::getHomeScore, Match::getAwayScore)
+                 .containsExactlyInAnyOrder(
+                        tuple("1", "20251011080000", null, 0L, 0L),
+                        tuple("2", "20251011100000", null, 0L, 0L),
+                        tuple("3", "20251011120000", null, 0L, 0L),
+                        tuple("4", "20251011140000", "2", 1L, 3L)
                 );
     }
 
@@ -231,6 +231,19 @@ public class MatchSyncServiceTest {
         assertThat(findSeason.getEndTimestamp()).isEqualTo("20250713090000");
         assertThat(findRound.getName()).isEqualTo("Quarterfinals");
 
+
+    }
+
+
+    @Test
+    public void 매치가_이미_존재할_때_중복_저장_하지_않음(){
+        fakeMatchRepository.save(EventSchedulesFixtures.wimbledonMen2025QuarterFinalsMatch4());
+
+        matchSyncService.saveEventSchedule();
+
+        List<Match> saved = fakeMatchRepository.findAll();
+
+        assertThat(saved).hasSize(4);  // 중복 제거 확인
 
     }
 
