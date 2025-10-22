@@ -30,4 +30,8 @@ public class RankingService {
                        .collect(Collectors.toList());
 
     }
+
+//    public List<RankingResponse> getRanking(){
+//        List<Ranking> rankings = rankingRepository.findAll();
+//    }
 }
