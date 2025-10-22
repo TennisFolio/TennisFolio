@@ -1,5 +1,6 @@
 package com.tennisfolio.Tennisfolio.calendar.dto;
 
+import com.tennisfolio.Tennisfolio.common.RoundType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -11,6 +12,7 @@ public class MatchScheduleResponse {
     private Long seasonId;
     private Long roundId;
     private String roundSlug;
+    private String roundNameKr;
     private Long matchId;
     private String rapidMatchId;
     private Long homeScore;
@@ -47,6 +49,7 @@ public class MatchScheduleResponse {
         this.seasonId = seasonId;
         this.roundId = roundId;
         this.roundSlug = roundSlug;
+        this.roundNameKr = RoundType.fromSlug(roundSlug).getKrName();
         this.matchId = matchId;
         this.rapidMatchId = rapidMatchId;
         this.homeScore = homeScore;

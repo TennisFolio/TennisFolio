@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.jdbc.Sql;
@@ -51,32 +50,14 @@ class CalendarIntegrationTest {
     @Test
     void 달력_디테일_매치_조회_성공() throws Exception{
         mockMvc.perform(get("/api/calendar/detail")
-                        .param("date", "20251020"))
+                        .param("date", "20251020")
+                        .param("seasonId", "1"))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data", hasSize(1)))
                 .andExpect(jsonPath("$.data[0].homePlayerName").value("Alcaraz"))
                 .andExpect(jsonPath("$.data[0].status").value("Ended"))
                 .andExpect(jsonPath("$.data[0].roundSlug").value("final"));
-
-
     }
-
-//    @Test
-//    void 달력_달_중복_데이터_조회_성공() throws Exception{
-//        List<TournamentCalendarResponse> fakeData = List.of(
-//                new TournamentCalendarResponse(1L, "ATP", 2361L, "Shanghai Masters",
-//                        10929L, "Shanghai 2025", "2025", "20250930", "20251019"),
-//                new TournamentCalendarResponse(1L, "ATP", 2362L, "Auckland",
-//                        10930L, "Auckland 2025", "2025", "20251030", "20251122")
-//        );
-//        given(calendarService.getTournamentCalendar("202510")).willReturn(fakeData);
-//
-//        mockMvc.perform(get("/api/calendar")
-//                        .param("month", "202510"))
-//                .andExpect(status().isOk())
-//                .andExpect(jsonPath("$.data[0].tournamentName").value("Shanghai Masters"));
-//
-//    }
 
 }
