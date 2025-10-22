@@ -26,7 +26,6 @@ public class RankingController {
     }
 
     @PostMapping("/ranking")
-    @Scheduled(cron = "0 30 9 * * MON", zone = "Asia/Seoul")
     public ResponseEntity<ResponseDTO> saveAtpRankings(){
         rankingSyncService.saveAtpRanking();
         return new ResponseEntity(ResponseDTO.success(),HttpStatus.OK);
