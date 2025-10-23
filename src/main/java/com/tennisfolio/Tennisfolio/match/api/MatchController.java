@@ -70,7 +70,6 @@ public class MatchController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @Scheduled(cron= "0 0 0,12 * * *", zone = "Asia/Seoul")
     @PostMapping("/event")
     public ResponseEntity<ResponseDTO> saveEventSchedule(){
 

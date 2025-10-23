@@ -13,7 +13,7 @@ import java.util.List;
 public class MatchQueryRepository {
     private final EntityManager em;
 
-    public List<MatchScheduleResponse> findMatchSchedule(String date){
+    public List<MatchScheduleResponse> findMatchSchedule(String date, Long seasonId){
 
         return em.createQuery("""
                 SELECT new com.tennisfolio.Tennisfolio.calendar.dto.MatchScheduleResponse(
@@ -36,8 +36,10 @@ public class MatchQueryRepository {
                                    )
                                    FROM MatchEntity m
                                    WHERE FUNCTION('SUBSTRING', m.startTimestamp, 1, 8) = :date
+                                   AND m.roundEntity.seasonEntity.seasonId = :seasonId
                 """, MatchScheduleResponse.class)
                 .setParameter("date", date)
+                .setParameter("seasonId", seasonId)
                 .getResultList();
     }
 }

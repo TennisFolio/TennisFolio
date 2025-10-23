@@ -6,6 +6,7 @@ import com.tennisfolio.Tennisfolio.ranking.domain.Ranking;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.BatchSize;
 
 @Entity
 @Table(name = "tb_ranking")
@@ -25,7 +26,7 @@ public class RankingEntity extends BaseTimeEntity {
     )
     @Column(name="RANKING_ID")
     private Long rankingId;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "PLAYER_ID")
     private PlayerEntity playerEntity;
     @Column(name = "CUR_RANKING")

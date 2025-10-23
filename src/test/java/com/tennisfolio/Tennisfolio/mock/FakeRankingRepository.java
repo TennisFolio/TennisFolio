@@ -80,6 +80,11 @@ public class FakeRankingRepository implements RankingRepository {
     }
 
     @Override
+    public List<Ranking> findLatestRankingsBefore(Pageable pageable) {
+        return List.of();
+    }
+
+    @Override
     public List<Ranking> findByLastUpdate(String lastUpdate) {
         return data.stream().filter(item -> lastUpdate.equals(item.getLastUpdate())).toList();
     }

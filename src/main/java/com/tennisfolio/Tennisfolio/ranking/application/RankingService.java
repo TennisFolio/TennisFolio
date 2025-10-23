@@ -30,4 +30,13 @@ public class RankingService {
                        .collect(Collectors.toList());
 
     }
+
+    public List<RankingResponse> getRankingBefore(int page, int size){
+        List<Ranking> rankings = rankingRepository.findLatestRankingsBefore(PageRequest.of(page,size));
+
+        return rankings.stream()
+                .map(RankingResponse::new)
+                .collect(Collectors.toList());
+
+    }
 }

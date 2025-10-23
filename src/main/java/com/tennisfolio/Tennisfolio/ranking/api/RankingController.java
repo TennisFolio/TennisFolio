@@ -26,7 +26,6 @@ public class RankingController {
     }
 
     @PostMapping("/ranking")
-    @Scheduled(cron = "0 30 9 * * MON", zone = "Asia/Seoul")
     public ResponseEntity<ResponseDTO> saveAtpRankings(){
         rankingSyncService.saveAtpRanking();
         return new ResponseEntity(ResponseDTO.success(),HttpStatus.OK);
@@ -35,6 +34,12 @@ public class RankingController {
     @GetMapping("/ranking")
     public ResponseEntity<ResponseDTO<List<RankingResponse>>> getAtpRankings(@RequestParam("page") int page, @RequestParam("size") int size){
         List<RankingResponse> res = rankingService.getRanking(page, size);
+        return new ResponseEntity(ResponseDTO.success(res), HttpStatus.OK);
+    }
+
+    @GetMapping("/rankingBefore")
+    public ResponseEntity<ResponseDTO<List<RankingResponse>>> getAtpRankingsBefore(@RequestParam("page") int page, @RequestParam("size") int size){
+        List<RankingResponse> res = rankingService.getRankingBefore(page, size);
         return new ResponseEntity(ResponseDTO.success(res), HttpStatus.OK);
     }
 }
