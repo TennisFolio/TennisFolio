@@ -37,4 +37,10 @@ public class RankingController {
         List<RankingResponse> res = rankingService.getRanking(page, size);
         return new ResponseEntity(ResponseDTO.success(res), HttpStatus.OK);
     }
+
+    @GetMapping("/rankingBefore")
+    public ResponseEntity<ResponseDTO<List<RankingResponse>>> getAtpRankingsBefore(@RequestParam("page") int page, @RequestParam("size") int size){
+        List<RankingResponse> res = rankingService.getRankingBefore(page, size);
+        return new ResponseEntity(ResponseDTO.success(res), HttpStatus.OK);
+    }
 }

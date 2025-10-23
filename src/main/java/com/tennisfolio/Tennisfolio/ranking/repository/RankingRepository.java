@@ -16,6 +16,8 @@ public interface RankingRepository {
 
     List<Ranking> findLatestRankings(Pageable pageable);
 
+    List<Ranking> findLatestRankingsBefore(Pageable pageable);
+
     List<Ranking> findByLastUpdate(String lastUpdate);
 
     boolean existsByLastUpdate(String lastUpdate);
