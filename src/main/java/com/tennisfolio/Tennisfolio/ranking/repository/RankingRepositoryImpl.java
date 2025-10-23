@@ -50,6 +50,11 @@ public class RankingRepositoryImpl implements RankingRepository{
     }
 
     @Override
+    public List<Ranking> findLatestRankingsBefore(Pageable pageable) {
+        return rankingJpaRepository.findLatestRankingsBefore(pageable).stream().map(RankingEntity::toModel).toList();
+    }
+
+    @Override
     public List<Ranking> findByLastUpdate(String lastUpdate) {
         return rankingJpaRepository.findByLastUpdate(lastUpdate).stream().map(RankingEntity::toModel).toList();
     }
