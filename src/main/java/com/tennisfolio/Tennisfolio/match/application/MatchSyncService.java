@@ -230,7 +230,7 @@ public class MatchSyncService {
                 .orElseGet(() -> {
                     Round newRound = match.getRound();
                     newRound.updateSeason(season);
-                    RoundType roundType = RoundType.fromName(newRound.getName());
+                    RoundType roundType = RoundType.fromSlug(newRound.getSlug());
                     newRound.updateRoundInfo(roundType);
                     Round saved = roundRepository.save(newRound);
                     return saved;
