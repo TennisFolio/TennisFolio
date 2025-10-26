@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import './Schedule.css';
@@ -185,13 +185,13 @@ function Schedule() {
 
   // 첫 번째 카테고리를 기본 선택으로 설정
   useEffect(() => {
-    if (tournaments.length > 0 && !selectedCategory) {
+    if (tournaments.length > 0 && selectedCategory === null) {
       const categories = [...new Set(tournaments.map((t) => t.categoryName))];
       if (categories.length > 0) {
         setSelectedCategory(categories[0]);
       }
     }
-  }, [tournaments, selectedCategory]);
+  }, [tournaments]);
 
   // 월별 대회 목록 로드
   useEffect(() => {
@@ -203,7 +203,9 @@ function Schedule() {
         );
 
         if (response.data.code === '0000') {
-          const tournamentsData = response.data.data.map((tournament) => ({
+          // data.data에서 최대 5개까지만 사용하여 데이터 만들기
+          const limitedData = response.data.data.slice(0, 5);
+          const tournamentsData = limitedData.map((tournament) => ({
             ...tournament,
             startDate: parseTimestamp(tournament.startTimestamp),
             endDate: parseTimestamp(tournament.endTimestamp),
@@ -235,21 +237,12 @@ function Schedule() {
     const activeMonth = activeStartDate.getMonth();
     const activeYear = activeStartDate.getFullYear();
 
-    console.log('📆 월 변경 감지:', {
-      selectedDateMonth: `${selectedYear}-${selectedMonth + 1}`,
-      activeMonth: `${activeYear}-${activeMonth + 1}`,
-      isSameMonth: selectedYear === activeYear && selectedMonth === activeMonth,
-    });
-
     // 선택된 날짜의 달과 현재 달이 같으면 아무것도 안 함 (날짜 클릭)
     if (selectedYear === activeYear && selectedMonth === activeMonth) {
-      console.log('✅ 같은 달 - 아무것도 안 함');
       return;
     }
 
     // 다르면 화살표 클릭 - 경기 목록 초기화하고 1일 선택
-    console.log('🎯 다른 달 - 화살표 클릭으로 판단');
-    console.log('🧹 경기 목록 초기화');
     setMatches([]);
 
     const today = new Date();
@@ -258,12 +251,10 @@ function Schedule() {
 
     if (isCurrentMonth) {
       // 현재 달이면 오늘 날짜 선택
-      console.log('📍 오늘 날짜 선택:', today.toLocaleDateString());
       setSelectedDate(today);
     } else {
       // 다른 달이면 해당 달의 1일 선택
       const firstDayOfMonth = new Date(activeYear, activeMonth, 1);
-      console.log('📍 1일 선택:', firstDayOfMonth.toLocaleDateString());
       setSelectedDate(firstDayOfMonth);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -292,17 +283,23 @@ function Schedule() {
     return filtered;
   };
 
-  // 카테고리별로 대회 그룹화
-  const getTournamentsByCategory = () => {
+  // 카테고리별로 대회 그룹화 (메모이제이션)
+  const tournamentsByCategory = useMemo(() => {
     const grouped = {};
+    if (!tournaments || tournaments.length === 0) {
+      return grouped;
+    }
+
     tournaments.forEach((tournament) => {
-      if (!grouped[tournament.categoryName]) {
-        grouped[tournament.categoryName] = [];
+      if (tournament && tournament.categoryName) {
+        if (!grouped[tournament.categoryName]) {
+          grouped[tournament.categoryName] = [];
+        }
+        grouped[tournament.categoryName].push(tournament);
       }
-      grouped[tournament.categoryName].push(tournament);
     });
     return grouped;
-  };
+  }, [tournaments]);
 
   // 대회 색상 배열 (명확하게 구분되는 색상)
   const tournamentColors = [
@@ -414,7 +411,6 @@ function Schedule() {
 
   // 날짜 클릭 핸들러
   const handleDateClick = async (date) => {
-    console.log('🖱️ 날짜 클릭:', date.toLocaleDateString());
     setSelectedDate(date);
 
     // 선택된 날짜의 경기 목록 가져오기
@@ -449,14 +445,14 @@ function Schedule() {
 
   // 선택된 날짜가 변경될 때 경기 목록 가져오기
   useEffect(() => {
-    const fetchMatchesForDate = async () => {
-      if (!selectedDate) return;
+    if (!selectedDate || !selectedCategory) return;
 
+    const fetchMatchesForDate = async () => {
       try {
         const dateKey = formatDateToTimestamp(selectedDate);
         let apiUrl = `${base_server_url}/api/calendar/detail?date=${dateKey}`;
 
-        // seasonId가 선택되어 있으면 함께 전송
+        // seasonId가 선택되어 있으면 함께 전송 (없으면 전체 데이터)
         if (selectedSeasonId) {
           apiUrl += `&seasonId=${selectedSeasonId}`;
         }
@@ -477,23 +473,14 @@ function Schedule() {
       }
     };
 
-    if (tournaments.length > 0 && selectedDate) {
-      fetchMatchesForDate();
-    }
+    fetchMatchesForDate();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tournaments, selectedDate, selectedSeasonId]);
+  }, [selectedDate, selectedSeasonId, selectedCategory]);
 
   // 달력의 월이 변경될 때 호출
   const handleActiveStartDateChange = ({ activeStartDate }) => {
-    console.log('🔄 월 변경 호출:', {
-      newMonth: `${activeStartDate.getFullYear()}-${
-        activeStartDate.getMonth() + 1
-      }`,
-    });
     setActiveStartDate(activeStartDate);
   };
-
-  const tournamentsByCategory = getTournamentsByCategory();
 
   return (
     <div className="schedule-page">
@@ -509,7 +496,6 @@ function Schedule() {
               onClick={() => {
                 // 이미 선택된 카테고리를 다시 클릭하면 해제
                 if (selectedCategory === category) {
-                  // 해제할 때는 첫 번째 카테고리로 되돌림
                   const categories = Object.keys(tournamentsByCategory);
                   if (categories.length > 0) {
                     setSelectedCategory(categories[0]);
@@ -612,11 +598,7 @@ function Schedule() {
                             <h3>{tournament?.seasonName || '대회 정보'}</h3>
                           </div>
                           {seasonMatches.map((match) => (
-                            <div
-                              key={match.matchId}
-                              className="match-card"
-                              matchId={match.matchId}
-                            >
+                            <div key={match.matchId} className="match-card">
                               <div className="match-header">
                                 <div className="match-time">
                                   {formatTimeFromTimestamp(
