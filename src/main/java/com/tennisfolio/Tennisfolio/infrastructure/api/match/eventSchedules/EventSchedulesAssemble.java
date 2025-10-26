@@ -71,6 +71,7 @@ public class EventSchedulesAssemble implements EntityAssemble<List<EventSchedule
                     .periodSet(periodSet)
                     .status(status)
                     .startTimestamp(events.getStartTimestamp())
+                    .winner(events.getWinner())
                     .build();
         }).collect(Collectors.toList());
 
