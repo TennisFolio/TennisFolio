@@ -23,9 +23,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Clock;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -89,25 +87,31 @@ public class MatchSyncService {
 
         allEvents.stream()
                 .filter(match -> match.getTournament().getCategory().isSupportedCategory())
-                .filter(match -> matchRepository.findByRapidMatchId(match.getRapidMatchId()).isEmpty())
                 .forEach(match -> {
+                    Optional<Match> existingOpt = matchRepository.findByRapidMatchId(match.getRapidMatchId());
 
-                    Category category = findOrSaveCategory(match);
+                    // 존재하는 경우 → dirty checking (UPDATE)
+                    if (existingOpt.isPresent()) {
+                        Match existing = existingOpt.get(); // 영속 상태
+                        existing.updateFrom(match);         // 필드 변경
+                        matchRepository.save(existing);
+                        // dirty checking 자동으로 감지됨 (save() 필요 X)
+                    }
+                    // 존재하지 않는 경우 → 새로 저장 (INSERT)
+                    else {
+                        Category category = findOrSaveCategory(match);
+                        Tournament tournament = findOrSaveTournament(match, category);
+                        Season season = findOrSaveSeason(match, tournament);
+                        Round round = findOrSaveRound(match, season);
+                        match.updateRound(round);
 
-                    Tournament tournament = findOrSaveTournament(match, category);
+                        Player homePlayer = playerProvider.provide(match.getHomePlayer().getRapidPlayerId());
+                        Player awayPlayer = playerProvider.provide(match.getAwayPlayer().getRapidPlayerId());
+                        roundRepository.flush();
+                        match.updatePlayer(homePlayer, awayPlayer);
 
-                    Season season = findOrSaveSeason(match, tournament);
-
-                    Round round = findOrSaveRound(match, season);
-
-                    match.updateRound(round);
-
-                    Player homePlayer = playerProvider.provide(match.getHomePlayer().getRapidPlayerId());
-                    Player awayPlayer = playerProvider.provide(match.getAwayPlayer().getRapidPlayerId());
-                    roundRepository.flush();
-                    match.updatePlayer(homePlayer, awayPlayer);
-
-                    matchRepository.save(match);
+                        matchRepository.save(match); // INSERT
+                    }
                 });
 
     }

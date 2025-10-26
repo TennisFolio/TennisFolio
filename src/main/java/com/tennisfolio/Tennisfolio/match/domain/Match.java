@@ -63,6 +63,17 @@ public class Match {
         this.status = status;
     }
 
+    public void updateFrom(Match match){
+        this.homeScore = match.getHomeScore();
+        this.awayScore = match.getAwayScore();
+        this.homeSet = match.getHomeSet();
+        this.awaySet = match.getAwaySet();
+        this.periodSet = match.getPeriodSet();
+        this.startTimestamp = match.getStartTimestamp();
+        this.winner = match.getWinner();
+        this.status = match.getStatus();
+    }
+
     public void nullToZero(){
         homeSet.nullToZero();
         awaySet.nullToZero();
