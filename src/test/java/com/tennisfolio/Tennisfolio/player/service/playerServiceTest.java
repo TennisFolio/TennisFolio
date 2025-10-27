@@ -15,6 +15,8 @@ import com.tennisfolio.Tennisfolio.player.domain.PlayerAggregate;
 import com.tennisfolio.Tennisfolio.player.dto.TeamDetailsApiDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -26,20 +28,30 @@ public class playerServiceTest {
     // repository
     FakePlayerRepository fakePlayerRepository = new FakePlayerRepository();
 
+
+    @Mock
+    private ApiCallCounter apiCallCounter;
+
     // api
     ResponseParser<TeamDetailsApiDTO> fakeResponseParser = new FakeTeamDetailsResponseParser();
     EntityMapper<TeamDetailsApiDTO, PlayerAggregate> fakeEntityMapper = new FakeTeamDetailsEntityMapper();
     ApiCaller fakeApiCaller = new FakeApiCaller();
 
-    StrategyApiTemplate<TeamDetailsApiDTO, PlayerAggregate> fakeStrategyApiTemplate = new FakeTeamDetailsApiTemplate(fakeApiCaller, fakeResponseParser, fakeEntityMapper, null, RapidApi.TEAMDETAILS);
+
 
     // image 다운로드
     TeamImageDownloader fakeDownloader = mock(TeamImageDownloader.class);
     PlayerImageStorage fakeStorage = mock(PlayerImageStorage.class);
 
 
+
     @BeforeEach
     void setUp() {
+
+        MockitoAnnotations.openMocks(this);
+
+        StrategyApiTemplate<TeamDetailsApiDTO, PlayerAggregate> fakeStrategyApiTemplate = new FakeTeamDetailsApiTemplate(fakeApiCaller, fakeResponseParser, fakeEntityMapper, apiCallCounter, RapidApi.TEAMDETAILS);
+
         this.playerService = PlayerService.builder()
                 .playerImageService(new PlayerImageService(fakeDownloader, fakeStorage))
                 .playerRepository(fakePlayerRepository)

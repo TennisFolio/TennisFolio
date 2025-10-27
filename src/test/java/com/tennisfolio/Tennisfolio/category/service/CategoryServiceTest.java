@@ -8,7 +8,10 @@ import com.tennisfolio.Tennisfolio.infrastructure.api.category.categories.Catego
 import com.tennisfolio.Tennisfolio.mock.FakeApiCaller;
 import com.tennisfolio.Tennisfolio.mock.FakeCategoryRepository;
 import com.tennisfolio.Tennisfolio.mock.categories.FakeCategoriesApiTemplate;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -18,6 +21,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.tuple;
 
 public class CategoryServiceTest {
+
+    @Mock
+    private ApiCallCounter apiCallCounter;
 
     // api
     ResponseParser<List<CategoryDTO>> fakeResponseParser = resp -> List.of();
@@ -51,13 +57,23 @@ public class CategoryServiceTest {
 
     ApiCaller fakeApiCaller = new FakeApiCaller();
 
-    StrategyApiTemplate<List<CategoryDTO>, List<Category>> fakeStrategyApiTemplate
-            = new FakeCategoriesApiTemplate(fakeApiCaller, fakeResponseParser, fakeEntityMapper, null, RapidApi.CATEGORIES);
+
 
     CategoryRepository categoryRepository = new FakeCategoryRepository();
 
-    CategoryService categoryService = new CategoryService(fakeStrategyApiTemplate, categoryRepository);
+    CategoryService categoryService;
 
+
+
+    @BeforeEach
+    void setUp(){
+        MockitoAnnotations.openMocks(this);
+
+        StrategyApiTemplate<List<CategoryDTO>, List<Category>> fakeStrategyApiTemplate
+                = new FakeCategoriesApiTemplate(fakeApiCaller, fakeResponseParser, fakeEntityMapper, apiCallCounter, RapidApi.CATEGORIES);
+
+        categoryService = new CategoryService(fakeStrategyApiTemplate, categoryRepository);
+    }
 
     @Test
     public void 카테고리_여러개_저장(){
