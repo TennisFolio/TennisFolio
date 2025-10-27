@@ -14,7 +14,8 @@ public class LeagueSeasonsTemplate extends StrategyApiTemplate<List<LeagueSeason
               ApiCaller apiCaller
             , ResponseParser<List<LeagueSeasonsDTO>> leagueSeasonsParser
             , EntityMapper<List<LeagueSeasonsDTO>, List<Season>> leagueSeasonsEntityMapper
+              , ApiCallCounter apiCallCounter
             ) {
-        super(apiCaller, leagueSeasonsParser, leagueSeasonsEntityMapper, RapidApi.LEAGUESEASONS);
+        super(apiCaller, leagueSeasonsParser, leagueSeasonsEntityMapper, apiCallCounter, RapidApi.LEAGUESEASONS);
     }
 }

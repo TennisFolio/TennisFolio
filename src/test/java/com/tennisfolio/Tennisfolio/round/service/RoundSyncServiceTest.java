@@ -40,6 +40,9 @@ public class RoundSyncServiceTest {
     private StrategyApiTemplate<List<LeagueRoundsDTO>, List<Round>> leagueRoundsApiTemplate;
 
     @Mock
+    private ApiCallCounter apiCallCounter;
+
+    @Mock
     private ResponseParser parser;
 
     @BeforeEach
@@ -48,7 +51,7 @@ public class RoundSyncServiceTest {
 
         EntityMapper<List<LeagueRoundsDTO>, List<Round>> fakeLeagueRoundsMapper = new FakeLeagueRoundsMapper();
 
-        leagueRoundsApiTemplate = new FakeLeagueRoundsApiTemplate(apiCaller, parser, fakeLeagueRoundsMapper, RapidApi.LEAGUEROUNDS);
+        leagueRoundsApiTemplate = new FakeLeagueRoundsApiTemplate(apiCaller, parser, fakeLeagueRoundsMapper, apiCallCounter, RapidApi.LEAGUEROUNDS);
 
         strategies.add(leagueRoundsApiTemplate);
 

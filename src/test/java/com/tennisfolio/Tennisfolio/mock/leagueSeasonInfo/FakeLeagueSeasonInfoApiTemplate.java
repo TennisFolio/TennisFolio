@@ -5,7 +5,7 @@ import com.tennisfolio.Tennisfolio.infrastructure.api.season.leagueSeasonInfo.Le
 import com.tennisfolio.Tennisfolio.season.domain.Season;
 
 public class FakeLeagueSeasonInfoApiTemplate extends StrategyApiTemplate<LeagueSeasonInfoDTO, Season> {
-    public FakeLeagueSeasonInfoApiTemplate(ApiCaller apiCaller, ResponseParser<LeagueSeasonInfoDTO> parser, EntityMapper<LeagueSeasonInfoDTO, Season> mapper, RapidApi endpoint) {
-        super(apiCaller, parser, mapper, endpoint);
+    public FakeLeagueSeasonInfoApiTemplate(ApiCaller apiCaller, ResponseParser<LeagueSeasonInfoDTO> parser, EntityMapper<LeagueSeasonInfoDTO, Season> mapper, ApiCallCounter apiCallCounter, RapidApi endpoint) {
+        super(apiCaller, parser, mapper, apiCallCounter, endpoint);
     }
 }

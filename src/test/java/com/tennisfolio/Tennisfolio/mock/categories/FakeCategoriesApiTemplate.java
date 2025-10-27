@@ -7,7 +7,8 @@ import com.tennisfolio.Tennisfolio.infrastructure.api.category.categories.Catego
 import java.util.List;
 
 public class FakeCategoriesApiTemplate extends StrategyApiTemplate<List<CategoryDTO>, List<Category>> {
-    public FakeCategoriesApiTemplate(ApiCaller apiCaller, ResponseParser<List<CategoryDTO>> parser, EntityMapper<List<CategoryDTO>, List<Category>> mapper, RapidApi endpoint) {
-        super(apiCaller, parser, mapper, endpoint);
+    public FakeCategoriesApiTemplate(ApiCaller apiCaller, ResponseParser<List<CategoryDTO>> parser, EntityMapper<List<CategoryDTO>, List<Category>> mapper,
+                                     ApiCallCounter apiCallCounter, RapidApi endpoint) {
+        super(apiCaller, parser, mapper, apiCallCounter, endpoint);
     }
 }

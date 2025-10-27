@@ -18,17 +18,20 @@ public abstract class StrategyApiTemplate<T, E> {
     private final ApiCaller apiCaller;
     private final ResponseParser<T> parser;
     private final EntityMapper<T, E> mapper;
+    private final ApiCallCounter apiCallCounter;
     private final RapidApi endpoint;
 
     // 생성자
     public StrategyApiTemplate(
-                               ApiCaller apiCaller,
-                               ResponseParser<T> parser,
-                               EntityMapper<T, E> mapper,
-                               RapidApi endpoint) {
+            ApiCaller apiCaller,
+            ResponseParser<T> parser,
+            EntityMapper<T, E> mapper,
+            ApiCallCounter apiCallCounter,
+            RapidApi endpoint) {
         this.apiCaller = apiCaller;
         this.parser = parser;
         this.mapper = mapper;
+        this.apiCallCounter = apiCallCounter;
         this.endpoint = endpoint;
     }
 
@@ -37,6 +40,8 @@ public abstract class StrategyApiTemplate<T, E> {
         // api 호출
         String responseStr = apiCaller.callApi(endpoint, params);
         if(responseStr == null || responseStr.isBlank()) return null;
+        // api 호출 증가
+        apiCallCounter.increment(endpoint.getMethodName());
         // response to DTO
         T dto = parser.parse(responseStr);
         // DTO to Entity

@@ -14,8 +14,8 @@ public class CategoriesTemplate extends StrategyApiTemplate<List<CategoryDTO>, L
     public CategoriesTemplate(
               ApiCaller apiCaller
             , EntityMapper<List<CategoryDTO>, List<Category>> categoriesEntityMapper
-            , ResponseParser<List<CategoryDTO>> categoriesResponseParser) {
-        super(apiCaller, categoriesResponseParser, categoriesEntityMapper,  RapidApi.CATEGORIES);
+            , ResponseParser<List<CategoryDTO>> categoriesResponseParser, ApiCallCounter apiCallCounter) {
+        super(apiCaller, categoriesResponseParser, categoriesEntityMapper, apiCallCounter, RapidApi.CATEGORIES);
     }
 
 }

@@ -13,8 +13,9 @@ public class TournamentInfoTemplate extends StrategyApiTemplate<TournamentInfoDT
               ApiCaller apiCaller
             , ResponseParser<TournamentInfoDTO> tournamentInfoResponseParser
             , EntityMapper<TournamentInfoDTO, Tournament> tournamentInfoEntityMapper
+              , ApiCallCounter apiCallCounter
             ) {
-        super(apiCaller, tournamentInfoResponseParser, tournamentInfoEntityMapper, RapidApi.TOURNAMENTINFO);
+        super(apiCaller, tournamentInfoResponseParser, tournamentInfoEntityMapper, apiCallCounter, RapidApi.TOURNAMENTINFO);
     }
 
 }

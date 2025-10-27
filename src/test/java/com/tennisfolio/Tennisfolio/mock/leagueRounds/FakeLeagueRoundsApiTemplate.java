@@ -7,7 +7,7 @@ import com.tennisfolio.Tennisfolio.round.domain.Round;
 import java.util.List;
 
 public class FakeLeagueRoundsApiTemplate extends StrategyApiTemplate<List<LeagueRoundsDTO>, List<Round>> {
-    public FakeLeagueRoundsApiTemplate(ApiCaller apiCaller, ResponseParser<List<LeagueRoundsDTO>> parser, EntityMapper<List<LeagueRoundsDTO>, List<Round>> mapper, RapidApi endpoint) {
-        super(apiCaller, parser, mapper, endpoint);
+    public FakeLeagueRoundsApiTemplate(ApiCaller apiCaller, ResponseParser<List<LeagueRoundsDTO>> parser, EntityMapper<List<LeagueRoundsDTO>, List<Round>> mapper, ApiCallCounter apiCallCounter, RapidApi endpoint) {
+        super(apiCaller, parser, mapper, apiCallCounter, endpoint);
     }
 }

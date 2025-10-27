@@ -7,7 +7,8 @@ import com.tennisfolio.Tennisfolio.ranking.dto.AtpRankingApiDTO;
 import java.util.List;
 
 public class FakeAtpRankingApiTemplate extends StrategyApiTemplate<List<AtpRankingApiDTO>, List<Ranking>> {
-    public FakeAtpRankingApiTemplate(ApiCaller apiCaller, ResponseParser<List<AtpRankingApiDTO>> parser, EntityMapper<List<AtpRankingApiDTO>, List<Ranking>> mapper, RapidApi endpoint) {
-        super(apiCaller, parser, mapper, endpoint);
+    public FakeAtpRankingApiTemplate(ApiCaller apiCaller, ResponseParser<List<AtpRankingApiDTO>> parser, EntityMapper<List<AtpRankingApiDTO>,
+            List<Ranking>> mapper, ApiCallCounter apiCallCounter, RapidApi endpoint) {
+        super(apiCaller, parser, mapper, apiCallCounter, endpoint);
     }
 }

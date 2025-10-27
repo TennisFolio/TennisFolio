@@ -6,7 +6,7 @@ import com.tennisfolio.Tennisfolio.infrastructure.api.tournament.leagueDetails.L
 import com.tennisfolio.Tennisfolio.infrastructure.api.tournament.tournamentInfo.TournamentInfoDTO;
 
 public class FakeLeagueDetails extends StrategyApiTemplate<LeagueDetailsDTO, Tournament> {
-    public FakeLeagueDetails(ApiCaller apiCaller, ResponseParser<LeagueDetailsDTO> parser, EntityMapper<LeagueDetailsDTO, Tournament> mapper, RapidApi endpoint) {
-        super(apiCaller, parser, mapper, endpoint);
+    public FakeLeagueDetails(ApiCaller apiCaller, ResponseParser<LeagueDetailsDTO> parser, EntityMapper<LeagueDetailsDTO, Tournament> mapper, ApiCallCounter apiCallCounter, RapidApi endpoint) {
+        super(apiCaller, parser, mapper, apiCallCounter, endpoint);
     }
 }
