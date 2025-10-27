@@ -5,7 +5,9 @@ import com.tennisfolio.Tennisfolio.player.domain.PlayerAggregate;
 import com.tennisfolio.Tennisfolio.player.dto.TeamDetailsApiDTO;
 
 public class FakeTeamDetailsApiTemplate extends StrategyApiTemplate<TeamDetailsApiDTO, PlayerAggregate> {
-    public FakeTeamDetailsApiTemplate(ApiCaller apiCaller, ResponseParser<TeamDetailsApiDTO> parser, EntityMapper<TeamDetailsApiDTO, PlayerAggregate> mapper, RapidApi endpoint) {
-        super(apiCaller, parser, mapper, endpoint);
+    public FakeTeamDetailsApiTemplate(ApiCaller apiCaller, ResponseParser<TeamDetailsApiDTO> parser,
+                                      EntityMapper<TeamDetailsApiDTO, PlayerAggregate> mapper,
+                                      ApiCallCounter apiCallCounter, RapidApi endpoint) {
+        super(apiCaller, parser, mapper, apiCallCounter, endpoint);
     }
 }

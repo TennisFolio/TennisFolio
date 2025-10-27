@@ -52,7 +52,7 @@ public class CategoryServiceTest {
     ApiCaller fakeApiCaller = new FakeApiCaller();
 
     StrategyApiTemplate<List<CategoryDTO>, List<Category>> fakeStrategyApiTemplate
-            = new FakeCategoriesApiTemplate(fakeApiCaller, fakeResponseParser, fakeEntityMapper, RapidApi.CATEGORIES);
+            = new FakeCategoriesApiTemplate(fakeApiCaller, fakeResponseParser, fakeEntityMapper, null, RapidApi.CATEGORIES);
 
     CategoryRepository categoryRepository = new FakeCategoryRepository();
 

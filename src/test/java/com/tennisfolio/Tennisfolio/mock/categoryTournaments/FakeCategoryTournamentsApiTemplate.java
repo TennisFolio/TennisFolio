@@ -7,7 +7,8 @@ import com.tennisfolio.Tennisfolio.infrastructure.api.tournament.categoryTournam
 import java.util.List;
 
 public class FakeCategoryTournamentsApiTemplate extends StrategyApiTemplate<List<CategoryTournamentsDTO>, List<Tournament>> {
-    public FakeCategoryTournamentsApiTemplate(ApiCaller apiCaller, ResponseParser<List<CategoryTournamentsDTO>> parser, EntityMapper<List<CategoryTournamentsDTO>, List<Tournament>> mapper, RapidApi endpoint) {
-        super(apiCaller, parser, mapper, endpoint);
+    public FakeCategoryTournamentsApiTemplate(ApiCaller apiCaller, ResponseParser<List<CategoryTournamentsDTO>> parser, EntityMapper<List<CategoryTournamentsDTO>, List<Tournament>> mapper,
+                                              ApiCallCounter apiCallCounter, RapidApi endpoint) {
+        super(apiCaller, parser, mapper, apiCallCounter, endpoint);
     }
 }

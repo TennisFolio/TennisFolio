@@ -12,8 +12,9 @@ public class LeagueDetailsTemplate extends StrategyApiTemplate<LeagueDetailsDTO,
               ApiCaller apiCaller
             , ResponseParser<LeagueDetailsDTO> leagueDetailsParser
             , EntityMapper<LeagueDetailsDTO, Tournament> leagueDetailsEntityMapper
+              , ApiCallCounter apiCallCounter
             ) {
-        super(apiCaller, leagueDetailsParser, leagueDetailsEntityMapper, RapidApi.LEAGUEDETAILS);
+        super(apiCaller, leagueDetailsParser, leagueDetailsEntityMapper, apiCallCounter, RapidApi.LEAGUEDETAILS);
     }
 
 }

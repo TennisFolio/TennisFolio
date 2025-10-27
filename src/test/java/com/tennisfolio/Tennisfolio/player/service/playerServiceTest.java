@@ -30,7 +30,8 @@ public class playerServiceTest {
     ResponseParser<TeamDetailsApiDTO> fakeResponseParser = new FakeTeamDetailsResponseParser();
     EntityMapper<TeamDetailsApiDTO, PlayerAggregate> fakeEntityMapper = new FakeTeamDetailsEntityMapper();
     ApiCaller fakeApiCaller = new FakeApiCaller();
-    StrategyApiTemplate<TeamDetailsApiDTO, PlayerAggregate> fakeStrategyApiTemplate = new FakeTeamDetailsApiTemplate(fakeApiCaller, fakeResponseParser, fakeEntityMapper, RapidApi.TEAMDETAILS);
+
+    StrategyApiTemplate<TeamDetailsApiDTO, PlayerAggregate> fakeStrategyApiTemplate = new FakeTeamDetailsApiTemplate(fakeApiCaller, fakeResponseParser, fakeEntityMapper, null, RapidApi.TEAMDETAILS);
 
     // image 다운로드
     TeamImageDownloader fakeDownloader = mock(TeamImageDownloader.class);

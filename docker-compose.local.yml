@@ -15,6 +15,24 @@ services:
       - ./src/main/resources/application.properties:/app/application.properties:ro
     networks:
       - monitoring
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    ports:
+      - "6379:6379"  # 로컬 접근도 허용 (optional)
+    volumes:
+      - redis_data:/data
+    command: ["redis-server", "--appendonly", "yes"]
+    networks:
+      - monitoring
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 256M
 
   prometheus:
     image: prom/prometheus
@@ -51,6 +69,7 @@ services:
 
 volumes:
   grafana_data:
+  redis_data: {}
 
 networks:
   monitoring:

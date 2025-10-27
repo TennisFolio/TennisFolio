@@ -7,7 +7,7 @@ import com.tennisfolio.Tennisfolio.season.domain.Season;
 import java.util.List;
 
 public class FakeLeagueSeasonsApiTemplate extends StrategyApiTemplate<List<LeagueSeasonsDTO>, List<Season>> {
-    public FakeLeagueSeasonsApiTemplate(ApiCaller apiCaller, ResponseParser<List<LeagueSeasonsDTO>> parser, EntityMapper<List<LeagueSeasonsDTO>, List<Season>> mapper, RapidApi endpoint) {
-        super(apiCaller, parser, mapper, endpoint);
+    public FakeLeagueSeasonsApiTemplate(ApiCaller apiCaller, ResponseParser<List<LeagueSeasonsDTO>> parser, EntityMapper<List<LeagueSeasonsDTO>, List<Season>> mapper, ApiCallCounter apiCallCounter, RapidApi endpoint) {
+        super(apiCaller, parser, mapper, apiCallCounter, endpoint);
     }
 }

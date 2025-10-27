@@ -8,7 +8,7 @@ import org.hibernate.stat.Statistics;
 import java.util.List;
 
 public class FakeEventStatisticsApiTemplate extends StrategyApiTemplate<List<EventsStatisticsDTO>, List<Statistic>> {
-    public FakeEventStatisticsApiTemplate(ApiCaller apiCaller, ResponseParser<List<EventsStatisticsDTO>> parser, EntityMapper<List<EventsStatisticsDTO>, List<Statistic>> mapper, RapidApi endpoint) {
-        super(apiCaller, parser, mapper, endpoint);
+    public FakeEventStatisticsApiTemplate(ApiCaller apiCaller, ResponseParser<List<EventsStatisticsDTO>> parser, EntityMapper<List<EventsStatisticsDTO>, List<Statistic>> mapper, ApiCallCounter apiCallCounter, RapidApi endpoint) {
+        super(apiCaller, parser, mapper, apiCallCounter, endpoint);
     }
 }

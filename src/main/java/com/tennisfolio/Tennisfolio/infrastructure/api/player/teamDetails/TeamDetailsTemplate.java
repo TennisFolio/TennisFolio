@@ -13,8 +13,9 @@ public class TeamDetailsTemplate extends StrategyApiTemplate<TeamDetailsApiDTO, 
     public TeamDetailsTemplate(ApiCaller apiCaller
                                , ResponseParser<TeamDetailsApiDTO> responseParser
                                , EntityMapper<TeamDetailsApiDTO, PlayerAggregate> entityMapper
+                               , ApiCallCounter apiCallCounter
                               ){
-        super(apiCaller, responseParser, entityMapper, RapidApi.TEAMDETAILS);
+        super(apiCaller, responseParser, entityMapper, apiCallCounter, RapidApi.TEAMDETAILS);
     }
 
 

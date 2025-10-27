@@ -84,20 +84,20 @@ public class MatchSyncServiceTest {
         EntityMapper<List<LeagueEventsByRoundDTO>, List<Match>> fakeLeagueEventsByRoundMapper = new FakeLeagueEventsByRoundMapper();
 
         StrategyApiTemplate<List<LeagueEventsByRoundDTO>, List<Match>> fakeLeagueEventsByRoundApi
-                = new FakeLeagueEventsByRoundApiTemplate(fakeApiCaller, parser, fakeLeagueEventsByRoundMapper, RapidApi.LEAGUEEVENETBYROUND);
+                = new FakeLeagueEventsByRoundApiTemplate(fakeApiCaller, parser, fakeLeagueEventsByRoundMapper, null, RapidApi.LEAGUEEVENETBYROUND);
 
         EntityMapper<List<EventSchedulesDTO>, List<Match>> fakeEventSchedulesMapper = new FakeEventSchedulesMapper();
 
-        StrategyApiTemplate<List<EventSchedulesDTO>, List<Match>> fakeEventSchedulesApi = new FakeEventSchedulesApiTemplate(fakeApiCaller, parser, fakeEventSchedulesMapper, RapidApi.EVENTSCHEDULES);
+        StrategyApiTemplate<List<EventSchedulesDTO>, List<Match>> fakeEventSchedulesApi = new FakeEventSchedulesApiTemplate(fakeApiCaller, parser, fakeEventSchedulesMapper,null, RapidApi.EVENTSCHEDULES);
 
         EntityMapper<TournamentInfoDTO, Tournament> fakeTournamentInfoMapper = new FakeTournamentInfoMapper();
-        StrategyApiTemplate<TournamentInfoDTO, Tournament> fakeTournamentInfoApi = new FakeTournamentInfo(fakeApiCaller, parser, fakeTournamentInfoMapper, RapidApi.TOURNAMENTINFO);
+        StrategyApiTemplate<TournamentInfoDTO, Tournament> fakeTournamentInfoApi = new FakeTournamentInfo(fakeApiCaller, parser, fakeTournamentInfoMapper,null,RapidApi.TOURNAMENTINFO);
 
         EntityMapper<LeagueDetailsDTO, Tournament> fakeLeagueDetailsMapper = new FakeLeagueDetailsMapper();
-        StrategyApiTemplate<LeagueDetailsDTO, Tournament> fakeLeagueDetailsApi = new FakeLeagueDetails(fakeApiCaller, parser, fakeLeagueDetailsMapper, RapidApi.LEAGUEDETAILS);
+        StrategyApiTemplate<LeagueDetailsDTO, Tournament> fakeLeagueDetailsApi = new FakeLeagueDetails(fakeApiCaller, parser, fakeLeagueDetailsMapper,null, RapidApi.LEAGUEDETAILS);
 
         EntityMapper<LeagueSeasonInfoDTO, Season> fakeLeagueSeasonInfoMapper = new FakeLeagueSeasonInfoMapper();
-        StrategyApiTemplate<LeagueSeasonInfoDTO, Season> fakeLeagueSeasonInfoApi = new FakeLeagueSeasonInfoApiTemplate(fakeApiCaller, parser, fakeLeagueSeasonInfoMapper, RapidApi.LEAGUESEASONINFO);
+        StrategyApiTemplate<LeagueSeasonInfoDTO, Season> fakeLeagueSeasonInfoApi = new FakeLeagueSeasonInfoApiTemplate(fakeApiCaller, parser, fakeLeagueSeasonInfoMapper,null, RapidApi.LEAGUESEASONINFO);
 
         strategies.addAll(List.of(fakeLeagueEventsByRoundApi, fakeEventSchedulesApi, fakeTournamentInfoApi, fakeLeagueDetailsApi, fakeLeagueSeasonInfoApi));
 
