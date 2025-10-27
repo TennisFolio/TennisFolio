@@ -20,7 +20,7 @@ public class ApiCallCounterTest {
     @Autowired
     private StringRedisTemplate redis;
 
-    @Autowired
+    @Autowired(required = false)
     private ApiCallCounter apiCallCounter;
 
     @Test

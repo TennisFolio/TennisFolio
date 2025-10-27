@@ -5,6 +5,7 @@ import com.tennisfolio.Tennisfolio.exception.NotFoundException;
 import com.tennisfolio.Tennisfolio.infrastructure.repository.ApiCallJpaRepository;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -21,7 +22,7 @@ public class ApiCallFlushTask {
     private final StringRedisTemplate redis;
     private final ApiCallJpaRepository apiCallJpaRepository;
 
-    public ApiCallFlushTask(StringRedisTemplate redis, ApiCallJpaRepository apiCallJpaRepository) {
+    public ApiCallFlushTask(@Autowired(required = false) StringRedisTemplate redis, ApiCallJpaRepository apiCallJpaRepository) {
         this.redis = redis;
         this.apiCallJpaRepository = apiCallJpaRepository;
     }
