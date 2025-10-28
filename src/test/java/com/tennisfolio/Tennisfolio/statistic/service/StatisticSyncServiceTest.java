@@ -40,6 +40,9 @@ public class StatisticSyncServiceTest {
     @Mock
     private ResponseParser parser;
 
+    @Mock
+    private ApiCallCounter apiCallCounter;
+
     @BeforeEach
     public void setUp(){
         MockitoAnnotations.openMocks(this);
@@ -49,7 +52,7 @@ public class StatisticSyncServiceTest {
         List<StrategyApiTemplate<?, ?>> strategies = new ArrayList<>();
 
         EntityMapper<List<EventsStatisticsDTO>, List<Statistic>> eventsStatisticMapper = new FakeEventsStatisticsMapper();
-        StrategyApiTemplate<List<EventsStatisticsDTO>, List<Statistic>> eventsStatisticApiTemplate = new FakeEventStatisticsApiTemplate(apiCaller, parser, eventsStatisticMapper, RapidApi.EVENTSTATISTICS);
+        StrategyApiTemplate<List<EventsStatisticsDTO>, List<Statistic>> eventsStatisticApiTemplate = new FakeEventStatisticsApiTemplate(apiCaller, parser, eventsStatisticMapper, apiCallCounter, RapidApi.EVENTSTATISTICS);
 
         strategies.add(eventsStatisticApiTemplate);
 

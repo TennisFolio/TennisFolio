@@ -8,7 +8,7 @@ import java.util.List;
 
 @Component
 public class EventSchedulesTemplate extends StrategyApiTemplate<List<EventSchedulesDTO>, List<Match>> {
-    public EventSchedulesTemplate(ApiCaller apiCaller, ResponseParser<List<EventSchedulesDTO>> parser, EntityMapper<List<EventSchedulesDTO>, List<Match>> mapper) {
-        super(apiCaller, parser, mapper, RapidApi.EVENTSCHEDULES);
+    public EventSchedulesTemplate(ApiCaller apiCaller, ResponseParser<List<EventSchedulesDTO>> parser, EntityMapper<List<EventSchedulesDTO>, List<Match>> mapper, ApiCallCounter apiCallCounter) {
+        super(apiCaller, parser, mapper, apiCallCounter, RapidApi.EVENTSCHEDULES);
     }
 }

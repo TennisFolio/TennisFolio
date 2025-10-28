@@ -14,8 +14,9 @@ public class CategoryTournamentsTemplate extends StrategyApiTemplate<List<Catego
             ApiCaller apiCaller
             , ResponseParser<List<CategoryTournamentsDTO>> responseParser
             , EntityMapper<List<CategoryTournamentsDTO>, List<Tournament>> entityMapper
+            , ApiCallCounter apiCallCounter
                                       ) {
-        super(apiCaller, responseParser, entityMapper, RapidApi.CATEGORYTOURNAMENTS);
+        super(apiCaller, responseParser, entityMapper, apiCallCounter, RapidApi.CATEGORYTOURNAMENTS);
 
     }
 

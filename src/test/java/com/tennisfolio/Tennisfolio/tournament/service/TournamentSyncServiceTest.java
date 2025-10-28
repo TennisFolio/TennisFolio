@@ -60,6 +60,8 @@ public class TournamentSyncServiceTest {
     @Mock
     private ResponseParser parser;
 
+    @Mock
+    private ApiCallCounter apiCallCounter;
 
 
     List<StrategyApiTemplate<?, ?>> strategies = new ArrayList<>();
@@ -86,10 +88,10 @@ public class TournamentSyncServiceTest {
         // stub 파서 응답
         when(categoryService.getByRapidCategoryIdNotIn(any())).thenReturn(List.of(Category.builder().categoryId(1L).rapidCategoryId("3").build()));
 
-        categoryTemplate = new FakeCategoryTournamentsApiTemplate(apiCaller, parser, fakeCategoryTournamentMapper, RapidApi.CATEGORYTOURNAMENTS);
-        infoTemplate = new FakeTournamentInfo(apiCaller, parser, fakeTournamentInfoMapper, RapidApi.TOURNAMENTINFO);
-        leagueTemplate = new FakeLeagueDetails(apiCaller, parser, fakeLeagueDetailsMapper, RapidApi.LEAGUEDETAILS);
-        teamDetailsTemplate = new FakeTeamDetailsApiTemplate(apiCaller, parser, fakeTeamDetailsMapper, RapidApi.TEAMDETAILS);
+        categoryTemplate = new FakeCategoryTournamentsApiTemplate(apiCaller, parser, fakeCategoryTournamentMapper,apiCallCounter, RapidApi.CATEGORYTOURNAMENTS);
+        infoTemplate = new FakeTournamentInfo(apiCaller, parser, fakeTournamentInfoMapper, apiCallCounter, RapidApi.TOURNAMENTINFO);
+        leagueTemplate = new FakeLeagueDetails(apiCaller, parser, fakeLeagueDetailsMapper, apiCallCounter, RapidApi.LEAGUEDETAILS);
+        teamDetailsTemplate = new FakeTeamDetailsApiTemplate(apiCaller, parser, fakeTeamDetailsMapper, apiCallCounter, RapidApi.TEAMDETAILS);
 
         strategies.addAll(List.of(categoryTemplate, infoTemplate, leagueTemplate, teamDetailsTemplate));
 

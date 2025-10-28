@@ -44,13 +44,15 @@ public class RankingSyncServiceTest {
     @Mock
     PlayerImageService playerImageService;
 
+    @Mock
+    private ApiCallCounter apiCallCounter;
 
     @BeforeEach
     void setUp(){
         MockitoAnnotations.openMocks(this);
 
-        StrategyApiTemplate<List<AtpRankingApiDTO>, List<Ranking>> fakeAtpRankingApiTemplate = new FakeAtpRankingApiTemplate(fakeApiCaller, parser, fakeAtpRankingEntityMapper, RapidApi.ATPRANKINGS);
-        StrategyApiTemplate<TeamDetailsApiDTO, PlayerAggregate> teamDetailsApi = new FakeTeamDetailsApiTemplate(fakeApiCaller, parser, fakeTeamDetailsMapper, RapidApi.TEAMDETAILS);
+        StrategyApiTemplate<List<AtpRankingApiDTO>, List<Ranking>> fakeAtpRankingApiTemplate = new FakeAtpRankingApiTemplate(fakeApiCaller, parser, fakeAtpRankingEntityMapper, apiCallCounter, RapidApi.ATPRANKINGS);
+        StrategyApiTemplate<TeamDetailsApiDTO, PlayerAggregate> teamDetailsApi = new FakeTeamDetailsApiTemplate(fakeApiCaller, parser, fakeTeamDetailsMapper, apiCallCounter, RapidApi.TEAMDETAILS);
 
         List<StrategyApiTemplate<?,?>> strategyApiTemplates = new ArrayList<>();
         strategyApiTemplates.add(fakeAtpRankingApiTemplate);

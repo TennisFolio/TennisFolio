@@ -7,7 +7,7 @@ import com.tennisfolio.Tennisfolio.match.domain.Match;
 import java.util.List;
 
 public class FakeEventSchedulesApiTemplate extends StrategyApiTemplate<List<EventSchedulesDTO>, List<Match>> {
-    public FakeEventSchedulesApiTemplate(ApiCaller apiCaller, ResponseParser<List<EventSchedulesDTO>> parser, EntityMapper<List<EventSchedulesDTO>, List<Match>> mapper, RapidApi endpoint) {
-        super(apiCaller, parser, mapper, RapidApi.EVENTSCHEDULES);
+    public FakeEventSchedulesApiTemplate(ApiCaller apiCaller, ResponseParser<List<EventSchedulesDTO>> parser, EntityMapper<List<EventSchedulesDTO>, List<Match>> mapper, ApiCallCounter apiCallCounter, RapidApi endpoint) {
+        super(apiCaller, parser, mapper, apiCallCounter, RapidApi.EVENTSCHEDULES);
     }
 }

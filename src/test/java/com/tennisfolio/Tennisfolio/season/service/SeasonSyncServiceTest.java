@@ -46,6 +46,9 @@ public class SeasonSyncServiceTest {
     @Mock
     TournamentQueryService tournamentQueryService;
 
+    @Mock
+    private ApiCallCounter apiCallCounter;
+
     private List<StrategyApiTemplate<?, ?>> strategies = new ArrayList<>();
 
     private StrategyApiTemplate<List<LeagueSeasonsDTO>, List<Season>> leagueSeasonTemplate;
@@ -62,10 +65,10 @@ public class SeasonSyncServiceTest {
         when(tournamentQueryService.getAllTournament()).thenReturn(List.of(rolandGarros, wimbledon));
 
         EntityMapper<List<LeagueSeasonsDTO>, List<Season>> fakeLeagueSeasonsMapper = new FakeLeagueSeasonsMapper();
-        leagueSeasonTemplate = new FakeLeagueSeasonsApiTemplate(apiCaller, parser, fakeLeagueSeasonsMapper, RapidApi.LEAGUESEASONS);
+        leagueSeasonTemplate = new FakeLeagueSeasonsApiTemplate(apiCaller, parser, fakeLeagueSeasonsMapper, apiCallCounter, RapidApi.LEAGUESEASONS);
 
         EntityMapper<LeagueSeasonInfoDTO, Season> fakeLeagueSeasonInfoMapper = new FakeLeagueSeasonInfoMapper();
-        leagueSeasonInfoTemplate = new FakeLeagueSeasonInfoApiTemplate(apiCaller, parser, fakeLeagueSeasonInfoMapper, RapidApi.LEAGUESEASONINFO);
+        leagueSeasonInfoTemplate = new FakeLeagueSeasonInfoApiTemplate(apiCaller, parser, fakeLeagueSeasonInfoMapper, apiCallCounter, RapidApi.LEAGUESEASONINFO);
 
         strategies.add(leagueSeasonTemplate);
         strategies.add(leagueSeasonInfoTemplate);
