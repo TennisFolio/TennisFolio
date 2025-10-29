@@ -3,6 +3,8 @@ package com.tennisfolio.Tennisfolio.exception;
 import com.tennisfolio.Tennisfolio.common.ExceptionCode;
 import com.tennisfolio.Tennisfolio.common.response.ResponseDTO;
 import io.swagger.v3.oas.annotations.Hidden;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -51,5 +53,19 @@ public class GlobalExceptionHandler {
         ExceptionCode testNotFoundException = ExceptionCode.NOT_FOUND;
         return ResponseEntity.status(testNotFoundException.getHttpStatus())
                 .body(ResponseDTO.error(e.getExceptionCode().getCode(), e.getExceptionCode().getMessage()));
+    }
+
+    // RequestParam, PathVariable 검증 실패
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ResponseDTO<?>> handleConstraintViolation(ConstraintViolationException e) {
+        String message = e.getConstraintViolations()
+                .stream()
+                .map(ConstraintViolation::getMessage)
+                .findFirst()
+                .orElse("잘못된 요청입니다.");
+
+        return ResponseEntity
+                .badRequest() // HTTP 400
+                .body(ResponseDTO.error("VALIDATION_ERROR", message));
     }
 }

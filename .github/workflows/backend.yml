@@ -59,6 +59,7 @@ jobs:
           key: ${{ secrets.EC2_KEY }}
           script: |
             cd /home/ubuntu/TennisFolio
+            git pull origin main
             docker load -i tennisfolio.tar
             docker compose down
             docker compose up -d
