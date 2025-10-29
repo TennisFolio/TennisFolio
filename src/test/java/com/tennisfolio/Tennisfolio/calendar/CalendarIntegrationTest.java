@@ -60,4 +60,16 @@ class CalendarIntegrationTest {
                 .andExpect(jsonPath("$.data[0].roundSlug").value("final"));
     }
 
+    @Test
+    void 달력_디테일_매치_시즌_없이_조회_성공() throws Exception{
+        mockMvc.perform(get("/api/calendar/detail")
+                        .param("date", "20251020"))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data", hasSize(1)))
+                .andExpect(jsonPath("$.data[0].homePlayerName").value("Alcaraz"))
+                .andExpect(jsonPath("$.data[0].status").value("Ended"))
+                .andExpect(jsonPath("$.data[0].roundSlug").value("final"));
+    }
+
 }
