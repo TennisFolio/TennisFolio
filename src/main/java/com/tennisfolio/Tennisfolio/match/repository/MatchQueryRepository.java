@@ -36,7 +36,7 @@ public class MatchQueryRepository {
                                    )
                                    FROM MatchEntity m
                                    WHERE FUNCTION('SUBSTRING', m.startTimestamp, 1, 8) = :date
-                                   AND m.roundEntity.seasonEntity.seasonId = :seasonId
+                                   AND (:seasonId IS NULL OR m.roundEntity.seasonEntity.seasonId = :seasonId)
                 """, MatchScheduleResponse.class)
                 .setParameter("date", date)
                 .setParameter("seasonId", seasonId)
