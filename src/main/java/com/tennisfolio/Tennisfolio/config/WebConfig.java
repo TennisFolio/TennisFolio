@@ -19,7 +19,7 @@ public class WebConfig implements WebMvcConfigurer {
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/api/**")
+                registry.addMapping("/**")
                         .allowedOrigins(
                                 "https://tennisfolio.net",
                                 "https://www.tennisfolio.net",
