@@ -5,7 +5,7 @@ COPY . .
 RUN gradle clean build -x test
 
 # ✅ 2단계: 실제 실행
-FROM openjdk:17-jdk-slim
+FROM eclipse-temurin:17-jdk-jammy
 RUN apt-get update && apt-get install -y tzdata
 ENV TZ=Asia/Seoul
 RUN ln -sf /usr/share/zoneinfo/Asia/Seoul /etc/localtime && \
