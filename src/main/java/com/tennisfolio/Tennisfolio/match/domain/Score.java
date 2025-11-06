@@ -34,6 +34,21 @@ public class Score {
         this.set5Tie = set5Tie;
 
     }
+
+    public static Score from(ScoreDTO scoreDTO){
+        return Score.builder()
+                .set1(scoreDTO.getPeriod1())
+                .set2(scoreDTO.getPeriod2())
+                .set3(scoreDTO.getPeriod3())
+                .set4(scoreDTO.getPeriod4())
+                .set5(scoreDTO.getPeriod5())
+                .set1Tie(scoreDTO.getPeriod1TieBreak())
+                .set2Tie(scoreDTO.getPeriod2TieBreak())
+                .set3Tie(scoreDTO.getPeriod3TieBreak())
+                .set4Tie(scoreDTO.getPeriod4TieBreak())
+                .set5Tie(scoreDTO.getPeriod5TieBreak())
+                .build();
+    }
     public void nullToZero(){
         if(this.set1 == null) this.set1 = 0L;
         if(this.set2 == null) this.set2 = 0L;

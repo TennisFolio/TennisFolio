@@ -28,24 +28,24 @@ public class MatchController {
     }
     @GetMapping("/atp/liveEvents")
     public ResponseEntity<ResponseDTO<List<LiveMatchResponse>>> getATPLiveEvents(){
-        List<LiveMatchResponse> events = liveMatchService.getATPLiveEvents();
+        List<LiveMatchResponse> events = liveMatchService.getATPLiveEventsByRedis();
         return new ResponseEntity<>(ResponseDTO.success(events), HttpStatus.OK);
     }
     @Scheduled(fixedRate = 30000)
     public void getATPLiveEventsSchedule(){
 
-        List<LiveMatchResponse> events = liveMatchService.getATPLiveEvents();
+        List<LiveMatchResponse> events = liveMatchService.getATPLiveEventsByRedis();
         messagingTemplate.convertAndSend("/topic/atp/liveMatches", events);
     }
 
     @GetMapping("/wta/liveEvents")
     public ResponseEntity<ResponseDTO<List<LiveMatchResponse>>> getWTALiveEvents(){
-        List<LiveMatchResponse> events = liveMatchService.getWTALiveEvents();
+        List<LiveMatchResponse> events = liveMatchService.getWTALiveEventsByRedis();
         return new ResponseEntity<>(ResponseDTO.success(events), HttpStatus.OK);
     }
     @Scheduled(fixedRate = 30000)
     public void getWTALiveEventsSchedule(){
-        List<LiveMatchResponse> events = liveMatchService.getWTALiveEvents();
+        List<LiveMatchResponse> events = liveMatchService.getWTALiveEventsByRedis();
         messagingTemplate.convertAndSend("/topic/wta/liveMatches", events);
     }
 
@@ -58,10 +58,10 @@ public class MatchController {
 
     @Scheduled(fixedRate = 30000)
     public void getLiveEventSchedule(){
-        List<LiveMatchResponse> events = liveMatchService.getATPLiveEvents();
-        events.stream().forEach( event -> {
-            messagingTemplate.convertAndSend("/topic/liveMatch/" + event.getRapidId(), event);
-        });
+//        List<LiveMatchResponse> events = liveMatchService.getATPLiveEvents();
+//        events.stream().forEach( event -> {
+//            messagingTemplate.convertAndSend("/topic/liveMatch/" + event.getRapidId(), event);
+//        });
     }
 
     @PostMapping("/match")
