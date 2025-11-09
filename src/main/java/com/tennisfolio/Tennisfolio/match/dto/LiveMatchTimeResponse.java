@@ -1,15 +1,15 @@
 package com.tennisfolio.Tennisfolio.match.dto;
 
 import com.tennisfolio.Tennisfolio.infrastructure.api.match.liveEvents.LiveEventsApiDTO;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Getter
 @NoArgsConstructor
+@Builder
+@AllArgsConstructor
 public class LiveMatchTimeResponse {
     private List<String> period = new ArrayList<>();
     private String currentPeriodStartTimestamp;

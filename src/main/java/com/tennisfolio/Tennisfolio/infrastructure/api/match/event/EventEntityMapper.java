@@ -15,8 +15,6 @@ public class EventEntityMapper implements EntityMapper<EventDTO, Match> {
     @Override
     public Match map(EventDTO dto, Object... params) {
 
-        String rapidMatchId = params[0].toString();
-        //
         return Match.builder()
                 .rapidMatchId(dto.getRapidId())
                 .homeSeed(dto.getHomeTeamSeed())
