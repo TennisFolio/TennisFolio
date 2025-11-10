@@ -4,9 +4,7 @@ import './testHeader.css';
 function TestHeader() {
   return (
     <div className="test-header">
-      <div>
-        테스트를 통해 나만의 <br></br>테니스 프로필을 만들어보세요!
-      </div>
+      <div>당신의 테니스 스타일, 얼마나 알고 있나요?</div>
     </div>
   );
 }
