@@ -4,7 +4,7 @@ import com.tennisfolio.Tennisfolio.infrastructure.api.base.*;
 import com.tennisfolio.Tennisfolio.match.domain.Match;
 
 public class EventTemplate extends StrategyApiTemplate<EventDTO, Match> {
-    public EventTemplate(ApiCaller apiCaller, ResponseParser<EventDTO> parser, EntityMapper<EventDTO, Match> mapper, ApiCallCounter apiCallCounter, RapidApi endpoint) {
+    public EventTemplate(ApiCaller apiCaller, ResponseParser<EventDTO> parser, EntityMapper<EventDTO, Match> mapper, ApiCallCounter apiCallCounter) {
         super(apiCaller, parser, mapper, apiCallCounter, RapidApi.EVENT);
     }
 }

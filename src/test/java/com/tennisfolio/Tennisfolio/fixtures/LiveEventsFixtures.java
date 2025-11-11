@@ -31,7 +31,7 @@ public class LiveEventsFixtures {
                 .current(1L)
                 .display(1L)
                 .point("15")
-                .periodScore(List.of(6L,1L,2L,null,null))
+                .periodScore(List.of(6L,1L,2L))
                 .build();
     }
 
@@ -40,7 +40,7 @@ public class LiveEventsFixtures {
                 .current(1L)
                 .display(1L)
                 .point("30")
-                .periodScore(List.of(2L,6L,3L,null,null))
+                .periodScore(List.of(2L,6L,3L))
                 .build();
     }
 
@@ -49,7 +49,7 @@ public class LiveEventsFixtures {
                 .current(1L)
                 .display(1L)
                 .point("40")
-                .periodScore(List.of(6L,1L,2L,null,null))
+                .periodScore(List.of(6L,1L,2L))
                 .build();
     }
 
@@ -58,7 +58,25 @@ public class LiveEventsFixtures {
                 .current(1L)
                 .display(1L)
                 .point("40")
-                .periodScore(List.of(2L,6L,3L,null,null))
+                .periodScore(List.of(2L,6L,3L))
+                .build();
+    }
+
+    public static LiveMatchScoreResponse homeScoreInProgress3(){
+        return LiveMatchScoreResponse.builder()
+                .current(1L)
+                .display(1L)
+                .point("30")
+                .periodScore(List.of(6L,1L,2L))
+                .build();
+    }
+
+    public static LiveMatchScoreResponse awayScoreInProgress3(){
+        return LiveMatchScoreResponse.builder()
+                .current(1L)
+                .display(1L)
+                .point("40")
+                .periodScore(List.of(2L,6L,5L))
                 .build();
     }
 
@@ -78,10 +96,19 @@ public class LiveEventsFixtures {
                 .build();
     }
 
+    public static LiveMatchTimeResponse timeInProgress3(){
+        return LiveMatchTimeResponse.builder()
+                .startTime("1762128000")
+                .currentPeriodStartTimestamp("1762583573")
+                .period(List.of("1900", "3000", "3500"))
+                .build();
+    }
+
     public static LiveMatchResponse liveMatchInProgress1(){
 
         return LiveMatchResponse.builder()
                 .rapidId("1")
+                .category("atp")
                 .tournamentName(TournamentFixtures.wimbledonATP().getTournamentName())
                 .homePlayer(homePlayer())
                 .awayPlayer(awayPlayer())
@@ -98,6 +125,7 @@ public class LiveEventsFixtures {
 
         return LiveMatchResponse.builder()
                 .rapidId("1")
+                .category("atp")
                 .tournamentName(TournamentFixtures.wimbledonATP().getTournamentName())
                 .homePlayer(homePlayer())
                 .awayPlayer(awayPlayer())
@@ -109,4 +137,22 @@ public class LiveEventsFixtures {
                 .status("3rd Set")
                 .build();
     }
+
+    public static LiveMatchResponse liveMatchInProgress3(){
+
+        return LiveMatchResponse.builder()
+                .rapidId("2")
+                .category("atp")
+                .tournamentName(TournamentFixtures.wimbledonATP().getTournamentName())
+                .homePlayer(homePlayer())
+                .awayPlayer(awayPlayer())
+                .seasonName(SeasonFixtures.wimbledonMen2025().getSeasonName())
+                .roundName(RoundFixtures.wimbledonMen2025Final().getName())
+                .homeScore(homeScoreInProgress3())
+                .awayScore(awayScoreInProgress3())
+                .time(timeInProgress3())
+                .status("3Rd set")
+                .build();
+    }
+
 }
