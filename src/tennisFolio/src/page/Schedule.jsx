@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, Fragment } from 'react';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import './Schedule.css';
@@ -165,6 +165,30 @@ const formatDateToYearMonth = (date) => {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0');
   return `${year}${month}`;
+};
+
+const renderPlayerName = (nameKr, name) => {
+  const source = (nameKr || name || '').trim();
+
+  if (!source) {
+    return '미정';
+  }
+
+  const parts = source
+    .split('/')
+    .map((part) => part.trim())
+    .filter((part) => part.length > 0);
+
+  if (parts.length <= 1) {
+    return parts[0];
+  }
+
+  return parts.map((part, index) => (
+    <Fragment key={`${part}-${index}`}>
+      {part}
+      {index !== parts.length - 1 && <br />}
+    </Fragment>
+  ));
 };
 
 // YYYYMMDDHHMMSS 형식을 HH:MM으로 변환
@@ -646,8 +670,10 @@ function Schedule() {
                                       />
                                     )}
                                     <span>
-                                      {match.homePlayerNameKr ||
-                                        match.homePlayerName}
+                                      {renderPlayerName(
+                                        match.homePlayerNameKr,
+                                        match.homePlayerName
+                                      )}
                                     </span>
                                   </div>
                                   <div className="score">{match.homeScore}</div>
@@ -666,8 +692,10 @@ function Schedule() {
                                       />
                                     )}
                                     <span>
-                                      {match.awayPlayerNameKr ||
-                                        match.awayPlayerName}
+                                      {renderPlayerName(
+                                        match.awayPlayerNameKr,
+                                        match.awayPlayerName
+                                      )}
                                     </span>
                                   </div>
                                 </div>
