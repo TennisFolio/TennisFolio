@@ -462,19 +462,52 @@
   }
 }
 
-/* 태블릿 & 데스크톱 반응형 */
-@media (min-width: 769px) {
+/* 태블릿 레이아웃 */
+@media (min-width: 769px) and (max-width: 1199px) {
   .schedule-page {
     flex-direction: row;
+    flex-wrap: wrap;
     gap: 20px;
   }
 
   .calendar-section {
-    flex: 1;
+    flex: 1 1 420px;
+    min-width: 320px;
+    margin-bottom: 0;
+    order: 1;
+  }
+
+  .schedule-detail-section {
+    flex: 1 1 420px;
+    min-width: 320px;
+    order: 2;
+  }
+
+  .filter-section {
+    order: 0;
+    width: 100%;
+  }
+}
+
+/* 데스크톱 레이아웃 */
+@media (min-width: 1200px) {
+  .schedule-page {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 20px;
+  }
+
+  .filter-section {
+    flex: 0 0 300px;
+    align-self: flex-start;
+  }
+
+  .calendar-section {
+    flex: 1 1 0;
     margin-bottom: 0;
   }
 
   .schedule-detail-section {
-    flex: 1;
+    flex: 1 1 0;
   }
 }
