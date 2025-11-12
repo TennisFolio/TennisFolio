@@ -11,6 +11,7 @@ import TestResult from './page/TestResult.jsx';
 import { Navigate } from 'react-router-dom';
 import Privacy from './components/main/Privacy.jsx';
 import Main from './page/Main.jsx';
+import Schedule from './page/Schedule.jsx';
 
 window.global ||= window;
 window.Buffer ||= Buffer;
@@ -25,6 +26,7 @@ function App() {
           <Route path="/live/:category" element={<LiveEventsList />} />
           <Route path="/ranking" element={<Ranking />} />
           <Route path="/liveEvents/:matchId" element={<LiveEventsDetail />} />
+          <Route path="/schedule" element={<Schedule />} />
           <Route path="/test" element={<TestList />} />
           <Route path="/test/:category" element={<TestDetail />} />
           <Route
