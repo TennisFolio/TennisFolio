@@ -311,9 +311,22 @@
 .match-header {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 10px;
   padding-bottom: 10px;
   border-bottom: 1px solid #e0e0e0;
+}
+
+.match-header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.match-header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .match-time {
@@ -337,6 +350,39 @@
   gap: 15px;
   font-weight: 500;
   padding: 10px 0;
+  position: relative;
+}
+
+.match-players .score {
+  font-weight: bold;
+}
+
+.match-players .player {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.match-players .player span {
+  display: inline-block;
+}
+
+.match-players .player .winner-icon {
+  position: absolute;
+  top: -18px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 20px;
+  height: 20px;
+  display: none;
+  pointer-events: none;
+}
+
+.match-players .player.winner .winner-icon {
+  display: block;
 }
 
 .player {

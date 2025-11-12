@@ -586,7 +586,6 @@ function Schedule() {
                       const tournamentColor = tournament
                         ? getTournamentColor(tournament.tournamentId)
                         : '#667eea';
-
                       return (
                         <div key={seasonId} className="season-group">
                           <div
@@ -597,31 +596,72 @@ function Schedule() {
                           >
                             <h3>{tournament?.seasonName || '대회 정보'}</h3>
                           </div>
-                          {seasonMatches.map((match) => (
-                            <div key={match.matchId} className="match-card">
-                              <div className="match-header">
-                                <div className="match-time">
-                                  {formatTimeFromTimestamp(
-                                    match.startTimestamp
-                                  )}
+                          {seasonMatches.map((match) => {
+                            const winner =
+                              match.winner === '1'
+                                ? 'home'
+                                : match.winner === '2'
+                                ? 'away'
+                                : null;
+                            return (
+                              <div key={match.matchId} className="match-card">
+                                <div className="match-header">
+                                  <div className="match-header-left">
+                                    <div className="match-time">
+                                      {formatTimeFromTimestamp(
+                                        match.startTimestamp
+                                      )}
+                                    </div>
+                                    <div className="match-status">
+                                      {match.status}
+                                    </div>
+                                  </div>
+                                  <div className="match-header-right">
+                                    {match.roundNameKr}
+                                  </div>
                                 </div>
-                                <div className="match-status">
-                                  {match.status}
+                                <div className="match-players">
+                                  <div
+                                    className={`player ${
+                                      winner === 'home' ? 'winner' : ''
+                                    }`}
+                                  >
+                                    {winner === 'home' && (
+                                      <img
+                                        src="/images/ico_winner.png"
+                                        className="winner-icon home"
+                                        alt="winner"
+                                      />
+                                    )}
+                                    <span>
+                                      {match.homePlayerNameKr ||
+                                        match.homePlayerName}
+                                    </span>
+                                  </div>
+                                  <div className="score">{match.homeScore}</div>
+                                  <div className="vs">vs</div>
+                                  <div className="score">{match.awayScore}</div>
+                                  <div
+                                    className={`player ${
+                                      winner === 'away' ? 'winner' : ''
+                                    }`}
+                                  >
+                                    {winner === 'away' && (
+                                      <img
+                                        src="/images/ico_winner.png"
+                                        className="winner-icon away"
+                                        alt="winner"
+                                      />
+                                    )}
+                                    <span>
+                                      {match.awayPlayerNameKr ||
+                                        match.awayPlayerName}
+                                    </span>
+                                  </div>
                                 </div>
                               </div>
-                              <div className="match-players">
-                                <div className="player">
-                                  {match.homePlayerNameKr ||
-                                    match.homePlayerName}
-                                </div>
-                                <div className="vs">vs</div>
-                                <div className="player">
-                                  {match.awayPlayerNameKr ||
-                                    match.awayPlayerName}
-                                </div>
-                              </div>
-                            </div>
-                          ))}
+                            );
+                          })}
                         </div>
                       );
                     }
