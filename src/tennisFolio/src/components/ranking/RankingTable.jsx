@@ -40,7 +40,9 @@ function RankingTable({ rankings }) {
                 />
               </td>
               <td>
-                <span className="player-name">{rank.player.playerName}</span>
+                <span className="player-name">
+                  {rank.player.playerNameKr || rank.player.playerName}
+                </span>
               </td>
               <td>
                 <span style={{ fontSize: '16px', fontWeight: 'bold' }}>

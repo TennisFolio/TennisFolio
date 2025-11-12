@@ -1,13 +1,12 @@
-import React from 'react'
+import React from 'react';
 import './testHeader.css';
 
 function TestHeader() {
   return (
     <div className="test-header">
-      <h1 className="test-header-title">테니스 테스트</h1>
-      
+      <div>당신의 테니스 스타일, 얼마나 알고 있나요?</div>
     </div>
   );
 }
 
-export default TestHeader
+export default TestHeader;
