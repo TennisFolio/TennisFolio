@@ -203,9 +203,7 @@ function Schedule() {
         );
 
         if (response.data.code === '0000') {
-          // data.data에서 최대 5개까지만 사용하여 데이터 만들기
-          const limitedData = response.data.data.slice(0, 5);
-          const tournamentsData = limitedData.map((tournament) => ({
+          const tournamentsData = response.data.data.map((tournament) => ({
             ...tournament,
             startDate: parseTimestamp(tournament.startTimestamp),
             endDate: parseTimestamp(tournament.endTimestamp),
@@ -325,23 +323,21 @@ function Schedule() {
     if (tournaments.length === 0) return;
 
     const newColorMap = {};
-    const usedColors = new Set();
     let colorIndex = 0;
 
     // 대회 ID 순으로 정렬
-    const sortedTournaments = [...tournaments].sort(
-      (a, b) => a.tournamentId - b.tournamentId
-    );
+    const sortedTournaments = [...tournaments].sort((a, b) => {
+      const aKey = a.seasonId ?? a.tournamentId;
+      const bKey = b.seasonId ?? b.tournamentId;
+      return aKey - bKey;
+    });
 
     sortedTournaments.forEach((tournament) => {
-      if (!newColorMap[tournament.tournamentId]) {
-        // 아직 사용하지 않은 색상 찾기
-        while (usedColors.has(colorIndex)) {
-          colorIndex = (colorIndex + 1) % tournamentColors.length;
-        }
-        newColorMap[tournament.tournamentId] = tournamentColors[colorIndex];
-        usedColors.add(colorIndex);
-        colorIndex = (colorIndex + 1) % tournamentColors.length;
+      const mapKey = tournament.seasonId ?? tournament.tournamentId;
+      if (!newColorMap[mapKey]) {
+        newColorMap[mapKey] =
+          tournamentColors[colorIndex % tournamentColors.length];
+        colorIndex += 1;
       }
     });
 
@@ -349,8 +345,8 @@ function Schedule() {
   }, [tournaments]);
 
   // 대회 ID로 색상 할당
-  const getTournamentColor = (tournamentId) => {
-    return tournamentColorMap[tournamentId] || tournamentColors[0];
+  const getTournamentColor = (key) => {
+    return tournamentColorMap[key] || tournamentColors[0];
   };
 
   // 타일에 클래스명 추가 (대회 기간 표시)
@@ -370,11 +366,20 @@ function Schedule() {
     const dateTournaments = getTournamentsForDate(date);
     if (dateTournaments.length === 0) return null;
 
+    const uniqueTournaments = Array.from(
+      new Map(
+        dateTournaments.map((tournament) => [
+          tournament.seasonId ?? tournament.tournamentId,
+          tournament,
+        ])
+      ).values()
+    );
+
     return (
       <div className="tournament-lines">
-        {dateTournaments
+        {uniqueTournaments
           .sort((a, b) => a.startTimestamp.localeCompare(b.startTimestamp))
-          .map((tournament) => {
+          .map((tournament, index) => {
             const isStart =
               date.toDateString() === tournament.startDate.toDateString();
             const isEnd =
@@ -396,10 +401,14 @@ function Schedule() {
 
             return (
               <div
-                key={tournament.tournamentId}
+                key={`${
+                  tournament.seasonId ?? tournament.tournamentId
+                }-${index}`}
                 className={lineClass}
                 style={{
-                  backgroundColor: getTournamentColor(tournament.tournamentId),
+                  backgroundColor: getTournamentColor(
+                    tournament.seasonId ?? tournament.tournamentId
+                  ),
                 }}
                 title={tournament.seasonName}
               />
@@ -583,8 +592,11 @@ function Schedule() {
                       const tournament = tournaments.find(
                         (t) => t.seasonId === parseInt(seasonId)
                       );
-                      const tournamentColor = tournament
-                        ? getTournamentColor(tournament.tournamentId)
+                      const colorKey = tournament
+                        ? tournament.seasonId ?? tournament.tournamentId
+                        : null;
+                      const tournamentColor = colorKey
+                        ? getTournamentColor(colorKey)
                         : '#667eea';
                       return (
                         <div key={seasonId} className="season-group">
