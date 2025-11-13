@@ -1,12 +1,18 @@
 package com.tennisfolio.Tennisfolio.match.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.tennisfolio.Tennisfolio.category.enums.CategoryType;
 import com.tennisfolio.Tennisfolio.infrastructure.api.match.liveEvents.LiveEventsApiDTO;
 import com.tennisfolio.Tennisfolio.player.domain.Player;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
+@Builder
+@AllArgsConstructor
 public class LiveMatchResponse {
     private String rapidId;
     private String category;
@@ -42,13 +48,32 @@ public class LiveMatchResponse {
         this.awayPlayer.setPlayerInfo(awayPlayerImage);
     }
 
+    @JsonIgnore
     public boolean isAtp(){
         return "atp".equals(category);
     }
 
+    @JsonIgnore
     public boolean isWta(){
         return "wta".equals(category);
     }
+
+    @JsonIgnore
+    public boolean isSupportedCategory(){
+
+        return this.category.equals(CategoryType.ATP.getCategorySlug()) ||
+                this.category.equals(CategoryType.WTA.getCategorySlug()) ||
+                this.category.equals(CategoryType.UNITED_CUP.getCategorySlug()) ||
+                this.category.equals(CategoryType.DAVIS_CUP.getCategorySlug()) ||
+                this.category.equals(CategoryType.EXHIBITION.getCategorySlug());
+    }
+
+    @JsonIgnore
+    public String getSupportedCategory(){
+        if(isSupportedCategory()) return category;
+        else return null;
+    }
+
 
 
 }

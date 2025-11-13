@@ -14,7 +14,8 @@ public enum RapidApi {
     LEAGUEROUNDS("leagueRounds", "/tennis/tournament/%s/season/%s/rounds"),
     LEAGUEEVENETBYROUND("leagueEventsByRound", "/tennis/tournament/%s/season/%s/events/round/%d/slug/%s"),
     EVENTSTATISTICS("eventStatistics", "/tennis/event/%s/statistics"),
-    EVENTSCHEDULES("eventSchedules", "/tennis/events/%s/%s/%s");
+    EVENTSCHEDULES("eventSchedules", "/tennis/events/%s/%s/%s"),
+    EVENT("event", "/tennis/event/%s");
 
     private final String methodName;
     private final String param;

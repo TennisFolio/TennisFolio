@@ -34,5 +34,15 @@ public class Period {
         this.set5 = ConversionUtil.secondToMinute(this.set5);
     }
 
+    public static Period from(TimeDTO timeSet){
+        return Period.builder()
+                .set1(timeSet.getPeriod1())
+                .set2(timeSet.getPeriod2())
+                .set3(timeSet.getPeriod3())
+                .set4(timeSet.getPeriod4())
+                .set5(timeSet.getPeriod5())
+                .build();
+    }
+
 }
 
