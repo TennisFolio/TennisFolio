@@ -1,12 +1,18 @@
-import React from 'react'
+import React from 'react';
 import './RankingHeader.css';
 import dayjs from 'dayjs';
-function RankingHeader({lastUpdated}) {
+
+function RankingHeader({ lastUpdated }) {
   return (
-    <h1 className="ranking-title">
-        ATP 단식 랭킹 <br/>({dayjs(lastUpdated).format('YYYY.MM.DD')})
-    </h1>
-  )
+    <div className="ranking-title">
+      <div>
+        최신 ATP 순위를 확인하세요! <br />
+        <span className="update-date">
+          업데이트: {dayjs(lastUpdated).format('YYYY.MM.DD')}
+        </span>
+      </div>
+    </div>
+  );
 }
 
-export default RankingHeader
+export default RankingHeader;

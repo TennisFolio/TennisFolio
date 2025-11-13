@@ -13,7 +13,11 @@ const NAV_ITEMS = [
   },
   {
     title: '랭킹',
-    children: [{ label: '실시간', path: '/ranking' }],
+    children: [{ label: 'ATP', path: '/ranking' }],
+  },
+  {
+    title: '경기일정',
+    children: [{ label: '대회 일정', path: '/schedule' }],
   },
   {
     title: '엔터테인먼트',

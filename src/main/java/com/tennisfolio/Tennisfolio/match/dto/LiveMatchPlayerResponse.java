@@ -2,11 +2,15 @@ package com.tennisfolio.Tennisfolio.match.dto;
 
 import com.tennisfolio.Tennisfolio.infrastructure.api.match.liveEvents.TeamDTO;
 import com.tennisfolio.Tennisfolio.player.domain.Player;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
+@Builder
+@AllArgsConstructor
 public class LiveMatchPlayerResponse {
     private String playerRapidId;
     private String playerName;

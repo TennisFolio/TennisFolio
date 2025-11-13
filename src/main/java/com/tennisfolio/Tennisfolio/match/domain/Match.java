@@ -110,4 +110,8 @@ public class Match {
         this.round = round;
     }
 
+    public boolean isEnded(){
+        return status.equals("Ended") || status.equals("Retired") || status.equals("Canceled");
+    }
+
 }

@@ -49,11 +49,11 @@ public class EventSchedulesAssemble implements EntityAssemble<List<EventSchedule
             Player homePlayer = Player.builder().rapidPlayerId(events.getHomeTeam().getRapidPlayerId()).build();
             Player awayPlayer = Player.builder().rapidPlayerId(events.getAwayTeam().getRapidPlayerId()).build();
 
-            Score homeScore = scoreBuilder(events.getHomeScore());
+            Score homeScore = Score.from(events.getHomeScore());
 
-            Score awayScore = scoreBuilder(events.getAwayScore());
+            Score awayScore = Score.from(events.getAwayScore());
 
-            Period periodSet = periodBuilder(events.getTime());
+            Period periodSet = Period.from(events.getTime());
 
             String status = events.getStatus().getDescription();
 
@@ -126,28 +126,4 @@ public class EventSchedulesAssemble implements EntityAssemble<List<EventSchedule
                 .build();
     }
 
-    private Score scoreBuilder(ScoreDTO scoreDTO){
-        return Score.builder()
-                .set1(scoreDTO.getPeriod1())
-                .set2(scoreDTO.getPeriod2())
-                .set3(scoreDTO.getPeriod3())
-                .set4(scoreDTO.getPeriod4())
-                .set5(scoreDTO.getPeriod5())
-                .set1Tie(scoreDTO.getPeriod1TieBreak())
-                .set2Tie(scoreDTO.getPeriod2TieBreak())
-                .set3Tie(scoreDTO.getPeriod3TieBreak())
-                .set4Tie(scoreDTO.getPeriod4TieBreak())
-                .set5Tie(scoreDTO.getPeriod5TieBreak())
-                .build();
-    }
-
-    private Period periodBuilder(TimeDTO timeSet){
-        return Period.builder()
-                .set1(timeSet.getPeriod1())
-                .set2(timeSet.getPeriod2())
-                .set3(timeSet.getPeriod3())
-                .set4(timeSet.getPeriod4())
-                .set5(timeSet.getPeriod5())
-                .build();
-    }
 }
