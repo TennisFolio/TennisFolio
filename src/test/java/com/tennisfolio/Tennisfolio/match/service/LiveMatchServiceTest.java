@@ -2,6 +2,7 @@ package com.tennisfolio.Tennisfolio.match.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tennisfolio.Tennisfolio.fixtures.LiveEventsFixtures;
+import com.tennisfolio.Tennisfolio.fixtures.MatchFixtures;
 import com.tennisfolio.Tennisfolio.infrastructure.api.base.*;
 import com.tennisfolio.Tennisfolio.infrastructure.api.match.event.EventTemplate;
 import com.tennisfolio.Tennisfolio.infrastructure.api.match.liveEvents.LiveEventsTemplate;
@@ -108,6 +109,8 @@ public class LiveMatchServiceTest {
         // 1. redis에 1,2번 경기 데이터 추가
         LiveMatchResponse match1 = LiveEventsFixtures.liveMatchInProgress1();
         LiveMatchResponse match3 = LiveEventsFixtures.liveMatchInProgress3();
+        matchRepository.save(MatchFixtures.wimbledonMen2025FinalMatch());
+        matchRepository.save(MatchFixtures.rolandGarrosMen2025FinalMatch());
 
         redisTemplate.opsForValue().set("live:atp:1", match1);
         redisTemplate.opsForValue().set("live:atp:2", match3);

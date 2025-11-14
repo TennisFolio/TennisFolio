@@ -15,7 +15,9 @@ import com.tennisfolio.Tennisfolio.match.repository.MatchRepository;
 import com.tennisfolio.Tennisfolio.player.application.PlayerService;
 import com.tennisfolio.Tennisfolio.player.domain.Player;
 import com.tennisfolio.Tennisfolio.player.infrastructure.PlayerProvider;
+import com.tennisfolio.Tennisfolio.round.repository.RoundRepository;
 import com.tennisfolio.Tennisfolio.util.ConversionUtil;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -95,6 +97,7 @@ public class LiveMatchService {
                 .orElseThrow(() -> new LiveMatchNotFoundException(ExceptionCode.NOT_FOUND));
     }
 
+    @Transactional
     public void updateLiveMatches(){
 
         // 라이브 매치 api 호출
@@ -116,22 +119,21 @@ public class LiveMatchService {
         // 종료된 것으로 예상되는 rapidId
         List<String> endedMatchRapidIds = findEndedMatchRapidIds(liveMatches);
 
-        endedMatchRapidIds.stream()
+        updateEndedMatches(endedMatchRapidIds);
+
+    }
+
+    public void updateEndedMatches(List<String> endedIds){
+        endedIds.stream()
                 .forEach(p ->{
 
                     matchRepository.findByRapidMatchId(p)
-                            .ifPresentOrElse(findMatch -> {
+                            .ifPresent(findMatch -> {
                                 if(findMatch.isEnded()) return;
-
-                                Match updateMatch = apiWorker.process(RapidApi.EVENT, p);
-                                findMatch.updateFrom(updateMatch);
-                                matchRepository.save(findMatch);
-                            }, () -> {
-                                Match newMatch =  apiWorker.process(RapidApi.EVENT, p);
-                                matchRepository.save(newMatch);
+                                Match event = apiWorker.process(RapidApi.EVENT, p);
+                                matchRepository.updateMatch(event);
                             });
-        });
-
+                });
     }
 
     public List<LiveMatchResponse> getATPLiveEventsByRedis() {

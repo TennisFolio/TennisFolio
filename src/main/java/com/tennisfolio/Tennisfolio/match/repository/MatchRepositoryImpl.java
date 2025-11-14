@@ -22,7 +22,7 @@ public class MatchRepositoryImpl implements MatchRepository{
 
     @Override
     public Optional<Match> findByRapidMatchId(String rapidMatchId) {
-        return matchJpaRepository.findByRapidMatchId(rapidMatchId).map(MatchEntity::toModel);
+        return matchJpaRepository.findByRapidMatchId(rapidMatchId).map(MatchEntity::toModelBaseOnly);
     }
 
     @Override
@@ -65,5 +65,50 @@ public class MatchRepositoryImpl implements MatchRepository{
     @Override
     public void flush() {
         matchJpaRepository.flush();
+    }
+
+    @Override
+    public void updateMatch(Match match) {
+        matchJpaRepository.updateMatch(
+                match.getRapidMatchId(),
+                match.getHomeSeed(),
+                match.getAwaySeed(),
+                match.getHomeScore(),
+                match.getAwayScore(),
+
+                match.getHomeSet().getSet1(),
+                match.getHomeSet().getSet2(),
+                match.getHomeSet().getSet3(),
+                match.getHomeSet().getSet4(),
+                match.getHomeSet().getSet5(),
+
+                match.getHomeSet().getSet1Tie(),
+                match.getHomeSet().getSet2Tie(),
+                match.getHomeSet().getSet3Tie(),
+                match.getHomeSet().getSet4Tie(),
+                match.getHomeSet().getSet5Tie(),
+
+                match.getAwaySet().getSet1(),
+                match.getAwaySet().getSet2(),
+                match.getAwaySet().getSet3(),
+                match.getAwaySet().getSet4(),
+                match.getAwaySet().getSet5(),
+
+                match.getAwaySet().getSet1Tie(),
+                match.getAwaySet().getSet2Tie(),
+                match.getAwaySet().getSet3Tie(),
+                match.getAwaySet().getSet4Tie(),
+                match.getAwaySet().getSet5Tie(),
+
+                match.getPeriodSet().getSet1(),
+                match.getPeriodSet().getSet2(),
+                match.getPeriodSet().getSet3(),
+                match.getPeriodSet().getSet4(),
+                match.getPeriodSet().getSet5(),
+
+                match.getStartTimestamp(),
+                match.getWinner(),
+                match.getStatus()
+        );
     }
 }

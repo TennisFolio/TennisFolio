@@ -111,7 +111,7 @@ public class Match {
     }
 
     public boolean isEnded(){
-        return status.equals("Ended") || status.equals("Retired") || status.equals("Canceled");
+        return "Ended".equals(status) || "Retired".equals(status) || "Canceled".equals(status);
     }
 
 }
