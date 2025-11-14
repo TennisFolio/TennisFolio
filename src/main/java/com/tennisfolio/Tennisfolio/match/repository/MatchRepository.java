@@ -17,4 +17,5 @@ public interface MatchRepository {
     boolean flushWhenFull();
     boolean flushAll();
     void flush();
+    void updateMatch(Match match);
 }

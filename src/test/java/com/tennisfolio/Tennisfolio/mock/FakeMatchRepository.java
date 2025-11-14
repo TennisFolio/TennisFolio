@@ -70,6 +70,12 @@ public class FakeMatchRepository implements MatchRepository {
 
     }
 
+    @Override
+    public void updateMatch(Match match) {
+        Match findMatch = data.values().stream().filter(p -> p.getRapidMatchId().equals(match.getRapidMatchId())).findFirst().get();
+        data.put(findMatch.getMatchId(), match);
+    }
+
     private void flushBatch() {
         for (var match : batch) {
             long matchId = match.getMatchId();

@@ -7,9 +7,11 @@ import com.tennisfolio.Tennisfolio.match.domain.Match;
 import com.tennisfolio.Tennisfolio.match.domain.Period;
 import com.tennisfolio.Tennisfolio.match.domain.Score;
 import com.tennisfolio.Tennisfolio.match.repository.MatchRepository;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+@Component
 public class EventEntityMapper implements EntityMapper<EventDTO, Match> {
 
     @Override

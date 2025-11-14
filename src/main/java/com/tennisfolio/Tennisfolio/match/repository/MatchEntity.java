@@ -1,5 +1,6 @@
 package com.tennisfolio.Tennisfolio.match.repository;
 
+import com.tennisfolio.Tennisfolio.common.Entity.BaseTimeEntity;
 import com.tennisfolio.Tennisfolio.match.domain.Match;
 import com.tennisfolio.Tennisfolio.match.domain.Period;
 import com.tennisfolio.Tennisfolio.match.domain.Score;
@@ -13,7 +14,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(name="tb_match")
 @NoArgsConstructor
-public class MatchEntity {
+public class MatchEntity extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy= GenerationType.TABLE, generator = "match_gen")
     @TableGenerator(
