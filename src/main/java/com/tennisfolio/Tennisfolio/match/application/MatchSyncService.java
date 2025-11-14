@@ -9,6 +9,8 @@ import com.tennisfolio.Tennisfolio.infrastructure.api.base.ApiWorker;
 import com.tennisfolio.Tennisfolio.infrastructure.api.base.RapidApi;
 import com.tennisfolio.Tennisfolio.infrastructure.api.base.StrategyApiTemplate;
 import com.tennisfolio.Tennisfolio.infrastructure.api.match.leagueEventsByRound.LeagueEventsByRoundDTO;
+import com.tennisfolio.Tennisfolio.infrastructure.worker.GenericBatchWorker;
+import com.tennisfolio.Tennisfolio.infrastructure.worker.match.MatchBatchWorkerConfig;
 import com.tennisfolio.Tennisfolio.match.domain.Match;
 import com.tennisfolio.Tennisfolio.infrastructure.repository.RoundJpaRepository;
 import com.tennisfolio.Tennisfolio.match.repository.MatchRepository;
@@ -19,16 +21,22 @@ import com.tennisfolio.Tennisfolio.round.repository.RoundRepository;
 import com.tennisfolio.Tennisfolio.season.domain.Season;
 import com.tennisfolio.Tennisfolio.season.repository.SeasonRepository;
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.Clock;
 import java.time.LocalDate;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Service
+@Slf4j
 public class MatchSyncService {
+
 
     private final CategoryRepository categoryRepository;
     private final TournamentRepository tournamentRepository;
@@ -38,8 +46,9 @@ public class MatchSyncService {
     private final ApiWorker apiWorker;
     private final PlayerProvider playerProvider;
     private final Clock clock;
+    private final GenericBatchWorker<Match> matchBatchWorker;
 
-    public MatchSyncService(CategoryRepository categoryRepository, TournamentRepository tournamentRepository, SeasonRepository seasonRepository, RoundRepository roundRepository, MatchRepository matchRepository, ApiWorker apiWorker, PlayerProvider playerProvider, Clock clock) {
+    public MatchSyncService(CategoryRepository categoryRepository, TournamentRepository tournamentRepository, SeasonRepository seasonRepository, RoundRepository roundRepository, MatchRepository matchRepository, ApiWorker apiWorker, PlayerProvider playerProvider, Clock clock, GenericBatchWorker<Match> matchBatchWorker) {
         this.categoryRepository = categoryRepository;
         this.tournamentRepository = tournamentRepository;
         this.seasonRepository = seasonRepository;
@@ -48,9 +57,11 @@ public class MatchSyncService {
         this.apiWorker = apiWorker;
         this.playerProvider = playerProvider;
         this.clock = clock;
+        this.matchBatchWorker = matchBatchWorker;
     }
 
     public void saveMatchList() {
+
         Set<String> existingKeys = matchRepository.findAllRapidIds();
 
         roundRepository.findAll()
@@ -62,6 +73,7 @@ public class MatchSyncService {
                         Long roundNum = round.getRound();
                         if(round.getSlug() == null) return;
                         String slug = round.getSlug();
+
                         List<Match> matches =  apiWorker.process(RapidApi.LEAGUEEVENETBYROUND,rapidTournamentId, rapidSeasonId, roundNum, slug);
                         List<Match> newMatches = matches.stream()
                                 .filter(match -> !existingKeys.contains(match.getRapidMatchId()))
@@ -77,6 +89,51 @@ public class MatchSyncService {
 
         matchRepository.flushAll();
 
+    }
+
+    public void loadMatchesByRound(){
+        ExecutorService producerExecutor = Executors.newFixedThreadPool(6);
+
+        Set<String> existingKeys = matchRepository.findAllRapidIds();
+
+        List<Round> rounds = roundRepository.findAll();
+
+        List<CompletableFuture<Void>> futures = rounds.stream()
+                .map(round -> CompletableFuture.runAsync(() -> {
+                    try{
+                        if(round.getSlug() == null) return;
+                        String rapidTournamentId = round.getSeason().getTournament().getRapidTournamentId();
+                        String rapidSeasonId = round.getSeason().getRapidSeasonId();
+                        Long roundNum = round.getRound();
+                        String slug = round.getSlug();
+
+                        log.info("Producer Thread: {} - round={}",
+                                Thread.currentThread().getName(),
+                                round.getSlug());
+
+                        List<Match> matches = apiWorker.process(
+                                RapidApi.LEAGUEEVENETBYROUND,
+                                rapidTournamentId,
+                                rapidSeasonId,
+                                roundNum,
+                                slug
+                        );
+
+                        List<Match> newMatches = matches.stream()
+                                .filter(m -> !existingKeys.contains(m.getRapidMatchId()))
+                                .toList();
+
+                        matchBatchWorker.submit(newMatches);
+                    } catch (Exception e){
+                        e.printStackTrace();
+                    }
+
+                }, producerExecutor))
+                .toList();
+
+        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+        producerExecutor.shutdown();
+        matchBatchWorker.shutdown();
     }
 
     @Transactional

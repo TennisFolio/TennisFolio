@@ -1,5 +1,6 @@
 package com.tennisfolio.Tennisfolio.match.repository;
 
+import com.tennisfolio.Tennisfolio.category.repository.CategoryEntity;
 import com.tennisfolio.Tennisfolio.infrastructure.repository.MatchJpaRepository;
 import com.tennisfolio.Tennisfolio.infrastructure.saver.BufferedBatchSaver;
 import com.tennisfolio.Tennisfolio.match.domain.Match;
@@ -28,6 +29,12 @@ public class MatchRepositoryImpl implements MatchRepository{
     @Override
     public Match save(Match match) {
         return matchJpaRepository.save(MatchEntity.fromModel(match)).toModel();
+    }
+
+    @Override
+    public void saveAll(List<Match> matches) {
+        List<MatchEntity> entities = matches.stream().map(MatchEntity::fromModel).toList();
+        matchJpaRepository.saveAll(entities);
     }
 
     @Override

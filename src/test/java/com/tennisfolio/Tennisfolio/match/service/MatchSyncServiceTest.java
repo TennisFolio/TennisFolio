@@ -106,7 +106,7 @@ public class MatchSyncServiceTest {
 
         apiWorker = new ApiWorker(strategies);
 
-        matchSyncService = new MatchSyncService(fakeCategoryRepository, fakeTournamentRepository, fakeSeasonRepository, fakeRoundRepository, fakeMatchRepository, apiWorker, playerProvider, fixedClock);
+        matchSyncService = new MatchSyncService(fakeCategoryRepository, fakeTournamentRepository, fakeSeasonRepository, fakeRoundRepository, fakeMatchRepository, apiWorker, playerProvider, fixedClock, null);
 
     }
 

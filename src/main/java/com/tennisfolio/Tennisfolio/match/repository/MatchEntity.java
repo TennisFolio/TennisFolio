@@ -23,7 +23,7 @@ public class MatchEntity extends BaseTimeEntity {
             pkColumnName = "TABLE_ID",
             valueColumnName = "NEXT_VAL",
             pkColumnValue = "MATCH_ID",
-            allocationSize = 1000
+            allocationSize = 500
     )
     private Long matchId;
     @ManyToOne(fetch = FetchType.LAZY)

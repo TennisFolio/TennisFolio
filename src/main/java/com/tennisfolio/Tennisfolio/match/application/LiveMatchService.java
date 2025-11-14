@@ -97,6 +97,8 @@ public class LiveMatchService {
                 .orElseThrow(() -> new LiveMatchNotFoundException(ExceptionCode.NOT_FOUND));
     }
 
+
+
     @Transactional
     public void updateLiveMatches(){
 
@@ -150,6 +152,10 @@ public class LiveMatchService {
         return wtaMatches;
     }
 
+    public LiveMatchResponse getLiveEventsByRedis(String rapidId){
+
+    }
+
     private List<String> findEndedMatchRapidIds(List<LiveMatchResponse> liveMatches){
         List<String> newMatchIds = liveMatches.stream()
                 .filter(LiveMatchResponse::isSupportedCategory)
@@ -167,5 +173,6 @@ public class LiveMatchService {
                 .toList();
 
     }
+
 
 }
