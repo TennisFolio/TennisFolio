@@ -60,7 +60,7 @@ public class MatchController {
     public void getLiveEventSchedule(){
         List<LiveMatchResponse> events = liveMatchService.getATPLiveEventsByRedis();
         events.stream().forEach( event -> {
-            messagingTemplate.convertAndSend("/topic/liveMatch/" + event.getRapidId(), event);
+            messagingTemplate.convertAndSend("/topic/liveMatch." + event.getRapidId(), event);
         });
     }
 
