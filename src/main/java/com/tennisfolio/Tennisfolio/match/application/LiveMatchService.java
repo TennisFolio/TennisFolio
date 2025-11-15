@@ -20,13 +20,20 @@ import com.tennisfolio.Tennisfolio.util.ConversionUtil;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.redis.connection.RedisConnection;
+import org.springframework.data.redis.core.Cursor;
+import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.stereotype.Service;
 
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import static org.springframework.data.redis.core.ScanOptions.scanOptions;
 
 @Slf4j
 @Service
@@ -148,6 +155,31 @@ public class LiveMatchService {
         List<LiveMatchResponse> wtaMatches = redis.opsForValue().multiGet(keys);
 
         return wtaMatches;
+    }
+
+    public LiveMatchResponse getLiveEventByRedis(String rapidId){
+        String pattern = "live:*:" + rapidId;
+
+        // scan: 운영/공유 환경
+        ScanOptions options = scanOptions()
+                .match(pattern)
+                .count(200)
+                .build();
+
+        return (LiveMatchResponse) redis.execute((RedisCallback<LiveMatchResponse>) (RedisConnection conn) -> {
+            try (var cursor = conn.keyCommands().scan(options)) {
+
+                while (cursor.hasNext()) {
+                    String key = new String(cursor.next(), StandardCharsets.UTF_8);
+                    LiveMatchResponse dto = (LiveMatchResponse)redis.opsForValue().get(key);
+                    if (dto != null) return dto; // 첫 매칭 즉시 종료
+                }
+                return null;
+
+            }
+        });
+
+
     }
 
     private List<String> findEndedMatchRapidIds(List<LiveMatchResponse> liveMatches){
