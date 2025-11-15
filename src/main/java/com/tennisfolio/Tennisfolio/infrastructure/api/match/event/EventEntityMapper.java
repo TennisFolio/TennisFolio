@@ -16,8 +16,7 @@ public class EventEntityMapper implements EntityMapper<EventDTO, Match> {
 
     @Override
     public Match map(EventDTO dto, Object... params) {
-
-        return Match.builder()
+        Match match = Match.builder()
                 .rapidMatchId(dto.getRapidId())
                 .homeSeed(dto.getHomeTeamSeed())
                 .awaySeed(dto.getAwayTeamSeed())
@@ -30,6 +29,11 @@ public class EventEntityMapper implements EntityMapper<EventDTO, Match> {
                 .winner(dto.getWinner())
                 .status(dto.getStatus().getDescription())
                 .build();
+
+        match.nullToZero();
+        match.convertTime();
+        
+        return match;
 
     }
 }

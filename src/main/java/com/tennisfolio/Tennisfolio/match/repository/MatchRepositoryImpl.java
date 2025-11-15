@@ -25,6 +25,10 @@ public class MatchRepositoryImpl implements MatchRepository{
         return matchJpaRepository.findByRapidMatchId(rapidMatchId).map(MatchEntity::toModelBaseOnly);
     }
 
+    public Optional<Match> findWithToOneByRapidMatchId(String rapidMatchId){
+        return matchJpaRepository.findWithToOneByRapidMatchId(rapidMatchId).map(MatchEntity::toModel);
+    }
+
     @Override
     public Match save(Match match) {
         return matchJpaRepository.save(MatchEntity.fromModel(match)).toModel();

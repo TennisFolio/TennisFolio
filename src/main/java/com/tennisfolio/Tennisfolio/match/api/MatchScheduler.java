@@ -25,6 +25,6 @@ public class MatchScheduler {
 
     @Scheduled(cron="0,30 * * * * *", zone= "Asia/Seoul")
     public void updateLiveMatches(){
-        liveMatchService.updateLiveMatches();
+//        liveMatchService.updateLiveMatches();
     }
 }
