@@ -115,12 +115,14 @@ public class LiveMatchService {
            if(category == null) continue;
 
            String key = "live:"+ category + ":" + liveMatch.getRapidId();
+           String indexKey = "index:rapidId:" + liveMatch.getRapidId();
+
            String homePlayerImage = playerProvider.provide(liveMatch.getHomePlayer().getPlayerRapidId()).getImage();
            String awayPlayerImage = playerProvider.provide(liveMatch.getAwayPlayer().getPlayerRapidId()).getImage();
            liveMatch.setPlayerImage(homePlayerImage, awayPlayerImage);
 
-            redis.opsForValue()
-                    .set(key, liveMatch, Duration.ofMinutes(1));
+            redis.opsForValue().set(key, liveMatch, Duration.ofMinutes(1));
+            redis.opsForValue().set(indexKey, key, Duration.ofMinutes(1));
         }
 
         // 종료된 것으로 예상되는 rapidId
@@ -157,27 +159,19 @@ public class LiveMatchService {
         return wtaMatches;
     }
 
+    public List<LiveMatchResponse> getAllLiveEventsByRedis(){
+        List<LiveMatchResponse> atpEvents = getATPLiveEventsByRedis();
+        List<LiveMatchResponse> wtaEvents = getWTALiveEventsByRedis();
+
+        atpEvents.addAll(wtaEvents);
+
+        return atpEvents;
+    }
+
     public LiveMatchResponse getLiveEventByRedis(String rapidId){
-        String pattern = "live:*:" + rapidId;
+        String indexKey = "index:rapidId:" + rapidId;
 
-        // scan: 운영/공유 환경
-        ScanOptions options = scanOptions()
-                .match(pattern)
-                .count(200)
-                .build();
-
-        return (LiveMatchResponse) redis.execute((RedisCallback<LiveMatchResponse>) (RedisConnection conn) -> {
-            try (var cursor = conn.keyCommands().scan(options)) {
-
-                while (cursor.hasNext()) {
-                    String key = new String(cursor.next(), StandardCharsets.UTF_8);
-                    LiveMatchResponse dto = (LiveMatchResponse)redis.opsForValue().get(key);
-                    if (dto != null) return dto; // 첫 매칭 즉시 종료
-                }
-                return null;
-
-            }
-        });
+        return (LiveMatchResponse) redis.opsForValue().get(indexKey);
 
 
     }

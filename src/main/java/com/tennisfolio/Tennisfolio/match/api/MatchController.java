@@ -58,7 +58,7 @@ public class MatchController {
 
     @Scheduled(fixedRate = 30000)
     public void getLiveEventSchedule(){
-        List<LiveMatchResponse> events = liveMatchService.getATPLiveEventsByRedis();
+        List<LiveMatchResponse> events = liveMatchService.getAllLiveEventsByRedis();
         events.stream().forEach( event -> {
             messagingTemplate.convertAndSend("/topic/liveMatch." + event.getRapidId(), event);
         });

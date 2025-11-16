@@ -32,8 +32,8 @@ public class EventMapperTest {
         assertThat(match.getHomeScore()).isEqualTo(1);
         assertThat(match.getAwayScore()).isEqualTo(1);
         assertThat(match.getStatus()).isEqualTo("3rd set");
-        assertThat(match.getPeriodSet().getSet1()).isEqualTo("1829");
-        assertThat(match.getStartTimestamp()).isEqualTo("1762578000");
+        assertThat(match.getPeriodSet().getSet1()).isEqualTo("30:29");
+        assertThat(match.getStartTimestamp()).isEqualTo("20251108140000");
         assertThat(match.getWinner()).isNull();
     }
 }
