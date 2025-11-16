@@ -151,8 +151,9 @@ public class LiveMatchServiceTest {
         LiveMatchResponse response1 = LiveEventsFixtures.liveMatchInProgress1();
 
         redisTemplate.opsForValue().set("live:atp:1", response1);
+        redisTemplate.opsForValue().set("index:rapidId:1", response1);
 
-        LiveMatchResponse res = liveMatchService.getLiveEvent("1");
+        LiveMatchResponse res = liveMatchService.getLiveEventByRedis("1");
 
         assertThat(res.getRapidId()).isEqualTo("1");
         assertThat(res.getRoundName()).isEqualTo("Final");

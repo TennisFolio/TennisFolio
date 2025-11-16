@@ -10,7 +10,19 @@ import java.util.Optional;
 import java.util.Set;
 
 public interface MatchJpaRepository extends JpaRepository<MatchEntity, Long> {
-    Optional<MatchEntity> findByRapidMatchId(String rapidMatchId);
+
+    Optional<MatchEntity> findByRapidMatchId(@Param("rapidMatchId") String rapidMatchId);
+
+    @Query("""
+            SELECT m
+            FROM MatchEntity m
+            JOIN FETCH m.roundEntity r
+            JOIN FETCH r.seasonEntity s
+            JOIN FETCH s.tournamentEntity t
+            JOIN FETCH t.categoryEntity c
+            WHERE rapidMatchId = :rapidMatchId
+            """)
+    Optional<MatchEntity> findWithToOneByRapidMatchId(@Param("rapidMatchId") String rapidMatchId);
 
     @Query("SELECT m.rapidMatchId FROM MatchEntity m")
     Set<String> findAllRapidMatchIds();

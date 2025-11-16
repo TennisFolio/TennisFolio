@@ -16,6 +16,11 @@ public class FakeMatchRepository implements MatchRepository {
     private final List<Match> batch = Collections.synchronizedList(new ArrayList<>());
 
     @Override
+    public Optional<Match> findWithToOneByRapidMatchId(String rapidMatchId) {
+        return data.values().stream().filter(p -> rapidMatchId.equals(p.getRapidMatchId())).findFirst();
+    }
+
+    @Override
     public Optional<Match> findByRapidMatchId(String rapidMatchId) {
         return data.values().stream().filter(p -> rapidMatchId.equals(p.getRapidMatchId())).findFirst();
     }

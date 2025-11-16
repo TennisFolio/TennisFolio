@@ -88,7 +88,7 @@ public class MatchSyncService {
         allEvents.stream()
                 .filter(match -> match.getTournament().getCategory().isSupportedCategory())
                 .forEach(match -> {
-                    Optional<Match> existingOpt = matchRepository.findByRapidMatchId(match.getRapidMatchId());
+                    Optional<Match> existingOpt = matchRepository.findWithToOneByRapidMatchId(match.getRapidMatchId());
 
                     // 존재하는 경우 → dirty checking (UPDATE)
                     if (existingOpt.isPresent()) {

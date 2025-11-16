@@ -20,13 +20,20 @@ import com.tennisfolio.Tennisfolio.util.ConversionUtil;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.redis.connection.RedisConnection;
+import org.springframework.data.redis.core.Cursor;
+import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.stereotype.Service;
 
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import static org.springframework.data.redis.core.ScanOptions.scanOptions;
 
 @Slf4j
 @Service
@@ -108,12 +115,14 @@ public class LiveMatchService {
            if(category == null) continue;
 
            String key = "live:"+ category + ":" + liveMatch.getRapidId();
+           String indexKey = "index:rapidId:" + liveMatch.getRapidId();
+
            String homePlayerImage = playerProvider.provide(liveMatch.getHomePlayer().getPlayerRapidId()).getImage();
            String awayPlayerImage = playerProvider.provide(liveMatch.getAwayPlayer().getPlayerRapidId()).getImage();
            liveMatch.setPlayerImage(homePlayerImage, awayPlayerImage);
 
-            redis.opsForValue()
-                    .set(key, liveMatch, Duration.ofMinutes(1));
+            redis.opsForValue().set(key, liveMatch, Duration.ofMinutes(1));
+            redis.opsForValue().set(indexKey, key, Duration.ofMinutes(1));
         }
 
         // 종료된 것으로 예상되는 rapidId
@@ -148,6 +157,23 @@ public class LiveMatchService {
         List<LiveMatchResponse> wtaMatches = redis.opsForValue().multiGet(keys);
 
         return wtaMatches;
+    }
+
+    public List<LiveMatchResponse> getAllLiveEventsByRedis(){
+        List<LiveMatchResponse> atpEvents = getATPLiveEventsByRedis();
+        List<LiveMatchResponse> wtaEvents = getWTALiveEventsByRedis();
+
+        atpEvents.addAll(wtaEvents);
+
+        return atpEvents;
+    }
+
+    public LiveMatchResponse getLiveEventByRedis(String rapidId){
+        String indexKey = "index:rapidId:" + rapidId;
+
+        return (LiveMatchResponse) redis.opsForValue().get(indexKey);
+
+
     }
 
     private List<String> findEndedMatchRapidIds(List<LiveMatchResponse> liveMatches){

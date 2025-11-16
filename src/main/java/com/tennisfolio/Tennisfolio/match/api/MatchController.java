@@ -51,14 +51,14 @@ public class MatchController {
 
     @GetMapping("/liveEvents/{matchId}")
     public ResponseEntity<ResponseDTO<LiveMatchResponse>> getLiveEvent(@PathVariable("matchId") String matchId){
-        LiveMatchResponse event = liveMatchService.getLiveEvent(matchId);
+        LiveMatchResponse event = liveMatchService.getLiveEventByRedis(matchId);
 
         return new ResponseEntity<>(ResponseDTO.success(event), HttpStatus.OK);
     }
 
     @Scheduled(fixedRate = 30000)
     public void getLiveEventSchedule(){
-        List<LiveMatchResponse> events = liveMatchService.getATPLiveEventsByRedis();
+        List<LiveMatchResponse> events = liveMatchService.getAllLiveEventsByRedis();
         events.stream().forEach( event -> {
             messagingTemplate.convertAndSend("/topic/liveMatch." + event.getRapidId(), event);
         });
