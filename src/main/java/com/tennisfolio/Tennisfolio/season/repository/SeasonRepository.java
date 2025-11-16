@@ -13,6 +13,7 @@ public interface SeasonRepository {
     List<Season> collect(Season season);
     List<Season> collect(List<Season> seasons);
     Set<String> findAllRapidIds();
+    List<Season> findByRapidSeasonIdIn(Set<String> rapidSeasonIds);
     Optional<Season> findByRapidSeasonId(String rapidId);
     boolean flushWhenFull();
     boolean flushAll();

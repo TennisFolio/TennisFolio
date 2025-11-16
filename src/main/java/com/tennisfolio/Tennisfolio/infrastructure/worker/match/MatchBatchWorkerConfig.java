@@ -10,11 +10,16 @@ import org.springframework.context.annotation.Configuration;
 public class MatchBatchWorkerConfig {
 
     private static final int MATCH_BATCH_LIMIT = 500;
+    private final MatchBatchPipeline matchBatchPipeline;
+
+    public MatchBatchWorkerConfig(MatchBatchPipeline matchBatchPipeline) {
+        this.matchBatchPipeline = matchBatchPipeline;
+    }
 
     @Bean
     public GenericBatchWorker<Match> matchBatchWorker(MatchRepository matchRepository){
         return new GenericBatchWorker<>(
-                matchRepository::saveAll,
+                matchBatchPipeline::runBatch,
                 MATCH_BATCH_LIMIT
         );
     }

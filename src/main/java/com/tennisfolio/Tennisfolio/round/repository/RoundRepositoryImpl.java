@@ -64,6 +64,11 @@ public class RoundRepositoryImpl implements RoundRepository{
     }
 
     @Override
+    public List<Round> findBySeasonAndRoundIn(Season season, Set<Long> rounds) {
+        return List.of();
+    }
+
+    @Override
     public boolean flushWhenFull() {
         return bufferedBatchSaver.flushWhenFull();
     }

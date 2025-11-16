@@ -16,6 +16,7 @@ public interface RoundRepository {
     Optional<Round> findBySeasonAndRound(Season season, Long round);
     List<Round> collect(Round round);
     List<Round> collect(List<Round> rounds);
+    List<Round> findBySeasonAndRoundIn(Season season, Set<Long> rounds);
     boolean flushWhenFull();
     boolean flushAll();
     void flush();

@@ -11,6 +11,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Repository
 public class MatchRepositoryImpl implements MatchRepository{
@@ -35,6 +36,11 @@ public class MatchRepositoryImpl implements MatchRepository{
     public void saveAll(List<Match> matches) {
         List<MatchEntity> entities = matches.stream().map(MatchEntity::fromModel).toList();
         matchJpaRepository.saveAll(entities);
+    }
+
+    @Override
+    public Set<String> findRapidMatchIdByRapidMatchIds(List<String> rapidMatchIds) {
+        return matchJpaRepository.findRapidMatchIdByRapidMatchIds(rapidMatchIds).stream().collect(Collectors.toSet());
     }
 
     @Override

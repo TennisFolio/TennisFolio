@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
 
@@ -14,6 +15,13 @@ public interface MatchJpaRepository extends JpaRepository<MatchEntity, Long> {
 
     @Query("SELECT m.rapidMatchId FROM MatchEntity m")
     Set<String> findAllRapidMatchIds();
+
+    @Query("""
+            SELECT m.rapidMatchId
+            FROM MatchEntity m
+            WHERE rapidMatchId IN :rapidMatchIds
+            """)
+    Set<String> findRapidMatchIdByRapidMatchIds(@Param("rapidMatchIds") Collection<String> rapidMatchIds);
 
     @Modifying
     @Query("""

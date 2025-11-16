@@ -1,11 +1,14 @@
 package com.tennisfolio.Tennisfolio.infrastructure.api.match.leagueEventsByRound;
 
+import com.tennisfolio.Tennisfolio.Tournament.domain.Tournament;
+import com.tennisfolio.Tennisfolio.category.domain.Category;
 import com.tennisfolio.Tennisfolio.exception.NotFoundException;
 import com.tennisfolio.Tennisfolio.infrastructure.api.base.EntityAssemble;
 import com.tennisfolio.Tennisfolio.common.ExceptionCode;
 import com.tennisfolio.Tennisfolio.exception.InvalidRequestException;
-import com.tennisfolio.Tennisfolio.infrastructure.api.match.liveEvents.ScoreDTO;
-import com.tennisfolio.Tennisfolio.infrastructure.api.match.liveEvents.TimeDTO;
+import com.tennisfolio.Tennisfolio.infrastructure.api.category.categories.CategoryDTO;
+import com.tennisfolio.Tennisfolio.infrastructure.api.match.eventSchedules.EventSchedulesDTO;
+import com.tennisfolio.Tennisfolio.infrastructure.api.match.liveEvents.*;
 import com.tennisfolio.Tennisfolio.match.domain.Match;
 import com.tennisfolio.Tennisfolio.match.domain.Period;
 import com.tennisfolio.Tennisfolio.match.domain.Score;
@@ -26,14 +29,6 @@ import java.util.stream.Collectors;
 
 @Component
 public class LeagueEventsByRoundAssemble implements EntityAssemble<List<LeagueEventsByRoundDTO>, List<Match>> {
-    private final RoundRepository roundRepository;
-    private final SeasonRepository seasonRepository;
-    private final PlayerService playerService;
-    public LeagueEventsByRoundAssemble(RoundRepository roundRepository, SeasonRepository seasonRepository, PlayerService playerService) {
-        this.roundRepository = roundRepository;
-        this.seasonRepository = seasonRepository;
-        this.playerService = playerService;
-    }
 
 
     @Override
@@ -41,20 +36,21 @@ public class LeagueEventsByRoundAssemble implements EntityAssemble<List<LeagueEv
         if(params.length == 0 || params[1] == null || params[2] == null || params[3] == null){
             throw new InvalidRequestException(ExceptionCode.INVALID_REQUEST);
         }
-        String rapidSeasonId = params[1].toString();
-        Long roundType = Long.parseLong(params[2].toString());
-        String slug = params[3].toString();
-
-        Season season = seasonRepository.findByRapidSeasonId(rapidSeasonId)
-                .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND));
-
-        Round round = roundRepository.findBySeasonAndRoundAndSlug(season,roundType,slug)
-                .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND));
-
         List<Match> matches = dto.stream().map( events -> {
 
-            Player homePlayer = playerService.getOrCreatePlayerByRapidId(events.getHomeTeam().getRapidPlayerId());
-            Player awayPlayer = playerService.getOrCreatePlayerByRapidId(events.getAwayTeam().getRapidPlayerId());
+            SeasonDTO seasonDTO = events.getSeason();
+            Season season = findSeason(seasonDTO);
+            // Round
+            RoundDTO roundDTO = events.getRound();
+            Round round = findRound(roundDTO, season);
+
+            // homePlayer
+            TeamDTO homePlayerDTO = events.getHomeTeam();
+            Player homePlayer = findPlayer(homePlayerDTO);
+
+            // awayPlayer
+            TeamDTO awayPlayerDTO = events.getAwayTeam();
+            Player awayPlayer = findPlayer(awayPlayerDTO);
 
             ScoreDTO homeScoreDTO = events.getHomeScore();
             Score homeScore = Score.builder()
@@ -117,5 +113,30 @@ public class LeagueEventsByRoundAssemble implements EntityAssemble<List<LeagueEv
         }).toList();
 
 
+    }
+
+
+    private Player findPlayer(TeamDTO teamDTO){
+        return Player.builder()
+                .rapidPlayerId(teamDTO.getRapidPlayerId())
+                .playerName(teamDTO.getName())
+                .build();
+    }
+
+    private Round findRound(RoundDTO roundDTO, Season season){
+        return Round.builder()
+                .season(season)
+                .round(roundDTO.getRound())
+                .name(roundDTO.getName())
+                .slug(roundDTO.getSlug())
+                .build();
+    }
+
+    private Season findSeason(SeasonDTO seasonDTO){
+        return Season.builder()
+                .rapidSeasonId(seasonDTO.getRapidId())
+                .seasonName(seasonDTO.getName())
+                .year(seasonDTO.getYear())
+                .build();
     }
 }

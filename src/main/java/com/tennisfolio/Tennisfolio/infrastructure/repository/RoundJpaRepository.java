@@ -5,8 +5,11 @@ import com.tennisfolio.Tennisfolio.round.repository.RoundEntity;
 import com.tennisfolio.Tennisfolio.season.repository.SeasonEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -16,4 +19,15 @@ public interface RoundJpaRepository extends JpaRepository<RoundEntity, Long> {
     Optional<RoundEntity> findBySeasonEntityAndRound(SeasonEntity seasonEntity, Long round);
     @Query("SELECT r.seasonEntity, r.round FROM RoundEntity r")
     Set<Pair<SeasonEntity,String>> findAllSeasonRoundPairs();
+
+    @Query("""
+            SELECT r
+            FROM RoundEntity r
+            JOIN FETCH r.seasonEntity s
+            JOIN FETCH s.tournamentEntity t
+            JOIN FETCH t.categoryEntity c
+            WHERE r.season = :season
+            AND r.round IN :rounds 
+            """)
+    List<RoundEntity> findBySeasonAndRoundIn(@Param("season") SeasonEntity season, @Param("rounds") Collection<Long> rounds);
 }
