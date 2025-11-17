@@ -199,6 +199,22 @@ const formatTimeFromTimestamp = (timestamp) => {
   return `${hour}:${minute}`;
 };
 
+// 대회 색상 배열 (명확하게 구분되는 색상)
+const tournamentColors = [
+  '#FF6B6B', // 빨강
+  '#4ECDC4', // 청록
+  '#FFD93D', // 노랑
+  '#6BCF7F', // 초록
+  '#A8E6CF', // 민트
+  '#FF8B94', // 연분홍
+  '#C7CEEA', // 연보라
+  '#FFDAC1', // 피치
+  '#B4A7D6', // 라벤더
+  '#95E1D3', // 민트그린
+  '#F38181', // 코랄
+  '#AA96DA', // 퍼플
+];
+
 function Schedule() {
   const [selectedDate, setSelectedDate] = useState(new Date()); // 초기에는 오늘 날짜 선택
   const [activeStartDate, setActiveStartDate] = useState(new Date()); // 현재 보고 있는 달력의 월
@@ -215,6 +231,7 @@ function Schedule() {
         setSelectedCategory(categories[0]);
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tournaments]);
 
   // 월별 대회 목록 로드
@@ -323,21 +340,15 @@ function Schedule() {
     return grouped;
   }, [tournaments]);
 
-  // 대회 색상 배열 (명확하게 구분되는 색상)
-  const tournamentColors = [
-    '#FF6B6B', // 빨강
-    '#4ECDC4', // 청록
-    '#FFD93D', // 노랑
-    '#6BCF7F', // 초록
-    '#A8E6CF', // 민트
-    '#FF8B94', // 연분홍
-    '#C7CEEA', // 연보라
-    '#FFDAC1', // 피치
-    '#B4A7D6', // 라벤더
-    '#95E1D3', // 민트그린
-    '#F38181', // 코랄
-    '#AA96DA', // 퍼플
-  ];
+  // 현재 선택된 카테고리의 categoryId (메모이제이션)
+  const selectedCategoryId = useMemo(() => {
+    if (!selectedCategory || !tournamentsByCategory[selectedCategory]) {
+      return null;
+    }
+    // 같은 카테고리의 첫 번째 토너먼트에서 categoryId 가져오기
+    const firstTournament = tournamentsByCategory[selectedCategory][0];
+    return firstTournament?.categoryId || null;
+  }, [selectedCategory, tournamentsByCategory]);
 
   // 대회 ID와 색상 매핑 (같은 달에 색상 겹침 방지)
   const [tournamentColorMap, setTournamentColorMap] = useState({});
@@ -454,6 +465,9 @@ function Schedule() {
       // seasonId가 선택되어 있으면 함께 전송
       if (selectedSeasonId) {
         apiUrl += `&seasonId=${selectedSeasonId}`;
+      } else if (selectedCategoryId) {
+        // seasonId가 선택되지 않았고, 선택된 카테고리가 있으면 categoryId 전송
+        apiUrl += `&categoryId=${selectedCategoryId}`;
       }
 
       const response = await apiRequest.get(apiUrl);
@@ -485,9 +499,12 @@ function Schedule() {
         const dateKey = formatDateToTimestamp(selectedDate);
         let apiUrl = `${base_server_url}/api/calendar/detail?date=${dateKey}`;
 
-        // seasonId가 선택되어 있으면 함께 전송 (없으면 전체 데이터)
+        // seasonId가 선택되어 있으면 함께 전송
         if (selectedSeasonId) {
           apiUrl += `&seasonId=${selectedSeasonId}`;
+        } else if (selectedCategoryId) {
+          // seasonId가 선택되지 않았고, 선택된 카테고리가 있으면 categoryId 전송
+          apiUrl += `&categoryId=${selectedCategoryId}`;
         }
 
         const response = await apiRequest.get(apiUrl);
@@ -507,8 +524,7 @@ function Schedule() {
     };
 
     fetchMatchesForDate();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedDate, selectedSeasonId, selectedCategory]);
+  }, [selectedDate, selectedSeasonId, selectedCategory, selectedCategoryId]);
 
   // 달력의 월이 변경될 때 호출
   const handleActiveStartDateChange = ({ activeStartDate }) => {
