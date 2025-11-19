@@ -47,6 +47,9 @@ public class RankingSyncServiceTest {
     @Mock
     private ApiCallCounter apiCallCounter;
 
+    @Mock
+    private RedisRateLimiter redisRateLimiter;
+
     @BeforeEach
     void setUp(){
         MockitoAnnotations.openMocks(this);
@@ -57,7 +60,7 @@ public class RankingSyncServiceTest {
         List<StrategyApiTemplate<?,?>> strategyApiTemplates = new ArrayList<>();
         strategyApiTemplates.add(fakeAtpRankingApiTemplate);
         strategyApiTemplates.add(teamDetailsApi);
-        ApiWorker apiWorker = new ApiWorker(strategyApiTemplates);
+        ApiWorker apiWorker = new ApiWorker(strategyApiTemplates, redisRateLimiter);
         when(playerImageService.fetchImage("1")).thenReturn("/player/1");
         when(playerImageService.fetchImage("2")).thenReturn("/player/2");
         when(playerImageService.fetchImage("3")).thenReturn("/player/3");

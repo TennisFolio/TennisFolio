@@ -49,6 +49,9 @@ public class SeasonSyncServiceTest {
     @Mock
     private ApiCallCounter apiCallCounter;
 
+    @Mock
+    private RedisRateLimiter redisRateLimiter;
+
     private List<StrategyApiTemplate<?, ?>> strategies = new ArrayList<>();
 
     private StrategyApiTemplate<List<LeagueSeasonsDTO>, List<Season>> leagueSeasonTemplate;
@@ -73,7 +76,7 @@ public class SeasonSyncServiceTest {
         strategies.add(leagueSeasonTemplate);
         strategies.add(leagueSeasonInfoTemplate);
 
-        ApiWorker apiWorker = new ApiWorker(strategies);
+        ApiWorker apiWorker = new ApiWorker(strategies, redisRateLimiter);
         seasonSyncService = new SeasonSyncService(apiWorker, tournamentQueryService, fakeSeasonRepository);
     }
 

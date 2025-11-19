@@ -51,6 +51,14 @@ public class SeasonRepositoryImpl implements SeasonRepository{
     }
 
     @Override
+    public List<Season> findByRapidSeasonIdIn(Set<String> rapidSeasonIds) {
+        return seasonJpaRepository.findByRapidSeasonIdIn(rapidSeasonIds)
+                .stream()
+                .map(SeasonEntity::toModelBaseOnly)
+                .toList();
+    }
+
+    @Override
     public Optional<Season> findByRapidSeasonId(String rapidId) {
         return seasonJpaRepository.findByRapidSeasonId(rapidId).map(SeasonEntity::toModel);
     }

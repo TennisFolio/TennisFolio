@@ -45,6 +45,9 @@ public class RoundSyncServiceTest {
     @Mock
     private ResponseParser parser;
 
+    @Mock
+    private RedisRateLimiter redisRateLimiter;
+
     @BeforeEach
     void setUp(){
         MockitoAnnotations.openMocks(this);
@@ -55,7 +58,7 @@ public class RoundSyncServiceTest {
 
         strategies.add(leagueRoundsApiTemplate);
 
-        ApiWorker apiWorker = new ApiWorker(strategies);
+        ApiWorker apiWorker = new ApiWorker(strategies, redisRateLimiter);
 
         fakeSeasonRepository.collect(List.of(SeasonInfoFixtures.wimbledonMen2025(), SeasonInfoFixtures.rolandGarrosMen2025()));
         fakeSeasonRepository.flushAll();

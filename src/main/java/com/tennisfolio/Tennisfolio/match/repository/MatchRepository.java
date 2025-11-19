@@ -11,6 +11,8 @@ public interface MatchRepository {
     Optional<Match> findByRapidMatchId(String rapidMatchId);
     Optional<Match> findWithToOneByRapidMatchId(String rapidMatchId);
     Match save(Match match);
+    void saveAll(List<Match> matches);
+    Set<String> findRapidMatchIdByRapidMatchIds(List<String> rapidMatchIds);
     List<Match> findAll();
     Set<String> findAllRapidIds();
     List<Match> collect(Match match);

@@ -66,6 +66,14 @@ public class FakeRoundRepository implements RoundRepository {
     }
 
     @Override
+    public List<Round> findBySeasonAndRoundIn(Season season, Set<Long> rounds) {
+        return data.values().stream()
+                .filter(r -> r.getSeason().getRapidSeasonId().equals(season.getRapidSeasonId()) &&
+                        rounds.contains(r.getRound()))
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public boolean flushWhenFull() {
         if(batch.size() >= batchSize){
             flushBatch();

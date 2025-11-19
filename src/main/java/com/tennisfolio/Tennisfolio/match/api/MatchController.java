@@ -70,6 +70,12 @@ public class MatchController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    @PostMapping("/asyncMatch")
+    public ResponseEntity<ResponseDTO> asyncSaveMatch(){
+        matchSyncService.loadMatchesByRound();
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
     @PostMapping("/event")
     public ResponseEntity<ResponseDTO> saveEventSchedule(){
 

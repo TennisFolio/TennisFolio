@@ -2,6 +2,7 @@ package com.tennisfolio.Tennisfolio.infrastructure.api.base.apiCaller;
 
 import com.tennisfolio.Tennisfolio.common.ExceptionCode;
 import com.tennisfolio.Tennisfolio.config.HttpClientConfig;
+import com.tennisfolio.Tennisfolio.exception.Rapid429Exception;
 import com.tennisfolio.Tennisfolio.exception.RapidApiException;
 import com.tennisfolio.Tennisfolio.infrastructure.api.base.ApiCaller;
 import com.tennisfolio.Tennisfolio.infrastructure.api.base.DecompressorUtil;
@@ -58,11 +59,18 @@ public class TennisApiCaller implements ApiCaller {
             if(response.statusCode() != 200){
                 for(Object param : params){
                     System.out.println(param);
+
+                }
+                System.out.println("statusCode : " + response.statusCode());
+                if (response.statusCode() == 429) {
+                    throw new Rapid429Exception("429 Too Many Requests from Rapid API");
                 }
                 return null;
             }
 
             return decodeResponse(response);
+        }catch(Rapid429Exception e){
+            throw e;
         }catch(Exception e){
             e.printStackTrace();
             throw new RapidApiException(ExceptionCode.RAPID_ERROR);

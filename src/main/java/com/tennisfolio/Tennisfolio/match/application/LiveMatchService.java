@@ -104,6 +104,8 @@ public class LiveMatchService {
                 .orElseThrow(() -> new LiveMatchNotFoundException(ExceptionCode.NOT_FOUND));
     }
 
+
+
     @Transactional
     public void updateLiveMatches(){
 
@@ -193,5 +195,6 @@ public class LiveMatchService {
                 .toList();
 
     }
+
 
 }

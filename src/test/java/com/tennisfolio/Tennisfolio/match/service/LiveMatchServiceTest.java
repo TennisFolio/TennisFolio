@@ -55,6 +55,9 @@ public class LiveMatchServiceTest {
     private ApiCallCounter apiCallCounter;
 
     @Mock
+    private RedisRateLimiter redisRateLimiter;
+
+    @Mock
     PlayerImageService playerImageService;
 
     @BeforeEach
@@ -70,7 +73,7 @@ public class LiveMatchServiceTest {
         strategies.addAll(List.of(liveEventsTemplateSecond, eventTemplate));
         when(playerProvider.provide("206570")).thenReturn(Player.builder().image("player/206570").build());
         when(playerProvider.provide("275923")).thenReturn(Player.builder().image("player/275923").build());
-        apiWorker = new ApiWorker(strategies);
+        apiWorker = new ApiWorker(strategies, redisRateLimiter);
 
         liveMatchService = new LiveMatchService(apiWorker, playerProvider, redisTemplate, matchRepository);
     }

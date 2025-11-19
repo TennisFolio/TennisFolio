@@ -64,6 +64,13 @@ public class RoundRepositoryImpl implements RoundRepository{
     }
 
     @Override
+    public List<Round> findBySeasonAndRoundIn(Season season, Set<Long> rounds) {
+        return  roundJpaRepository.findBySeasonAndRoundIn(SeasonEntity.fromModel(season), rounds)
+                .stream().map(RoundEntity::toModel).toList();
+
+    }
+
+    @Override
     public boolean flushWhenFull() {
         return bufferedBatchSaver.flushWhenFull();
     }

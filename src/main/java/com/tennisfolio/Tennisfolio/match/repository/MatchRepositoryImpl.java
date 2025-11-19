@@ -1,5 +1,6 @@
 package com.tennisfolio.Tennisfolio.match.repository;
 
+import com.tennisfolio.Tennisfolio.category.repository.CategoryEntity;
 import com.tennisfolio.Tennisfolio.infrastructure.repository.MatchJpaRepository;
 import com.tennisfolio.Tennisfolio.infrastructure.saver.BufferedBatchSaver;
 import com.tennisfolio.Tennisfolio.match.domain.Match;
@@ -10,6 +11,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Repository
 public class MatchRepositoryImpl implements MatchRepository{
@@ -17,7 +19,7 @@ public class MatchRepositoryImpl implements MatchRepository{
     private final BufferedBatchSaver<MatchEntity> bufferedBatchSaver;
     public MatchRepositoryImpl(MatchJpaRepository matchJpaRepository, TransactionTemplate transactionTemplate) {
         this.matchJpaRepository = matchJpaRepository;
-        this.bufferedBatchSaver = new BufferedBatchSaver<>(matchJpaRepository, 1000, transactionTemplate);
+        this.bufferedBatchSaver = new BufferedBatchSaver<>(matchJpaRepository, 500, transactionTemplate);
     }
 
     @Override
@@ -32,6 +34,17 @@ public class MatchRepositoryImpl implements MatchRepository{
     @Override
     public Match save(Match match) {
         return matchJpaRepository.save(MatchEntity.fromModel(match)).toModel();
+    }
+
+    @Override
+    public void saveAll(List<Match> matches) {
+        List<MatchEntity> entities = matches.stream().map(MatchEntity::fromModel).toList();
+        matchJpaRepository.saveAll(entities);
+    }
+
+    @Override
+    public Set<String> findRapidMatchIdByRapidMatchIds(List<String> rapidMatchIds) {
+        return matchJpaRepository.findRapidMatchIdByRapidMatchIds(rapidMatchIds).stream().collect(Collectors.toSet());
     }
 
     @Override
