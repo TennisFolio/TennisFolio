@@ -26,6 +26,21 @@ public class FakeMatchRepository implements MatchRepository {
     }
 
     @Override
+    public void saveAll(List<Match> matches) {
+        for (Match m : matches) {
+            data.put(m.getMatchId(), m);
+        }
+    }
+
+    @Override
+    public Set<String> findRapidMatchIdByRapidMatchIds(List<String> rapidMatchIds) {
+        return data.values().stream()
+                .filter(rapidMatchIds::contains)
+                .map(p -> p.getRapidMatchId())
+                .collect(Collectors.toSet());
+    }
+
+    @Override
     public List<Match> findAll() {
         return data.values().stream().toList();
     }

@@ -43,6 +43,9 @@ public class StatisticSyncServiceTest {
     @Mock
     private ApiCallCounter apiCallCounter;
 
+    @Mock
+    private RedisRateLimiter redisRateLimiter;
+
     @BeforeEach
     public void setUp(){
         MockitoAnnotations.openMocks(this);
@@ -58,7 +61,7 @@ public class StatisticSyncServiceTest {
 
         fakeMatchRepository.collect(List.of(MatchFixtures.wimbledonMen2025FinalMatch(), MatchFixtures.rolandGarrosMen2025FinalMatch()));
         fakeMatchRepository.flushAll();
-        apiWorker = new ApiWorker(strategies);
+        apiWorker = new ApiWorker(strategies, redisRateLimiter);
         statisticService = new StatisticSyncService(apiWorker, fakeMatchRepository, fakeStatisticRepository);
     }
 

@@ -10,6 +10,8 @@ import org.springframework.context.annotation.Configuration;
 public class MatchBatchWorkerConfig {
 
     private static final int MATCH_BATCH_LIMIT = 500;
+    private static final int MATCH_QUEUE_CAPACITY = 2000; // 대략 500 * 4 라운드 정도
+
     private final MatchBatchPipeline matchBatchPipeline;
 
     public MatchBatchWorkerConfig(MatchBatchPipeline matchBatchPipeline) {
@@ -20,7 +22,8 @@ public class MatchBatchWorkerConfig {
     public GenericBatchWorker<Match> matchBatchWorker(MatchRepository matchRepository){
         return new GenericBatchWorker<>(
                 matchBatchPipeline::runBatch,
-                MATCH_BATCH_LIMIT
+                MATCH_BATCH_LIMIT,
+                MATCH_QUEUE_CAPACITY
         );
     }
 }

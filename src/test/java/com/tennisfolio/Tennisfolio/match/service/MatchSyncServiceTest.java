@@ -73,6 +73,9 @@ public class MatchSyncServiceTest {
     @Mock
     private ApiCallCounter apiCallCounter;
 
+    @Mock
+    private RedisRateLimiter redisRateLimiter;
+
     Clock fixedClock = Clock.fixed(
             LocalDate.of(2025, 10, 9).atStartOfDay(ZoneId.systemDefault()).toInstant(),
             ZoneId.systemDefault()
@@ -104,9 +107,9 @@ public class MatchSyncServiceTest {
 
         strategies.addAll(List.of(fakeLeagueEventsByRoundApi, fakeEventSchedulesApi, fakeTournamentInfoApi, fakeLeagueDetailsApi, fakeLeagueSeasonInfoApi));
 
-        apiWorker = new ApiWorker(strategies);
+        apiWorker = new ApiWorker(strategies, redisRateLimiter);
 
-        matchSyncService = new MatchSyncService(fakeCategoryRepository, fakeTournamentRepository, fakeSeasonRepository, fakeRoundRepository, fakeMatchRepository, apiWorker, playerProvider, fixedClock, null);
+        matchSyncService = new MatchSyncService(fakeCategoryRepository, fakeTournamentRepository, fakeSeasonRepository, fakeRoundRepository, fakeMatchRepository, apiWorker, playerProvider, fixedClock, null, null);
 
     }
 

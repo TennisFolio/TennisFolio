@@ -26,8 +26,17 @@ public interface RoundJpaRepository extends JpaRepository<RoundEntity, Long> {
             JOIN FETCH r.seasonEntity s
             JOIN FETCH s.tournamentEntity t
             JOIN FETCH t.categoryEntity c
-            WHERE r.season = :season
+            """)
+    List<RoundEntity> findAll();
+
+    @Query("""
+            SELECT r
+            FROM RoundEntity r
+            JOIN FETCH r.seasonEntity s
+            JOIN FETCH s.tournamentEntity t
+            JOIN FETCH t.categoryEntity c
+            WHERE r.seasonEntity = :seasonEntity
             AND r.round IN :rounds 
             """)
-    List<RoundEntity> findBySeasonAndRoundIn(@Param("season") SeasonEntity season, @Param("rounds") Collection<Long> rounds);
+    List<RoundEntity> findBySeasonAndRoundIn(@Param("seasonEntity") SeasonEntity season, @Param("rounds") Collection<Long> rounds);
 }

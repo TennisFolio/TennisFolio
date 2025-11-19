@@ -35,7 +35,7 @@ public class MatchBatchPipeline extends AbstractBatchPipeline<Match> {
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     protected List<Match> enrich(List<Match> batch) {
 
         // 1) 필요한 키 수집
@@ -120,33 +120,14 @@ public class MatchBatchPipeline extends AbstractBatchPipeline<Match> {
 
         return enriched;
 
-
-
-
-//        batch.stream().forEach(p -> {
-//           Season season = seasonRepository.findByRapidSeasonId(p.getSeason().getRapidSeasonId())
-//                   .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND));
-//
-//           Round round = p.getRound();
-//           Round findRound = roundRepository.findBySeasonAndRound(season, round.getRound())
-//                   .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND));
-//
-//           Player homePlayer = playerProvider.provide(p.getHomePlayer().getRapidPlayerId());
-//           Player awayPlayer = playerProvider.provide(p.getAwayPlayer().getRapidPlayerId());
-//
-//           p.updatePlayer(homePlayer, awayPlayer);
-//           p.updateRound(findRound);
-//
-//        });
-
-//        return batch;
     }
 
     @Override
+    @Transactional
     protected void save(List<Match> batchEntities) {
         List<String> rapidMatchIds = batchEntities.stream().map(p -> p.getRapidMatchId()).collect(Collectors.toList());
         Set<String> findRapidMatchIds = matchRepository.findRapidMatchIdByRapidMatchIds(rapidMatchIds);
-
+        System.out.println("=========================== save!!!!=============================");
         List<Match> savePossibleMatches = batchEntities
                 .stream()
                 .filter(p -> !findRapidMatchIds.contains(p.getRapidMatchId()))

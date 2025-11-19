@@ -65,7 +65,9 @@ public class RoundRepositoryImpl implements RoundRepository{
 
     @Override
     public List<Round> findBySeasonAndRoundIn(Season season, Set<Long> rounds) {
-        return List.of();
+        return  roundJpaRepository.findBySeasonAndRoundIn(SeasonEntity.fromModel(season), rounds)
+                .stream().map(RoundEntity::toModel).toList();
+
     }
 
     @Override

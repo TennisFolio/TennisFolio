@@ -81,6 +81,9 @@ public class TournamentSyncServiceTest {
     @Mock
     private PlayerProvider playerProvider;
 
+    @Mock
+    private RedisRateLimiter redisRateLimiter;
+
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
@@ -95,7 +98,7 @@ public class TournamentSyncServiceTest {
 
         strategies.addAll(List.of(categoryTemplate, infoTemplate, leagueTemplate, teamDetailsTemplate));
 
-        ApiWorker apiWorker = new ApiWorker(strategies);
+        ApiWorker apiWorker = new ApiWorker(strategies, redisRateLimiter);
 
         service = new TournamentSyncService(apiWorker, categoryService, fakeTournamentRepository, playerProvider);
 

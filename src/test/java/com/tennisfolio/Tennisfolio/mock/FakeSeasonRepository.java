@@ -45,6 +45,14 @@ public class FakeSeasonRepository implements SeasonRepository {
     }
 
     @Override
+    public List<Season> findByRapidSeasonIdIn(Set<String> rapidSeasonIds) {
+        return data.values()
+                .stream()
+                .filter(p -> rapidSeasonIds.contains(p.getRapidSeasonId()))
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public Optional<Season> findByRapidSeasonId(String rapidId) {
         return findAll().stream().filter(season -> rapidId.equals(season.getRapidSeasonId())).findFirst();
     }

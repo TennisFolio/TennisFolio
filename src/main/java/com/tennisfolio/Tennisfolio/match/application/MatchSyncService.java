@@ -7,6 +7,7 @@ import com.tennisfolio.Tennisfolio.category.repository.CategoryRepository;
 import com.tennisfolio.Tennisfolio.common.RoundType;
 import com.tennisfolio.Tennisfolio.infrastructure.api.base.ApiWorker;
 import com.tennisfolio.Tennisfolio.infrastructure.api.base.RapidApi;
+import com.tennisfolio.Tennisfolio.infrastructure.api.base.RetryExecutor;
 import com.tennisfolio.Tennisfolio.infrastructure.api.base.StrategyApiTemplate;
 import com.tennisfolio.Tennisfolio.infrastructure.api.match.leagueEventsByRound.LeagueEventsByRoundDTO;
 import com.tennisfolio.Tennisfolio.infrastructure.worker.GenericBatchWorker;
@@ -30,6 +31,7 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -47,8 +49,9 @@ public class MatchSyncService {
     private final PlayerProvider playerProvider;
     private final Clock clock;
     private final GenericBatchWorker<Match> matchBatchWorker;
+    private final RetryExecutor retryExecutor;
 
-    public MatchSyncService(CategoryRepository categoryRepository, TournamentRepository tournamentRepository, SeasonRepository seasonRepository, RoundRepository roundRepository, MatchRepository matchRepository, ApiWorker apiWorker, PlayerProvider playerProvider, Clock clock, GenericBatchWorker<Match> matchBatchWorker) {
+    public MatchSyncService(CategoryRepository categoryRepository, TournamentRepository tournamentRepository, SeasonRepository seasonRepository, RoundRepository roundRepository, MatchRepository matchRepository, ApiWorker apiWorker, PlayerProvider playerProvider, Clock clock, GenericBatchWorker<Match> matchBatchWorker, RetryExecutor retryExecutor) {
         this.categoryRepository = categoryRepository;
         this.tournamentRepository = tournamentRepository;
         this.seasonRepository = seasonRepository;
@@ -58,6 +61,7 @@ public class MatchSyncService {
         this.playerProvider = playerProvider;
         this.clock = clock;
         this.matchBatchWorker = matchBatchWorker;
+        this.retryExecutor = retryExecutor;
     }
 
     public void saveMatchList() {
@@ -92,16 +96,23 @@ public class MatchSyncService {
     }
 
     public void loadMatchesByRound(){
-        ExecutorService producerExecutor = Executors.newFixedThreadPool(6);
+        ExecutorService producerExecutor = Executors.newFixedThreadPool(5);
 
         Set<String> existingKeys = matchRepository.findAllRapidIds();
 
         List<Round> rounds = roundRepository.findAll();
 
+        int MAX_PENDING_BEFORE_API = 2000;   // API 호출 전에 허용할 최대 pending 개수
+        long CAPACITY_CHECK_INTERVAL_MS = 50L;
+
         List<CompletableFuture<Void>> futures = rounds.stream()
                 .map(round -> CompletableFuture.runAsync(() -> {
                     try{
                         if(round.getSlug() == null) return;
+
+                        // API 호출 전에 batch worker 상태를 보고 백프레셔 적용
+                        matchBatchWorker.awaitCapacity(MAX_PENDING_BEFORE_API, CAPACITY_CHECK_INTERVAL_MS);
+
                         String rapidTournamentId = round.getSeason().getTournament().getRapidTournamentId();
                         String rapidSeasonId = round.getSeason().getRapidSeasonId();
                         Long roundNum = round.getRound();
@@ -111,12 +122,14 @@ public class MatchSyncService {
                                 Thread.currentThread().getName(),
                                 round.getSlug());
 
-                        List<Match> matches = apiWorker.process(
+                        List<Match> matches = retryExecutor.callWithRetry(() ->
+                                apiWorker.process(
                                 RapidApi.LEAGUEEVENETBYROUND,
                                 rapidTournamentId,
                                 rapidSeasonId,
                                 roundNum,
                                 slug
+                            )
                         );
 
                         List<Match> newMatches = matches.stream()
@@ -133,7 +146,7 @@ public class MatchSyncService {
 
         CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
         producerExecutor.shutdown();
-        matchBatchWorker.shutdown();
+        matchBatchWorker.shutdownAndAwait(60, TimeUnit.SECONDS);;
     }
 
     @Transactional

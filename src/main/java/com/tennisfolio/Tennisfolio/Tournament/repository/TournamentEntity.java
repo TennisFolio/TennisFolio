@@ -73,6 +73,7 @@ public class TournamentEntity extends BaseTimeEntity {
     }
 
     public static TournamentEntity fromModel(Tournament tournament) {
+        if(tournament == null) return null;
         TournamentEntity tournamentEntity = new TournamentEntity();
         tournamentEntity.tournamentId = tournament.getTournamentId();
         tournamentEntity.categoryEntity = tournament.getCategory() != null

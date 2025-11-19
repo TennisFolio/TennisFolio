@@ -19,7 +19,7 @@ public class MatchRepositoryImpl implements MatchRepository{
     private final BufferedBatchSaver<MatchEntity> bufferedBatchSaver;
     public MatchRepositoryImpl(MatchJpaRepository matchJpaRepository, TransactionTemplate transactionTemplate) {
         this.matchJpaRepository = matchJpaRepository;
-        this.bufferedBatchSaver = new BufferedBatchSaver<>(matchJpaRepository, 1000, transactionTemplate);
+        this.bufferedBatchSaver = new BufferedBatchSaver<>(matchJpaRepository, 500, transactionTemplate);
     }
 
     @Override

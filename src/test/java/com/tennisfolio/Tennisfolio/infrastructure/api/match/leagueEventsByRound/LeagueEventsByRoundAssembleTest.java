@@ -52,7 +52,7 @@ public class LeagueEventsByRoundAssembleTest {
         fakeRoundRepository.collect(fakeRound);
         fakeRoundRepository.flushAll();
 
-        leagueEventsByRoundAssemble = new LeagueEventsByRoundAssemble(fakeRoundRepository, fakeSeasonRepository, playerService);
+        leagueEventsByRoundAssemble = new LeagueEventsByRoundAssemble();
     }
 
     @Test

@@ -2,9 +2,10 @@ package com.tennisfolio.Tennisfolio.infrastructure.repository;
 
 import com.tennisfolio.Tennisfolio.season.domain.Season;
 import com.tennisfolio.Tennisfolio.season.repository.SeasonEntity;
-import io.lettuce.core.dynamic.annotation.Param;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.Collection;
 import java.util.List;
