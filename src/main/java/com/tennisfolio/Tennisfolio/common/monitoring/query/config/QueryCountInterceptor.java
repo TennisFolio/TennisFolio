@@ -1,5 +1,6 @@
 package com.tennisfolio.Tennisfolio.common.monitoring.query.config;
 
+import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.DistributionSummary;
 import io.micrometer.core.instrument.MeterRegistry;
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,29 +25,14 @@ public class QueryCountInterceptor implements HandlerInterceptor {
      */
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
-        // 1. HTTP 메서드 추출
+
         String httpMethod = request.getMethod();
 
-
-        if (!(handler instanceof HandlerMethod)) {
-            System.out.println("Handler is not a HandlerMethod. URI: {}, handler: {}" +  request.getRequestURI() +  handler.getClass().getName());
-        }
-
-
-        // 2. BEST_MATCHING_PATTERN_ATTRIBUTE로부터 path 추출
-        String bestMatchPath =  request.getRequestURI();
-        if (bestMatchPath == null) {
-            bestMatchPath = UNKNOWN_PATH;
-        }
-
-        // 3. ThreadLocal 에 저장
         RequestContext ctx = RequestContext.builder()
                 .httpMethod(httpMethod)
-                .bestMatchPath(bestMatchPath)
                 .build();
 
         RequestContextHolder.initContext(ctx);
-
         return true;
     }
 
@@ -57,25 +43,48 @@ public class QueryCountInterceptor implements HandlerInterceptor {
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
         RequestContext ctx = RequestContextHolder.getContext();
 
-        // 1. 쿼리 횟수를 MeterRegistry 에 기록
         if (ctx != null) {
-            Map<QueryType, Integer> queryCountByType = ctx.getQueryCountByType();
-            queryCountByType.forEach((queryType, count) -> increment(ctx, queryType, count));
+
+            // ★ 여기서 path template 추출됨
+            String pathPattern =
+                    (String) request.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE);
+
+            if (pathPattern == null) {
+                pathPattern = request.getRequestURI(); // fallback
+            }
+
+            ctx.setBestMatchPath(pathPattern);
+
+            // 모든 QueryType SQL 개수를 합산 → "요청당 총 SQL 실행 횟수"
+            int totalCount = ctx.getQueryCountByType()
+                    .values()
+                    .stream()
+                    .mapToInt(Integer::intValue)
+                    .sum();
+
+            System.out.println("Metric submit: path=" + ctx.getBestMatchPath() + ", count=" + totalCount);
+
+            // Grafana/N+1 측정용 Counter 기록(요청당 1회)
+            Counter.builder("sql_queries_per_request_total")
+                    .tag("path", ctx.getBestMatchPath())
+                    .tag("http_method", ctx.getHttpMethod())
+                    .register(meterRegistry)
+                    .increment(totalCount);
+
+            DistributionSummary summary = DistributionSummary.builder("sql_queries_per_request")
+                    .description("SQL count per request")
+                    .publishPercentileHistogram()
+                    .tag("path", ctx.getBestMatchPath())
+                    .tag("http_method", ctx.getHttpMethod())
+                    .register(meterRegistry);
+
+            summary.record(totalCount);
+
         }
 
-        // 2. ThreadLocal 해제
+
+
         RequestContextHolder.clear();
     }
 
-    private void increment(RequestContext ctx, QueryType queryType, Integer count) {
-        DistributionSummary summary = DistributionSummary.builder("app.query.per_request")
-                .description("Number of SQL queries per request")
-                .tag("path", ctx.getBestMatchPath())
-                .tag("http_method", ctx.getHttpMethod())
-                .tag("query_type", queryType.name())
-                .publishPercentiles(0.5, 0.95)
-                .register(meterRegistry);
-
-        summary.record(count);
-    }
 }

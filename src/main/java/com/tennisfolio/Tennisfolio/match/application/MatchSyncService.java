@@ -10,6 +10,7 @@ import com.tennisfolio.Tennisfolio.infrastructure.api.base.RapidApi;
 import com.tennisfolio.Tennisfolio.infrastructure.api.base.RetryExecutor;
 import com.tennisfolio.Tennisfolio.infrastructure.api.base.StrategyApiTemplate;
 import com.tennisfolio.Tennisfolio.infrastructure.api.match.leagueEventsByRound.LeagueEventsByRoundDTO;
+import com.tennisfolio.Tennisfolio.infrastructure.worker.AbstractBatchPipeline;
 import com.tennisfolio.Tennisfolio.infrastructure.worker.GenericBatchWorker;
 import com.tennisfolio.Tennisfolio.infrastructure.worker.match.MatchBatchWorkerConfig;
 import com.tennisfolio.Tennisfolio.match.domain.Match;
@@ -50,8 +51,9 @@ public class MatchSyncService {
     private final Clock clock;
     private final GenericBatchWorker<Match> matchBatchWorker;
     private final RetryExecutor retryExecutor;
+    private final AbstractBatchPipeline<Match> matchAbstractBatchPipeline;
 
-    public MatchSyncService(CategoryRepository categoryRepository, TournamentRepository tournamentRepository, SeasonRepository seasonRepository, RoundRepository roundRepository, MatchRepository matchRepository, ApiWorker apiWorker, PlayerProvider playerProvider, Clock clock, GenericBatchWorker<Match> matchBatchWorker, RetryExecutor retryExecutor) {
+    public MatchSyncService(CategoryRepository categoryRepository, TournamentRepository tournamentRepository, SeasonRepository seasonRepository, RoundRepository roundRepository, MatchRepository matchRepository, ApiWorker apiWorker, PlayerProvider playerProvider, Clock clock, GenericBatchWorker<Match> matchBatchWorker, RetryExecutor retryExecutor, AbstractBatchPipeline<Match> matchAbstractBatchPipeline) {
         this.categoryRepository = categoryRepository;
         this.tournamentRepository = tournamentRepository;
         this.seasonRepository = seasonRepository;
@@ -62,6 +64,7 @@ public class MatchSyncService {
         this.clock = clock;
         this.matchBatchWorker = matchBatchWorker;
         this.retryExecutor = retryExecutor;
+        this.matchAbstractBatchPipeline = matchAbstractBatchPipeline;
     }
 
     public void saveMatchList() {
@@ -83,8 +86,8 @@ public class MatchSyncService {
                                 .filter(match -> !existingKeys.contains(match.getRapidMatchId()))
                                 .toList();
 
-                        matchRepository.collect(newMatches);
-                        matchRepository.flushWhenFull();
+                        matchAbstractBatchPipeline.runBatch(newMatches);
+
                     }catch(Exception e){
                         e.printStackTrace();
                     }

@@ -3,6 +3,7 @@ package com.tennisfolio.Tennisfolio.infrastructure.worker.match;
 import com.tennisfolio.Tennisfolio.infrastructure.worker.GenericBatchWorker;
 import com.tennisfolio.Tennisfolio.match.domain.Match;
 import com.tennisfolio.Tennisfolio.match.repository.MatchRepository;
+import io.micrometer.core.instrument.MeterRegistry;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -13,9 +14,11 @@ public class MatchBatchWorkerConfig {
     private static final int MATCH_QUEUE_CAPACITY = 2000; // 대략 500 * 4 라운드 정도
 
     private final MatchBatchPipeline matchBatchPipeline;
+    private final MeterRegistry meterRegistry;
 
-    public MatchBatchWorkerConfig(MatchBatchPipeline matchBatchPipeline) {
+    public MatchBatchWorkerConfig(MatchBatchPipeline matchBatchPipeline, MeterRegistry meterRegistry) {
         this.matchBatchPipeline = matchBatchPipeline;
+        this.meterRegistry = meterRegistry;
     }
 
     @Bean
@@ -23,7 +26,8 @@ public class MatchBatchWorkerConfig {
         return new GenericBatchWorker<>(
                 matchBatchPipeline::runBatch,
                 MATCH_BATCH_LIMIT,
-                MATCH_QUEUE_CAPACITY
+                MATCH_QUEUE_CAPACITY,
+                meterRegistry
         );
     }
 }

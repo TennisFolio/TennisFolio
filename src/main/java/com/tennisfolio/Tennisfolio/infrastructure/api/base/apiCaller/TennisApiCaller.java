@@ -7,6 +7,8 @@ import com.tennisfolio.Tennisfolio.exception.RapidApiException;
 import com.tennisfolio.Tennisfolio.infrastructure.api.base.ApiCaller;
 import com.tennisfolio.Tennisfolio.infrastructure.api.base.DecompressorUtil;
 import com.tennisfolio.Tennisfolio.infrastructure.api.base.RapidApi;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
@@ -32,10 +34,16 @@ public class TennisApiCaller implements ApiCaller {
     private final HttpClientConfig httpClientConfig;
 
     private DecompressorUtil decompressorUtil;
+    private final Counter errorCounter;
+    private final MeterRegistry meterRegistry;
 
     @Autowired
-    public TennisApiCaller(HttpClientConfig httpClientConfig) {
+    public TennisApiCaller(HttpClientConfig httpClientConfig, MeterRegistry meterRegistry) {
+
         this.httpClientConfig = httpClientConfig;
+        this.meterRegistry = meterRegistry;
+        this.errorCounter = meterRegistry.counter("external_api_errors_total");
+
     }
 
     @Override
@@ -72,6 +80,7 @@ public class TennisApiCaller implements ApiCaller {
         }catch(Rapid429Exception e){
             throw e;
         }catch(Exception e){
+            errorCounter.increment();
             e.printStackTrace();
             throw new RapidApiException(ExceptionCode.RAPID_ERROR);
         }

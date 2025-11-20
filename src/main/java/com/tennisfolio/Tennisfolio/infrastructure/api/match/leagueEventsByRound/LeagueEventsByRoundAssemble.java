@@ -102,6 +102,7 @@ public class LeagueEventsByRoundAssemble implements EntityAssemble<List<LeagueEv
                     .periodSet(periodSet)
                     .startTimestamp(events.getStartTimestamp())
                     .winner(events.getWinner())
+                    .status(events.getStatus().getDescription())
                     .build();
 
         }).collect(Collectors.toList());
