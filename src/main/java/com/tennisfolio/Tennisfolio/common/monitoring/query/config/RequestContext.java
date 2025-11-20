@@ -18,6 +18,10 @@ public class RequestContext {
         this.bestMatchPath = bestMatchPath;
     }
 
+    public void setBestMatchPath(String bestMatchPath){
+        this.bestMatchPath = bestMatchPath;
+    }
+
     public void incrementQueryCount(String sql) {
         QueryType queryType = QueryType.from(sql);
         queryCountByType.merge(queryType, 1, Integer::sum);

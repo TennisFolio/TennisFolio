@@ -1,5 +1,8 @@
 package com.tennisfolio.Tennisfolio.infrastructure.worker;
 
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Timer;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,10 +24,14 @@ public class GenericBatchWorkerTest {
 
     private GenericBatchWorker<Integer> worker;
 
+    @Mock
+    private MeterRegistry meterRegistry;
+
+
     @BeforeEach
     void setUp() {
-        // batchLimit = 5, queueCapacity = 50
-        worker = new GenericBatchWorker<>(saver, 5, 50);
+        meterRegistry = new SimpleMeterRegistry();
+        worker = new GenericBatchWorker<>(saver, 5, 50, meterRegistry);
     }
 
     @Test

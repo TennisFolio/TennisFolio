@@ -34,6 +34,8 @@ public class LeagueEventsByRoundDTO {
     private ScoreDTO homeScore;
     @JsonProperty("awayScore")
     private ScoreDTO awayScore;
+    @JsonProperty("status")
+    private StatusDTO status;
     @JsonProperty("time")
     private TimeDTO time;
     @JsonProperty("startTimestamp")

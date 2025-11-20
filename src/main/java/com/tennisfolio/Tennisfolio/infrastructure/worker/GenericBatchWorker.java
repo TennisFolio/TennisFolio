@@ -1,9 +1,14 @@
 package com.tennisfolio.Tennisfolio.infrastructure.worker;
 
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.Gauge;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Timer;
 import org.springframework.context.annotation.Bean;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -20,11 +25,20 @@ public class GenericBatchWorker<T> {
     private final List<T> buffer = new ArrayList<>();
     private final Object bufferLock = new Object();
     private volatile boolean running = true;
+    private final MeterRegistry meterRegistry;
+    private final Timer flushTimer;
+    private final Counter processedCounter;
+    private final Counter errorCounter;
 
-    public GenericBatchWorker(BatchSaver<T> saver, int batchLimit, int queueCapacity){
+    public GenericBatchWorker(BatchSaver<T> saver, int batchLimit, int queueCapacity, MeterRegistry meterRegistry){
         this.saver = saver;
         this.batchLimit = batchLimit;
         this.queue = new LinkedBlockingQueue<>(queueCapacity);
+        this.meterRegistry = meterRegistry;
+        this.flushTimer = meterRegistry.timer("batch_worker_flush_duration_seconds");
+        this.processedCounter = meterRegistry.counter("batch_worker_processed_matches_total");
+        this.errorCounter = meterRegistry.counter("batch_worker_errors_total");
+        registerMetrics(meterRegistry);
         start();
     }
     private void start(){
@@ -66,13 +80,17 @@ public class GenericBatchWorker<T> {
 
         List<T> toSave = new ArrayList<>(buffer);
         buffer.clear();
+        flushTimer.record(() -> {
+            try{
+                saver.saveBatch(toSave);
+                processedCounter.increment(toSave.size());
+            }catch(Exception e){
+                errorCounter.increment();
+                System.err.println("[GenericBatchWorker] Failed to save batch, size=" + toSave.size());
+                e.printStackTrace();
+            }
+        });
 
-        try{
-            saver.saveBatch(toSave);
-        }catch(Exception e){
-            System.err.println("[GenericBatchWorker] Failed to save batch, size=" + toSave.size());
-            e.printStackTrace();
-        }
     }
 
     public void submit(List<T> items){
@@ -122,5 +140,15 @@ public class GenericBatchWorker<T> {
             consumerExecutor.shutdownNow();
             Thread.currentThread().interrupt();
         }
+    }
+
+    private void registerMetrics(MeterRegistry registry) {
+        Gauge.builder("batch_worker_queue_size", queue, LinkedBlockingQueue::size)
+                .description("Current queue size of GenericBatchWorker")
+                .register(registry);
+
+        Gauge.builder("batch_worker_buffer_size", this, w -> w.buffer.size())
+                .description("Buffered items before flush")
+                .register(registry);
     }
 }
