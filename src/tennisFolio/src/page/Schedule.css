@@ -460,6 +460,41 @@
   .player {
     font-size: 13px;
   }
+
+  /* 스켈레톤 모바일 크기 조정 */
+  .skeleton-category-tab {
+    height: 36px !important;
+    width: 90px !important;
+  }
+
+  .skeleton-tournament-item {
+    height: 37px !important;
+  }
+
+  .skeleton-match-time {
+    width: 50px !important;
+    height: 18px !important;
+  }
+
+  .skeleton-match-status {
+    width: 70px !important;
+    height: 22px !important;
+  }
+
+  .skeleton-match-round {
+    width: 80px !important;
+    height: 18px !important;
+  }
+
+  .skeleton-player-name {
+    width: 80px !important;
+    height: 18px !important;
+  }
+
+  .skeleton-score {
+    width: 25px !important;
+    height: 18px !important;
+  }
 }
 
 /* 태블릿 레이아웃 */
