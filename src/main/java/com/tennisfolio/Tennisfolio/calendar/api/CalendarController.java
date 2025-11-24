@@ -45,11 +45,13 @@ public class CalendarController {
             @Pattern(regexp= "\\d{8}", message="date 파라미터는 yyyyMMDD 형식이어야 합니다.")
             String date,
             @RequestParam(value="seasonId", required = false)
-            Long seasonId){
+            Long seasonId,
+            @RequestParam(value="categoryId", required = false)
+            Long categoryId){
 
 
         ResponseDTO<List<MatchScheduleResponse>> res =
-                ResponseDTO.success(calendarService.getMatchSchedule(date, seasonId));
+                ResponseDTO.success(calendarService.getMatchSchedule(date, seasonId, categoryId));
 
         return ResponseEntity.ok(res);
     }

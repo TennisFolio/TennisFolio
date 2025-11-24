@@ -24,7 +24,7 @@ public class CalendarService {
         return tournamentQueryRepository.findTournamentCalendar(month);
     }
 
-    public List<MatchScheduleResponse> getMatchSchedule(String date, Long seasonId){
-        return matchQueryRepository.findMatchSchedule(date, seasonId);
+    public List<MatchScheduleResponse> getMatchSchedule(String date, Long seasonId, Long categoryId){
+        return matchQueryRepository.findMatchSchedule(date, seasonId, categoryId);
     }
 }
