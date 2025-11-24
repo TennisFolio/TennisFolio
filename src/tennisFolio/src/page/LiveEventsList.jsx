@@ -10,9 +10,11 @@ import { apiRequest } from '../utils/apiClient';
 import MetatagRenderer from '../components/MetatagRenderer';
 import { useParams } from 'react-router-dom';
 import MSWToggle from '../components/dev/MSWToggle';
+import { LiveEventsSkeleton } from './LiveEventsSkeleton';
 
 function Main() {
   const [liveEvents, setLiveEvents] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const clientRef = useRef(null);
   const param = useParams();
@@ -24,6 +26,7 @@ function Main() {
 
   // API 호출 함수 분리
   const fetchLiveEvents = () => {
+    setIsLoading(true);
     apiRequest
       .get(`/api/${category}/liveEvents`)
       .then((res) => {
@@ -32,6 +35,9 @@ function Main() {
       .catch((err) => {
         console.error('라이브 이벤트 조회 실패:', err);
         setLiveEvents([]);
+      })
+      .finally(() => {
+        setIsLoading(false);
       });
   };
 
@@ -92,8 +98,11 @@ function Main() {
       <MetatagRenderer />
       {/* LiveEvents 페이지에서만 MSW 토글 표시 */}
       {isDevelopment && <MSWToggle />}
-      {/* <LiveEvents liveEvents={emptyEventTestArray} /> */}
-      <LiveEvents liveEvents={liveEvents} />
+      {isLoading ? (
+        <LiveEventsSkeleton />
+      ) : (
+        <LiveEvents liveEvents={liveEvents} />
+      )}
     </>
   );
 }

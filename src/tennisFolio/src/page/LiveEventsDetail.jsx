@@ -9,6 +9,7 @@ import { base_server_url } from '@/constants';
 import { apiRequest } from '../utils/apiClient';
 import { useNavigate } from 'react-router-dom';
 import { selectMSWActive } from '../store/mswSlice';
+import { LiveEventCardSkeleton } from './LiveEventsSkeleton';
 
 function LiveEventsDetail() {
   const { matchId } = useParams();
@@ -97,7 +98,10 @@ function LiveEventsDetail() {
           <ChatRoom matchId={matchId} />
         </>
       ) : (
-        <div>Loading...</div>
+        <>
+          <LiveEventCardSkeleton />
+          <ChatRoom matchId={matchId} />
+        </>
       )}
     </div>
   );

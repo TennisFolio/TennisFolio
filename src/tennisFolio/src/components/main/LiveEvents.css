@@ -392,4 +392,53 @@
     font-size: 0.9rem;
     border-radius: 1.5rem;
   }
+
+  /* 스켈레톤 모바일 크기 조정 */
+  .skeleton-tournament-name {
+    width: 150px !important;
+    height: 22px !important;
+  }
+
+  .skeleton-round-name {
+    width: 120px !important;
+    height: 18px !important;
+  }
+
+  .skeleton-player-image {
+    width: 70px !important;
+    height: 70px !important;
+  }
+
+  .skeleton-team-name {
+    width: 80px !important;
+    height: 16px !important;
+  }
+
+  .skeleton-set-score {
+    width: 50px !important;
+    height: 28px !important;
+  }
+
+  .skeleton-player-name {
+    width: 80px !important;
+    height: 16px !important;
+  }
+
+  .skeleton-set-score-cell {
+    width: 25px !important;
+    height: 16px !important;
+  }
+
+  .skeleton-event-button {
+    width: 100px !important;
+    height: 36px !important;
+  }
+}
+
+/* 태블릿 크기 스켈레톤 조정 */
+@media (max-width: 1199px) and (min-width: 768px) {
+  .skeleton-player-image {
+    width: 64px !important;
+    height: 64px !important;
+  }
 }
