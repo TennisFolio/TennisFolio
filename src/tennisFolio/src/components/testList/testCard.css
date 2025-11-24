@@ -134,3 +134,41 @@
     font-size: 1rem;
   }
 }
+
+/* 스켈레톤 카드 스타일 */
+.skeleton-test-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  background-size: cover !important;
+  background-position: center !important;
+}
+
+.skeleton-test-card::before {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+/* 스켈레톤 모바일 크기 조정 */
+@media (max-width: 767px) {
+  .skeleton-test-title {
+    height: 28px !important;
+    width: 75% !important;
+  }
+
+  .skeleton-test-description {
+    height: 18px !important;
+  }
+
+  .skeleton-feature-tag {
+    height: 24px !important;
+    width: 70px !important;
+  }
+}
+
+@media (max-width: 1023px) and (min-width: 768px) {
+  .skeleton-test-title {
+    height: 36px !important;
+  }
+
+  .skeleton-test-description {
+    height: 22px !important;
+  }
+}

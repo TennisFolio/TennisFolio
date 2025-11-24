@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import TestHeader from '../components/testList/TestHeader';
 import TestCard from '../components/testList/TestCard';
+import { TestListSkeleton } from './TestListSkeleton';
 import '../components/testList/testCard.css';
 
 function TestList() {
   const [testDataList, setTestDataList] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const loadAllTests = async () => {
+      setIsLoading(true);
       const testCategories = ['racket', 'string', 'atpPlayer', 'ntrp'];
       const loadedTests = [];
 
@@ -23,6 +26,7 @@ function TestList() {
       }
 
       setTestDataList(loadedTests);
+      setIsLoading(false);
     };
 
     loadAllTests();
@@ -31,11 +35,15 @@ function TestList() {
   return (
     <div>
       <TestHeader />
-      <div className="test-grid-container">
-        {testDataList.map((testData, index) => (
-          <TestCard key={testData.info.mainUrl} testData={testData} />
-        ))}
-      </div>
+      {isLoading ? (
+        <TestListSkeleton />
+      ) : (
+        <div className="test-grid-container">
+          {testDataList.map((testData) => (
+            <TestCard key={testData.info.mainUrl} testData={testData} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

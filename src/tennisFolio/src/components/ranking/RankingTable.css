@@ -71,4 +71,25 @@
   .player-name {
     font-size: 12px;
   }
+
+  /* 스켈레톤 모바일 크기 조정 */
+  .skeleton-ranking {
+    width: 30px !important;
+    height: 16px !important;
+  }
+
+  .skeleton-flag {
+    width: 28px !important;
+    height: 16px !important;
+  }
+
+  .skeleton-player-name {
+    width: 100px !important;
+    height: 16px !important;
+  }
+
+  .skeleton-points {
+    width: 60px !important;
+    height: 16px !important;
+  }
 }

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import RankingTable from '../components/ranking/RankingTable';
 import RankingHeader from '../components/ranking/RankingHeader';
 import { apiRequest } from '../utils/apiClient';
+import { RankingTableSkeleton } from './RankingSkeleton';
 
 import './ranking.css';
 
@@ -44,7 +45,9 @@ function Ranking() {
   return (
     <div>
       <RankingHeader lastUpdated={rankings[0]?.rankingLastUpdated} />
-      {isInitialLoading ? null : ( // 공통 로딩 마스크가 표시됨
+      {isInitialLoading ? (
+        <RankingTableSkeleton />
+      ) : (
         <>
           <RankingTable rankings={rankings} />
           {!isAllLoaded && (

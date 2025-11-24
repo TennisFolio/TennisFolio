@@ -4,6 +4,7 @@ import 'react-calendar/dist/Calendar.css';
 import './Schedule.css';
 import { apiRequest } from '../utils/apiClient';
 import { base_server_url } from '@/constants';
+import { FilterSectionSkeleton, MatchesListSkeleton } from './ScheduleSkeleton';
 
 // 임시 목 데이터 - 전체 대회 목록
 const mockTournamentsResponse = {
@@ -222,6 +223,8 @@ function Schedule() {
   const [matches, setMatches] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(null); // 선택된 카테고리
   const [selectedSeasonId, setSelectedSeasonId] = useState(null); // 선택된 대회
+  const [isLoadingTournaments, setIsLoadingTournaments] = useState(false);
+  const [isLoadingMatches, setIsLoadingMatches] = useState(false);
 
   // 첫 번째 카테고리를 기본 선택으로 설정
   useEffect(() => {
@@ -237,6 +240,7 @@ function Schedule() {
   // 월별 대회 목록 로드
   useEffect(() => {
     const fetchTournaments = async () => {
+      setIsLoadingTournaments(true);
       try {
         const yearMonth = formatDateToYearMonth(activeStartDate);
         const response = await apiRequest.get(
@@ -262,6 +266,8 @@ function Schedule() {
           })
         );
         setTournaments(tournamentsData);
+      } finally {
+        setIsLoadingTournaments(false);
       }
     };
 
@@ -458,6 +464,7 @@ function Schedule() {
     setSelectedDate(date);
 
     // 선택된 날짜의 경기 목록 가져오기
+    setIsLoadingMatches(true);
     try {
       const dateKey = formatDateToTimestamp(date);
       let apiUrl = `${base_server_url}/api/calendar/detail?date=${dateKey}`;
@@ -487,6 +494,8 @@ function Schedule() {
       } else {
         setMatches([]);
       }
+    } finally {
+      setIsLoadingMatches(false);
     }
   };
 
@@ -495,6 +504,7 @@ function Schedule() {
     if (!selectedDate || !selectedCategory) return;
 
     const fetchMatchesForDate = async () => {
+      setIsLoadingMatches(true);
       try {
         const dateKey = formatDateToTimestamp(selectedDate);
         let apiUrl = `${base_server_url}/api/calendar/detail?date=${dateKey}`;
@@ -520,6 +530,8 @@ function Schedule() {
         if (matchesData && matchesData.code === '0000') {
           setMatches(matchesData.data);
         }
+      } finally {
+        setIsLoadingMatches(false);
       }
     };
 
@@ -534,56 +546,60 @@ function Schedule() {
   return (
     <div className="schedule-page">
       {/* 필터 영역 */}
-      <div className="filter-section">
-        <div className="category-tabs">
-          {Object.keys(tournamentsByCategory).map((category) => (
-            <button
-              key={category}
-              className={`category-tab ${
-                selectedCategory === category ? 'active' : ''
-              }`}
-              onClick={() => {
-                // 이미 선택된 카테고리를 다시 클릭하면 해제
-                if (selectedCategory === category) {
-                  const categories = Object.keys(tournamentsByCategory);
-                  if (categories.length > 0) {
-                    setSelectedCategory(categories[0]);
-                  }
-                } else {
-                  setSelectedCategory(category);
-                  setSelectedSeasonId(null);
-                }
-              }}
-            >
-              {category}
-            </button>
-          ))}
-        </div>
-
-        {/* 선택된 카테고리의 대회 목록 */}
-        {selectedCategory && tournamentsByCategory[selectedCategory] && (
-          <div className="tournament-list">
-            {tournamentsByCategory[selectedCategory].map((tournament) => (
+      {isLoadingTournaments ? (
+        <FilterSectionSkeleton />
+      ) : (
+        <div className="filter-section">
+          <div className="category-tabs">
+            {Object.keys(tournamentsByCategory).map((category) => (
               <button
-                key={tournament.seasonId}
-                className={`tournament-item ${
-                  selectedSeasonId === tournament.seasonId ? 'active' : ''
+                key={category}
+                className={`category-tab ${
+                  selectedCategory === category ? 'active' : ''
                 }`}
                 onClick={() => {
-                  // 이미 선택된 아이템을 다시 클릭하면 해제
-                  if (selectedSeasonId === tournament.seasonId) {
-                    setSelectedSeasonId(null);
+                  // 이미 선택된 카테고리를 다시 클릭하면 해제
+                  if (selectedCategory === category) {
+                    const categories = Object.keys(tournamentsByCategory);
+                    if (categories.length > 0) {
+                      setSelectedCategory(categories[0]);
+                    }
                   } else {
-                    setSelectedSeasonId(tournament.seasonId);
+                    setSelectedCategory(category);
+                    setSelectedSeasonId(null);
                   }
                 }}
               >
-                {tournament.seasonName}
+                {category}
               </button>
             ))}
           </div>
-        )}
-      </div>
+
+          {/* 선택된 카테고리의 대회 목록 */}
+          {selectedCategory && tournamentsByCategory[selectedCategory] && (
+            <div className="tournament-list">
+              {tournamentsByCategory[selectedCategory].map((tournament) => (
+                <button
+                  key={tournament.seasonId}
+                  className={`tournament-item ${
+                    selectedSeasonId === tournament.seasonId ? 'active' : ''
+                  }`}
+                  onClick={() => {
+                    // 이미 선택된 아이템을 다시 클릭하면 해제
+                    if (selectedSeasonId === tournament.seasonId) {
+                      setSelectedSeasonId(null);
+                    } else {
+                      setSelectedSeasonId(tournament.seasonId);
+                    }
+                  }}
+                >
+                  {tournament.seasonName}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* 달력 영역 */}
       <div className="calendar-section">
@@ -600,142 +616,150 @@ function Schedule() {
       </div>
 
       {/* 일정 상세 영역 */}
-      <div className="schedule-detail-section">
-        {selectedDate ? (
-          <>
-            <div className="detail-header">
-              <h2>
-                {selectedDate.toLocaleDateString('ko-KR', {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric',
-                })}
-              </h2>
-            </div>
+      {isLoadingMatches ? (
+        <MatchesListSkeleton />
+      ) : (
+        <div className="schedule-detail-section">
+          {selectedDate ? (
+            <>
+              <div className="detail-header">
+                <h2>
+                  {selectedDate.toLocaleDateString('ko-KR', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                  })}
+                </h2>
+              </div>
 
-            <div className="matches-list">
-              {matches.length > 0 ? (
-                (() => {
-                  // seasonId로 경기 그룹화
-                  const groupedMatches = matches.reduce((acc, match) => {
-                    const seasonId = match.seasonId;
-                    if (!acc[seasonId]) {
-                      acc[seasonId] = [];
-                    }
-                    acc[seasonId].push(match);
-                    return acc;
-                  }, {});
+              <div className="matches-list">
+                {matches.length > 0 ? (
+                  (() => {
+                    // seasonId로 경기 그룹화
+                    const groupedMatches = matches.reduce((acc, match) => {
+                      const seasonId = match.seasonId;
+                      if (!acc[seasonId]) {
+                        acc[seasonId] = [];
+                      }
+                      acc[seasonId].push(match);
+                      return acc;
+                    }, {});
 
-                  return Object.entries(groupedMatches).map(
-                    ([seasonId, seasonMatches]) => {
-                      // 해당 seasonId의 대회 찾기
-                      const tournament = tournaments.find(
-                        (t) => t.seasonId === parseInt(seasonId)
-                      );
-                      const colorKey = tournament
-                        ? tournament.seasonId ?? tournament.tournamentId
-                        : null;
-                      const tournamentColor = colorKey
-                        ? getTournamentColor(colorKey)
-                        : '#667eea';
-                      return (
-                        <div key={seasonId} className="season-group">
-                          <div
-                            className="tournament-info"
-                            style={{
-                              background: tournamentColor,
-                            }}
-                          >
-                            <h3>{tournament?.seasonName || '대회 정보'}</h3>
+                    return Object.entries(groupedMatches).map(
+                      ([seasonId, seasonMatches]) => {
+                        // 해당 seasonId의 대회 찾기
+                        const tournament = tournaments.find(
+                          (t) => t.seasonId === parseInt(seasonId)
+                        );
+                        const colorKey = tournament
+                          ? tournament.seasonId ?? tournament.tournamentId
+                          : null;
+                        const tournamentColor = colorKey
+                          ? getTournamentColor(colorKey)
+                          : '#667eea';
+                        return (
+                          <div key={seasonId} className="season-group">
+                            <div
+                              className="tournament-info"
+                              style={{
+                                background: tournamentColor,
+                              }}
+                            >
+                              <h3>{tournament?.seasonName || '대회 정보'}</h3>
+                            </div>
+                            {seasonMatches.map((match) => {
+                              const winner =
+                                match.winner === '1'
+                                  ? 'home'
+                                  : match.winner === '2'
+                                  ? 'away'
+                                  : null;
+                              return (
+                                <div key={match.matchId} className="match-card">
+                                  <div className="match-header">
+                                    <div className="match-header-left">
+                                      <div className="match-time">
+                                        {formatTimeFromTimestamp(
+                                          match.startTimestamp
+                                        )}
+                                      </div>
+                                      <div className="match-status">
+                                        {match.status}
+                                      </div>
+                                    </div>
+                                    <div className="match-header-right">
+                                      {match.roundNameKr}
+                                    </div>
+                                  </div>
+                                  <div className="match-players">
+                                    <div
+                                      className={`player ${
+                                        winner === 'home' ? 'winner' : ''
+                                      }`}
+                                    >
+                                      {winner === 'home' && (
+                                        <img
+                                          src="/images/ico_winner.png"
+                                          className="winner-icon home"
+                                          alt="winner"
+                                        />
+                                      )}
+                                      <span>
+                                        {renderPlayerName(
+                                          match.homePlayerNameKr,
+                                          match.homePlayerName
+                                        )}
+                                      </span>
+                                    </div>
+                                    <div className="score">
+                                      {match.homeScore}
+                                    </div>
+                                    <div className="vs">vs</div>
+                                    <div className="score">
+                                      {match.awayScore}
+                                    </div>
+                                    <div
+                                      className={`player ${
+                                        winner === 'away' ? 'winner' : ''
+                                      }`}
+                                    >
+                                      {winner === 'away' && (
+                                        <img
+                                          src="/images/ico_winner.png"
+                                          className="winner-icon away"
+                                          alt="winner"
+                                        />
+                                      )}
+                                      <span>
+                                        {renderPlayerName(
+                                          match.awayPlayerNameKr,
+                                          match.awayPlayerName
+                                        )}
+                                      </span>
+                                    </div>
+                                  </div>
+                                </div>
+                              );
+                            })}
                           </div>
-                          {seasonMatches.map((match) => {
-                            const winner =
-                              match.winner === '1'
-                                ? 'home'
-                                : match.winner === '2'
-                                ? 'away'
-                                : null;
-                            return (
-                              <div key={match.matchId} className="match-card">
-                                <div className="match-header">
-                                  <div className="match-header-left">
-                                    <div className="match-time">
-                                      {formatTimeFromTimestamp(
-                                        match.startTimestamp
-                                      )}
-                                    </div>
-                                    <div className="match-status">
-                                      {match.status}
-                                    </div>
-                                  </div>
-                                  <div className="match-header-right">
-                                    {match.roundNameKr}
-                                  </div>
-                                </div>
-                                <div className="match-players">
-                                  <div
-                                    className={`player ${
-                                      winner === 'home' ? 'winner' : ''
-                                    }`}
-                                  >
-                                    {winner === 'home' && (
-                                      <img
-                                        src="/images/ico_winner.png"
-                                        className="winner-icon home"
-                                        alt="winner"
-                                      />
-                                    )}
-                                    <span>
-                                      {renderPlayerName(
-                                        match.homePlayerNameKr,
-                                        match.homePlayerName
-                                      )}
-                                    </span>
-                                  </div>
-                                  <div className="score">{match.homeScore}</div>
-                                  <div className="vs">vs</div>
-                                  <div className="score">{match.awayScore}</div>
-                                  <div
-                                    className={`player ${
-                                      winner === 'away' ? 'winner' : ''
-                                    }`}
-                                  >
-                                    {winner === 'away' && (
-                                      <img
-                                        src="/images/ico_winner.png"
-                                        className="winner-icon away"
-                                        alt="winner"
-                                      />
-                                    )}
-                                    <span>
-                                      {renderPlayerName(
-                                        match.awayPlayerNameKr,
-                                        match.awayPlayerName
-                                      )}
-                                    </span>
-                                  </div>
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      );
-                    }
-                  );
-                })()
-              ) : (
-                <div className="no-matches">
-                  이 날짜에 예정된 경기가 없습니다.
-                </div>
-              )}
+                        );
+                      }
+                    );
+                  })()
+                ) : (
+                  <div className="no-matches">
+                    이 날짜에 예정된 경기가 없습니다.
+                  </div>
+                )}
+              </div>
+            </>
+          ) : (
+            <div className="no-matches">
+              날짜를 선택하면 경기 일정을 확인할 수 있습니다.
             </div>
-          </>
-        ) : (
-          <div className="no-matches">
-            날짜를 선택하면 경기 일정을 확인할 수 있습니다.
-          </div>
-        )}
-      </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
