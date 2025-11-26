@@ -1,7 +1,7 @@
 package com.tennisfolio.Tennisfolio.mock;
 
 import com.tennisfolio.Tennisfolio.player.domain.Player;
-import com.tennisfolio.Tennisfolio.player.infrastructure.PlayerRepository;
+import com.tennisfolio.Tennisfolio.player.repository.PlayerRepository;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;

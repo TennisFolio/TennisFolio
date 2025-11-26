@@ -4,7 +4,7 @@ import com.tennisfolio.Tennisfolio.common.Entity.BaseTimeEntity;
 import com.tennisfolio.Tennisfolio.match.domain.Match;
 import com.tennisfolio.Tennisfolio.match.domain.Period;
 import com.tennisfolio.Tennisfolio.match.domain.Score;
-import com.tennisfolio.Tennisfolio.player.infrastructure.PlayerEntity;
+import com.tennisfolio.Tennisfolio.player.repository.PlayerEntity;
 import com.tennisfolio.Tennisfolio.round.repository.RoundEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -39,10 +39,10 @@ public class MatchEntity extends BaseTimeEntity {
     private Long homeScore;
     @Column(name="AWAY_SCORE")
     private Long awayScore;
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="HOME_PLAYER", nullable = true)
     private PlayerEntity homePlayer;
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="AWAY_PLAYER", nullable = true)
     private PlayerEntity awayPlayer;
     @Embedded

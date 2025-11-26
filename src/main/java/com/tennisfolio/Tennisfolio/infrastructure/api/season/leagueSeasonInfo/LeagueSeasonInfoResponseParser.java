@@ -18,6 +18,7 @@ public class LeagueSeasonInfoResponseParser implements ResponseParser<LeagueSeas
     @Override
     public LeagueSeasonInfoDTO parse(String response) {
         try{
+
             JsonNode rootNode = objectMapper.readTree(response);
 
             JsonNode infoNode = rootNode.path("info");

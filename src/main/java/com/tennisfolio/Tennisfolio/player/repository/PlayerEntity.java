@@ -1,8 +1,7 @@
-package com.tennisfolio.Tennisfolio.player.infrastructure;
+package com.tennisfolio.Tennisfolio.player.repository;
 
 import com.tennisfolio.Tennisfolio.player.domain.Player;
 import com.tennisfolio.Tennisfolio.common.Entity.BaseTimeEntity;
-import com.tennisfolio.Tennisfolio.prize.repository.PlayerPrizeEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

@@ -1,4 +1,4 @@
-package com.tennisfolio.Tennisfolio.player.infrastructure;
+package com.tennisfolio.Tennisfolio.player.repository;
 
 import com.tennisfolio.Tennisfolio.player.domain.Player;
 
