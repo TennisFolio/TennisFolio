@@ -39,7 +39,7 @@ public abstract class StrategyApiTemplate<T, E> {
     public E execute(Object... params){
         // api 호출
         String responseStr = apiCaller.callApi(endpoint, params);
-
+        if(responseStr == null) return null;
         // api 호출 증가
         apiCallCounter.increment(endpoint.getMethodName());
         // response to DTO

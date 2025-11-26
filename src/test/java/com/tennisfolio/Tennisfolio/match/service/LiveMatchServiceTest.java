@@ -13,24 +13,19 @@ import com.tennisfolio.Tennisfolio.match.dto.LiveMatchResponse;
 import com.tennisfolio.Tennisfolio.match.repository.MatchRepository;
 import com.tennisfolio.Tennisfolio.mock.FakeApiCaller;
 import com.tennisfolio.Tennisfolio.mock.FakeMatchRepository;
-import com.tennisfolio.Tennisfolio.mock.FakePlayerRepository;
 import com.tennisfolio.Tennisfolio.mock.FakeRedisTemplate;
 import com.tennisfolio.Tennisfolio.mock.event.FakeEventMapper;
-import com.tennisfolio.Tennisfolio.mock.liveEvents.FakeLiveEventsMapper;
 import com.tennisfolio.Tennisfolio.mock.liveEvents.FakeLiveEventsMapperSecond;
 import com.tennisfolio.Tennisfolio.player.domain.Player;
 import com.tennisfolio.Tennisfolio.player.infrastructure.PlayerProvider;
-import com.tennisfolio.Tennisfolio.player.infrastructure.PlayerRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.groups.Tuple.tuple;

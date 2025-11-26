@@ -5,11 +5,8 @@ import com.tennisfolio.Tennisfolio.player.domain.Player;
 import com.tennisfolio.Tennisfolio.player.domain.PlayerAggregate;
 import com.tennisfolio.Tennisfolio.infrastructure.api.player.teamImage.PlayerImageService;
 import com.tennisfolio.Tennisfolio.player.dto.TeamDetailsApiDTO;
-import com.tennisfolio.Tennisfolio.player.infrastructure.PlayerEntity;
-import com.tennisfolio.Tennisfolio.player.infrastructure.PlayerRepository;
-import jakarta.transaction.Transactional;
+import com.tennisfolio.Tennisfolio.player.repository.PlayerRepository;
 import lombok.Builder;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 

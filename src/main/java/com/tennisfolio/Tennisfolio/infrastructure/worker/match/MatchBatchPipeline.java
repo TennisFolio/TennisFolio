@@ -1,13 +1,10 @@
 package com.tennisfolio.Tennisfolio.infrastructure.worker.match;
 
-import com.tennisfolio.Tennisfolio.common.ExceptionCode;
-import com.tennisfolio.Tennisfolio.exception.NotFoundException;
 import com.tennisfolio.Tennisfolio.infrastructure.worker.AbstractBatchPipeline;
 import com.tennisfolio.Tennisfolio.match.domain.Match;
 import com.tennisfolio.Tennisfolio.match.repository.MatchRepository;
 import com.tennisfolio.Tennisfolio.player.domain.Player;
 import com.tennisfolio.Tennisfolio.player.infrastructure.PlayerProvider;
-import com.tennisfolio.Tennisfolio.player.infrastructure.PlayerRepository;
 import com.tennisfolio.Tennisfolio.round.domain.Round;
 import com.tennisfolio.Tennisfolio.round.repository.RoundRepository;
 import com.tennisfolio.Tennisfolio.season.domain.Season;

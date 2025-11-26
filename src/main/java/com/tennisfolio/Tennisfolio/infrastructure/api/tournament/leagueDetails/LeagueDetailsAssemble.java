@@ -1,15 +1,10 @@
 package com.tennisfolio.Tennisfolio.infrastructure.api.tournament.leagueDetails;
 
 import com.tennisfolio.Tennisfolio.Tournament.domain.Tournament;
-import com.tennisfolio.Tennisfolio.Tournament.repository.TournamentEntity;
 import com.tennisfolio.Tennisfolio.Tournament.repository.TournamentRepository;
-import com.tennisfolio.Tennisfolio.common.ExceptionCode;
-import com.tennisfolio.Tennisfolio.exception.NotFoundException;
-import com.tennisfolio.Tennisfolio.infrastructure.repository.TournamentJpaRepository;
 import com.tennisfolio.Tennisfolio.infrastructure.api.base.EntityAssemble;
 import com.tennisfolio.Tennisfolio.player.application.PlayerService;
 import com.tennisfolio.Tennisfolio.player.domain.Player;
-import com.tennisfolio.Tennisfolio.player.infrastructure.PlayerEntity;
 import org.springframework.stereotype.Component;
 
 @Component

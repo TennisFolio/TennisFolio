@@ -9,7 +9,7 @@ import com.tennisfolio.Tennisfolio.mock.FakeCategoryRepository;
 import com.tennisfolio.Tennisfolio.mock.FakePlayerRepository;
 import com.tennisfolio.Tennisfolio.mock.FakeTournamentRepository;
 import com.tennisfolio.Tennisfolio.player.domain.Player;
-import com.tennisfolio.Tennisfolio.player.infrastructure.PlayerRepository;
+import com.tennisfolio.Tennisfolio.player.repository.PlayerRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

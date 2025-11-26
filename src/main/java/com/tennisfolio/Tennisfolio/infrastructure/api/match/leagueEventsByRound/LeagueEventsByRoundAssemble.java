@@ -1,27 +1,15 @@
 package com.tennisfolio.Tennisfolio.infrastructure.api.match.leagueEventsByRound;
 
-import com.tennisfolio.Tennisfolio.Tournament.domain.Tournament;
-import com.tennisfolio.Tennisfolio.category.domain.Category;
-import com.tennisfolio.Tennisfolio.exception.NotFoundException;
 import com.tennisfolio.Tennisfolio.infrastructure.api.base.EntityAssemble;
 import com.tennisfolio.Tennisfolio.common.ExceptionCode;
 import com.tennisfolio.Tennisfolio.exception.InvalidRequestException;
-import com.tennisfolio.Tennisfolio.infrastructure.api.category.categories.CategoryDTO;
-import com.tennisfolio.Tennisfolio.infrastructure.api.match.eventSchedules.EventSchedulesDTO;
 import com.tennisfolio.Tennisfolio.infrastructure.api.match.liveEvents.*;
 import com.tennisfolio.Tennisfolio.match.domain.Match;
 import com.tennisfolio.Tennisfolio.match.domain.Period;
 import com.tennisfolio.Tennisfolio.match.domain.Score;
-import com.tennisfolio.Tennisfolio.match.repository.MatchEntity;
-import com.tennisfolio.Tennisfolio.player.application.PlayerService;
 import com.tennisfolio.Tennisfolio.player.domain.Player;
-import com.tennisfolio.Tennisfolio.player.infrastructure.PlayerEntity;
 import com.tennisfolio.Tennisfolio.round.domain.Round;
-import com.tennisfolio.Tennisfolio.round.repository.RoundEntity;
-import com.tennisfolio.Tennisfolio.round.repository.RoundRepository;
 import com.tennisfolio.Tennisfolio.season.domain.Season;
-import com.tennisfolio.Tennisfolio.season.repository.SeasonEntity;
-import com.tennisfolio.Tennisfolio.season.repository.SeasonRepository;
 import org.springframework.stereotype.Component;
 
 import java.util.List;

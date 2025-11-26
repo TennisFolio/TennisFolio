@@ -1,15 +1,11 @@
-package com.tennisfolio.Tennisfolio.player.infrastructure;
+package com.tennisfolio.Tennisfolio.player.repository;
 
 import com.tennisfolio.Tennisfolio.player.domain.Country;
-import com.tennisfolio.Tennisfolio.player.domain.Player;
 import com.tennisfolio.Tennisfolio.player.dto.CountryDTO;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.util.Objects;
 
 @Embeddable
 @Getter
