@@ -2,7 +2,12 @@ import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { selectMSWActive } from '../../store/mswSlice';
 
-function SmartImage({ base_url, imageName, fallbackText }) {
+function SmartImage({
+  base_url,
+  imageName,
+  fallbackText,
+  forceDisableMSW = false,
+}) {
   const [step, setStep] = useState(0);
   const [src, setSrc] = useState(null);
   const isMSWActive = useSelector(selectMSWActive);
@@ -18,16 +23,17 @@ function SmartImage({ base_url, imageName, fallbackText }) {
       return [];
     }
 
-    if (isDevelopment && isMSWActive) {
-      // MSW 활성화 시: public 폴더의 테스트 이미지 사용
-      return [`/images/${imageName}`];
-    } else {
+    // forceDisableMSW가 true이거나 MSW가 비활성화되어 있으면 실제 서버 경로 사용
+    if (forceDisableMSW || !(isDevelopment && isMSWActive)) {
       // 실제 API 사용 시: 서버의 여러 형식 이미지 시도
       return [
         `${base_url}/converted/${imageName}.avif`,
         `${base_url}/${imageName}.webp`,
         `${base_url}/${imageName}`,
       ];
+    } else {
+      // MSW 활성화 시: public 폴더의 테스트 이미지 사용
+      return [`/images/${imageName}`];
     }
   })();
 

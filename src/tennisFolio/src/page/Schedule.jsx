@@ -560,10 +560,7 @@ function Schedule() {
                 onClick={() => {
                   // 이미 선택된 카테고리를 다시 클릭하면 해제
                   if (selectedCategory === category) {
-                    const categories = Object.keys(tournamentsByCategory);
-                    if (categories.length > 0) {
-                      setSelectedCategory(categories[0]);
-                    }
+                    return;
                   } else {
                     setSelectedCategory(category);
                     setSelectedSeasonId(null);

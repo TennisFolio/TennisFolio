@@ -1,25 +1,27 @@
 .load-more-button {
   margin: 20px auto;
   display: block;
-  padding: 12px 24px;
+  padding: 10px 20px;
   font-size: 16px;
-  font-weight: bold;
-  color: #ffffff;
-  background-color: #3498db;
-  border: none;
-  border-radius: 8px;
+  font-weight: 500;
+  color: #666;
+  background: white;
+  border: 2px solid #e0e0e0;
+  border-radius: 20px;
   cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.2s ease;
+  transition: all 0.3s;
+  white-space: nowrap;
 }
 
 .load-more-button:hover {
-  background-color: #2980b9; /* hover 시 조금 더 진한 초록색 */
-  transform: translateY(-2px);
+  border-color: #185a9d;
+  color: #185a9d;
 }
 
 .load-more-button:active {
-  background-color: #2980b9;
-  transform: translateY(0);
+  background: #185a9d;
+  border-color: #185a9d;
+  color: white;
 }
 
 .header {
