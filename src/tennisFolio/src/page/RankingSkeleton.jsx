@@ -15,9 +15,10 @@ export const RankingTableSkeleton = () => {
         <thead>
           <tr>
             <th>랭킹</th>
-            <th>국가</th>
-            <th>선수 이름</th>
-            <th>현재 포인트</th>
+            <th>선수</th>
+            <th>나이</th>
+            <th>포인트</th>
+            <th>+/-</th>
           </tr>
         </thead>
         <tbody>
@@ -31,20 +32,34 @@ export const RankingTableSkeleton = () => {
                   className="skeleton-ranking"
                 />
               </td>
-              <td>
-                <Skeleton
-                  width="32px"
-                  height="20px"
-                  borderRadius="4px"
-                  className="skeleton-flag"
-                />
+              <td className="player-cell">
+                <div className="player-info" style={{ justifyContent: 'center' }}>
+                  <Skeleton
+                    width="40px"
+                    height="40px"
+                    borderRadius="50%"
+                    className="skeleton-player-image"
+                  />
+                  <Skeleton
+                    width="24px"
+                    height="16px"
+                    borderRadius="4px"
+                    className="skeleton-flag"
+                  />
+                  <Skeleton
+                    width="120px"
+                    height="20px"
+                    borderRadius="4px"
+                    className="skeleton-player-name"
+                  />
+                </div>
               </td>
               <td>
                 <Skeleton
-                  width="120px"
+                  width="30px"
                   height="20px"
                   borderRadius="4px"
-                  className="skeleton-player-name"
+                  className="skeleton-age"
                 />
               </td>
               <td>
@@ -53,6 +68,14 @@ export const RankingTableSkeleton = () => {
                   height="20px"
                   borderRadius="4px"
                   className="skeleton-points"
+                />
+              </td>
+              <td>
+                <Skeleton
+                  width="50px"
+                  height="20px"
+                  borderRadius="4px"
+                  className="skeleton-gap-points"
                 />
               </td>
             </tr>

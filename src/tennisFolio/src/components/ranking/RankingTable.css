@@ -1,5 +1,4 @@
 .ranking-table-container {
-  padding: 10px;
   overflow-x: auto;
   width: 100%;
   background-color: #fafafa;
@@ -10,16 +9,16 @@
 .ranking-table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 190px;
+  min-width: 500px;
   text-align: center;
   align-items: center;
 }
 
 .ranking-table th,
 .ranking-table td {
-  border: 1px solid #ddd;
   padding: 12px 16px;
   font-size: 14px;
+  vertical-align: middle;
 }
 
 .ranking-table th {
@@ -41,38 +40,213 @@
   color: #555;
 }
 
-/* 랭킹 컬럼 강조 */
-.ranking-table td:nth-child(1) {
+/* 랭킹 컬럼 */
+.ranking-cell {
   font-weight: bold;
+  text-align: center;
+}
+
+.ranking-number {
+  font-size: 16px;
+  font-weight: 700;
+  color: #222;
+}
+
+/* 선수 컬럼 */
+.player-cell {
+  text-align: left;
+  padding: 8px 12px;
+}
+
+.player-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.player-image-container {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.player-image-container.gap-up .playerImg,
+.player-image-container.gap-up .playerFallback {
+  border-color: #e74c3c !important;
+  border-width: 2px !important;
+}
+
+.player-image-container.gap-down .playerImg,
+.player-image-container.gap-down .playerFallback {
+  border-color: #3498db !important;
+  border-width: 2px !important;
+}
+
+.gap-ranking {
+  position: absolute;
+  top: -8px;
+  left: -23px;
+  font-size: 10px;
+  font-weight: 600;
+  white-space: nowrap;
+  background-color: rgba(255, 255, 255, 0.9);
+  padding: 2px 4px;
+  border-radius: 4px;
+  z-index: 1;
+  line-height: 1;
+}
+
+.gap-ranking.up {
+  color: #e74c3c;
+}
+
+.gap-ranking.down {
+  color: #3498db;
+}
+
+.player-info .playerImg {
+  width: 45px !important;
+  height: 45px !important;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 1px solid #ddd;
+  flex-shrink: 0;
+}
+
+.player-info .playerFallback {
+  width: 45px !important;
+  height: 45px !important;
+  border-radius: 50%;
+  font-size: 10px;
+  flex-shrink: 0;
+}
+
+.player-flag-container {
+  width: 18px;
+  height: 12px;
+  flex-shrink: 0;
+  border: 1px solid #ddd;
+  border-radius: 2px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.player-flag {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .player-name {
   font-size: 15px;
   font-weight: 600;
   color: #222;
+  flex: 1;
+  min-width: 100px;
+}
+
+/* 나이 컬럼 */
+.age-cell {
+  text-align: center;
+  font-size: 14px;
+}
+
+/* 포인트 컬럼 */
+.points-cell {
+  text-align: center;
+}
+
+.points-number {
+  font-size: 16px;
+  font-weight: 700;
+  color: #222;
+}
+
+/* +/- 컬럼 */
+.gap-points-cell {
+  text-align: center;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.gap-points-cell.up {
+  color: #e74c3c;
+}
+
+.gap-points-cell.down {
+  color: #3498db;
 }
 
 @media (max-width: 768px) {
+  .ranking-table {
+    min-width: 400px;
+  }
+
   .ranking-table th,
   .ranking-table td {
-    padding: 8px 12px;
+    padding: 8px 10px;
     font-size: 12px;
   }
 
   .ranking-table th {
-    font-size: 10px;
+    font-size: 11px;
     font-weight: 800;
+    padding: 8px;
   }
 
-  .ranking-table td:nth-child(1) {
-    font-size: 10px;
+  .ranking-number {
+    font-size: 14px;
+  }
+
+  .player-info {
+    gap: 6px;
+  }
+
+  .gap-ranking {
+    font-size: 9px;
+    top: -6px;
+    left: -1px;
+    padding: 1px 3px;
+  }
+
+  .player-info .playerImg {
+    width: 36px !important;
+    height: 36px !important;
+  }
+
+  .player-info .playerFallback {
+    width: 36px !important;
+    height: 36px !important;
+    font-size: 9px;
+  }
+
+  .player-flag-container {
+    width: 16px;
+    height: 11px;
   }
 
   .player-name {
     font-size: 12px;
+    min-width: 80px;
   }
 
-  /* 스켈레톤 모바일 크기 조정 */
+  .age-cell {
+    font-size: 12px;
+  }
+
+  .points-number {
+    font-size: 13px;
+  }
+
+  .gap-points-cell {
+    font-size: 12px;
+  }
+}
+
+/* 스켈레톤 모바일 크기 조정 */
+@media (max-width: 768px) {
   .skeleton-ranking {
     width: 30px !important;
     height: 16px !important;
