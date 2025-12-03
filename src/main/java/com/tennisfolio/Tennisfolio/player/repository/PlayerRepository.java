@@ -17,6 +17,7 @@ public interface PlayerRepository {
 
     List<Player> saveAll(List<Player> players);
 
+    List<Player> findSinglePlayer();
 
 }
 
