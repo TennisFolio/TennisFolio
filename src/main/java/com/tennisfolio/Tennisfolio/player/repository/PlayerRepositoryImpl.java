@@ -44,4 +44,9 @@ public class PlayerRepositoryImpl implements PlayerRepository{
 
         return playerJpaRepository.saveAll(playerEntities).stream().map(p -> p.toModel()).collect(Collectors.toList());
     }
+
+    @Override
+    public List<Player> findSinglePlayer() {
+        return playerJpaRepository.findSinglePlayer().stream().map(PlayerEntity::toModel).collect(Collectors.toList());
+    }
 }

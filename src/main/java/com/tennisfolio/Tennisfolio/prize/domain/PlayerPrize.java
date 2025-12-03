@@ -38,11 +38,14 @@ public class PlayerPrize {
         }
     }
 
-    public void updatePlayerPrize(PlayerPrizeEntity prize){
-        this.player = updated(this.player, prize.getPlayerEntity().toModel());
-        this.prizeCurrentAmount = updated(this.prizeCurrentAmount, prize.getPrizeCurrentAmount());
-        this.prizeCurrentCurrency = updated(this.prizeCurrentCurrency, prize.getPrizeCurrentCurrency());
-        this.prizeTotalAmount = updated(this.prizeTotalAmount, prize.getPrizeTotalAmount());
-        this.prizeTotalCurrency = updated(this.prizeTotalCurrency, prize.getPrizeTotalCurrency());
+    public void updatePlayer(Player player){
+        this.player = player;
+    }
+
+    public void updatePlayerPrize(Long prizeCurrentAmount, String prizeCurrentCurrency, Long prizeTotalAmount, String prizeTotalCurrency){
+        this.prizeCurrentAmount = updated(this.prizeCurrentAmount, prizeCurrentAmount);
+        this.prizeCurrentCurrency = updated(this.prizeCurrentCurrency, prizeCurrentCurrency);
+        this.prizeTotalAmount = updated(this.prizeTotalAmount, prizeTotalAmount);
+        this.prizeTotalCurrency = updated(this.prizeTotalCurrency, prizeTotalCurrency);
     }
 }

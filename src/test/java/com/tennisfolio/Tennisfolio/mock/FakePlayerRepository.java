@@ -80,4 +80,9 @@ public class FakePlayerRepository implements PlayerRepository {
 
         return newPlayerList;
     }
+
+    @Override
+    public List<Player> findSinglePlayer() {
+        return data.stream().filter(p -> !p.getPlayerName().contains("/")).toList();
+    }
 }

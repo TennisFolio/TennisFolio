@@ -80,9 +80,9 @@ public class playerServiceTest {
     @Test
     void getOrCreatePlayerByRapidId_존재하지_않으면_저장한다(){
 
-        Player player = playerService.getOrCreatePlayerByRapidId("1");
+        Player player = playerService.getOrCreatePlayerByRapidId("275923");
 
-        Player findPlayer = fakePlayerRepository.findByRapidPlayerId("1").get();
+        Player findPlayer = fakePlayerRepository.findByRapidPlayerId("275923").get();
 
         assertThat(player.getPlayerId()).isEqualTo(findPlayer.getPlayerId());
         assertThat(player.getRapidPlayerId()).isEqualTo(findPlayer.getRapidPlayerId());

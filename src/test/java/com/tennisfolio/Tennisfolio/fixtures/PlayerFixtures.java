@@ -6,6 +6,7 @@ public class PlayerFixtures {
     // Players
     public static Player nadal() {
         return Player.builder()
+                .playerId(1L)
                 .rapidPlayerId("14486")
                 .playerName("Rafael Nadal")
                 .playerNameKr("라파엘 나달")
@@ -14,6 +15,7 @@ public class PlayerFixtures {
 
     public static Player alcaraz() {
         return Player.builder()
+                .playerId(2L)
                 .rapidPlayerId("275923")
                 .playerName("Alcaraz")
                 .playerNameKr("알카라즈")
@@ -22,6 +24,7 @@ public class PlayerFixtures {
 
     public static Player federer(){
         return Player.builder()
+                .playerId(4L)
                 .rapidPlayerId("14342")
                 .playerName("Roger Federer")
                 .playerNameKr("로저 페더러")
@@ -30,6 +33,7 @@ public class PlayerFixtures {
 
     public static Player sinner(){
         return Player.builder()
+                .playerId(3L)
                 .rapidPlayerId("206570")
                 .playerName("Jannik Sinner")
                 .playerNameKr("야닉 시너")

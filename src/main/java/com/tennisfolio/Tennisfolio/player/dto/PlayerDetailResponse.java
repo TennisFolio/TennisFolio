@@ -60,7 +60,7 @@ public class PlayerDetailResponse {
         this.turnedPro = turnedPro;
         this.weight = weight;
         this.plays = plays;
-        this.height = String.valueOf((int)(Double.parseDouble(height) * 100));
+        this.height = height != null? String.valueOf((int)(Double.parseDouble(height) * 100)) : "";
         this.image = image;
         this.prizeCurrentAmount = prizeCurrentAmount;
         this.prizeCurrentCurrency = prizeCurrentCurrency;

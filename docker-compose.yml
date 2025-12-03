@@ -51,6 +51,8 @@ services:
   prometheus:
     image: prom/prometheus
     container_name: prometheus
+    command:
+      - '--storage.tsdb.retention.time=1d'
     ports:
       - "9090:9090"
     volumes:
