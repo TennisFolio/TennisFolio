@@ -1,9 +1,13 @@
 package com.tennisfolio.Tennisfolio.ranking.application;
 
+import com.tennisfolio.Tennisfolio.common.RankingSearchCondition;
+import com.tennisfolio.Tennisfolio.fixtures.PlayerFixtures;
+import com.tennisfolio.Tennisfolio.fixtures.RankingFixtures;
 import com.tennisfolio.Tennisfolio.infrastructure.api.player.teamImage.PlayerImageService;
 import com.tennisfolio.Tennisfolio.mock.FakeRankingRepository;
 import com.tennisfolio.Tennisfolio.player.application.PlayerService;
 import com.tennisfolio.Tennisfolio.player.domain.Player;
+import com.tennisfolio.Tennisfolio.prize.domain.PlayerPrize;
 import com.tennisfolio.Tennisfolio.ranking.domain.Ranking;
 import com.tennisfolio.Tennisfolio.ranking.dto.RankingResponse;
 import com.tennisfolio.Tennisfolio.ranking.repository.RankingRepository;
@@ -16,6 +20,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.groups.Tuple.tuple;
 
 public class RankingServiceTest {
     private RankingService rankingService;
@@ -88,7 +93,7 @@ public class RankingServiceTest {
     @Test
     void 가장_최근_랭킹을_페이지와_사이즈로_조회한다(){
 
-        List<RankingResponse> rankings = rankingService.getRanking(0, 2);
+        List<RankingResponse> rankings = rankingService.getRanking(0, 2, null, null);
         RankingResponse rankings1 = rankings.get(0);
         RankingResponse rankings2 = rankings.get(1);
 
@@ -113,4 +118,5 @@ public class RankingServiceTest {
         assertThat(rankings2.getPlayer().getPlayerId()).isEqualTo(2L);
         assertThat(rankings2.getPlayer().getPlayerNameKr()).isEqualTo("조코비치");
     }
+
 }

@@ -1,6 +1,8 @@
 package com.tennisfolio.Tennisfolio.ranking.api;
 
+import com.tennisfolio.Tennisfolio.common.RankingSearchCondition;
 import com.tennisfolio.Tennisfolio.common.response.ResponseDTO;
+import com.tennisfolio.Tennisfolio.player.dto.CountryResponse;
 import com.tennisfolio.Tennisfolio.ranking.application.RankingService;
 import com.tennisfolio.Tennisfolio.ranking.application.RankingSyncService;
 import com.tennisfolio.Tennisfolio.ranking.dto.RankingResponse;
@@ -32,8 +34,11 @@ public class RankingController {
     }
 
     @GetMapping("/ranking")
-    public ResponseEntity<ResponseDTO<List<RankingResponse>>> getAtpRankings(@RequestParam("page") int page, @RequestParam("size") int size){
-        List<RankingResponse> res = rankingService.getRanking(page, size);
+    public ResponseEntity<ResponseDTO<List<RankingResponse>>> getAtpRankings(@RequestParam("page") int page,
+                                                                             @RequestParam("size") int size,
+                                                                             @RequestParam(value = "condition", required = false) RankingSearchCondition condition,
+                                                                             @RequestParam(value = "keyword", required = false) String keyword){
+        List<RankingResponse> res = rankingService.getRankingSearchByCondition(page, size, condition, keyword);
         return new ResponseEntity(ResponseDTO.success(res), HttpStatus.OK);
     }
 
@@ -42,4 +47,11 @@ public class RankingController {
         List<RankingResponse> res = rankingService.getRankingBefore(page, size);
         return new ResponseEntity(ResponseDTO.success(res), HttpStatus.OK);
     }
+
+    @GetMapping("/ranking/country")
+    public ResponseEntity<ResponseDTO<List<CountryResponse>>> getDistinctTopRankedCoutries(){
+        List<CountryResponse> res = rankingService.getDistinctTopRankedCountries();
+        return new ResponseEntity<>(ResponseDTO.success(res), HttpStatus.OK);
+    }
+
 }

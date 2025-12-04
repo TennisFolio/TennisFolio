@@ -9,6 +9,7 @@ import com.tennisfolio.Tennisfolio.mock.atpRanking.FakeAtpRankingApiTemplate;
 import com.tennisfolio.Tennisfolio.mock.atpRanking.FakeAtpRankingEntityMapper;
 import com.tennisfolio.Tennisfolio.mock.teamDetails.FakeTeamDetailsApiTemplate;
 import com.tennisfolio.Tennisfolio.mock.teamDetails.FakeTeamDetailsEntityMapper;
+import com.tennisfolio.Tennisfolio.player.domain.Player;
 import com.tennisfolio.Tennisfolio.player.domain.PlayerAggregate;
 import com.tennisfolio.Tennisfolio.player.dto.TeamDetailsApiDTO;
 import com.tennisfolio.Tennisfolio.player.infrastructure.PlayerProvider;
@@ -74,7 +75,25 @@ public class RankingSyncServiceTest {
     }
     @Test
     void batch를_통해_모두_저장_성공(){
+        Player player1 = Player.builder()
+                .playerId(1L)
+                .rapidPlayerId("1")
+                .playerName("Alcaraz")
+                .build();
 
+        Player player2 = Player.builder()
+                .playerId(2L)
+                .rapidPlayerId("2")
+                .playerName("Djokobic")
+                .build();
+
+        Player player3 = Player.builder()
+                .playerId(3L)
+                .rapidPlayerId("3")
+                .playerName("Sinner")
+                .build();
+
+        playerRepository.saveAll(List.of(player1, player2, player3));
         rankingSyncService.saveAtpRanking();
 
         List<Ranking> rankings = rankingRepository.findByLastUpdate("20250731");

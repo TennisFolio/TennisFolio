@@ -66,6 +66,7 @@ public class PlayerFixtures {
 
     public static Player shelton(){
         return Player.builder()
+                .playerId(5L)
                 .rapidPlayerId("385485")
                 .playerName("Ben Shelton")
                 .playerNameKr("벤 쉘튼")
