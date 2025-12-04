@@ -1,8 +1,11 @@
 package com.tennisfolio.Tennisfolio.mock;
 
+import com.tennisfolio.Tennisfolio.common.RankingSearchCondition;
+import com.tennisfolio.Tennisfolio.player.domain.Country;
 import com.tennisfolio.Tennisfolio.player.domain.Player;
 import com.tennisfolio.Tennisfolio.ranking.domain.Ranking;
 import com.tennisfolio.Tennisfolio.ranking.repository.RankingRepository;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.util.*;
@@ -161,5 +164,15 @@ public class FakeRankingRepository implements RankingRepository {
             return true;
         }
         return false;
+    }
+
+    @Override
+    public List<Country> getDistinctCountriesFromTopRankings() {
+        return List.of();
+    }
+
+    @Override
+    public Page<Ranking> search(Pageable pageable, RankingSearchCondition condition, String keyword) {
+        return null;
     }
 }
