@@ -124,7 +124,7 @@ public class LiveMatchService {
            liveMatch.setPlayerImage(homePlayerImage, awayPlayerImage);
 
             redis.opsForValue().set(key, liveMatch, Duration.ofMinutes(1));
-            redis.opsForValue().set(indexKey, key, Duration.ofMinutes(1));
+            redis.opsForValue().set(indexKey, liveMatch, Duration.ofMinutes(1));
         }
 
         // 종료된 것으로 예상되는 rapidId
@@ -172,8 +172,8 @@ public class LiveMatchService {
 
     public LiveMatchResponse getLiveEventByRedis(String rapidId){
         String indexKey = "index:rapidId:" + rapidId;
-
-        return (LiveMatchResponse) redis.opsForValue().get(indexKey);
+        LiveMatchResponse match = (LiveMatchResponse) redis.opsForValue().get(indexKey);
+        return match;
 
 
     }
