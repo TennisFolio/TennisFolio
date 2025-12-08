@@ -25,7 +25,8 @@
 | CI/CD | GitHub Actions, Docker |
 
 ## 아키텍처
-![image](https://github.com/user-attachments/assets/11929765-7e03-4b20-a96c-be6c4796b17f)
+<img width="1166" height="670" alt="image" src="https://github.com/user-attachments/assets/afed3fcc-a1bd-4d7a-8f66-33bf3712d63c" />
+
 
 ## 도메인
 ![image](https://github.com/user-attachments/assets/e2064138-c5f9-4ea9-bc07-0dae43665948)
@@ -69,10 +70,11 @@
 | 실시간 경기 | RapidAPI 기반 경기 정보 + 채팅 기능 |
 | 랭킹 조회 | ATP 500위 내 선수 랭킹 정보 |
 | 추천 테스트 | 12문항 기반 라켓, 스트링, ATP 선수 추천 |
+| 경기 일정 조회 | 과거 및 예정 경기 정보 제공 |
 
 ## 구현 예정 기능
 - 선수 개별 정보 상세 페이지(개인 정보, 최근 경기 및 성적)
-- 과거 및 예정 경기 제공
+- ~~과거 및 예정 경기 제공~~
 - 회원 가입 및 로그인
 - 커뮤니티 기능(댓글, 게시판)
 - 예측 게임 (경기 결과, 대회 우승자 예측)
