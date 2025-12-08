@@ -16,6 +16,7 @@ public class EventSchedulesFixtures {
                 .homePlayer(PlayerFixtures.fritz())
                 .awayPlayer(PlayerFixtures.khachanov())
                 .startTimestamp("20251011080000")
+                .status("Ended")
                 .build();
     }
 
@@ -29,6 +30,7 @@ public class EventSchedulesFixtures {
                 .homePlayer(PlayerFixtures.norrie())
                 .awayPlayer(PlayerFixtures.alcaraz())
                 .startTimestamp("20251011100000")
+                .status("Ended")
                 .build();
     }
 
@@ -42,6 +44,7 @@ public class EventSchedulesFixtures {
                 .homePlayer(PlayerFixtures.sinner())
                 .awayPlayer(PlayerFixtures.shelton())
                 .startTimestamp("20251011120000")
+                .status("Ended")
                 .build();
     }
 
@@ -56,6 +59,7 @@ public class EventSchedulesFixtures {
                 .homePlayer(PlayerFixtures.cobolli())
                 .awayPlayer(PlayerFixtures.djokovic())
                 .startTimestamp("20251011140000")
+                .status("Ended")
                 .build();
     }
 
@@ -70,6 +74,7 @@ public class EventSchedulesFixtures {
                 .homeScore(3L)
                 .awayScore(2L)
                 .winner("1")
+                .status("Ended")
                 .build();
     }
 

@@ -60,4 +60,9 @@ public class StatisticRepositoryImpl implements StatisticRepository{
     public boolean flushAll() {
         return bufferedBatchSaver.flushAll();
     }
+
+    @Override
+    public void save(Statistic statistic) {
+        statisticJpaRepository.save(StatisticEntity.fromModel(statistic));
+    }
 }

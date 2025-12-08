@@ -19,4 +19,6 @@ public interface StatisticRepository {
     boolean flushWhenFull();
 
     boolean flushAll();
+
+    void save(Statistic statistic);
 }

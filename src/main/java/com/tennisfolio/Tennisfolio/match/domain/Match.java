@@ -110,8 +110,12 @@ public class Match {
         this.round = round;
     }
 
+    // 진행했든, 안했든 종료
     public boolean isEnded(){
         return "Ended".equals(status) || "Retired".equals(status) || "Canceled".equals(status);
     }
+
+    // 경기 진행 후 종료
+    public boolean isFinished(){return "Ended".equals(status) || "Retired".equals(status);}
 
 }
