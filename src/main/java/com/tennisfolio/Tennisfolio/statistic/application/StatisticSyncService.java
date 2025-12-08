@@ -39,6 +39,10 @@ public class StatisticSyncService {
                             return;
                         }
                         List<Statistic> statistics = apiWorker.process(RapidApi.EVENTSTATISTICS, rapidMatchId);
+                        if(statistics == null) return;
+
+                        statistics.stream().forEach(p -> p.updateMatch(match));
+
                         statisticRepository.collect(statistics);
                         statisticRepository.flushWhenFull();
                     }catch(Exception e){

@@ -22,6 +22,8 @@ import com.tennisfolio.Tennisfolio.round.domain.Round;
 import com.tennisfolio.Tennisfolio.round.repository.RoundRepository;
 import com.tennisfolio.Tennisfolio.season.domain.Season;
 import com.tennisfolio.Tennisfolio.season.repository.SeasonRepository;
+import com.tennisfolio.Tennisfolio.statistic.domain.Statistic;
+import com.tennisfolio.Tennisfolio.statistic.repository.StatisticRepository;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -46,6 +48,7 @@ public class MatchSyncService {
     private final SeasonRepository seasonRepository;
     private final RoundRepository roundRepository;
     private final MatchRepository matchRepository;
+    private final StatisticRepository statisticRepository;
     private final ApiWorker apiWorker;
     private final PlayerProvider playerProvider;
     private final Clock clock;
@@ -53,12 +56,13 @@ public class MatchSyncService {
     private final RetryExecutor retryExecutor;
     private final AbstractBatchPipeline<Match> matchAbstractBatchPipeline;
 
-    public MatchSyncService(CategoryRepository categoryRepository, TournamentRepository tournamentRepository, SeasonRepository seasonRepository, RoundRepository roundRepository, MatchRepository matchRepository, ApiWorker apiWorker, PlayerProvider playerProvider, Clock clock, GenericBatchWorker<Match> matchBatchWorker, RetryExecutor retryExecutor, AbstractBatchPipeline<Match> matchAbstractBatchPipeline) {
+    public MatchSyncService(CategoryRepository categoryRepository, TournamentRepository tournamentRepository, SeasonRepository seasonRepository, RoundRepository roundRepository, MatchRepository matchRepository, StatisticRepository statisticRepository, ApiWorker apiWorker, PlayerProvider playerProvider, Clock clock, GenericBatchWorker<Match> matchBatchWorker, RetryExecutor retryExecutor, AbstractBatchPipeline<Match> matchAbstractBatchPipeline) {
         this.categoryRepository = categoryRepository;
         this.tournamentRepository = tournamentRepository;
         this.seasonRepository = seasonRepository;
         this.roundRepository = roundRepository;
         this.matchRepository = matchRepository;
+        this.statisticRepository = statisticRepository;
         this.apiWorker = apiWorker;
         this.playerProvider = playerProvider;
         this.clock = clock;
@@ -167,26 +171,50 @@ public class MatchSyncService {
                     if (existingOpt.isPresent()) {
                         Match existing = existingOpt.get(); // 영속 상태
                         existing.updateFrom(match);         // 필드 변경
-                        matchRepository.save(existing);
-                        // dirty checking 자동으로 감지됨 (save() 필요 X)
+                        saveMatch(existing);
+                        if(existing.isFinished()){
+                            saveStatistic(existing);
+                        }
                     }
                     // 존재하지 않는 경우 → 새로 저장 (INSERT)
                     else {
-                        Category category = findOrSaveCategory(match);
-                        Tournament tournament = findOrSaveTournament(match, category);
-                        Season season = findOrSaveSeason(match, tournament);
-                        Round round = findOrSaveRound(match, season);
-                        match.updateRound(round);
+                        resolveMatchHierarchy(match);
 
                         Player homePlayer = playerProvider.provide(match.getHomePlayer().getRapidPlayerId());
                         Player awayPlayer = playerProvider.provide(match.getAwayPlayer().getRapidPlayerId());
                         roundRepository.flush();
                         match.updatePlayer(homePlayer, awayPlayer);
 
-                        matchRepository.save(match); // INSERT
+                        saveMatch(match);
+                        if(match.isFinished()){
+                            saveStatistic(match);
+
+                        }
                     }
                 });
 
+    }
+
+    private void resolveMatchHierarchy(Match match) {
+        Category category = findOrSaveCategory(match);
+        Tournament tournament = findOrSaveTournament(match, category);
+        Season season = findOrSaveSeason(match, tournament);
+        Round round = findOrSaveRound(match, season);
+        match.updateRound(round);
+    }
+
+    private void saveMatch(Match existing) {
+        matchRepository.save(existing);
+        matchRepository.flush();
+    }
+
+    private void saveStatistic(Match existing) {
+        List<Statistic> statistics = apiWorker.process(RapidApi.EVENTSTATISTICS, existing.getRapidMatchId());
+        if(statistics == null) return;
+        statistics.stream().forEach(p -> {
+            p.updateMatch(existing);
+            statisticRepository.save(p);
+        });
     }
 
     private void fetchUpcomingMatchSchedules(List<Match> allEvents) {

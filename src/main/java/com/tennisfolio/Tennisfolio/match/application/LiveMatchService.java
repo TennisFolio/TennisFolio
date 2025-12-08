@@ -29,9 +29,12 @@ import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.springframework.data.redis.core.ScanOptions.scanOptions;
 
@@ -162,12 +165,11 @@ public class LiveMatchService {
     }
 
     public List<LiveMatchResponse> getAllLiveEventsByRedis(){
-        List<LiveMatchResponse> atpEvents = getATPLiveEventsByRedis();
-        List<LiveMatchResponse> wtaEvents = getWTALiveEventsByRedis();
+        List<LiveMatchResponse> atp = Optional.ofNullable(getATPLiveEventsByRedis()).orElseGet(List::of);
+        List<LiveMatchResponse> wta = Optional.ofNullable(getWTALiveEventsByRedis()).orElseGet(List::of);
 
-        atpEvents.addAll(wtaEvents);
-
-        return atpEvents;
+        return Stream.concat(atp.stream(), wta.stream())
+                .collect(Collectors.toList());
     }
 
     public LiveMatchResponse getLiveEventByRedis(String rapidId){

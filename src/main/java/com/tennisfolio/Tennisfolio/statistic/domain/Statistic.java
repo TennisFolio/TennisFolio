@@ -43,4 +43,8 @@ public class Statistic {
         this.awayTotal = dto.getAwayTotal();
 
     }
+
+    public void updateMatch(Match match){
+        this.match = match;
+    }
 }
