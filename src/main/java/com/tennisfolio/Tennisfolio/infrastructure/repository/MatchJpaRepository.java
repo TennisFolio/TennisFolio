@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -24,6 +25,19 @@ public interface MatchJpaRepository extends JpaRepository<MatchEntity, Long> {
             WHERE rapidMatchId = :rapidMatchId
             """)
     Optional<MatchEntity> findWithToOneByRapidMatchId(@Param("rapidMatchId") String rapidMatchId);
+
+    @Query("""
+            SELECT m
+            FROM MatchEntity m
+            JOIN FETCH m.roundEntity r
+            JOIN FETCH r.seasonEntity s
+            JOIN FETCH s.tournamentEntity t
+            JOIN FETCH t.categoryEntity c
+            JOIN FETCH m.homePlayer hp
+            JOIN FETCH m.awayPlayer ap
+            WHERE m.startTimestamp LIKE CONCAT(:year, '%')
+            """)
+    List<MatchEntity> findByYear(@Param("year") String year);
 
     @Query("SELECT m.rapidMatchId FROM MatchEntity m")
     Set<String> findAllRapidMatchIds();

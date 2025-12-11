@@ -14,6 +14,7 @@ public interface StatisticRepository {
 
     List<Statistic> findAll();
     List<Statistic> findByMatch(Match match);
+    List<Statistic> findWithMatchAndPlayerByYear(String year);
     List<Statistic> collect(Statistic statistic);
     List<Statistic> collect(List<Statistic> statistics);
     boolean flushWhenFull();
@@ -21,4 +22,5 @@ public interface StatisticRepository {
     boolean flushAll();
 
     void save(Statistic statistic);
+    void saveAll(List<Statistic> statistics);
 }

@@ -31,6 +31,11 @@ public class StatisticRepositoryImpl implements StatisticRepository{
         return statisticJpaRepository.findByMatchEntity(MatchEntity.fromModel(match)).stream().map(StatisticEntity::toModel).toList();
     }
 
+    @Override
+    public List<Statistic> findWithMatchAndPlayerByYear(String year) {
+        return statisticJpaRepository.findWithMatchAndPlayerByYear(year).stream().map(StatisticEntity::toModel).toList();
+    }
+
 
     @Override
     public List<Statistic> collect(Statistic statistic) {
@@ -64,5 +69,11 @@ public class StatisticRepositoryImpl implements StatisticRepository{
     @Override
     public void save(Statistic statistic) {
         statisticJpaRepository.save(StatisticEntity.fromModel(statistic));
+    }
+
+    @Override
+    public void saveAll(List<Statistic> statistics) {
+        List<StatisticEntity> statisticEntities = statistics.stream().map(p -> StatisticEntity.fromModel(p)).toList();
+        statisticJpaRepository.saveAll(statisticEntities);
     }
 }

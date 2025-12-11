@@ -21,6 +21,11 @@ public class FakeMatchRepository implements MatchRepository {
     }
 
     @Override
+    public List<Match> findByYear(String year) {
+        return List.of();
+    }
+
+    @Override
     public Optional<Match> findByRapidMatchId(String rapidMatchId) {
         return data.values().stream().filter(p -> rapidMatchId.equals(p.getRapidMatchId())).findFirst();
     }

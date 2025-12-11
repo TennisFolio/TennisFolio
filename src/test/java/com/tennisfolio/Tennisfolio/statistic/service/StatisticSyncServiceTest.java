@@ -62,7 +62,7 @@ public class StatisticSyncServiceTest {
         fakeMatchRepository.collect(List.of(MatchFixtures.wimbledonMen2025FinalMatch(), MatchFixtures.rolandGarrosMen2025FinalMatch()));
         fakeMatchRepository.flushAll();
         apiWorker = new ApiWorker(strategies, redisRateLimiter);
-        statisticService = new StatisticSyncService(apiWorker, fakeMatchRepository, fakeStatisticRepository);
+        statisticService = new StatisticSyncService(apiWorker, fakeMatchRepository, fakeStatisticRepository, null, null);
     }
 
     @Test

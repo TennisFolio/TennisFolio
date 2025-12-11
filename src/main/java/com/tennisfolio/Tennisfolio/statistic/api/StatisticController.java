@@ -4,6 +4,7 @@ import com.tennisfolio.Tennisfolio.common.response.ResponseDTO;
 import com.tennisfolio.Tennisfolio.statistic.application.StatisticSyncService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -23,4 +24,11 @@ public class StatisticController {
         statisticSyncService.saveStatisticList();
         return new ResponseEntity<>(HttpStatus.OK);
     }
+
+    @PostMapping("/async/{year}")
+    public ResponseEntity<ResponseDTO> asyncSaveStatistic(@PathVariable("year") String year){
+        statisticSyncService.loadStatisticsByMatch(year);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
 }

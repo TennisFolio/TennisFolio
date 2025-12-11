@@ -27,6 +27,11 @@ public class FakeStatisticRepository implements StatisticRepository {
     }
 
     @Override
+    public List<Statistic> findWithMatchAndPlayerByYear(String year) {
+        return List.of();
+    }
+
+    @Override
     public List<Statistic> collect(Statistic statistic) {
         batch.add(statistic);
         return batch;
@@ -59,6 +64,11 @@ public class FakeStatisticRepository implements StatisticRepository {
     @Override
     public void save(Statistic statistic) {
         data.put(statistic.getStatId(), statistic);
+    }
+
+    @Override
+    public void saveAll(List<Statistic> statistics) {
+
     }
 
     private void flushBatch() {
