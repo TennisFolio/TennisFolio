@@ -32,6 +32,11 @@ public class MatchRepositoryImpl implements MatchRepository{
     }
 
     @Override
+    public List<Match> findByYear(String year) {
+        return matchJpaRepository.findByYear(year).stream().map(MatchEntity::toModel).toList();
+    }
+
+    @Override
     public Match save(Match match) {
         return matchJpaRepository.save(MatchEntity.fromModel(match)).toModel();
     }

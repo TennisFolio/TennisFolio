@@ -10,6 +10,7 @@ import java.util.Set;
 public interface MatchRepository {
     Optional<Match> findByRapidMatchId(String rapidMatchId);
     Optional<Match> findWithToOneByRapidMatchId(String rapidMatchId);
+    List<Match> findByYear(String year);
     Match save(Match match);
     void saveAll(List<Match> matches);
     Set<String> findRapidMatchIdByRapidMatchIds(List<String> rapidMatchIds);
