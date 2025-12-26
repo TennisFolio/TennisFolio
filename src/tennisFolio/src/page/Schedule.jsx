@@ -231,7 +231,29 @@ function Schedule() {
     if (tournaments.length > 0 && selectedCategory === null) {
       const categories = [...new Set(tournaments.map((t) => t.categoryName))];
       if (categories.length > 0) {
-        setSelectedCategory(categories[0]);
+        // ATP 우선, 없으면 WTA 우선, 둘 다 있으면 ATP 첫번째 WTA 두번째로 정렬
+        const sorted = [...categories];
+        const atpIndex = sorted.indexOf('ATP');
+        const wtaIndex = sorted.indexOf('WTA');
+
+        if (atpIndex !== -1) {
+          sorted.splice(atpIndex, 1);
+          sorted.unshift('ATP');
+        }
+
+        if (wtaIndex !== -1) {
+          const newWtaIndex = sorted.indexOf('WTA');
+          if (newWtaIndex !== -1) {
+            sorted.splice(newWtaIndex, 1);
+            if (atpIndex !== -1) {
+              sorted.splice(1, 0, 'WTA');
+            } else {
+              sorted.unshift('WTA');
+            }
+          }
+        }
+
+        setSelectedCategory(sorted[0]);
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -345,6 +367,39 @@ function Schedule() {
     });
     return grouped;
   }, [tournaments]);
+
+  // 카테고리 순서 정렬 (ATP 우선, 없으면 WTA 우선, 둘 다 있으면 ATP 첫번째 WTA 두번째)
+  const sortedCategories = useMemo(() => {
+    const categories = Object.keys(tournamentsByCategory);
+    if (categories.length === 0) return [];
+
+    const sorted = [...categories];
+    const atpIndex = sorted.indexOf('ATP');
+    const wtaIndex = sorted.indexOf('WTA');
+
+    // ATP가 있으면 ATP를 첫 번째로
+    if (atpIndex !== -1) {
+      sorted.splice(atpIndex, 1);
+      sorted.unshift('ATP');
+    }
+
+    // WTA 처리
+    if (wtaIndex !== -1) {
+      // ATP가 제거되었을 수 있으므로 인덱스 재계산
+      const newWtaIndex = sorted.indexOf('WTA');
+      if (newWtaIndex !== -1) {
+        sorted.splice(newWtaIndex, 1);
+        // ATP가 있으면 두 번째로, 없으면 첫 번째로
+        if (atpIndex !== -1) {
+          sorted.splice(1, 0, 'WTA');
+        } else {
+          sorted.unshift('WTA');
+        }
+      }
+    }
+
+    return sorted;
+  }, [tournamentsByCategory]);
 
   // 현재 선택된 카테고리의 categoryId (메모이제이션)
   const selectedCategoryId = useMemo(() => {
@@ -550,49 +605,57 @@ function Schedule() {
         <FilterSectionSkeleton />
       ) : (
         <div className="filter-section">
-          <div className="category-tabs">
-            {Object.keys(tournamentsByCategory).map((category) => (
-              <button
-                key={category}
-                className={`category-tab ${
-                  selectedCategory === category ? 'active' : ''
-                }`}
-                onClick={() => {
-                  // 이미 선택된 카테고리를 다시 클릭하면 해제
-                  if (selectedCategory === category) {
-                    return;
-                  } else {
-                    setSelectedCategory(category);
-                    setSelectedSeasonId(null);
-                  }
-                }}
-              >
-                {category}
-              </button>
-            ))}
-          </div>
+          {sortedCategories.length > 0 ? (
+            <>
+              <div className="category-tabs">
+                {sortedCategories.map((category) => (
+                  <button
+                    key={category}
+                    className={`category-tab ${
+                      selectedCategory === category ? 'active' : ''
+                    }`}
+                    onClick={() => {
+                      // 이미 선택된 카테고리를 다시 클릭하면 해제
+                      if (selectedCategory === category) {
+                        return;
+                      } else {
+                        setSelectedCategory(category);
+                        setSelectedSeasonId(null);
+                      }
+                    }}
+                  >
+                    {category}
+                  </button>
+                ))}
+              </div>
 
-          {/* 선택된 카테고리의 대회 목록 */}
-          {selectedCategory && tournamentsByCategory[selectedCategory] && (
-            <div className="tournament-list">
-              {tournamentsByCategory[selectedCategory].map((tournament) => (
-                <button
-                  key={tournament.seasonId}
-                  className={`tournament-item ${
-                    selectedSeasonId === tournament.seasonId ? 'active' : ''
-                  }`}
-                  onClick={() => {
-                    // 이미 선택된 아이템을 다시 클릭하면 해제
-                    if (selectedSeasonId === tournament.seasonId) {
-                      setSelectedSeasonId(null);
-                    } else {
-                      setSelectedSeasonId(tournament.seasonId);
-                    }
-                  }}
-                >
-                  {tournament.seasonName}
-                </button>
-              ))}
+              {/* 선택된 카테고리의 대회 목록 */}
+              {selectedCategory && tournamentsByCategory[selectedCategory] && (
+                <div className="tournament-list">
+                  {tournamentsByCategory[selectedCategory].map((tournament) => (
+                    <button
+                      key={tournament.seasonId}
+                      className={`tournament-item ${
+                        selectedSeasonId === tournament.seasonId ? 'active' : ''
+                      }`}
+                      onClick={() => {
+                        // 이미 선택된 아이템을 다시 클릭하면 해제
+                        if (selectedSeasonId === tournament.seasonId) {
+                          setSelectedSeasonId(null);
+                        } else {
+                          setSelectedSeasonId(tournament.seasonId);
+                        }
+                      }}
+                    >
+                      {tournament.seasonName}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="no-matches">
+              이 달에 예정된 토너먼트가 없습니다.
             </div>
           )}
         </div>
