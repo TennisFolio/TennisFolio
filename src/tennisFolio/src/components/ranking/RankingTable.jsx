@@ -3,6 +3,8 @@ import './RankingTable.css';
 import Flag from 'react-world-flags';
 import SmartImage from '../main/SmartImage';
 import { base_image_url } from '@/constants';
+import { useDispatch } from 'react-redux';
+import { openPlayerDetail } from '../../store/playerDetailSlice';
 
 // YYYYMMDD 형식의 생년월일을 받아서 만 나이 계산
 function calculateAge(birth) {
@@ -29,6 +31,14 @@ function calculateAge(birth) {
 }
 
 function RankingTable({ rankings }) {
+  const dispatch = useDispatch();
+
+  const handlePlayerNameClick = (playerId) => {
+    if (playerId) {
+      dispatch(openPlayerDetail(playerId));
+    }
+  };
+
   return (
     <div className="ranking-table-container">
       <table className="ranking-table">
@@ -92,7 +102,13 @@ function RankingTable({ rankings }) {
                         className="player-flag"
                       />
                     </div>
-                    <span className="player-name">
+                    <span
+                      className="player-name"
+                      onClick={() =>
+                        handlePlayerNameClick(rank.player?.playerId)
+                      }
+                      style={{ cursor: 'pointer' }}
+                    >
                       {rank.player?.playerNameKr || rank.player?.playerName}
                     </span>
                   </div>

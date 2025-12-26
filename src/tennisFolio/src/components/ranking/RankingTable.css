@@ -145,6 +145,13 @@
   color: #222;
   flex: 1;
   min-width: 100px;
+  transition: color 0.2s;
+  text-align: left;
+}
+
+.player-name:hover {
+  color: #185a9d;
+  text-decoration: underline;
 }
 
 /* 나이 컬럼 */
