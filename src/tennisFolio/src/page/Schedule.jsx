@@ -1,10 +1,12 @@
 import { useState, useEffect, useMemo, Fragment } from 'react';
+import { useDispatch } from 'react-redux';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import './Schedule.css';
 import { apiRequest } from '../utils/apiClient';
 import { base_server_url } from '@/constants';
 import { FilterSectionSkeleton, MatchesListSkeleton } from './ScheduleSkeleton';
+import { openPlayerDetail } from '../store/playerDetailSlice';
 
 // 임시 목 데이터 - 전체 대회 목록
 const mockTournamentsResponse = {
@@ -217,6 +219,7 @@ const tournamentColors = [
 ];
 
 function Schedule() {
+  const dispatch = useDispatch();
   const [selectedDate, setSelectedDate] = useState(new Date()); // 초기에는 오늘 날짜 선택
   const [activeStartDate, setActiveStartDate] = useState(new Date()); // 현재 보고 있는 달력의 월
   const [tournaments, setTournaments] = useState([]);
@@ -598,6 +601,13 @@ function Schedule() {
     setActiveStartDate(activeStartDate);
   };
 
+  // 선수 이름 클릭 핸들러
+  const handlePlayerNameClick = (playerId) => {
+    if (playerId) {
+      dispatch(openPlayerDetail(playerId));
+    }
+  };
+
   return (
     <div className="schedule-page">
       {/* 필터 영역 */}
@@ -764,7 +774,18 @@ function Schedule() {
                                           alt="winner"
                                         />
                                       )}
-                                      <span>
+                                      <span
+                                        onClick={() =>
+                                          handlePlayerNameClick(
+                                            match.homePlayerId
+                                          )
+                                        }
+                                        style={{
+                                          cursor: match.homePlayerId
+                                            ? 'pointer'
+                                            : 'default',
+                                        }}
+                                      >
                                         {renderPlayerName(
                                           match.homePlayerNameKr,
                                           match.homePlayerName
@@ -790,7 +811,18 @@ function Schedule() {
                                           alt="winner"
                                         />
                                       )}
-                                      <span>
+                                      <span
+                                        onClick={() =>
+                                          handlePlayerNameClick(
+                                            match.awayPlayerId
+                                          )
+                                        }
+                                        style={{
+                                          cursor: match.awayPlayerId
+                                            ? 'pointer'
+                                            : 'default',
+                                        }}
+                                      >
                                         {renderPlayerName(
                                           match.awayPlayerNameKr,
                                           match.awayPlayerName
