@@ -23,7 +23,8 @@ public class WebConfig implements WebMvcConfigurer {
                         .allowedOrigins(
                                 "https://tennisfolio.net",
                                 "https://www.tennisfolio.net",
-                                "http://localhost:5173"
+                                "http://localhost:5173",
+                                "http://localhost:4173"
                         )
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS", "HEAD")
                         .allowedHeaders("*")

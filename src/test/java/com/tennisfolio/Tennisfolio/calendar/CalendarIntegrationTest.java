@@ -1,15 +1,30 @@
 package com.tennisfolio.Tennisfolio.calendar;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.tennisfolio.Tennisfolio.calendar.dto.MatchScheduleResponse;
+import com.tennisfolio.Tennisfolio.config.IntegrationTest;
 import com.tennisfolio.Tennisfolio.infrastructure.api.base.ApiCaller;
+import com.tennisfolio.Tennisfolio.infrastructure.api.match.eventSchedules.EventSchedulesDTO;
+import com.tennisfolio.Tennisfolio.match.dto.LiveMatchResponse;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
+
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -17,7 +32,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 
-@SpringBootTest
+@IntegrationTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @Sql(value = "/sql/calendar.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS)
@@ -26,6 +41,12 @@ class CalendarIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @Autowired(required = false)
+    @Qualifier("redisTemplate")
+    private RedisTemplate redis;
+
+    ObjectMapper objectMapper = new ObjectMapper();
 
     @Test
     void 달력_데이터_조회_성공() throws Exception{
@@ -84,6 +105,59 @@ class CalendarIntegrationTest {
                 .andExpect(jsonPath("$.data[0].roundSlug").value("final"));
 
     }
-    
+
+    @Test
+    void 실시간_경기_중_달력_디테일_조회() throws Exception{
+        LiveMatchResponse liveMatch = loadLiveMatch("redisFixtures/live_atp_15222427.json");
+
+        String redisKey = "index:rapidId:" + liveMatch.getRapidId();
+
+        redis.opsForValue().set(redisKey, liveMatch);
+
+        mockMvc.perform(get("/api/calendar/detail")
+                .param("date", "20251230")
+                .param("categoryId", "1"))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data", hasSize(2)))
+                .andExpect(jsonPath("$.data[0].homeScore").value(1))
+                .andExpect(jsonPath("$.data[0].awayScore").value(0))
+                .andExpect(jsonPath("$.data[0].roundNameKr").value("결승"))
+                .andExpect(jsonPath("$.data[0].status").value("2nd set"));
+
+    }
+
+    @Test
+    void 실시간_경기_중_달력_디테일_레디스_DB_조회() throws Exception{
+        LiveMatchResponse liveMatch = loadLiveMatch("redisFixtures/live_atp_15222427.json");
+
+        String redisKey = "index:rapidId:" + liveMatch.getRapidId();
+
+        redis.opsForValue().set(redisKey, liveMatch);
+
+        mockMvc.perform(get("/api/calendar/detail")
+                        .param("date", "20251230")
+                        .param("categoryId", "1"))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data", hasSize(2)))
+                .andExpect(jsonPath("$.data[0].homeScore").value(1))
+                .andExpect(jsonPath("$.data[0].awayScore").value(0))
+                .andExpect(jsonPath("$.data[0].roundNameKr").value("결승"))
+                .andExpect(jsonPath("$.data[0].status").value("2nd set"))
+                .andExpect(jsonPath("$.data[1].homeScore").value(0))
+                .andExpect(jsonPath("$.data[1].awayScore").value(0))
+                .andExpect(jsonPath("$.data[1].roundNameKr").value("결승"))
+                .andExpect(jsonPath("$.data[1].status").value("Not started"));
+
+    }
+
+    private LiveMatchResponse loadLiveMatch(String fileName) throws Exception {
+        ClassPathResource resource = new ClassPathResource(fileName);
+        return objectMapper.readValue(
+                resource.getInputStream(),
+                LiveMatchResponse.class
+        );
+    }
 
 }

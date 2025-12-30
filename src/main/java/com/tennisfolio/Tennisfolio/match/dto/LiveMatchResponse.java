@@ -19,6 +19,7 @@ public class LiveMatchResponse {
     private String tournamentName;
     private String seasonName;
     private String roundName;
+    private String roundSlug;
     private String status;
 
     private LiveMatchPlayerResponse homePlayer;
@@ -35,6 +36,7 @@ public class LiveMatchResponse {
         this.tournamentName = dto.getTournament().getName();
         this.seasonName = dto.getSeason().getName();
         this.roundName = dto.getRound() != null ? dto.getRound().getName() : null;
+        this.roundSlug = dto.getRound() != null ? dto.getRound().getSlug() : null;
         this.status = dto.getStatus().getDescription();
         this.homePlayer = new LiveMatchPlayerResponse(dto.getHomeTeam());
         this.awayPlayer = new LiveMatchPlayerResponse(dto.getAwayTeam());
