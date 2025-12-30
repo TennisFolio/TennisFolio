@@ -1,0 +1,48 @@
+{
+  "rapidId": "15222427",
+  "category": "atp",
+  "tournamentName": "Next Gen Finals Jeddah, Saudi Arabia, Red Group",
+  "seasonName": "Next Gen ATP Finals Men Singles 2025",
+  "roundName": null,
+  "roundSlug": "final",
+  "status": "2nd set",
+  "homePlayer": {
+    "playerRapidId": "349089",
+    "playerName": "Dino Prižemić",
+    "playerImage": "player/349089",
+    "playerRanking": "128",
+    "playerCountryAlpha": "HR",
+    "playerCountryName": "Croatia"
+  },
+  "awayPlayer": {
+    "playerRapidId": "403148",
+    "playerName": "Justin Engel",
+    "playerImage": "player/403148",
+    "playerRanking": "187",
+    "playerCountryAlpha": "DE",
+    "playerCountryName": "Germany"
+  },
+  "homeScore": {
+    "current": 1,
+    "display": 1,
+    "periodScore":
+      [4, 0, 0, 0, 0]
+    ,
+    "point": "0"
+  },
+  "awayScore": {
+    "current": 0,
+    "display": 0,
+    "periodScore":
+      [1, 1, 0, 0, 0]
+    ,
+    "point": "15"
+  },
+  "time": {
+    "period":
+      ["1110", null, null, null, null]
+    ,
+    "currentPeriodStartTimestamp": "1766057274",
+    "startTime": "1766055600"
+  }
+}

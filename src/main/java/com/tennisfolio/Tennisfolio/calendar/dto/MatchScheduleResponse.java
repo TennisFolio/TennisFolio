@@ -1,6 +1,7 @@
 package com.tennisfolio.Tennisfolio.calendar.dto;
 
 import com.tennisfolio.Tennisfolio.common.RoundType;
+import com.tennisfolio.Tennisfolio.match.dto.LiveMatchResponse;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -63,5 +64,13 @@ public class MatchScheduleResponse {
         this.status = status;
         this.startTimestamp = startTimestamp;
         this.winner = winner;
+    }
+
+    public void applyLiveMatch(LiveMatchResponse liveMatchResponse){
+        this.roundNameKr = RoundType.fromSlug(liveMatchResponse.getRoundSlug()).getKrName();
+        this.homeScore = liveMatchResponse.getHomeScore().getCurrent();
+        this.awayScore = liveMatchResponse.getAwayScore().getCurrent();
+        this.status = liveMatchResponse.getStatus();
+
     }
 }
