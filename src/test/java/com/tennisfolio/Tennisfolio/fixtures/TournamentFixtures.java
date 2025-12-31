@@ -45,4 +45,22 @@ public class TournamentFixtures {
                 .groundType("Grass")
                 .build();
     }
+
+    public static Tournament unitedCupSingle(){
+        return Tournament.builder()
+                .rapidTournamentId("19728")
+                .category(CategoryFixtures.unitedCup())
+                .tournamentName("United Cup")
+                .groundType("Hardcourt outdoor")
+                .build();
+    }
+
+    public static Tournament laverCup(){
+        return Tournament.builder()
+                .rapidTournamentId("10524")
+                .category(CategoryFixtures.exhibition())
+                .tournamentName("Laver Cup")
+                .groundType("Hardcourt indoor")
+                .build();
+    }
 }

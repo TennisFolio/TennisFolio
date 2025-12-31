@@ -8,7 +8,8 @@ public enum CategoryType {
     ATP("3", "ATP", "atp"),
     DAVIS_CUP("76", "Davis Cup", "davis-cup"),
     WTA("6", "WTA", "wta"),
-    EXHIBITION("79", "Exhibition", "exhibition");
+    EXHIBITION("79", "Exhibition", "exhibition"),
+    BILLIE_JEAN_KING_CUP("74", "Billie Jean King Cup", "billie-jean-king-cup");
 
     private final String rapidCategoryId;
     private final String categoryName;

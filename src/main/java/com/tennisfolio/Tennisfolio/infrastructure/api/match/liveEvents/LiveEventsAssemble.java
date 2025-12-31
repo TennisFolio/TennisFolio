@@ -13,10 +13,9 @@ import java.util.stream.Collectors;
 
 @Component
 public class LiveEventsAssemble implements EntityAssemble<List<LiveEventsApiDTO>, List<LiveMatchResponse>> {
-    private final PlayerService playerService;
 
-    public LiveEventsAssemble(PlayerService playerService) {
-        this.playerService = playerService;
+    public LiveEventsAssemble() {
+
     }
 
     @Override
@@ -24,8 +23,8 @@ public class LiveEventsAssemble implements EntityAssemble<List<LiveEventsApiDTO>
         if(dto == null || dto.isEmpty()){
             return List.of();
         }
-        //atp, wta만 전달
-        dto = dto.stream().filter(p -> p.isAtpEvent() || p.isWtaEvent()).toList();
+        // 카테고리 선정
+        dto = dto.stream().filter(p -> p.isSupportedEvent()).toList();
         
         return dto.stream()
                 .map(this::getLiveMatchResponse)
@@ -34,17 +33,7 @@ public class LiveEventsAssemble implements EntityAssemble<List<LiveEventsApiDTO>
     }
 
     private LiveMatchResponse getLiveMatchResponse(LiveEventsApiDTO dto){
-        Player homePlayer = Player.builder()
-                .rapidPlayerId(dto.getHomeTeam().getRapidPlayerId())
-                .playerName(dto.getHomeTeam().getName())
-                .build();
 
-        Player awayPlayer = Player.builder()
-                .rapidPlayerId(dto.getAwayTeam().getRapidPlayerId())
-                .playerName(dto.getAwayTeam().getName())
-                .build();
-//        Player homePlayer = playerService.getOrCreatePlayerByRapidId(dto.getHomeTeam().getRapidPlayerId());
-//        Player awayPlayer = playerService.getOrCreatePlayerByRapidId(dto.getAwayTeam().getRapidPlayerId());
         return new LiveMatchResponse(dto);
     }
 }

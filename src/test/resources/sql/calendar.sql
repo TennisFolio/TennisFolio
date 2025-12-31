@@ -17,8 +17,8 @@ INSERT INTO tb_player(PLAYER_ID, PLAYER_NAME, PLAYER_NAME_KR) VALUES(4, 'Shelton
 INSERT INTO tb_match(MATCH_ID, ROUND_ID, rapid_match_id, home_score, away_score, home_player, away_player, status, start_timestamp, winner)
 VALUES(1, 1, '1', 2, 1, 1, 2, 'Ended', '20251020150000', '1'),
       (2, 2, '2', 0, 0, 3, 4, 'Not started', '20251016230000', ''),
-      (3, 2, '15222427', 1, 1, 2, 3, 'Not started', '20251230120000', ''),
-      (4, 2, '3', 0, 0, 2, 4, 'Not started', '20251230150000', '');
+      (3, 2, '15222427', 1, 1, 2, 3, 'Not started', FORMATDATETIME(CURRENT_TIMESTAMP, 'yyyyMMddHHmmss'), NULL),
+      (4, 2, '3', 0, 0, 2, 4, 'Not started', FORMATDATETIME(CURRENT_TIMESTAMP, 'yyyyMMddHHmmss'), NULL);
 
 
 

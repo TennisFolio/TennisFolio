@@ -43,4 +43,24 @@ public class SeasonFixtures {
                 .year("2024")
                 .build();
     }
+
+    public static Season unitedCup2025(){
+        return Season.builder()
+                .seasonId(15L)
+                .rapidSeasonId("67129")
+                .seasonName("United Cup 2025")
+                .tournament(TournamentFixtures.unitedCupSingle())
+                .year("2025")
+                .build();
+    }
+
+    public static Season laverCup2025(){
+        return Season.builder()
+                .seasonId(4L)
+                .rapidSeasonId("67324")
+                .seasonName("Exhibition Laver Cup Men Singles 2025")
+                .tournament(TournamentFixtures.laverCup())
+                .year("2025")
+                .build();
+    }
 }

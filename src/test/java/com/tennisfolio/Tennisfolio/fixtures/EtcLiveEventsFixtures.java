@@ -1,8 +1,5 @@
 package com.tennisfolio.Tennisfolio.fixtures;
 
-import com.tennisfolio.Tennisfolio.match.domain.Match;
-import com.tennisfolio.Tennisfolio.match.domain.Period;
-import com.tennisfolio.Tennisfolio.match.domain.Score;
 import com.tennisfolio.Tennisfolio.match.dto.LiveMatchPlayerResponse;
 import com.tennisfolio.Tennisfolio.match.dto.LiveMatchResponse;
 import com.tennisfolio.Tennisfolio.match.dto.LiveMatchScoreResponse;
@@ -10,7 +7,7 @@ import com.tennisfolio.Tennisfolio.match.dto.LiveMatchTimeResponse;
 
 import java.util.List;
 
-public class LiveEventsFixtures {
+public class EtcLiveEventsFixtures {
 
     public static LiveMatchPlayerResponse homePlayer(){
         return  LiveMatchPlayerResponse.builder()
@@ -82,38 +79,38 @@ public class LiveEventsFixtures {
 
     public static LiveMatchTimeResponse timeInProgress1(){
         return LiveMatchTimeResponse.builder()
-                .startTime("1762128000")
-                .currentPeriodStartTimestamp("1762583573")
+                .startTime("1767182400")
+                .currentPeriodStartTimestamp("1767182400")
                 .period(List.of("1829", "2953", "2228"))
                 .build();
     }
 
     public static LiveMatchTimeResponse timeInProgress2(){
         return LiveMatchTimeResponse.builder()
-                .startTime("1762128000")
-                .currentPeriodStartTimestamp("1762583573")
+                .startTime("1767182400")
+                .currentPeriodStartTimestamp("1767184200")
                 .period(List.of("1829", "2953", "2500"))
                 .build();
     }
 
     public static LiveMatchTimeResponse timeInProgress3(){
         return LiveMatchTimeResponse.builder()
-                .startTime("1762128000")
-                .currentPeriodStartTimestamp("1762583573")
+                .startTime("1767182400")
+                .currentPeriodStartTimestamp("1767186000")
                 .period(List.of("1900", "3000", "3500"))
                 .build();
     }
 
-    public static LiveMatchResponse liveMatchInProgress1(){
+    public static LiveMatchResponse etcLiveMatchInProgress1(){
 
         return LiveMatchResponse.builder()
-                .rapidId("1")
-                .category("atp")
-                .tournamentName(TournamentFixtures.wimbledonATP().getTournamentName())
+                .rapidId("5")
+                .category(CategoryFixtures.exhibition().getCategorySlug())
+                .tournamentName(TournamentFixtures.laverCup().getTournamentName())
                 .homePlayer(homePlayer())
                 .awayPlayer(awayPlayer())
-                .seasonName(SeasonFixtures.wimbledonMen2025().getSeasonName())
-                .roundName(RoundFixtures.wimbledonMen2025Final().getName())
+                .seasonName(SeasonFixtures.laverCup2025().getSeasonName())
+                .roundName(RoundFixtures.laverCup2025SemiFinal().getName())
                 .homeScore(homeScoreInProgress1())
                 .awayScore(awayScoreInProgress1())
                 .time(timeInProgress1())
@@ -121,37 +118,20 @@ public class LiveEventsFixtures {
                 .build();
     }
 
-    public static LiveMatchResponse liveMatchInProgress2(){
+    public static LiveMatchResponse etcLiveMatchInProgress2(){
 
         return LiveMatchResponse.builder()
-                .rapidId("1")
-                .category("atp")
-                .tournamentName(TournamentFixtures.wimbledonATP().getTournamentName())
+                .rapidId("6")
+                .category(CategoryFixtures.unitedCup().getCategorySlug())
+                .tournamentName(TournamentFixtures.unitedCupSingle().getTournamentName())
                 .homePlayer(homePlayer())
                 .awayPlayer(awayPlayer())
-                .seasonName(SeasonFixtures.wimbledonMen2025().getSeasonName())
-                .roundName(RoundFixtures.wimbledonMen2025Final().getName())
+                .seasonName(SeasonFixtures.unitedCup2025().getSeasonName())
+                .roundName(RoundFixtures.unitedCup2025UNKNOWN().getName())
                 .homeScore(homeScoreInProgress2())
                 .awayScore(awayScoreInProgress2())
                 .time(timeInProgress2())
                 .status("3rd Set")
-                .build();
-    }
-
-    public static LiveMatchResponse liveMatchInProgress3(){
-
-        return LiveMatchResponse.builder()
-                .rapidId("2")
-                .category("atp")
-                .tournamentName(TournamentFixtures.wimbledonATP().getTournamentName())
-                .homePlayer(homePlayer())
-                .awayPlayer(awayPlayer())
-                .seasonName(SeasonFixtures.wimbledonMen2025().getSeasonName())
-                .roundName(RoundFixtures.wimbledonMen2025Final().getName())
-                .homeScore(homeScoreInProgress3())
-                .awayScore(awayScoreInProgress3())
-                .time(timeInProgress3())
-                .status("3rd set")
                 .build();
     }
 

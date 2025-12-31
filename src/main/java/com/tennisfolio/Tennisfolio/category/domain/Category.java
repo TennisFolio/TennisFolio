@@ -38,6 +38,7 @@ public class Category {
                 this.rapidCategoryId.equals(CategoryType.WTA.getRapidCategoryId()) ||
                 this.rapidCategoryId.equals(CategoryType.UNITED_CUP.getRapidCategoryId()) ||
                 this.rapidCategoryId.equals(CategoryType.DAVIS_CUP.getRapidCategoryId()) ||
-                this.rapidCategoryId.equals(CategoryType.EXHIBITION.getRapidCategoryId());
+                this.rapidCategoryId.equals(CategoryType.EXHIBITION.getRapidCategoryId()) ||
+                this.rapidCategoryId.equals(CategoryType.BILLIE_JEAN_KING_CUP.getRapidCategoryId());
     }
 }

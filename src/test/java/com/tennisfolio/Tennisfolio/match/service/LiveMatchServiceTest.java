@@ -1,6 +1,9 @@
 package com.tennisfolio.Tennisfolio.match.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.tennisfolio.Tennisfolio.category.enums.CategoryType;
+import com.tennisfolio.Tennisfolio.fixtures.EtcLiveEventsFixtures;
 import com.tennisfolio.Tennisfolio.fixtures.LiveEventsFixtures;
 import com.tennisfolio.Tennisfolio.fixtures.MatchFixtures;
 import com.tennisfolio.Tennisfolio.infrastructure.api.base.*;
@@ -23,6 +26,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,7 +43,7 @@ public class LiveMatchServiceTest {
 
     ObjectMapper objectMapper = new ObjectMapper();
 
-    RedisTemplate redisTemplate = new FakeRedisTemplate();
+    StringRedisTemplate redisTemplate = new FakeRedisTemplate();
     MatchRepository matchRepository = new FakeMatchRepository();
 
     private List<StrategyApiTemplate<?, ?>> strategies = new ArrayList<>();
@@ -77,9 +81,12 @@ public class LiveMatchServiceTest {
     void 처음_경기_생성시_redis_데이터_추가(){
 
         liveMatchService.updateLiveMatches();
-
-        LiveMatchResponse res = (LiveMatchResponse)redisTemplate.opsForValue().get("live:atp:1");
-
+        LiveMatchResponse res = null;
+        try{
+            res = objectMapper.readValue(redisTemplate.opsForValue().get("live:atp:1"), LiveMatchResponse.class);
+        }catch(JsonProcessingException e){
+            e.printStackTrace();
+        }
         assertThat(res.getHomeScore().getPoint()).isEqualTo("40");
         assertThat(res.getAwayScore().getPoint()).isEqualTo("40");
 
@@ -87,15 +94,21 @@ public class LiveMatchServiceTest {
 
     @Test
     void 데이터_변경_시_redis_데이터_수정(){
-        // 첫번째 호출로 progress1 수정
-        // redis 수정 -> redis 조회
-        LiveMatchResponse response1 = LiveEventsFixtures.liveMatchInProgress1();
-        redisTemplate.opsForValue().set("live:atp:1", response1);
-        // 두번째 호출로 progress2로 수정
-        // redis 수정 -> redis 조회
-        liveMatchService.updateLiveMatches();
+        LiveMatchResponse res = null;
+        try{
+            // 첫번째 호출로 progress1 수정
+            // redis 수정 -> redis 조회
+            LiveMatchResponse response1 = LiveEventsFixtures.liveMatchInProgress1();
+            String responseStr = objectMapper.writeValueAsString(response1);
+            redisTemplate.opsForValue().set("live:atp:1", responseStr);
+            // 두번째 호출로 progress2로 수정
+            // redis 수정 -> redis 조회
+            liveMatchService.updateLiveMatches();
 
-        LiveMatchResponse res = (LiveMatchResponse)redisTemplate.opsForValue().get("live:atp:1");
+            res = objectMapper.readValue(redisTemplate.opsForValue().get("live:atp:1"), LiveMatchResponse.class);
+        }catch(JsonProcessingException e){
+            e.printStackTrace();
+        }
 
         assertThat(res.getHomeScore().getPoint()).isEqualTo("40");
         assertThat(res.getAwayScore().getPoint()).isEqualTo("40");
@@ -104,17 +117,25 @@ public class LiveMatchServiceTest {
 
     @Test
     void 경기_종료_시_데이터_업데이트(){
-        // 1. redis에 1,2번 경기 데이터 추가
-        LiveMatchResponse match1 = LiveEventsFixtures.liveMatchInProgress1();
-        LiveMatchResponse match3 = LiveEventsFixtures.liveMatchInProgress3();
-        matchRepository.save(MatchFixtures.wimbledonMen2025FinalMatch());
-        matchRepository.save(MatchFixtures.rolandGarrosMen2025FinalMatch());
+        try{
+            // 1. redis에 1,2번 경기 데이터 추가
+            LiveMatchResponse match1 = LiveEventsFixtures.liveMatchInProgress1();
+            LiveMatchResponse match3 = LiveEventsFixtures.liveMatchInProgress3();
 
-        redisTemplate.opsForValue().set("live:atp:1", match1);
-        redisTemplate.opsForValue().set("live:atp:2", match3);
+            String match1Str = objectMapper.writeValueAsString(match1);
+            String match3Str = objectMapper.writeValueAsString(match3);
+            matchRepository.save(MatchFixtures.wimbledonMen2025FinalMatch());
+            matchRepository.save(MatchFixtures.rolandGarrosMen2025FinalMatch());
 
-        // 2. liveMatch에 1번 데이터만 전송
-        liveMatchService.updateLiveMatches();
+            redisTemplate.opsForValue().set("live:atp:1", match1Str);
+            redisTemplate.opsForValue().set("live:atp:2", match3Str);
+
+            // 2. liveMatch에 1번 데이터만 전송
+            liveMatchService.updateLiveMatches();
+        }catch(JsonProcessingException e){
+            e.printStackTrace();
+        }
+
 
         // 3. match3은 DB에 업데이트
         Match res = matchRepository.findByRapidMatchId("2").get();
@@ -126,12 +147,22 @@ public class LiveMatchServiceTest {
 
     @Test
     void ATP_경기_조회(){
-        LiveMatchResponse response1 = LiveEventsFixtures.liveMatchInProgress1();
-        LiveMatchResponse response2 = LiveEventsFixtures.liveMatchInProgress3();
-        redisTemplate.opsForValue().set("live:atp:1", response1);
-        redisTemplate.opsForValue().set("live:atp:2", response2);
+        List<LiveMatchResponse> res = null;
+        try{
+            LiveMatchResponse response1 = LiveEventsFixtures.liveMatchInProgress1();
+            LiveMatchResponse response2 = LiveEventsFixtures.liveMatchInProgress3();
 
-        List<LiveMatchResponse> res = liveMatchService.getATPLiveEventsByRedis();
+            String response1Str = objectMapper.writeValueAsString(response1);
+            String response2Str = objectMapper.writeValueAsString(response2);
+
+            redisTemplate.opsForValue().set("live:atp:1", response1Str);
+            redisTemplate.opsForValue().set("live:atp:2", response2Str);
+
+            res = liveMatchService.getATPLiveEventsByRedis();
+        }catch(JsonProcessingException e){
+            e.printStackTrace();
+        }
+
 
         assertThat(res).hasSize(2);
         assertThat(res)
@@ -146,16 +177,53 @@ public class LiveMatchServiceTest {
 
     @Test
     void ATP_경기_단일_조회(){
-        LiveMatchResponse response1 = LiveEventsFixtures.liveMatchInProgress1();
+        LiveMatchResponse res = null;
+        try{
+            LiveMatchResponse response1 = LiveEventsFixtures.liveMatchInProgress1();
+            String response1Str = objectMapper.writeValueAsString(response1);
+            redisTemplate.opsForValue().set("live:atp:1", response1Str);
+            redisTemplate.opsForValue().set("index:rapidId:1", response1Str);
 
-        redisTemplate.opsForValue().set("live:atp:1", response1);
-        redisTemplate.opsForValue().set("index:rapidId:1", response1);
+            res = liveMatchService.getLiveEventByRedis("1");
+        }catch(JsonProcessingException e){
+            e.printStackTrace();
+        }
 
-        LiveMatchResponse res = liveMatchService.getLiveEventByRedis("1");
 
         assertThat(res.getRapidId()).isEqualTo("1");
         assertThat(res.getRoundName()).isEqualTo("Final");
         assertThat(res.getSeasonName()).isEqualTo("Wimbledon Men Singles 2025");
+
+    }
+
+    @Test
+    void Davis_Cup_경기_조회(){
+        List<LiveMatchResponse> res = null;
+        try{
+            LiveMatchResponse laverCup = EtcLiveEventsFixtures.etcLiveMatchInProgress1();
+            LiveMatchResponse unitedCup = EtcLiveEventsFixtures.etcLiveMatchInProgress2();
+            LiveMatchResponse response1 = LiveEventsFixtures.liveMatchInProgress1();
+
+            String laverCupStr = objectMapper.writeValueAsString(laverCup);
+            String unitedCupStr = objectMapper.writeValueAsString(unitedCup);
+            String response1Str = objectMapper.writeValueAsString(response1);
+            redisTemplate.opsForValue().set("live:"+ CategoryType.EXHIBITION.getCategorySlug()+laverCup.getRapidId(), laverCupStr);
+            redisTemplate.opsForValue().set("live:"+ CategoryType.UNITED_CUP.getCategorySlug()+unitedCup.getRapidId(), unitedCupStr);
+            redisTemplate.opsForValue().set("live:atp:1", response1Str);
+
+            res = liveMatchService.getEtcLiveEventsByRedis();
+        }catch(JsonProcessingException e){
+            e.printStackTrace();
+        }
+
+        assertThat(res).hasSize(2);
+        assertThat(res)
+                .extracting(LiveMatchResponse::getRapidId, LiveMatchResponse::getTournamentName, LiveMatchResponse::getRoundName,
+                        p -> p.getHomeScore().getCurrent(), p -> p.getAwayScore().getCurrent())
+                .containsExactlyInAnyOrder(
+                        tuple("5", "Laver Cup","Semifinals", 1L, 1L),
+                        tuple("6", "United Cup", "UNKNOWN", 1L, 1L)
+                );
 
     }
 }

@@ -19,4 +19,20 @@ public class CategoryFixtures {
                 .categorySlug("wta")
                 .build();
     }
+
+    public static Category unitedCup(){
+        return Category.builder()
+                .rapidCategoryId("1705")
+                .categoryName("United Cup")
+                .categorySlug("united-cup")
+                .build();
+    }
+
+    public static Category exhibition(){
+        return Category.builder()
+                .rapidCategoryId("79")
+                .categoryName("Exhibition")
+                .categorySlug("exhibition")
+                .build();
+    }
 }

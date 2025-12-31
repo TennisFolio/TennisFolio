@@ -54,4 +54,29 @@ public class SeasonInfoFixtures {
                 .totalPrizeCurrency("EUR")
                 .build();
     }
+
+    public static Season unitedCup2025(){
+        return Season.builder()
+                .seasonId(15L)
+                .rapidSeasonId("67129")
+                .seasonName("United Cup 2025")
+                .tournament(TournamentFixtures.unitedCupSingle())
+                .competitors(18L)
+                .year("2025")
+                .totalPrize(10000000L)
+                .totalPrizeCurrency("USD")
+                .build();
+    }
+
+    public static Season laverCup2025(){
+        return Season.builder()
+                .seasonId(4L)
+                .rapidSeasonId("67324")
+                .seasonName("Exhibition Laver Cup Men Singles 2025")
+                .tournament(TournamentFixtures.laverCup())
+                .totalPrize(0L)
+                .totalPrizeCurrency(null)
+                .year("2025")
+                .build();
+    }
 }
