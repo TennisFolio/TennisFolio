@@ -1,11 +1,13 @@
 package com.tennisfolio.Tennisfolio.calendar;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tennisfolio.Tennisfolio.calendar.dto.MatchScheduleResponse;
 import com.tennisfolio.Tennisfolio.config.IntegrationTest;
 import com.tennisfolio.Tennisfolio.infrastructure.api.base.ApiCaller;
 import com.tennisfolio.Tennisfolio.infrastructure.api.match.eventSchedules.EventSchedulesDTO;
 import com.tennisfolio.Tennisfolio.match.dto.LiveMatchResponse;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -21,8 +23,12 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -43,8 +49,7 @@ class CalendarIntegrationTest {
     private MockMvc mockMvc;
 
     @Autowired(required = false)
-    @Qualifier("redisTemplate")
-    private RedisTemplate redis;
+    private StringRedisTemplate redis;
 
     ObjectMapper objectMapper = new ObjectMapper();
 
@@ -108,14 +113,13 @@ class CalendarIntegrationTest {
 
     @Test
     void 실시간_경기_중_달력_디테일_조회() throws Exception{
-        LiveMatchResponse liveMatch = loadLiveMatch("redisFixtures/live_atp_15222427.json");
+        setRedis();
 
-        String redisKey = "index:rapidId:" + liveMatch.getRapidId();
-
-        redis.opsForValue().set(redisKey, liveMatch);
+        String today = LocalDate.now()
+                .format(DateTimeFormatter.ofPattern("yyyyMMdd"));
 
         mockMvc.perform(get("/api/calendar/detail")
-                .param("date", "20251230")
+                .param("date", today)
                 .param("categoryId", "1"))
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -127,16 +131,30 @@ class CalendarIntegrationTest {
 
     }
 
+    private void setRedis() throws Exception {
+        try{
+            LiveMatchResponse liveMatch = loadLiveMatch("redisFixtures/live_atp_15222427.json");
+
+            String redisKey = "index:rapidId:" + liveMatch.getRapidId();
+
+            String json = objectMapper.writeValueAsString(liveMatch);
+
+            redis.opsForValue().set(redisKey, json);
+        }catch(JsonProcessingException e){
+            e.printStackTrace();
+        }
+    }
+
+
     @Test
     void 실시간_경기_중_달력_디테일_레디스_DB_조회() throws Exception{
-        LiveMatchResponse liveMatch = loadLiveMatch("redisFixtures/live_atp_15222427.json");
+        setRedis();
 
-        String redisKey = "index:rapidId:" + liveMatch.getRapidId();
-
-        redis.opsForValue().set(redisKey, liveMatch);
+        String today = LocalDate.now()
+                .format(DateTimeFormatter.ofPattern("yyyyMMdd"));
 
         mockMvc.perform(get("/api/calendar/detail")
-                        .param("date", "20251230")
+                        .param("date", today)
                         .param("categoryId", "1"))
                 .andDo(print())
                 .andExpect(status().isOk())

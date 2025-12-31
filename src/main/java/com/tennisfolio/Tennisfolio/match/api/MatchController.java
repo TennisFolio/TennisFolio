@@ -44,15 +44,22 @@ public class MatchController {
         return new ResponseEntity<>(ResponseDTO.success(events), HttpStatus.OK);
     }
 
-    @GetMapping("/wta/liveEvents/before")
-    public ResponseEntity<ResponseDTO<List<LiveMatchResponse>>> getWTALiveEventsBefore(){
-        List<LiveMatchResponse> events = liveMatchService.getWTALiveEvents();
-        return new ResponseEntity<>(ResponseDTO.success(events), HttpStatus.OK);
-    }
     @Scheduled(fixedRate = 30000)
     public void getWTALiveEventsSchedule(){
         List<LiveMatchResponse> events = liveMatchService.getWTALiveEventsByRedis();
         messagingTemplate.convertAndSend("/topic/wta/liveMatches", events);
+    }
+
+    @GetMapping("/etc/liveEvents")
+    public ResponseEntity<ResponseDTO<List<LiveMatchResponse>>> getEtcLiveEvents(){
+        List<LiveMatchResponse> events = liveMatchService.getEtcLiveEventsByRedis();
+        return new ResponseEntity<>(ResponseDTO.success(events), HttpStatus.OK);
+    }
+
+    @Scheduled(fixedRate = 30000)
+    public void getEtcLiveEventsSchedule(){
+        List<LiveMatchResponse> events = liveMatchService.getEtcLiveEventsByRedis();
+        messagingTemplate.convertAndSend("/topic/etc/liveMatches", events);
     }
 
     @GetMapping("/liveEvents/{matchId}")

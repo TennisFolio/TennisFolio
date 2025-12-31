@@ -54,4 +54,24 @@ public class RoundFixtures {
                 .slug("quarterfinals")
                 .build();
     }
+
+    public static Round laverCup2025SemiFinal(){
+        return Round.builder()
+                .roundId(10L)
+                .season(SeasonInfoFixtures.laverCup2025())
+                .round(28L)
+                .name("Semifinals")
+                .slug("semifinals")
+                .build();
+    }
+
+    public static Round unitedCup2025UNKNOWN(){
+        return Round.builder()
+                .roundId(11803L)
+                .season(SeasonInfoFixtures.unitedCup2025())
+                .round(0L)
+                .name("UNKNOWN")
+                .slug("UNKNOWN")
+                .build();
+    }
 }

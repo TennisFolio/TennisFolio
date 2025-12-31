@@ -2,6 +2,7 @@ package com.tennisfolio.Tennisfolio.infrastructure.api.match.liveEvents;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.tennisfolio.Tennisfolio.category.enums.CategoryType;
 import com.tennisfolio.Tennisfolio.util.ConversionUtil;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -51,16 +52,16 @@ public class LiveEventsApiDTO {
         }
     }
 
-    public boolean isAtpEvent() {
-        return tournament != null
-                && tournament.getCategory() != null
-                && "atp".equalsIgnoreCase(tournament.getCategory().getSlug());
-    }
 
-    public boolean isWtaEvent() {
+    public boolean isSupportedEvent(){
         return tournament != null
                 && tournament.getCategory() != null
-                && "wta".equalsIgnoreCase(tournament.getCategory().getSlug());
+                && (CategoryType.ATP.getCategorySlug().equalsIgnoreCase(tournament.getCategory().getSlug())
+                    || CategoryType.WTA.getCategorySlug().equalsIgnoreCase(tournament.getCategory().getSlug())
+                    || CategoryType.DAVIS_CUP.getCategorySlug().equalsIgnoreCase(tournament.getCategory().getSlug())
+                    || CategoryType.EXHIBITION.getCategorySlug().equalsIgnoreCase(tournament.getCategory().getSlug())
+                    || CategoryType.UNITED_CUP.getCategorySlug().equalsIgnoreCase(tournament.getCategory().getSlug())
+                    || CategoryType.BILLIE_JEAN_KING_CUP.getCategorySlug().equalsIgnoreCase(tournament.getCategory().getSlug()));
     }
 
 }

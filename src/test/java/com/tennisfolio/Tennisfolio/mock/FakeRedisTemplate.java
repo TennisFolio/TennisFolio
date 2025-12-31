@@ -3,6 +3,7 @@ package com.tennisfolio.Tennisfolio.mock;
 import org.springframework.data.redis.connection.BitFieldSubCommands;
 import org.springframework.data.redis.core.RedisOperations;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 
 import java.time.Duration;
@@ -10,8 +11,8 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-public class FakeRedisTemplate extends RedisTemplate<String, Object> {
-    private final Map<String, Object> store = new HashMap<>();
+public class FakeRedisTemplate extends StringRedisTemplate {
+    private final Map<String, String> store = new HashMap<>();
     private final Map<String, Long> expiry = new HashMap<>();
 
     @Override
@@ -23,99 +24,95 @@ public class FakeRedisTemplate extends RedisTemplate<String, Object> {
     }
 
     @Override
-    public ValueOperations<String, Object> opsForValue(){
-        return new ValueOperations<String ,Object>(){
+    public ValueOperations<String, String> opsForValue(){
+
+        return new ValueOperations<String ,String>(){
+
             @Override
-            public void set(String key, Object value) {
+            public void set(String key, String value) {
                 store.put(key, value);
             }
 
             @Override
-            public void set(String key, Object value, long offset) {
+            public void set(String key, String value, long offset) {
                 store.put(key, value);
             }
 
-
             @Override
-            public void set(String key, Object value, long timeout, TimeUnit unit) {
+            public void set(String key, String value, long timeout, TimeUnit unit) {
                 store.put(key, value);
                 expiry.put(key, System.currentTimeMillis() + unit.toMillis(timeout));
             }
 
-
             @Override
-            public Object get(Object key) {
+            public String get(Object key) {
                 return store.get(key.toString());
             }
 
             @Override
-            public List<Object> multiGet(Collection<String> keys) {
-                List<Object> resultList = new ArrayList<>();
+            public List<String> multiGet(Collection<String> keys) {
+                List<String> resultList = new ArrayList<>();
                 keys.stream().forEach(p -> {
                     resultList.add(store.get(p));
                 });
                 return resultList;
             }
 
-
-
-
-
             @Override
-            public Boolean setIfAbsent(String key, Object value) {
+            public Boolean setIfAbsent(String key, String value) {
                 return null;
             }
 
             @Override
-            public Boolean setIfAbsent(String key, Object value, long timeout, TimeUnit unit) {
+            public Boolean setIfAbsent(String key, String value, long timeout, TimeUnit unit) {
                 return null;
             }
 
             @Override
-            public Boolean setIfPresent(String key, Object value) {
+            public Boolean setIfPresent(String key, String value) {
                 return null;
             }
 
             @Override
-            public Boolean setIfPresent(String key, Object value, long timeout, TimeUnit unit) {
+            public Boolean setIfPresent(String key, String value, long timeout, TimeUnit unit) {
                 return null;
             }
 
             @Override
-            public void multiSet(Map<? extends String, ?> map) {
+            public void multiSet(Map<? extends String, ? extends String> map) {
 
             }
 
             @Override
-            public Boolean multiSetIfAbsent(Map<? extends String, ?> map) {
+            public Boolean multiSetIfAbsent(Map<? extends String, ? extends String> map) {
                 return null;
+            }
+
+
+            @Override
+            public String getAndDelete(String key) {
+                return "";
             }
 
             @Override
-            public Object getAndDelete(String key) {
-                return null;
+            public String getAndExpire(String key, long timeout, TimeUnit unit) {
+                return "";
             }
 
             @Override
-            public Object getAndExpire(String key, long timeout, TimeUnit unit) {
-                return null;
+            public String getAndExpire(String key, Duration timeout) {
+                return "";
             }
 
             @Override
-            public Object getAndExpire(String key, Duration timeout) {
-                return null;
+            public String getAndPersist(String key) {
+                return "";
             }
 
             @Override
-            public Object getAndPersist(String key) {
-                return null;
+            public String getAndSet(String key, String value) {
+                return "";
             }
-
-            @Override
-            public Object getAndSet(String key, Object value) {
-                return null;
-            }
-
 
 
             @Override
@@ -153,6 +150,8 @@ public class FakeRedisTemplate extends RedisTemplate<String, Object> {
                 return "";
             }
 
+
+
             @Override
             public Long size(String key) {
                 return 0L;
@@ -174,10 +173,9 @@ public class FakeRedisTemplate extends RedisTemplate<String, Object> {
             }
 
             @Override
-            public RedisOperations<String, Object> getOperations() {
+            public RedisOperations<String, String> getOperations() {
                 return null;
             }
-
         };
     }
     public Object getValue(String key){
