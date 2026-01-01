@@ -220,14 +220,8 @@ public class MatchSyncService {
 
     private void fetchUpcomingMatchSchedules(List<Match> allEvents) {
 
-        Clock fixedClock = Clock.fixed(
-                LocalDate.of(2025, 12, 29)
-                        .atStartOfDay(ZoneId.systemDefault())
-                        .toInstant(),
-                ZoneId.systemDefault()
-        );
         for (int i = 0; i <= 2; i++) {
-            LocalDate date = LocalDate.now(fixedClock).plusDays(i);
+            LocalDate date = LocalDate.now(clock).plusDays(i);
             String year = String.valueOf(date.getYear());
             String month = String.format("%02d", date.getMonthValue());
             String day = String.format("%02d", date.getDayOfMonth());
