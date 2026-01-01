@@ -3,6 +3,7 @@ package com.tennisfolio.Tennisfolio.match.api;
 import com.tennisfolio.Tennisfolio.common.response.ResponseDTO;
 import com.tennisfolio.Tennisfolio.match.application.LiveMatchService;
 import com.tennisfolio.Tennisfolio.match.application.MatchSyncService;
+import com.tennisfolio.Tennisfolio.match.dto.LiveMatchSummaryResponse;
 import com.tennisfolio.Tennisfolio.statistic.application.StatisticSyncService;
 import com.tennisfolio.Tennisfolio.match.dto.LiveMatchResponse;
 import org.springframework.http.HttpStatus;
@@ -94,6 +95,12 @@ public class MatchController {
 
         matchSyncService.saveEventSchedule();
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @GetMapping("/liveEvents/summary")
+    public ResponseEntity<ResponseDTO> getSummaryLiveEvents(){
+        List<LiveMatchSummaryResponse> res = liveMatchService.getLiveEventsSummary();
+        return new ResponseEntity<>(ResponseDTO.success(res), HttpStatus.OK);
     }
 
 }

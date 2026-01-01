@@ -12,6 +12,7 @@ import com.tennisfolio.Tennisfolio.infrastructure.api.base.StrategyApiTemplate;
 import com.tennisfolio.Tennisfolio.infrastructure.api.match.liveEvents.LiveEventsApiDTO;
 import com.tennisfolio.Tennisfolio.match.domain.Match;
 import com.tennisfolio.Tennisfolio.match.dto.LiveMatchResponse;
+import com.tennisfolio.Tennisfolio.match.dto.LiveMatchSummaryResponse;
 import com.tennisfolio.Tennisfolio.match.repository.MatchRepository;
 import com.tennisfolio.Tennisfolio.player.application.PlayerService;
 import com.tennisfolio.Tennisfolio.player.domain.Player;
@@ -174,6 +175,13 @@ public class LiveMatchService {
                 .filter(id -> !newMatchIds.contains(id))
                 .toList();
 
+    }
+    public List<LiveMatchSummaryResponse> getLiveEventsSummary(){
+        return redis.keys("index:rapidId:*").stream()
+                .map(key -> redis.opsForValue().get(key))
+                .filter(Objects::nonNull) .map(this::deserialize)
+                .map(LiveMatchSummaryResponse::new)
+                .toList();
     }
 
 
