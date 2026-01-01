@@ -30,6 +30,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Clock;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
@@ -218,6 +219,7 @@ public class MatchSyncService {
     }
 
     private void fetchUpcomingMatchSchedules(List<Match> allEvents) {
+
         for (int i = 0; i <= 2; i++) {
             LocalDate date = LocalDate.now(clock).plusDays(i);
             String year = String.valueOf(date.getYear());

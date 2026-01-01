@@ -16,6 +16,7 @@ public class LiveEventsFixtures {
         return  LiveMatchPlayerResponse.builder()
                 .playerRapidId(PlayerFixtures.alcaraz().getRapidPlayerId())
                 .playerName(PlayerFixtures.alcaraz().getPlayerName())
+                .playerRanking("1")
                 .build();
     }
 
@@ -23,6 +24,7 @@ public class LiveEventsFixtures {
         return LiveMatchPlayerResponse.builder()
                 .playerRapidId(PlayerFixtures.sinner().getRapidPlayerId())
                 .playerName(PlayerFixtures.sinner().getPlayerName())
+                .playerRanking("2")
                 .build();
     }
 

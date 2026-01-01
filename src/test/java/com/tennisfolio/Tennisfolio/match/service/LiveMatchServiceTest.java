@@ -13,6 +13,7 @@ import com.tennisfolio.Tennisfolio.infrastructure.api.player.teamImage.PlayerIma
 import com.tennisfolio.Tennisfolio.match.application.LiveMatchService;
 import com.tennisfolio.Tennisfolio.match.domain.Match;
 import com.tennisfolio.Tennisfolio.match.dto.LiveMatchResponse;
+import com.tennisfolio.Tennisfolio.match.dto.LiveMatchSummaryResponse;
 import com.tennisfolio.Tennisfolio.match.repository.MatchRepository;
 import com.tennisfolio.Tennisfolio.mock.FakeApiCaller;
 import com.tennisfolio.Tennisfolio.mock.FakeMatchRepository;
@@ -225,5 +226,47 @@ public class LiveMatchServiceTest {
                         tuple("6", "United Cup", "UNKNOWN", 1L, 1L)
                 );
 
+    }
+
+    @Test
+    void 라이브_경기_요약_조회() {
+        List<LiveMatchSummaryResponse> res = null;
+        try {
+            LiveMatchResponse laverCup = EtcLiveEventsFixtures.etcLiveMatchInProgress1();
+            LiveMatchResponse unitedCup = EtcLiveEventsFixtures.etcLiveMatchInProgress2();
+            LiveMatchResponse wimbledon = LiveEventsFixtures.liveMatchInProgress1();
+
+            String laverCupStr = objectMapper.writeValueAsString(laverCup);
+            String unitedCupStr = objectMapper.writeValueAsString(unitedCup);
+            String wimbledonStr = objectMapper.writeValueAsString(wimbledon);
+
+            redisTemplate.opsForValue().set("index:rapidId:" + laverCup.getRapidId(), laverCupStr);
+            redisTemplate.opsForValue().set("index:rapidId:" + unitedCup.getRapidId(), unitedCupStr);
+            redisTemplate.opsForValue().set("index:rapidId:" + wimbledon.getRapidId(), wimbledonStr);
+
+            res = liveMatchService.getLiveEventsSummary();
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+
+        assertThat(res).hasSize(3);
+        assertThat(res)
+                .extracting(r -> r.getHomePlayer().getPlayerRapidId(),
+                        r -> r.getHomePlayer().getPlayerName(),
+                        r -> r.getHomePlayer().getPlayerRanking(),
+                        r -> r.getAwayPlayer().getPlayerRapidId(),
+                        r -> r.getAwayPlayer().getPlayerName(),
+                        r -> r.getAwayPlayer().getPlayerRanking(),
+                        LiveMatchSummaryResponse::getHomeScore,
+                        LiveMatchSummaryResponse::getAwayScore,
+                        LiveMatchSummaryResponse::getCategory,
+                        LiveMatchSummaryResponse::getTournamentName,
+                        LiveMatchSummaryResponse::getSeasonName,
+                        LiveMatchSummaryResponse::getRoundName)
+                .containsExactlyInAnyOrder(
+                        tuple("275923", "Alcaraz", "1", "206570", "Jannik Sinner", "2", 1L, 1L, "exhibition", "Laver Cup", "Exhibition Laver Cup Men Singles 2025", "Semifinals"),
+                        tuple("275923", "Alcaraz", "1", "206570", "Jannik Sinner", "2", 1L, 1L, "united-cup", "United Cup", "United Cup 2025", "UNKNOWN"),
+                        tuple("275923", "Alcaraz", "1", "206570", "Jannik Sinner", "2", 1L, 1L, "atp", "Wimbledon", "Wimbledon Men Singles 2025", "Final")
+                );
     }
 }
