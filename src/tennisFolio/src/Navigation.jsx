@@ -9,6 +9,7 @@ const NAV_ITEMS = [
     children: [
       { label: 'ATP', path: '/live/atp' },
       { label: 'WTA', path: '/live/wta' },
+      { label: 'ETC', path: '/live/etc' },
     ],
   },
   {
