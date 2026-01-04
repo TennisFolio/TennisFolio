@@ -6,6 +6,7 @@ import com.tennisfolio.Tennisfolio.match.application.MatchSyncService;
 import com.tennisfolio.Tennisfolio.match.dto.LiveMatchSummaryResponse;
 import com.tennisfolio.Tennisfolio.statistic.application.StatisticSyncService;
 import com.tennisfolio.Tennisfolio.match.dto.LiveMatchResponse;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -17,6 +18,10 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api")
+@ConditionalOnProperty(
+    name = "batch.enabled",
+    havingValue = "true"
+)
 public class MatchController {
     private final LiveMatchService liveMatchService;
     private final SimpMessagingTemplate messagingTemplate;

@@ -23,4 +23,5 @@ public interface StatisticRepository {
 
     void save(Statistic statistic);
     void saveAll(List<Statistic> statistics);
+    void flush();
 }
