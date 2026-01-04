@@ -71,6 +71,11 @@ public class FakeStatisticRepository implements StatisticRepository {
 
     }
 
+    @Override
+    public void flush() {
+
+    }
+
     private void flushBatch() {
         for (var statistic : batch) {
             long statId = statistic.getStatId();

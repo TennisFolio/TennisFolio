@@ -3,10 +3,15 @@ package com.tennisfolio.Tennisfolio.match.api;
 import com.tennisfolio.Tennisfolio.infrastructure.batchlog.BatchExecutor;
 import com.tennisfolio.Tennisfolio.match.application.LiveMatchService;
 import com.tennisfolio.Tennisfolio.match.application.MatchSyncService;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 @Component
+@ConditionalOnProperty(
+        name = "batch.enabled",
+        havingValue = "true"
+)
 public class MatchScheduler {
     private final BatchExecutor batchExecutor;
     private final MatchSyncService matchSyncService;

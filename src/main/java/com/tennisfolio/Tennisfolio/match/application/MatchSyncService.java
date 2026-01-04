@@ -186,9 +186,11 @@ public class MatchSyncService {
                         roundRepository.flush();
                         match.updatePlayer(homePlayer, awayPlayer);
 
-                        saveMatch(match);
+                        Match saved = saveMatch(match);
+
+
                         if(match.isFinished()){
-                            saveStatistic(match);
+                            saveStatistic(saved);
 
                         }
                     }
@@ -204,9 +206,10 @@ public class MatchSyncService {
         match.updateRound(round);
     }
 
-    private void saveMatch(Match existing) {
-        matchRepository.save(existing);
+    private Match saveMatch(Match existing) {
+        Match saved = matchRepository.save(existing);
         matchRepository.flush();
+        return saved;
     }
 
     private void saveStatistic(Match existing) {
@@ -216,6 +219,7 @@ public class MatchSyncService {
             p.updateMatch(existing);
             statisticRepository.save(p);
         });
+        statisticRepository.flush();
     }
 
     private void fetchUpcomingMatchSchedules(List<Match> allEvents) {

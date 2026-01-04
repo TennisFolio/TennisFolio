@@ -76,4 +76,9 @@ public class StatisticRepositoryImpl implements StatisticRepository{
         List<StatisticEntity> statisticEntities = statistics.stream().map(p -> StatisticEntity.fromModel(p)).toList();
         statisticJpaRepository.saveAll(statisticEntities);
     }
+
+    @Override
+    public void flush() {
+        statisticJpaRepository.flush();
+    }
 }
