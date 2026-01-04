@@ -1,0 +1,206 @@
+.ranking-search-container {
+  margin-bottom: 20px;
+  width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+.ranking-search-box {
+  display: flex;
+  gap: 16px;
+  align-items: flex-end;
+  background-color: #fafafa;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  flex-wrap: wrap;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.search-input-group,
+.search-select-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+  min-width: 200px;
+  justify-content: flex-end;
+  box-sizing: border-box;
+}
+
+.search-input-group label,
+.search-select-group label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+}
+
+.search-input,
+.search-select {
+  padding: 10px 14px;
+  font-size: 14px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  background-color: white;
+  color: #333;
+  transition: all 0.3s;
+  font-family: inherit;
+  height: 42px;
+  box-sizing: border-box;
+}
+
+.search-input:focus,
+.search-select:focus {
+  outline: none;
+  border-color: #185a9d;
+  box-shadow: 0 0 0 3px rgba(24, 90, 157, 0.1);
+}
+
+.search-input::placeholder {
+  color: #999;
+}
+
+.search-select {
+  cursor: pointer;
+  padding-right: 32px;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  background-size: 12px;
+}
+
+.search-select:disabled {
+  background-color: #f5f5f5;
+  cursor: not-allowed;
+  color: #999;
+}
+
+.search-button-group {
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+}
+
+.search-button,
+.clear-button {
+  padding: 10px 24px;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s;
+  white-space: nowrap;
+  height: 42px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 80px;
+}
+
+.search-button {
+  background: linear-gradient(90deg, #43cea2 2%, #185a9d 100%);
+  color: white;
+  border: none;
+}
+
+.search-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(24, 90, 157, 0.3);
+}
+
+.search-button:active {
+  transform: translateY(0);
+}
+
+.clear-button {
+  background-color: white;
+  color: #666;
+  border: 2px solid #e0e0e0;
+}
+
+.clear-button:hover {
+  border-color: #185a9d;
+  color: #185a9d;
+}
+
+.clear-button:active {
+  background-color: #f5f5f5;
+}
+
+/* 모바일 반응형 */
+@media (max-width: 768px) {
+  .ranking-search-container {
+    margin-bottom: 16px;
+    padding: 0;
+  }
+
+  .ranking-search-box {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 16px;
+    gap: 12px;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .search-input-group,
+  .search-select-group {
+    min-width: 0;
+    width: 100%;
+    flex: none;
+  }
+
+  .search-button-group {
+    width: 100%;
+    justify-content: stretch;
+  }
+
+  .search-button,
+  .clear-button {
+    flex: 1;
+    padding: 12px;
+    height: 42px;
+  }
+}
+
+@media (max-width: 480px) {
+  .ranking-search-container {
+    margin-bottom: 12px;
+  }
+
+  .ranking-search-box {
+    padding: 12px;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .search-input,
+  .search-select {
+    padding: 8px 12px;
+    padding-right: 28px;
+    font-size: 13px;
+    height: 38px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .search-select {
+    background-position: right 10px center;
+    background-size: 10px;
+  }
+
+  .search-input-group label,
+  .search-select-group label {
+    font-size: 13px;
+  }
+
+  .search-button,
+  .clear-button {
+    font-size: 13px;
+    padding: 10px;
+    height: 38px;
+  }
+}
