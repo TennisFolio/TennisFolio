@@ -1,9 +1,11 @@
 .ranking-table-container {
   overflow-x: auto;
   width: 100%;
+  max-width: 100%;
   background-color: #fafafa;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-sizing: border-box;
 }
 
 .ranking-table {
@@ -188,7 +190,8 @@
 
 @media (max-width: 768px) {
   .ranking-table {
-    min-width: 400px;
+    min-width: 0;
+    width: 100%;
   }
 
   .ranking-table th,
@@ -236,7 +239,8 @@
 
   .player-name {
     font-size: 12px;
-    min-width: 80px;
+    min-width: 0;
+    flex: 1;
   }
 
   .age-cell {

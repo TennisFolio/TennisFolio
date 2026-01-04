@@ -1,3 +1,10 @@
+/* Ranking 페이지 컨테이너 */
+.ranking-page-container {
+  width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
 .load-more-button {
   margin: 20px auto;
   display: block;
