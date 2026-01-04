@@ -32,7 +32,8 @@ public class FakeMatchRepository implements MatchRepository {
 
     @Override
     public Match save(Match match) {
-        return data.put(match.getMatchId(), match);
+        data.put(match.getMatchId(), match);
+        return data.get(match.getMatchId());
     }
 
     @Override
