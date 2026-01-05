@@ -727,6 +727,25 @@ function Schedule() {
                         const tournamentColor = colorKey
                           ? getTournamentColor(colorKey)
                           : '#667eea';
+
+                        // LIVE 경기를 위로 정렬
+                        const sortedMatches = [...seasonMatches].sort(
+                          (a, b) => {
+                            const aIsLive =
+                              a.status !== 'Ended' &&
+                              a.status !== 'Not started' &&
+                              a.status !== 'Canceled';
+                            const bIsLive =
+                              b.status !== 'Ended' &&
+                              b.status !== 'Not started' &&
+                              b.status !== 'Canceled';
+
+                            if (aIsLive && !bIsLive) return -1;
+                            if (!aIsLive && bIsLive) return 1;
+                            return 0;
+                          }
+                        );
+
                         return (
                           <div key={seasonId} className="season-group">
                             <div
@@ -737,7 +756,7 @@ function Schedule() {
                             >
                               <h3>{tournament?.seasonName || '대회 정보'}</h3>
                             </div>
-                            {seasonMatches.map((match) => {
+                            {sortedMatches.map((match) => {
                               const winner =
                                 match.winner === '1'
                                   ? 'home'
@@ -758,6 +777,16 @@ function Schedule() {
                                       </div>
                                     </div>
                                     <div className="match-header-right">
+                                      {match.status !== 'Ended' &&
+                                        match.status !== 'Not started' &&
+                                        match.status !== 'Canceled' && (
+                                          <div className="live-indicator">
+                                            <span className="live-dot"></span>
+                                            <span className="live-text">
+                                              LIVE
+                                            </span>
+                                          </div>
+                                        )}
                                       {match.roundNameKr}
                                     </div>
                                   </div>
