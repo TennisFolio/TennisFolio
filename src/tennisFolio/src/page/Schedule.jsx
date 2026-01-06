@@ -228,6 +228,12 @@ function Schedule() {
   const [selectedSeasonId, setSelectedSeasonId] = useState(null); // 선택된 대회
   const [isLoadingTournaments, setIsLoadingTournaments] = useState(false);
   const [isLoadingMatches, setIsLoadingMatches] = useState(false);
+  const [showLiveOnly, setShowLiveOnly] = useState(false); // LIVE만 보기 토글
+
+  // 날짜가 변경되면 LIVE 토글 해제
+  useEffect(() => {
+    setShowLiveOnly(false);
+  }, [selectedDate]);
 
   // 첫 번째 카테고리를 기본 선택으로 설정
   useEffect(() => {
@@ -700,178 +706,220 @@ function Schedule() {
                     day: 'numeric',
                   })}
                 </h2>
+                {(() => {
+                  // 오늘 날짜인지 확인
+                  const today = new Date();
+                  const isToday =
+                    selectedDate.getFullYear() === today.getFullYear() &&
+                    selectedDate.getMonth() === today.getMonth() &&
+                    selectedDate.getDate() === today.getDate();
+
+                  return isToday ? (
+                    <div className="live-filter-toggle">
+                      <label className="toggle-switch">
+                        <input
+                          type="checkbox"
+                          checked={showLiveOnly}
+                          onChange={(e) => setShowLiveOnly(e.target.checked)}
+                        />
+                        <span className="toggle-slider"></span>
+                      </label>
+                      <span className="toggle-label">LIVE만 보기</span>
+                    </div>
+                  ) : null;
+                })()}
               </div>
 
               <div className="matches-list">
-                {matches.length > 0 ? (
-                  (() => {
-                    // seasonId로 경기 그룹화
-                    const groupedMatches = matches.reduce((acc, match) => {
-                      const seasonId = match.seasonId;
-                      if (!acc[seasonId]) {
-                        acc[seasonId] = [];
-                      }
-                      acc[seasonId].push(match);
-                      return acc;
-                    }, {});
+                {(() => {
+                  // LIVE 필터링 적용
+                  const filteredMatches = showLiveOnly
+                    ? matches.filter(
+                        (match) =>
+                          match.status !== 'Ended' &&
+                          match.status !== 'Not started' &&
+                          match.status !== 'Canceled'
+                      )
+                    : matches;
 
-                    return Object.entries(groupedMatches).map(
-                      ([seasonId, seasonMatches]) => {
-                        // 해당 seasonId의 대회 찾기
-                        const tournament = tournaments.find(
-                          (t) => t.seasonId === parseInt(seasonId)
-                        );
-                        const colorKey = tournament
-                          ? tournament.seasonId ?? tournament.tournamentId
-                          : null;
-                        const tournamentColor = colorKey
-                          ? getTournamentColor(colorKey)
-                          : '#667eea';
-
-                        // LIVE 경기를 위로 정렬
-                        const sortedMatches = [...seasonMatches].sort(
-                          (a, b) => {
-                            const aIsLive =
-                              a.status !== 'Ended' &&
-                              a.status !== 'Not started' &&
-                              a.status !== 'Canceled';
-                            const bIsLive =
-                              b.status !== 'Ended' &&
-                              b.status !== 'Not started' &&
-                              b.status !== 'Canceled';
-
-                            if (aIsLive && !bIsLive) return -1;
-                            if (!aIsLive && bIsLive) return 1;
-                            return 0;
+                  return filteredMatches.length > 0 ? (
+                    (() => {
+                      // seasonId로 경기 그룹화
+                      const groupedMatches = filteredMatches.reduce(
+                        (acc, match) => {
+                          const seasonId = match.seasonId;
+                          if (!acc[seasonId]) {
+                            acc[seasonId] = [];
                           }
-                        );
+                          acc[seasonId].push(match);
+                          return acc;
+                        },
+                        {}
+                      );
 
-                        return (
-                          <div key={seasonId} className="season-group">
-                            <div
-                              className="tournament-info"
-                              style={{
-                                background: tournamentColor,
-                              }}
-                            >
-                              <h3>{tournament?.seasonName || '대회 정보'}</h3>
+                      return Object.entries(groupedMatches).map(
+                        ([seasonId, seasonMatches]) => {
+                          // 해당 seasonId의 대회 찾기
+                          const tournament = tournaments.find(
+                            (t) => t.seasonId === parseInt(seasonId)
+                          );
+                          const colorKey = tournament
+                            ? tournament.seasonId ?? tournament.tournamentId
+                            : null;
+                          const tournamentColor = colorKey
+                            ? getTournamentColor(colorKey)
+                            : '#667eea';
+
+                          // LIVE 경기를 위로 정렬
+                          const sortedMatches = [...seasonMatches].sort(
+                            (a, b) => {
+                              const aIsLive =
+                                a.status !== 'Ended' &&
+                                a.status !== 'Not started' &&
+                                a.status !== 'Canceled';
+                              const bIsLive =
+                                b.status !== 'Ended' &&
+                                b.status !== 'Not started' &&
+                                b.status !== 'Canceled';
+
+                              if (aIsLive && !bIsLive) return -1;
+                              if (!aIsLive && bIsLive) return 1;
+                              return 0;
+                            }
+                          );
+
+                          return (
+                            <div key={seasonId} className="season-group">
+                              <div
+                                className="tournament-info"
+                                style={{
+                                  background: tournamentColor,
+                                }}
+                              >
+                                <h3>{tournament?.seasonName || '대회 정보'}</h3>
+                              </div>
+                              {sortedMatches.map((match) => {
+                                const winner =
+                                  match.winner === '1'
+                                    ? 'home'
+                                    : match.winner === '2'
+                                    ? 'away'
+                                    : null;
+                                return (
+                                  <div
+                                    key={match.matchId}
+                                    className="match-card"
+                                  >
+                                    <div className="match-header">
+                                      <div className="match-header-left">
+                                        <div className="match-time">
+                                          {formatTimeFromTimestamp(
+                                            match.startTimestamp
+                                          )}
+                                        </div>
+                                        <div className="match-status">
+                                          {match.status}
+                                        </div>
+                                      </div>
+                                      <div className="match-header-right">
+                                        {match.status !== 'Ended' &&
+                                          match.status !== 'Not started' &&
+                                          match.status !== 'Canceled' && (
+                                            <div className="live-indicator">
+                                              <span className="live-dot"></span>
+                                              <span className="live-text">
+                                                LIVE
+                                              </span>
+                                            </div>
+                                          )}
+                                        {match.roundNameKr}
+                                      </div>
+                                    </div>
+                                    <div className="match-players">
+                                      <div
+                                        className={`player ${
+                                          winner === 'home' ? 'winner' : ''
+                                        }`}
+                                      >
+                                        {winner === 'home' && (
+                                          <img
+                                            src="/images/ico_winner.png"
+                                            className="winner-icon home"
+                                            alt="winner"
+                                          />
+                                        )}
+                                        <span
+                                          onClick={() =>
+                                            handlePlayerNameClick(
+                                              match.homePlayerId
+                                            )
+                                          }
+                                          style={{
+                                            cursor: match.homePlayerId
+                                              ? 'pointer'
+                                              : 'default',
+                                          }}
+                                        >
+                                          {renderPlayerName(
+                                            match.homePlayerNameKr,
+                                            match.homePlayerName
+                                          )}
+                                        </span>
+                                      </div>
+                                      <div className="score">
+                                        {match.homeScore}
+                                      </div>
+                                      <div className="vs">vs</div>
+                                      <div className="score">
+                                        {match.awayScore}
+                                      </div>
+                                      <div
+                                        className={`player ${
+                                          winner === 'away' ? 'winner' : ''
+                                        }`}
+                                      >
+                                        {winner === 'away' && (
+                                          <img
+                                            src="/images/ico_winner.png"
+                                            className="winner-icon away"
+                                            alt="winner"
+                                          />
+                                        )}
+                                        <span
+                                          onClick={() =>
+                                            handlePlayerNameClick(
+                                              match.awayPlayerId
+                                            )
+                                          }
+                                          style={{
+                                            cursor: match.awayPlayerId
+                                              ? 'pointer'
+                                              : 'default',
+                                          }}
+                                        >
+                                          {renderPlayerName(
+                                            match.awayPlayerNameKr,
+                                            match.awayPlayerName
+                                          )}
+                                        </span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                );
+                              })}
                             </div>
-                            {sortedMatches.map((match) => {
-                              const winner =
-                                match.winner === '1'
-                                  ? 'home'
-                                  : match.winner === '2'
-                                  ? 'away'
-                                  : null;
-                              return (
-                                <div key={match.matchId} className="match-card">
-                                  <div className="match-header">
-                                    <div className="match-header-left">
-                                      <div className="match-time">
-                                        {formatTimeFromTimestamp(
-                                          match.startTimestamp
-                                        )}
-                                      </div>
-                                      <div className="match-status">
-                                        {match.status}
-                                      </div>
-                                    </div>
-                                    <div className="match-header-right">
-                                      {match.status !== 'Ended' &&
-                                        match.status !== 'Not started' &&
-                                        match.status !== 'Canceled' && (
-                                          <div className="live-indicator">
-                                            <span className="live-dot"></span>
-                                            <span className="live-text">
-                                              LIVE
-                                            </span>
-                                          </div>
-                                        )}
-                                      {match.roundNameKr}
-                                    </div>
-                                  </div>
-                                  <div className="match-players">
-                                    <div
-                                      className={`player ${
-                                        winner === 'home' ? 'winner' : ''
-                                      }`}
-                                    >
-                                      {winner === 'home' && (
-                                        <img
-                                          src="/images/ico_winner.png"
-                                          className="winner-icon home"
-                                          alt="winner"
-                                        />
-                                      )}
-                                      <span
-                                        onClick={() =>
-                                          handlePlayerNameClick(
-                                            match.homePlayerId
-                                          )
-                                        }
-                                        style={{
-                                          cursor: match.homePlayerId
-                                            ? 'pointer'
-                                            : 'default',
-                                        }}
-                                      >
-                                        {renderPlayerName(
-                                          match.homePlayerNameKr,
-                                          match.homePlayerName
-                                        )}
-                                      </span>
-                                    </div>
-                                    <div className="score">
-                                      {match.homeScore}
-                                    </div>
-                                    <div className="vs">vs</div>
-                                    <div className="score">
-                                      {match.awayScore}
-                                    </div>
-                                    <div
-                                      className={`player ${
-                                        winner === 'away' ? 'winner' : ''
-                                      }`}
-                                    >
-                                      {winner === 'away' && (
-                                        <img
-                                          src="/images/ico_winner.png"
-                                          className="winner-icon away"
-                                          alt="winner"
-                                        />
-                                      )}
-                                      <span
-                                        onClick={() =>
-                                          handlePlayerNameClick(
-                                            match.awayPlayerId
-                                          )
-                                        }
-                                        style={{
-                                          cursor: match.awayPlayerId
-                                            ? 'pointer'
-                                            : 'default',
-                                        }}
-                                      >
-                                        {renderPlayerName(
-                                          match.awayPlayerNameKr,
-                                          match.awayPlayerName
-                                        )}
-                                      </span>
-                                    </div>
-                                  </div>
-                                </div>
-                              );
-                            })}
-                          </div>
-                        );
-                      }
-                    );
-                  })()
-                ) : (
-                  <div className="no-matches">
-                    이 날짜에 예정된 경기가 없습니다.
-                  </div>
-                )}
+                          );
+                        }
+                      );
+                    })()
+                  ) : (
+                    <div className="no-matches">
+                      {showLiveOnly
+                        ? '현재 진행 중인 경기가 없습니다.'
+                        : '이 날짜에 예정된 경기가 없습니다.'}
+                    </div>
+                  );
+                })()}
               </div>
             </>
           ) : (
