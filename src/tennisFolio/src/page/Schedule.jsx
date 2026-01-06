@@ -235,39 +235,6 @@ function Schedule() {
     setShowLiveOnly(false);
   }, [selectedDate]);
 
-  // 첫 번째 카테고리를 기본 선택으로 설정
-  useEffect(() => {
-    if (tournaments.length > 0 && selectedCategory === null) {
-      const categories = [...new Set(tournaments.map((t) => t.categoryName))];
-      if (categories.length > 0) {
-        // ATP 우선, 없으면 WTA 우선, 둘 다 있으면 ATP 첫번째 WTA 두번째로 정렬
-        const sorted = [...categories];
-        const atpIndex = sorted.indexOf('ATP');
-        const wtaIndex = sorted.indexOf('WTA');
-
-        if (atpIndex !== -1) {
-          sorted.splice(atpIndex, 1);
-          sorted.unshift('ATP');
-        }
-
-        if (wtaIndex !== -1) {
-          const newWtaIndex = sorted.indexOf('WTA');
-          if (newWtaIndex !== -1) {
-            sorted.splice(newWtaIndex, 1);
-            if (atpIndex !== -1) {
-              sorted.splice(1, 0, 'WTA');
-            } else {
-              sorted.unshift('WTA');
-            }
-          }
-        }
-
-        setSelectedCategory(sorted[0]);
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tournaments]);
-
   // 월별 대회 목록 로드
   useEffect(() => {
     const fetchTournaments = async () => {
@@ -409,6 +376,13 @@ function Schedule() {
 
     return sorted;
   }, [tournamentsByCategory]);
+
+  // 첫 번째 카테고리를 기본 선택으로 설정 (월/년도 변경 시 자동 선택)
+  useEffect(() => {
+    if (sortedCategories.length > 0) {
+      setSelectedCategory(sortedCategories[0]);
+    }
+  }, [sortedCategories]);
 
   // 현재 선택된 카테고리의 categoryId (메모이제이션)
   const selectedCategoryId = useMemo(() => {
