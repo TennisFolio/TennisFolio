@@ -1,15 +1,13 @@
 package com.tennisfolio.Tennisfolio.ranking.application;
 
 import com.tennisfolio.Tennisfolio.common.ExceptionCode;
+import com.tennisfolio.Tennisfolio.common.RankingCategory;
 import com.tennisfolio.Tennisfolio.exception.NotFoundException;
 import com.tennisfolio.Tennisfolio.infrastructure.api.base.ApiWorker;
 import com.tennisfolio.Tennisfolio.infrastructure.api.base.RapidApi;
-import com.tennisfolio.Tennisfolio.infrastructure.api.base.StrategyApiTemplate;
 import com.tennisfolio.Tennisfolio.player.domain.Player;
 import com.tennisfolio.Tennisfolio.player.infrastructure.PlayerProvider;
 import com.tennisfolio.Tennisfolio.ranking.domain.Ranking;
-import com.tennisfolio.Tennisfolio.ranking.repository.RankingEntity;
-import com.tennisfolio.Tennisfolio.ranking.dto.AtpRankingApiDTO;
 import com.tennisfolio.Tennisfolio.ranking.repository.RankingRepository;
 import jakarta.transaction.Transactional;
 import lombok.Builder;
@@ -39,7 +37,7 @@ public class RankingSyncService {
                 .map(Ranking::getLastUpdate)
                 .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND));
 
-        if(rankingRepository.existsByLastUpdate(lastUpdate)) return;
+        if(rankingRepository.existsByLastUpdateAndCategory(lastUpdate, RankingCategory.ATP)) return;
 
         rankingList.stream().forEach(p -> {
             Player findPlayer = playerProvider.provide(p.getPlayer().getRapidPlayerId());
@@ -48,5 +46,25 @@ public class RankingSyncService {
 
         rankingRepository.collect(rankingList);
         rankingRepository.flushAll();
+    }
+
+    @Transactional
+    public void saveWtaRanking() {
+        List<Ranking> rankingList = apiWorker.process(RapidApi.WTARANKINGS);
+        String lastUpdate = rankingList.stream()
+                .findFirst()
+                .map(Ranking::getLastUpdate)
+                .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND));
+
+        if(rankingRepository.existsByLastUpdateAndCategory(lastUpdate, RankingCategory.WTA)) return;
+
+        rankingList.stream().forEach(p -> {
+            Player findPlayer = playerProvider.provide(p.getPlayer().getRapidPlayerId());
+            p.updatePlayer(findPlayer);
+        });
+
+        rankingRepository.collect(rankingList);
+        rankingRepository.flushAll();
+
     }
 }

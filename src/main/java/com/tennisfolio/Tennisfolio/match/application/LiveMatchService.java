@@ -148,9 +148,11 @@ public class LiveMatchService {
     public List<LiveMatchResponse> getAllLiveEventsByRedis(){
         List<LiveMatchResponse> atp = Optional.ofNullable(getATPLiveEventsByRedis()).orElseGet(List::of);
         List<LiveMatchResponse> wta = Optional.ofNullable(getWTALiveEventsByRedis()).orElseGet(List::of);
+        List<LiveMatchResponse> etc = Optional.ofNullable(getEtcLiveEventsByRedis()).orElseGet(List::of);
 
-        return Stream.concat(atp.stream(), wta.stream())
-                .collect(Collectors.toList());
+        return Stream.of(atp, wta, etc)
+                .flatMap(List::stream)
+                .toList();
     }
 
     public LiveMatchResponse getLiveEventByRedis(String rapidId){

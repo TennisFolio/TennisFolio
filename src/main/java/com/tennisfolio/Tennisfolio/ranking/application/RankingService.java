@@ -1,5 +1,6 @@
 package com.tennisfolio.Tennisfolio.ranking.application;
 
+import com.tennisfolio.Tennisfolio.common.RankingCategory;
 import com.tennisfolio.Tennisfolio.common.RankingSearchCondition;
 import com.tennisfolio.Tennisfolio.player.domain.Country;
 import com.tennisfolio.Tennisfolio.player.dto.CountryResponse;
@@ -46,9 +47,9 @@ public class RankingService {
 
     }
 
-    public List<RankingResponse> getRankingSearchByCondition(int page, int size, RankingSearchCondition condition, String keyword){
+    public List<RankingResponse> getRankingSearchByCondition(int page, int size, RankingCategory category, String country, String name){
         Pageable pageable = PageRequest.of(page, size);
-        Page<Ranking> rankings = rankingRepository.search(pageable, condition, keyword);
+        Page<Ranking> rankings = rankingRepository.search(pageable, category, country, name);
 
         return rankings.stream()
                 .map(RankingResponse::new)

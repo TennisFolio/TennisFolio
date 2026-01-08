@@ -2,6 +2,7 @@ package com.tennisfolio.Tennisfolio.infrastructure.api.base;
 
 public enum RapidApi {
     ATPRANKINGS("atpRankings", "/tennis/rankings/atp"),
+    WTARANKINGS("wtaRankings", "/tennis/rankings/wta"),
     TEAMDETAILS("teamDetails", "/tennis/team/%s"),
     LIVEEVENTS("liveEvents", "/tennis/events/live"),
     TEAMIMAGE("teamImage", "/tennis/team/%s/image"),

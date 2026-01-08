@@ -35,6 +35,8 @@ public class Player {
 
     private String image;
 
+    private String gender;
+
     private PlayerPrize prize;
 
     public Player(TeamDetailsApiDTO rapidDTO){
@@ -46,6 +48,7 @@ public class Player {
         this.weight = rapidDTO.getWeight();
         this.height = rapidDTO.getHeight();
         this.plays = rapidDTO.getPlays();
+        this.gender = rapidDTO.getGender();
     }
 
     public void updateFrom(Player player){
@@ -56,7 +59,7 @@ public class Player {
         this.weight = updated(this.weight, player.getWeight());
         this.height = updated(this.height, player.getHeight());
         this.plays = updated(this.plays, player.getPlays());
-
+        this.gender = updated(this.gender, player.getGender());
         Country newCountry = player.getCountry();
         if(!newCountry.equals(this.country)) this.country = newCountry;
     }
