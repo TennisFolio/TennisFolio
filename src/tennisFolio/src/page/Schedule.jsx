@@ -708,12 +708,7 @@ function Schedule() {
                 {(() => {
                   // LIVE 필터링 적용
                   const filteredMatches = showLiveOnly
-                    ? matches.filter(
-                        (match) =>
-                          match.status !== 'Ended' &&
-                          match.status !== 'Not started' &&
-                          match.status !== 'Canceled'
-                      )
+                    ? matches.filter((match) => match.live === true)
                     : matches;
 
                   return filteredMatches.length > 0 ? (
@@ -747,17 +742,8 @@ function Schedule() {
                           // LIVE 경기를 위로 정렬
                           const sortedMatches = [...seasonMatches].sort(
                             (a, b) => {
-                              const aIsLive =
-                                a.status !== 'Ended' &&
-                                a.status !== 'Not started' &&
-                                a.status !== 'Canceled';
-                              const bIsLive =
-                                b.status !== 'Ended' &&
-                                b.status !== 'Not started' &&
-                                b.status !== 'Canceled';
-
-                              if (aIsLive && !bIsLive) return -1;
-                              if (!aIsLive && bIsLive) return 1;
+                              if (a.live && !b.live) return -1;
+                              if (!a.live && b.live) return 1;
                               return 0;
                             }
                           );
@@ -796,16 +782,14 @@ function Schedule() {
                                         </div>
                                       </div>
                                       <div className="match-header-right">
-                                        {match.status !== 'Ended' &&
-                                          match.status !== 'Not started' &&
-                                          match.status !== 'Canceled' && (
-                                            <div className="live-indicator">
-                                              <span className="live-dot"></span>
-                                              <span className="live-text">
-                                                LIVE
-                                              </span>
-                                            </div>
-                                          )}
+                                        {match.live && (
+                                          <div className="live-indicator">
+                                            <span className="live-dot"></span>
+                                            <span className="live-text">
+                                              LIVE
+                                            </span>
+                                          </div>
+                                        )}
                                         {match.roundNameKr}
                                       </div>
                                     </div>
