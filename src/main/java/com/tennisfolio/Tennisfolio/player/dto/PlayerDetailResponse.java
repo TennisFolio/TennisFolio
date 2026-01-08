@@ -20,6 +20,7 @@ public class PlayerDetailResponse {
     private String plays;
     private String height;
     private String image;
+    private String gender;
     private Long prizeCurrentAmount;
     private String prizeCurrentCurrency;
     private Long prizeTotalAmount;
@@ -42,6 +43,7 @@ public class PlayerDetailResponse {
             String plays,
             String height,
             String image,
+            String gender,
             Long prizeCurrentAmount,
             String prizeCurrentCurrency,
             Long prizeTotalAmount,
@@ -62,6 +64,7 @@ public class PlayerDetailResponse {
         this.plays = plays;
         this.height = height != null? String.valueOf((int)(Double.parseDouble(height) * 100)) : "";
         this.image = image;
+        this.gender = gender;
         this.prizeCurrentAmount = prizeCurrentAmount;
         this.prizeCurrentCurrency = prizeCurrentCurrency;
         this.prizeTotalAmount = prizeTotalAmount;
