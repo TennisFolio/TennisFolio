@@ -30,6 +30,7 @@ public class PlayerQueryRepository {
                     p.plays,
                     p.height,
                     p.image,
+                    p.gender,
                     pp.prizeCurrentAmount,
                     pp.prizeCurrentCurrency,
                     pp.prizeTotalAmount,
