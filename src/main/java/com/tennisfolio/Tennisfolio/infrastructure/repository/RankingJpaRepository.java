@@ -1,5 +1,6 @@
 package com.tennisfolio.Tennisfolio.infrastructure.repository;
 
+import com.tennisfolio.Tennisfolio.common.RankingCategory;
 import com.tennisfolio.Tennisfolio.player.repository.CountryEntity;
 import com.tennisfolio.Tennisfolio.ranking.repository.RankingEntity;
 import com.tennisfolio.Tennisfolio.ranking.repository.RankingQueryRepository;
@@ -22,7 +23,7 @@ public interface RankingJpaRepository extends JpaRepository<RankingEntity, Long>
 
     List<RankingEntity> findByLastUpdate(String lastUpdate);
 
-    boolean existsByLastUpdate(String lastUpdate);
+    boolean existsByLastUpdateAndCategory(String lastUpdate, RankingCategory category);
 
     @Query("""
             SELECT DISTINCT new com.tennisfolio.Tennisfolio.player.repository.CountryEntity(p.countryEntity.countryCode, p.countryEntity.countryName)

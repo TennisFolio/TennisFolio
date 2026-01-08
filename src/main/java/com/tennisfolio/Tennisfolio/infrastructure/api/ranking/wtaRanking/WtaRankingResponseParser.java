@@ -1,24 +1,27 @@
-package com.tennisfolio.Tennisfolio.infrastructure.api.ranking.atpranking;
+package com.tennisfolio.Tennisfolio.infrastructure.api.ranking.wtaRanking;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.tennisfolio.Tennisfolio.infrastructure.api.base.ResponseParser;
 import com.tennisfolio.Tennisfolio.common.ExceptionCode;
 import com.tennisfolio.Tennisfolio.exception.ParserException;
+import com.tennisfolio.Tennisfolio.infrastructure.api.base.ResponseParser;
 import com.tennisfolio.Tennisfolio.ranking.dto.AtpRankingApiDTO;
+import com.tennisfolio.Tennisfolio.ranking.dto.WtaRankingApiDTO;
 import com.tennisfolio.Tennisfolio.util.ConversionUtil;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+
 @Component
-public class AtpRankingResponseParser implements ResponseParser<List<AtpRankingApiDTO>> {
+public class WtaRankingResponseParser implements ResponseParser<List<WtaRankingApiDTO>> {
+
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
-    public List<AtpRankingApiDTO> parse(String response) {
+    public List<WtaRankingApiDTO> parse(String response) {
         try{
-            List<AtpRankingApiDTO> list = new ArrayList<>();
+            List<WtaRankingApiDTO> list = new ArrayList<>();
 
             JsonNode rootNode = objectMapper.readTree(response);
 
@@ -32,7 +35,7 @@ public class AtpRankingResponseParser implements ResponseParser<List<AtpRankingA
             }
 
             for(JsonNode dataNode : dataArrayNode){
-                AtpRankingApiDTO atpRankingApiDTO = objectMapper.treeToValue(dataNode, AtpRankingApiDTO.class);
+                WtaRankingApiDTO atpRankingApiDTO = objectMapper.treeToValue(dataNode, WtaRankingApiDTO.class);
                 atpRankingApiDTO.setUpdateTime(yyyyMMdd);
                 list.add(atpRankingApiDTO);
             }
@@ -41,4 +44,5 @@ public class AtpRankingResponseParser implements ResponseParser<List<AtpRankingA
             throw new ParserException(ExceptionCode.PARSER_ERROR);
         }
     }
+
 }

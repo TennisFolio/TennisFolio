@@ -1,5 +1,6 @@
 package com.tennisfolio.Tennisfolio.mock;
 
+import com.tennisfolio.Tennisfolio.common.RankingCategory;
 import com.tennisfolio.Tennisfolio.common.RankingSearchCondition;
 import com.tennisfolio.Tennisfolio.player.domain.Country;
 import com.tennisfolio.Tennisfolio.player.domain.Player;
@@ -93,8 +94,8 @@ public class FakeRankingRepository implements RankingRepository {
     }
 
     @Override
-    public boolean existsByLastUpdate(String lastUpdate) {
-        return findByLastUpdate(lastUpdate).size() > 0;
+    public boolean existsByLastUpdateAndCategory(String lastUpdate, RankingCategory category) {
+        return data.stream().anyMatch(item -> lastUpdate.equals(item.getLastUpdate()) && item.getCategory() == category);
     }
 
     @Override
@@ -172,7 +173,7 @@ public class FakeRankingRepository implements RankingRepository {
     }
 
     @Override
-    public Page<Ranking> search(Pageable pageable, RankingSearchCondition condition, String keyword) {
+    public Page<Ranking> search(Pageable pageable, RankingCategory category, String country, String name) {
         return null;
     }
 }

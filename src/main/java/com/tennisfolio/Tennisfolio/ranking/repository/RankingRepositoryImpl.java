@@ -1,6 +1,7 @@
 package com.tennisfolio.Tennisfolio.ranking.repository;
 
 import com.tennisfolio.Tennisfolio.common.ExceptionCode;
+import com.tennisfolio.Tennisfolio.common.RankingCategory;
 import com.tennisfolio.Tennisfolio.common.RankingSearchCondition;
 import com.tennisfolio.Tennisfolio.exception.NotFoundException;
 import com.tennisfolio.Tennisfolio.infrastructure.repository.RankingJpaRepository;
@@ -64,8 +65,8 @@ public class RankingRepositoryImpl implements RankingRepository{
     }
 
     @Override
-    public boolean existsByLastUpdate(String lastUpdate) {
-        return rankingJpaRepository.existsByLastUpdate(lastUpdate);
+    public boolean existsByLastUpdateAndCategory(String lastUpdate, RankingCategory category) {
+        return rankingJpaRepository.existsByLastUpdateAndCategory(lastUpdate, category);
     }
 
     @Override
@@ -97,8 +98,8 @@ public class RankingRepositoryImpl implements RankingRepository{
     }
 
     @Override
-    public Page<Ranking> search(Pageable pageable, RankingSearchCondition condition, String keyword) {
-        Page<RankingEntity> result = rankingJpaRepository.search(pageable, condition, keyword);
+    public Page<Ranking> search(Pageable pageable, RankingCategory category, String country, String name) {
+        Page<RankingEntity> result = rankingJpaRepository.search(pageable, category, country, name);
 
         return result.map(RankingEntity::toModel);
     }

@@ -43,6 +43,8 @@ public class PlayerEntity extends BaseTimeEntity {
     private String plays;
     @Column(name="IMAGE")
     private String image;
+    @Column(name="GENDER")
+    private String gender;
 
     public static PlayerEntity fromModel(Player player) {
         PlayerEntity playerEntity = new PlayerEntity();
@@ -59,6 +61,7 @@ public class PlayerEntity extends BaseTimeEntity {
         playerEntity.height = player.getHeight();
         playerEntity.plays = player.getPlays();
         playerEntity.image = player.getImage();
+        playerEntity.gender = player.getGender();
         //playerEntity.prizeEntity = PlayerPrizeEntity.fromModel(player.getPrize());
 
         return playerEntity;
@@ -79,6 +82,7 @@ public class PlayerEntity extends BaseTimeEntity {
                 .height(height)
                 .plays(plays)
                 .image(image)
+                .gender(gender)
                 //.prize(prizeEntity.toModel())
                 .build();
     }

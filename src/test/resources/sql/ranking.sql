@@ -9,17 +9,17 @@ INSERT INTO `tb_player` (`PLAYER_ID`, `rapid_player_id`, `player_name`, `player_
 VALUES (5, '261015', 'Lorenzo Musetti', '로렌조 무세티', '20020303', 'Italy', 'IT', '2019', '78', 'right-handed', '1.85', 'player/261015');
 
 
-INSERT INTO tb_ranking(RANKING_ID, PLAYER_ID, cur_ranking, pre_ranking, best_ranking, cur_points, pre_points, ranking_last_updated) VALUES
-(1L, 1L, 1L, 1L, 1L, 12050L, 12050L, '20251201');
-INSERT INTO tb_ranking(RANKING_ID, PLAYER_ID, cur_ranking, pre_ranking, best_ranking, cur_points, pre_points, ranking_last_updated) VALUES
-(2L, 2L, 2L, 2L, 1L, 11500L, 11500L, '20251201');
-INSERT INTO tb_ranking(RANKING_ID, PLAYER_ID, cur_ranking, pre_ranking, best_ranking, cur_points, pre_points, ranking_last_updated) VALUES
-(3L, 3L, 4L, 4L, 1L, 4830L, 4830L, '20251201');
-INSERT INTO tb_ranking(RANKING_ID, PLAYER_ID, cur_ranking, pre_ranking, best_ranking, cur_points, pre_points, ranking_last_updated) VALUES
-(4L, 4L, 9L, 9L, 5L, 3970L, 3970L, '20251201');
+INSERT INTO tb_ranking(RANKING_ID, PLAYER_ID, cur_ranking, pre_ranking, best_ranking, cur_points, pre_points, ranking_last_updated, CATEGORY) VALUES
+(1L, 1L, 1L, 1L, 1L, 12050L, 12050L, '20251201', 'ATP');
+INSERT INTO tb_ranking(RANKING_ID, PLAYER_ID, cur_ranking, pre_ranking, best_ranking, cur_points, pre_points, ranking_last_updated, CATEGORY) VALUES
+(2L, 2L, 2L, 2L, 1L, 11500L, 11500L, '20251201', 'ATP');
+INSERT INTO tb_ranking(RANKING_ID, PLAYER_ID, cur_ranking, pre_ranking, best_ranking, cur_points, pre_points, ranking_last_updated, CATEGORY) VALUES
+(3L, 3L, 4L, 4L, 1L, 4830L, 4830L, '20251201', 'ATP');
+INSERT INTO tb_ranking(RANKING_ID, PLAYER_ID, cur_ranking, pre_ranking, best_ranking, cur_points, pre_points, ranking_last_updated, CATEGORY) VALUES
+(4L, 4L, 9L, 9L, 5L, 3970L, 3970L, '20251201', 'ATP');
 
-INSERT INTO tb_ranking(RANKING_ID, PLAYER_ID, cur_ranking, pre_ranking, best_ranking, cur_points, pre_points, ranking_last_updated) VALUES
-(5L, 1L, 1L, 2L, 1L, 11050L, 11250L, '20251110');
+INSERT INTO tb_ranking(RANKING_ID, PLAYER_ID, cur_ranking, pre_ranking, best_ranking, cur_points, pre_points, ranking_last_updated, CATEGORY) VALUES
+(5L, 1L, 1L, 2L, 1L, 11050L, 11250L, '20251110', 'ATP');
 
-INSERT INTO `tb_ranking` (`RANKING_ID`, `PLAYER_ID`, `cur_ranking`, `pre_ranking`, `best_ranking`, `cur_points`, `pre_points`, `ranking_last_updated`) VALUES
-(6L, 5L, 8, 8, 6, 4040, 4040, '20251201');
+INSERT INTO `tb_ranking` (`RANKING_ID`, `PLAYER_ID`, `cur_ranking`, `pre_ranking`, `best_ranking`, `cur_points`, `pre_points`, `ranking_last_updated`, CATEGORY) VALUES
+(6L, 5L, 8, 8, 6, 4040, 4040, '20251201', 'ATP');

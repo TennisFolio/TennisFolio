@@ -43,7 +43,7 @@ public class TeamDetailsResponseParser implements ResponseParser<TeamDetailsApiD
     private TeamDetailsApiDTO extractTeamDetails(JsonNode teamNode) throws JsonProcessingException {
         JsonNode playerNode = teamNode.path("playerTeamInfo");
         JsonNode countryNode = teamNode.path("country");
-
+        String gender = teamNode.path("gender").asText();
         TeamDetailsApiDTO dto;
 
         if (playerNode == null || playerNode.isMissingNode()) {
@@ -56,6 +56,7 @@ public class TeamDetailsResponseParser implements ResponseParser<TeamDetailsApiD
 
             // 국가 정보 설정
             CountryDTO country = objectMapper.treeToValue(countryNode, CountryDTO.class);
+            dto.updateGender(gender);
             dto.setCountry(country);
         }
 

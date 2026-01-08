@@ -31,6 +31,8 @@ public class QPlayerEntity extends EntityPathBase<PlayerEntity> {
     //inherited
     public final DateTimePath<java.time.LocalDateTime> createDt = _super.createDt;
 
+    public final StringPath gender = createString("gender");
+
     public final StringPath height = createString("height");
 
     public final StringPath image = createString("image");

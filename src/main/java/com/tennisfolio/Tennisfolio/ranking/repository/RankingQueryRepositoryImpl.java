@@ -3,6 +3,7 @@ package com.tennisfolio.Tennisfolio.ranking.repository;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.tennisfolio.Tennisfolio.common.RankingCategory;
 import com.tennisfolio.Tennisfolio.common.RankingSearchCondition;
 import com.tennisfolio.Tennisfolio.player.repository.QPlayerEntity;
 import com.tennisfolio.Tennisfolio.ranking.domain.Ranking;
@@ -23,13 +24,13 @@ public class RankingQueryRepositoryImpl implements RankingQueryRepository{
     }
 
     @Override
-    public Page<RankingEntity> search(Pageable pageable, RankingSearchCondition condition, String keyword) {
+    public Page<RankingEntity> search(Pageable pageable, RankingCategory category, String country, String name) {
         QRankingEntity ranking = QRankingEntity.rankingEntity;
         QPlayerEntity player = QPlayerEntity.playerEntity;
 
         QRankingEntity ranking2 = new QRankingEntity("ranking2");
 
-        BooleanExpression predicate = buildPredicate(condition, keyword);
+        BooleanExpression predicate = buildPredicate(category, country, name);
 
         BooleanExpression latestUpdateCondition =
                 ranking.lastUpdate.eq(
@@ -55,14 +56,19 @@ public class RankingQueryRepositoryImpl implements RankingQueryRepository{
         return new PageImpl<>(rankingEntityList, pageable, total == null ? 0 : total);
     }
 
-    private BooleanExpression buildPredicate(RankingSearchCondition condition, String keyword){
-        if(!StringUtils.hasText(keyword)){
-            return null;
+    private BooleanExpression buildPredicate(RankingCategory category, String country, String name){
+        BooleanExpression expression = QRankingEntity.rankingEntity.category.eq(category);
+
+        if(StringUtils.hasText(name)){
+            expression = QPlayerEntity.playerEntity.playerName.containsIgnoreCase(name)
+                    .or(QPlayerEntity.playerEntity.playerNameKr.containsIgnoreCase(name));
         }
 
-        return switch(condition){
-            case NAME -> QPlayerEntity.playerEntity.playerName.containsIgnoreCase(keyword).or(QPlayerEntity.playerEntity.playerNameKr.containsIgnoreCase(keyword));
-            case COUNTRY -> QPlayerEntity.playerEntity.countryEntity.countryCode.eq(keyword);
-        };
+        if(StringUtils.hasText(country)){
+            BooleanExpression countryExpression = QPlayerEntity.playerEntity.countryEntity.countryCode.eq(country);
+            expression = expression == null ? countryExpression : expression.and(countryExpression);
+        }
+
+        return expression;
     }
 }

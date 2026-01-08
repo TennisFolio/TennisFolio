@@ -27,6 +27,7 @@ public class MatchScheduleResponse {
     private String status;
     private String startTimestamp;
     private String winner;
+    private boolean live = false;
 
     @Builder
     public MatchScheduleResponse(
@@ -64,6 +65,7 @@ public class MatchScheduleResponse {
         this.status = status;
         this.startTimestamp = startTimestamp;
         this.winner = winner;
+        this.live = false;
     }
 
     public void applyLiveMatch(LiveMatchResponse liveMatchResponse){
@@ -71,6 +73,7 @@ public class MatchScheduleResponse {
         this.homeScore = liveMatchResponse.getHomeScore().getCurrent();
         this.awayScore = liveMatchResponse.getAwayScore().getCurrent();
         this.status = liveMatchResponse.getStatus();
+        this.live = true;
 
     }
 }

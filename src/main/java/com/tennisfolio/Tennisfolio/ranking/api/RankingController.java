@@ -1,5 +1,6 @@
 package com.tennisfolio.Tennisfolio.ranking.api;
 
+import com.tennisfolio.Tennisfolio.common.RankingCategory;
 import com.tennisfolio.Tennisfolio.common.RankingSearchCondition;
 import com.tennisfolio.Tennisfolio.common.response.ResponseDTO;
 import com.tennisfolio.Tennisfolio.player.dto.CountryResponse;
@@ -27,18 +28,25 @@ public class RankingController {
         this.rankingSyncService = rankingSyncService;
     }
 
-    @PostMapping("/ranking")
+    @PostMapping("/ranking/atp")
     public ResponseEntity<ResponseDTO> saveAtpRankings(){
         rankingSyncService.saveAtpRanking();
+        return new ResponseEntity(ResponseDTO.success(),HttpStatus.OK);
+    }
+
+    @PostMapping("/ranking/wta")
+    public ResponseEntity<ResponseDTO> saveWtaRankings(){
+        rankingSyncService.saveWtaRanking();
         return new ResponseEntity(ResponseDTO.success(),HttpStatus.OK);
     }
 
     @GetMapping("/ranking")
     public ResponseEntity<ResponseDTO<List<RankingResponse>>> getAtpRankings(@RequestParam("page") int page,
                                                                              @RequestParam("size") int size,
-                                                                             @RequestParam(value = "condition", required = false) RankingSearchCondition condition,
-                                                                             @RequestParam(value = "keyword", required = false) String keyword){
-        List<RankingResponse> res = rankingService.getRankingSearchByCondition(page, size, condition, keyword);
+                                                                             @RequestParam(value= "category", required = true) RankingCategory category,
+                                                                             @RequestParam(value = "country", required = false) String country,
+                                                                             @RequestParam(value = "name", required = false) String name){
+        List<RankingResponse> res = rankingService.getRankingSearchByCondition(page, size, category, country, name);
         return new ResponseEntity(ResponseDTO.success(res), HttpStatus.OK);
     }
 

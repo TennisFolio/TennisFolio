@@ -30,7 +30,7 @@ import static org.mockito.Mockito.when;
 
 public class RankingSyncServiceTest {
 
-     RankingSyncService rankingSyncService;
+    RankingSyncService rankingSyncService;
     ApiCaller fakeApiCaller = new FakeApiCaller();
     EntityMapper<List<AtpRankingApiDTO>, List<Ranking>> fakeAtpRankingEntityMapper = new FakeAtpRankingEntityMapper();
     @Mock

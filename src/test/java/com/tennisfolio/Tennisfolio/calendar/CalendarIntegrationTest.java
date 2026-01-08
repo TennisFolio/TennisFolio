@@ -163,10 +163,12 @@ class CalendarIntegrationTest {
                 .andExpect(jsonPath("$.data[0].awayScore").value(0))
                 .andExpect(jsonPath("$.data[0].roundNameKr").value("결승"))
                 .andExpect(jsonPath("$.data[0].status").value("2nd set"))
+                .andExpect(jsonPath("$.data[0].live").value(true))
                 .andExpect(jsonPath("$.data[1].homeScore").value(0))
                 .andExpect(jsonPath("$.data[1].awayScore").value(0))
                 .andExpect(jsonPath("$.data[1].roundNameKr").value("결승"))
-                .andExpect(jsonPath("$.data[1].status").value("Not started"));
+                .andExpect(jsonPath("$.data[1].status").value("Not started"))
+                .andExpect(jsonPath("$.data[1].live").value(false));
 
     }
 
