@@ -14,6 +14,7 @@ function Ranking() {
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [isAllLoaded, setIsAllLoaded] = useState(false);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [hasError, setHasError] = useState(false);
   const [searchNameKeyword, setSearchNameKeyword] = useState(null);
   const [searchCountryCode, setSearchCountryCode] = useState(null);
   const observerTargetRef = useRef(null);
@@ -52,12 +53,15 @@ function Ranking() {
   useEffect(() => {
     const fetchInitial = async () => {
       try {
+        setHasError(false);
         const res = await fetchRankings(0, null, null);
         setRankings(res.data.data);
         setPage(1);
         if (res.data.data.length < size) setIsAllLoaded(true);
       } catch (error) {
         console.error('초기 데이터 조회 실패', error);
+        setHasError(true);
+        setIsAllLoaded(true); // 에러 발생 시 더 이상 로드하지 않도록 설정
       } finally {
         setIsInitialLoading(false);
       }
@@ -67,10 +71,11 @@ function Ranking() {
 
   // 추가 데이터 로드
   const handleLoadMore = useCallback(async () => {
-    if (isLoadingMore || isAllLoaded) return;
+    if (isLoadingMore || isAllLoaded || hasError) return;
 
     setIsLoadingMore(true);
     try {
+      setHasError(false);
       const res = await fetchRankings(
         page,
         searchNameKeyword,
@@ -81,6 +86,8 @@ function Ranking() {
       if (res.data.data.length < size) setIsAllLoaded(true);
     } catch (error) {
       console.error('추가 데이터 조회 실패', error);
+      setHasError(true);
+      setIsAllLoaded(true); // 에러 발생 시 더 이상 로드하지 않도록 설정
     } finally {
       setIsLoadingMore(false);
     }
@@ -88,6 +95,7 @@ function Ranking() {
     page,
     isLoadingMore,
     isAllLoaded,
+    hasError,
     searchNameKeyword,
     searchCountryCode,
     fetchRankings,
@@ -101,6 +109,7 @@ function Ranking() {
       setSearchCountryCode(countryCode);
       setPage(0);
       setIsAllLoaded(false);
+      setHasError(false);
 
       try {
         const res = await fetchRankings(0, nameKeyword, countryCode);
@@ -110,6 +119,8 @@ function Ranking() {
       } catch (error) {
         console.error('검색 실패', error);
         setRankings([]);
+        setHasError(true);
+        setIsAllLoaded(true); // 에러 발생 시 더 이상 로드하지 않도록 설정
       } finally {
         setIsInitialLoading(false);
       }
@@ -119,11 +130,11 @@ function Ranking() {
 
   // Intersection Observer로 무한스크롤 구현
   useEffect(() => {
-    if (isInitialLoading || isAllLoaded) return;
+    if (isInitialLoading || isAllLoaded || hasError) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting && !isLoadingMore) {
+        if (entries[0].isIntersecting && !isLoadingMore && !hasError) {
           handleLoadMore();
         }
       },
@@ -140,7 +151,7 @@ function Ranking() {
         observer.unobserve(currentTarget);
       }
     };
-  }, [isInitialLoading, isAllLoaded, isLoadingMore, handleLoadMore]);
+  }, [isInitialLoading, isAllLoaded, isLoadingMore, hasError, handleLoadMore]);
 
   return (
     <div
