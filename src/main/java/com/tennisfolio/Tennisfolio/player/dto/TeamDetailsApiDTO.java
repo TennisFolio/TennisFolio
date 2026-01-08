@@ -33,4 +33,10 @@ public class TeamDetailsApiDTO {
     private PrizeDTO prizeTotal;
     @JsonProperty("birthDateTimestamp")
     private String birthDate;
+    @JsonProperty("gender")
+    private String gender;
+
+    public void updateGender(String gender){
+        this.gender = gender;
+    }
 }

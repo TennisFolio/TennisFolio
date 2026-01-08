@@ -22,4 +22,6 @@ public class PlayerDetailService {
     public List<PlayerMatchResponse> findPlayerMatch(Long playerId){
         return playerQueryRepository.findMatchesByPlayerAndYear(playerId, "2025");
     }
+
+
 }

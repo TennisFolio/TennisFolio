@@ -28,10 +28,10 @@ INSERT INTO tb_player(PLAYER_ID, PLAYER_NAME, PLAYER_NAME_KR) VALUES(8, 'Bergs',
 INSERT INTO tb_player_prize(PRIZE_ID, PLAYER_ID, PRIZE_CURRENT_AMOUNT, prize_current_currency, PRIZE_TOTAL_AMOUNT, prize_total_currency) VALUES(1, 1, 100, 'EUR', 500, 'EUR');
 INSERT INTO tb_player_prize(PRIZE_ID, PLAYER_ID, PRIZE_CURRENT_AMOUNT, prize_current_currency, PRIZE_TOTAL_AMOUNT, prize_total_currency) VALUES(2, 2, 200, 'EUR', 600, 'EUR');
 
-INSERT INTO tb_ranking(RANKING_ID, PLAYER_ID, cur_ranking, pre_ranking, best_ranking, cur_points, ranking_last_updated) VALUES(1, 1, 1, 1, 1, 9500, '20251119');
-INSERT INTO tb_ranking(RANKING_ID, PLAYER_ID, cur_ranking, pre_ranking, best_ranking, cur_points, ranking_last_updated) VALUES(2, 1, 1, 1, 1, 10000, '20251125');
-INSERT INTO tb_ranking(RANKING_ID, PLAYER_ID, cur_ranking, pre_ranking, best_ranking, cur_points, ranking_last_updated) VALUES(3, 2, 2, 2, 1, 8500, '20251119');
-INSERT INTO tb_ranking(RANKING_ID, PLAYER_ID, cur_ranking, pre_ranking, best_ranking, cur_points, ranking_last_updated) VALUES(4, 2, 2, 2, 1, 9000, '20251125');
+INSERT INTO tb_ranking(RANKING_ID, PLAYER_ID, cur_ranking, pre_ranking, best_ranking, cur_points, ranking_last_updated, CATEGORY) VALUES(1, 1, 1, 1, 1, 9500, '20251119', 'ATP');
+INSERT INTO tb_ranking(RANKING_ID, PLAYER_ID, cur_ranking, pre_ranking, best_ranking, cur_points, ranking_last_updated, CATEGORY) VALUES(2, 1, 1, 1, 1, 10000, '20251125', 'ATP');
+INSERT INTO tb_ranking(RANKING_ID, PLAYER_ID, cur_ranking, pre_ranking, best_ranking, cur_points, ranking_last_updated, CATEGORY) VALUES(3, 2, 2, 2, 1, 8500, '20251119', 'ATP');
+INSERT INTO tb_ranking(RANKING_ID, PLAYER_ID, cur_ranking, pre_ranking, best_ranking, cur_points, ranking_last_updated, CATEGORY) VALUES(4, 2, 2, 2, 1, 9000, '20251125', 'ATP');
 
 INSERT INTO tb_match(MATCH_ID, ROUND_ID, rapid_match_id, home_player, away_player,
  home_set1, home_set2, home_set3, home_set4, home_set5,

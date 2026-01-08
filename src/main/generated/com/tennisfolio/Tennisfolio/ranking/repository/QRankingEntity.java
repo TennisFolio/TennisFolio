@@ -26,6 +26,8 @@ public class QRankingEntity extends EntityPathBase<RankingEntity> {
 
     public final NumberPath<Long> bestRank = createNumber("bestRank", Long.class);
 
+    public final EnumPath<com.tennisfolio.Tennisfolio.common.RankingCategory> category = createEnum("category", com.tennisfolio.Tennisfolio.common.RankingCategory.class);
+
     //inherited
     public final DateTimePath<java.time.LocalDateTime> createDt = _super.createDt;
 

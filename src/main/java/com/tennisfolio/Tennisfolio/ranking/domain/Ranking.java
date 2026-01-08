@@ -1,5 +1,6 @@
 package com.tennisfolio.Tennisfolio.ranking.domain;
 
+import com.tennisfolio.Tennisfolio.common.RankingCategory;
 import com.tennisfolio.Tennisfolio.player.domain.Player;
 import com.tennisfolio.Tennisfolio.ranking.dto.AtpRankingApiDTO;
 import lombok.AllArgsConstructor;
@@ -27,15 +28,18 @@ public class Ranking {
 
     private String lastUpdate;
 
-    public Ranking(AtpRankingApiDTO rapidDTO, Player player){
+    private RankingCategory category;
+
+    public Ranking(Long curRank, Long preRank, Long bestRank, Long curPoints, Long prePoints, String lastUpdate, Player player, RankingCategory category){
 
         this.player = player;
-        this.curRank = rapidDTO.getCurRank();
-        this.preRank = rapidDTO.getPreRank();
-        this.bestRank = rapidDTO.getBestRank();
-        this.curPoints = rapidDTO.getPoint();
-        this.prePoints = rapidDTO.getPrePoints();
-        this.lastUpdate = rapidDTO.getUpdateTime();
+        this.curRank = curRank;
+        this.preRank = preRank;
+        this.bestRank = bestRank;
+        this.curPoints = curPoints;
+        this.prePoints = prePoints;
+        this.lastUpdate = lastUpdate;
+        this.category = category;
 
     }
 

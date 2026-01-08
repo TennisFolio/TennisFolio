@@ -1,23 +1,20 @@
-package com.tennisfolio.Tennisfolio.infrastructure.api.ranking.atpranking;
+package com.tennisfolio.Tennisfolio.infrastructure.api.ranking.wtaRanking;
 
 import com.tennisfolio.Tennisfolio.common.RankingCategory;
 import com.tennisfolio.Tennisfolio.infrastructure.api.base.EntityMapper;
 import com.tennisfolio.Tennisfolio.player.domain.Player;
 import com.tennisfolio.Tennisfolio.ranking.domain.Ranking;
 import com.tennisfolio.Tennisfolio.ranking.dto.AtpRankingApiDTO;
+import com.tennisfolio.Tennisfolio.ranking.dto.WtaRankingApiDTO;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
-public class AtpRankingEntityMapper implements EntityMapper<List<AtpRankingApiDTO>, List<Ranking>> {
-
-    public AtpRankingEntityMapper(){
-
-    }
+public class WtaRankingEntityMapper implements EntityMapper<List<WtaRankingApiDTO>, List<Ranking>> {
     @Override
-    public List<Ranking> map(List<AtpRankingApiDTO> dto, Object... params) {
+    public List<Ranking> map(List<WtaRankingApiDTO> dto, Object... params) {
         List<Ranking> rankList = dto.stream().map(rank -> {
             Player player = Player.builder().rapidPlayerId(rank.getTeam().getPlayerRapidId()).build();
 
@@ -28,7 +25,7 @@ public class AtpRankingEntityMapper implements EntityMapper<List<AtpRankingApiDT
                     .curPoints(rank.getPoint())
                     .prePoints(rank.getPrePoints())
                     .lastUpdate(rank.getUpdateTime())
-                    .category(RankingCategory.ATP)
+                    .category(RankingCategory.WTA)
                     .player(player)
                     .build();
         }).collect(Collectors.toList());

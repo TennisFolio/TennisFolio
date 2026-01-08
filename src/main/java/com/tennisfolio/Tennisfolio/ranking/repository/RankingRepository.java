@@ -1,5 +1,6 @@
 package com.tennisfolio.Tennisfolio.ranking.repository;
 
+import com.tennisfolio.Tennisfolio.common.RankingCategory;
 import com.tennisfolio.Tennisfolio.common.RankingSearchCondition;
 import com.tennisfolio.Tennisfolio.player.domain.Country;
 import com.tennisfolio.Tennisfolio.ranking.domain.Ranking;
@@ -23,7 +24,7 @@ public interface RankingRepository {
 
     List<Ranking> findByLastUpdate(String lastUpdate);
 
-    boolean existsByLastUpdate(String lastUpdate);
+    boolean existsByLastUpdateAndCategory(String lastUpdate, RankingCategory category);
 
     List<Ranking> collect(Ranking ranking);
 
@@ -35,5 +36,5 @@ public interface RankingRepository {
 
     List<Country> getDistinctCountriesFromTopRankings();
 
-    Page<Ranking> search(Pageable pageable, RankingSearchCondition condition, String keyword);
+    Page<Ranking> search(Pageable pageable, RankingCategory category, String country, String name);
 }

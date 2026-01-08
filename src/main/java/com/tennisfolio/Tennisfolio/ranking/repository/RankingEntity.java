@@ -1,6 +1,7 @@
 package com.tennisfolio.Tennisfolio.ranking.repository;
 
 import com.tennisfolio.Tennisfolio.common.Entity.BaseTimeEntity;
+import com.tennisfolio.Tennisfolio.common.RankingCategory;
 import com.tennisfolio.Tennisfolio.player.repository.PlayerEntity;
 import com.tennisfolio.Tennisfolio.ranking.domain.Ranking;
 import jakarta.persistence.*;
@@ -40,6 +41,9 @@ public class RankingEntity extends BaseTimeEntity {
     private Long prePoints;
     @Column(name="RANKING_LAST_UPDATED")
     private String lastUpdate;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private RankingCategory category;
 
     public static RankingEntity fromModel(Ranking ranking) {
         RankingEntity rankingEntity = new RankingEntity();
@@ -51,6 +55,7 @@ public class RankingEntity extends BaseTimeEntity {
         rankingEntity.curPoints = ranking.getCurPoints();
         rankingEntity.prePoints = ranking.getPrePoints();
         rankingEntity.lastUpdate = ranking.getLastUpdate();
+        rankingEntity.category = ranking.getCategory();
 
         return rankingEntity;
     }
@@ -65,6 +70,7 @@ public class RankingEntity extends BaseTimeEntity {
                 .curPoints(curPoints)
                 .prePoints(prePoints)
                 .lastUpdate(lastUpdate)
+                .category(category)
                 .build();
     }
 
