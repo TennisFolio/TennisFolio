@@ -22,27 +22,18 @@ function Ranking() {
   // API 호출 함수
   const fetchRankings = useCallback(
     async (pageNum, nameKeyword, countryCode) => {
-      const params = { page: pageNum, size };
+      const params = { page: pageNum, size, category: 'ATP' };
 
       // 이름과 나라 조건을 모두 확인
       const hasName = nameKeyword && nameKeyword.trim();
       const hasCountry = countryCode && countryCode.trim();
 
-      if (hasName && hasCountry) {
-        // 두 조건 모두 있을 때: 이름 조건을 기본으로 하고 나라 코드를 추가 파라미터로 전달
-        params.condition = 'NAME';
-        params.keyword = nameKeyword;
-        params.countryCode = countryCode;
-      } else if (hasName) {
-        // 이름만 있을 때
-        params.condition = 'NAME';
-        params.keyword = nameKeyword;
-      } else if (hasCountry) {
-        // 나라만 있을 때
-        params.condition = 'COUNTRY';
-        params.keyword = countryCode;
+      if (hasName) {
+        params.name = nameKeyword.trim();
       }
-      // 둘 다 없으면 params에 조건 추가 안 함 (전체 조회)
+      if (hasCountry) {
+        params.country = countryCode.trim();
+      }
 
       return await apiRequest.get('/api/ranking', params);
     },
