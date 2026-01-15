@@ -118,4 +118,14 @@ public class Match {
     // 경기 진행 후 종료
     public boolean isFinished(){return "Ended".equals(status) || "Retired".equals(status);}
 
+    public boolean hasDifferentStartTime(String startTimestamp){
+        if(this.startTimestamp == null || startTimestamp == null) return true;
+
+        return !this.startTimestamp.equals(startTimestamp);
+    }
+
+    public void changeStartTime(String startTimestamp){
+        this.startTimestamp = startTimestamp;
+    }
+
 }

@@ -13,6 +13,8 @@ import com.tennisfolio.Tennisfolio.infrastructure.api.match.liveEvents.LiveEvent
 import com.tennisfolio.Tennisfolio.match.domain.Match;
 import com.tennisfolio.Tennisfolio.match.dto.LiveMatchResponse;
 import com.tennisfolio.Tennisfolio.match.dto.LiveMatchSummaryResponse;
+import com.tennisfolio.Tennisfolio.match.event.MatchFinishedEvent;
+import com.tennisfolio.Tennisfolio.match.event.MatchStartTimeChangedEvent;
 import com.tennisfolio.Tennisfolio.match.repository.MatchRepository;
 import com.tennisfolio.Tennisfolio.player.application.PlayerService;
 import com.tennisfolio.Tennisfolio.player.domain.Player;
@@ -22,6 +24,7 @@ import com.tennisfolio.Tennisfolio.util.ConversionUtil;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.core.*;
 import org.springframework.stereotype.Service;
@@ -42,14 +45,16 @@ public class LiveMatchService {
     private final PlayerProvider playerProvider;
     private final StringRedisTemplate redis;
     private final MatchRepository matchRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
-    public LiveMatchService(ApiWorker apiWorker, PlayerProvider playerProvider, StringRedisTemplate redis, MatchRepository matchRepository) {
+    public LiveMatchService(ApiWorker apiWorker, PlayerProvider playerProvider, StringRedisTemplate redis, MatchRepository matchRepository, ApplicationEventPublisher eventPublisher) {
 
         this.apiWorker = apiWorker;
         this.playerProvider = playerProvider;
         this.redis = redis;
         this.matchRepository = matchRepository;
+        this.eventPublisher = eventPublisher;
     }
 
 
@@ -81,24 +86,64 @@ public class LiveMatchService {
 
         }
 
-        // 종료된 것으로 예상되는 rapidId
-        List<String> endedMatchRapidIds = findEndedMatchRapidIds(liveMatches);
+        // DB 데이터와 실제 시작 시간이 다른 경우 수정
+        changeStartTime();
 
-        updateEndedMatches(endedMatchRapidIds);
+        // 종료된 경기 처리
+        finishMatch(liveMatches);
+
 
     }
 
-    public void updateEndedMatches(List<String> endedIds){
-        endedIds.stream()
-                .forEach(p ->{
+    private void finishMatch(List<LiveMatchResponse> liveMatches) {
+        List<String> endedMatchRapidIds = findEndedMatchRapidIds(liveMatches);
+        for(String rapidId : endedMatchRapidIds){
+            eventPublisher.publishEvent(
+                    new MatchFinishedEvent(rapidId)
+            );
+        }
+    }
 
-                    matchRepository.findByRapidMatchId(p)
-                            .ifPresent(findMatch -> {
-                                if(findMatch.isEnded()) return;
-                                Match event = apiWorker.process(RapidApi.EVENT, p);
-                                matchRepository.updateMatch(event);
-                            });
+
+    @Transactional
+    public void finishMatchProc(String endedId){
+        matchRepository.findByRapidMatchId(endedId)
+                .ifPresent(findMatch -> {
+                    if(findMatch.isEnded()) return;
+                    Match event = apiWorker.process(RapidApi.EVENT, endedId);
+                    matchRepository.updateMatch(event);
+        });
+    }
+
+
+    private void changeStartTime(){
+        Set<String> existingKeys = redis.keys("live:*");
+        for(String key : existingKeys){
+            String rapidId = key.split(":")[2];
+            eventPublisher.publishEvent(
+                    new MatchStartTimeChangedEvent(rapidId)
+            );
+        }
+    }
+
+    @Transactional
+    public void changeStartTimeProc(String rapidId){
+        // redis 데이터 조회
+        String redisJson = redis.opsForValue().get(rapidId);
+
+        LiveMatchResponse liveMatch = deserialize(redisJson);
+
+        if(liveMatch == null) return;
+
+        matchRepository.findByRapidMatchId(rapidId)
+                .ifPresent(findMatch -> {
+                    if(findMatch.getStartTimestamp().equals(liveMatch.getTime().getStartTime())) return;
+                    findMatch.changeStartTime(liveMatch.getTime().getStartTime());
+                    matchRepository.save(findMatch);
                 });
+
+
+
     }
 
     public List<LiveMatchResponse> getATPLiveEventsByRedis() {

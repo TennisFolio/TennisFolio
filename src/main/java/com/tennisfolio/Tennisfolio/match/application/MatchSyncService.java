@@ -224,7 +224,7 @@ public class MatchSyncService {
 
     private void fetchUpcomingMatchSchedules(List<Match> allEvents) {
 
-        for (int i = 0; i <= 2; i++) {
+        for (int i = -1; i <= 2; i++) {
             LocalDate date = LocalDate.now(clock).plusDays(i);
             String year = String.valueOf(date.getYear());
             String month = String.format("%02d", date.getMonthValue());
