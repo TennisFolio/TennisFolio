@@ -17,7 +17,7 @@ public class CategoryService {
     private final StrategyApiTemplate<List<CategoryDTO>, List<Category>> categoriesApiTemplate;
     private final CategoryRepository categoryRepository;
 
-    public CategoryService(@Qualifier("categoriesTemplate")StrategyApiTemplate<List<CategoryDTO>, List<Category>> categoriesApiTemplate, CategoryRepository categoryRepository) {
+    public CategoryService(StrategyApiTemplate<List<CategoryDTO>, List<Category>> categoriesApiTemplate, CategoryRepository categoryRepository) {
         this.categoriesApiTemplate = categoriesApiTemplate;
         this.categoryRepository = categoryRepository;
     }

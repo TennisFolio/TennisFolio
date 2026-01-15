@@ -14,6 +14,8 @@ import com.tennisfolio.Tennisfolio.match.application.LiveMatchService;
 import com.tennisfolio.Tennisfolio.match.domain.Match;
 import com.tennisfolio.Tennisfolio.match.dto.LiveMatchResponse;
 import com.tennisfolio.Tennisfolio.match.dto.LiveMatchSummaryResponse;
+import com.tennisfolio.Tennisfolio.match.event.MatchFinishedEvent;
+import com.tennisfolio.Tennisfolio.match.event.MatchStartTimeChangedEvent;
 import com.tennisfolio.Tennisfolio.match.repository.MatchRepository;
 import com.tennisfolio.Tennisfolio.mock.FakeApiCaller;
 import com.tennisfolio.Tennisfolio.mock.FakeMatchRepository;
@@ -24,9 +26,11 @@ import com.tennisfolio.Tennisfolio.player.domain.Player;
 import com.tennisfolio.Tennisfolio.player.infrastructure.PlayerProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
 import java.util.ArrayList;
@@ -34,7 +38,8 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.groups.Tuple.tuple;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.*;
 
 public class LiveMatchServiceTest {
     LiveMatchService liveMatchService;
@@ -60,6 +65,12 @@ public class LiveMatchServiceTest {
     @Mock
     PlayerImageService playerImageService;
 
+    @Mock
+    ApplicationEventPublisher eventPublisher;
+
+    @Captor
+    ArgumentCaptor<Object> eventCaptor;
+
     @BeforeEach
     void setUp(){
         MockitoAnnotations.openMocks(this);
@@ -75,7 +86,7 @@ public class LiveMatchServiceTest {
         when(playerProvider.provide("275923")).thenReturn(Player.builder().image("player/275923").build());
         apiWorker = new ApiWorker(strategies, redisRateLimiter);
 
-        liveMatchService = new LiveMatchService(apiWorker, playerProvider, redisTemplate, matchRepository);
+        liveMatchService = new LiveMatchService(apiWorker, playerProvider, redisTemplate, matchRepository, eventPublisher);
     }
 
     @Test
@@ -137,12 +148,13 @@ public class LiveMatchServiceTest {
             e.printStackTrace();
         }
 
+       verify(eventPublisher).publishEvent(
+               argThat((Object event) ->
+                       event instanceof MatchFinishedEvent &&
+                               ((MatchFinishedEvent) event).rapidMatchId().equals("2")
 
-        // 3. match3은 DB에 업데이트
-        Match res = matchRepository.findByRapidMatchId("2").get();
-
-        assertThat(res).isNotNull();
-        assertThat(res.getRapidMatchId()).isEqualTo("2");
+               )
+       );
 
     }
 
@@ -268,5 +280,38 @@ public class LiveMatchServiceTest {
                         tuple("275923", "Alcaraz", "1", "206570", "Jannik Sinner", "2", 1L, 1L, "united-cup", "United Cup", "United Cup 2025", "UNKNOWN"),
                         tuple("275923", "Alcaraz", "1", "206570", "Jannik Sinner", "2", 1L, 1L, "atp", "Wimbledon", "Wimbledon Men Singles 2025", "Final")
                 );
+    }
+
+    @Test
+    void 라이브_경기와_DB_시작_시간이_다른_경우_DB_업데이트(){
+
+        try{
+            matchRepository.save(Match.builder()
+                    .matchId(1L)
+                    .rapidMatchId("1")
+                    .startTimestamp("20250701090000")
+                    .status("3rd Set")
+                    .build());
+
+            LiveMatchResponse response1 = LiveEventsFixtures.liveMatchInProgress1();
+            String response1Str = objectMapper.writeValueAsString(response1);
+            redisTemplate.opsForValue().set("live:atp:1", response1Str);
+            redisTemplate.opsForValue().set("index:rapidId:1", response1Str);
+
+            liveMatchService.updateLiveMatches();
+
+
+        }catch(JsonProcessingException e){
+            e.printStackTrace();
+        }
+
+        verify(eventPublisher).publishEvent(
+                argThat((Object event) ->
+                        event instanceof MatchStartTimeChangedEvent &&
+                                ((MatchStartTimeChangedEvent) event).rapidMatchId().equals("1")
+
+                )
+        );
+
     }
 }

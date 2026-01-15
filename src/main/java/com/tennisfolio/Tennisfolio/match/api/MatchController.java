@@ -37,7 +37,7 @@ public class MatchController {
         List<LiveMatchResponse> events = liveMatchService.getATPLiveEventsByRedis();
         return new ResponseEntity<>(ResponseDTO.success(events), HttpStatus.OK);
     }
-    @Scheduled(fixedRate = 30000)
+    @Scheduled(cron="5,35 * * * * *", zone= "Asia/Seoul")
     public void getATPLiveEventsSchedule(){
 
         List<LiveMatchResponse> events = liveMatchService.getATPLiveEventsByRedis();
@@ -50,7 +50,7 @@ public class MatchController {
         return new ResponseEntity<>(ResponseDTO.success(events), HttpStatus.OK);
     }
 
-    @Scheduled(fixedRate = 30000)
+    @Scheduled(cron="5,35 * * * * *", zone= "Asia/Seoul")
     public void getWTALiveEventsSchedule(){
         List<LiveMatchResponse> events = liveMatchService.getWTALiveEventsByRedis();
         messagingTemplate.convertAndSend("/topic/wta/liveMatches", events);
@@ -62,7 +62,7 @@ public class MatchController {
         return new ResponseEntity<>(ResponseDTO.success(events), HttpStatus.OK);
     }
 
-    @Scheduled(fixedRate = 30000)
+    @Scheduled(cron="5,35 * * * * *", zone= "Asia/Seoul")
     public void getEtcLiveEventsSchedule(){
         List<LiveMatchResponse> events = liveMatchService.getEtcLiveEventsByRedis();
         messagingTemplate.convertAndSend("/topic/etc/liveMatches", events);
@@ -75,11 +75,11 @@ public class MatchController {
         return new ResponseEntity<>(ResponseDTO.success(event), HttpStatus.OK);
     }
 
-    @Scheduled(fixedRate = 30000)
+    @Scheduled(cron="5,35 * * * * *", zone= "Asia/Seoul")
     public void getLiveEventSchedule(){
         List<LiveMatchResponse> events = liveMatchService.getAllLiveEventsByRedis();
         events.stream().forEach( event -> {
-            messagingTemplate.convertAndSend("/topic/liveMatch." + event.getRapidId(), event);
+            messagingTemplate.convertAndSend("/topic/liveMatch/" + event.getRapidId(), event);
         });
     }
 
