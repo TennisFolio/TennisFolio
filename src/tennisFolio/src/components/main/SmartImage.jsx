@@ -7,6 +7,7 @@ function SmartImage({
   imageName,
   fallbackText,
   forceDisableMSW = false,
+  size = '100px',
 }) {
   const [step, setStep] = useState(0);
   const [src, setSrc] = useState(null);
@@ -66,8 +67,8 @@ function SmartImage({
       <div
         className="playerFallback"
         style={{
-          width: '100px',
-          height: '100px',
+          width: size,
+          height: size,
           borderRadius: '50%',
           backgroundColor: '#f0f0f0',
           display: 'flex',
@@ -95,8 +96,8 @@ function SmartImage({
       src={src}
       alt={fallbackText}
       style={{
-        width: '100px',
-        height: '100px',
+        width: size,
+        height: size,
         objectFit: 'cover',
         borderRadius: '50%',
         border: '1px solid #ddd',

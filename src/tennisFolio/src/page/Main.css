@@ -1,0 +1,404 @@
+.main-page {
+  width: 100%;
+  min-height: 100vh;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.main-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+/* 섹션 공통 스타일 */
+.live-events-section,
+.ranking-section {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.section-header h2 {
+  font-size: 20px;
+  font-weight: bold;
+  margin: 0;
+  color: #333;
+}
+
+.more-button {
+  padding: 8px 16px;
+  background: transparent;
+  border: 1px solid #185a9d;
+  border-radius: 20px;
+  color: #185a9d;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.more-button:hover {
+  background: #185a9d;
+  color: white;
+}
+
+/* 실시간 경기 섹션 */
+.matches-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.match-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px 15px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e4e4e4;
+  border-left: 4px solid #43cea2;
+  cursor: pointer;
+}
+
+.match-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.match-header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.match-header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  color: #666;
+}
+
+.live-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-right: 8px;
+}
+
+.live-dot {
+  width: 8px;
+  height: 8px;
+  background-color: #ff4444;
+  border-radius: 50%;
+  display: inline-block;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.live-text {
+  font-size: 12px;
+  font-weight: bold;
+  color: #ff4444;
+  letter-spacing: 0.5px;
+}
+
+.match-time {
+  font-size: 14px;
+  font-weight: bold;
+  color: #185a9d;
+}
+
+.match-status {
+  font-size: 12px;
+  color: #666;
+  background: #e9ecef;
+  padding: 4px 10px;
+  border-radius: 12px;
+}
+
+.match-players {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  font-weight: 500;
+  padding: 10px 0;
+  position: relative;
+}
+
+.match-players .score {
+  font-weight: bold;
+  font-size: 16px;
+  color: #333;
+}
+
+.match-players .player {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  flex: 1;
+  font-size: 14px;
+  text-align: center;
+}
+
+.match-players .player span {
+  display: inline-block;
+}
+
+.match-players .player .winner-icon {
+  position: absolute;
+  top: -18px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 20px;
+  height: 20px;
+  display: none;
+  pointer-events: none;
+}
+
+.match-players .player.winner .winner-icon {
+  display: block;
+}
+
+.vs {
+  color: #999;
+  font-size: 12px;
+  font-weight: bold;
+  flex-shrink: 0;
+}
+
+/* 랭킹 섹션 */
+.ranking-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.ranking-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e4e4e4;
+  cursor: pointer;
+}
+
+.player-ranking {
+  font-size: 11px;
+  color: #666;
+  font-weight: normal;
+}
+
+.ranking-number {
+  font-size: 18px;
+  font-weight: bold;
+  color: #185a9d;
+  min-width: 25px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.ranking-player-image {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.ranking-player-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ranking-player-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.ranking-player-name-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ranking-player-flag {
+  width: 20px;
+  height: 14px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.ranking-player-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ranking-player-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 12px;
+}
+
+.ranking-points {
+  color: #666;
+}
+
+.ranking-gap {
+  color: #666;
+  font-size: 11px;
+}
+
+.ranking-gap.up {
+  color: #43cea2;
+  font-weight: 500;
+}
+
+.ranking-gap.down {
+  color: #ff4444;
+  font-weight: 500;
+}
+
+/* 로딩 및 빈 상태 메시지 */
+.loading-message,
+.empty-message {
+  text-align: center;
+  padding: 40px 20px;
+  color: #999;
+  font-size: 14px;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 모바일 반응형 */
+@media (max-width: 768px) {
+  .main-page {
+    padding: 10px;
+  }
+
+  .main-container {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+
+  .live-events-section,
+  .ranking-section {
+    padding: 15px;
+  }
+
+  .section-header {
+    margin-bottom: 15px;
+    padding-bottom: 12px;
+  }
+
+  .section-header h2 {
+    font-size: 18px;
+  }
+
+  .more-button {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+
+  .match-header {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .match-time {
+    font-size: 12px;
+  }
+
+  .match-status {
+    font-size: 11px;
+    padding: 3px 8px;
+  }
+
+  .match-players {
+    gap: 10px;
+  }
+
+  .match-players .player {
+    font-size: 13px;
+  }
+
+  .match-players .score {
+    font-size: 14px;
+  }
+
+  .ranking-card {
+    padding: 10px;
+  }
+
+  .ranking-number {
+    font-size: 18px;
+    min-width: 25px;
+  }
+
+  .ranking-player-name {
+    font-size: 14px;
+  }
+
+  .ranking-player-meta {
+    font-size: 11px;
+    gap: 8px;
+  }
+}
+
+/* 태블릿 레이아웃 */
+@media (min-width: 769px) and (max-width: 1023px) {
+  .main-container {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+}
