@@ -14,7 +14,10 @@ const NAV_ITEMS = [
   },
   {
     title: '랭킹',
-    children: [{ label: 'ATP', path: '/ranking' }],
+    children: [
+      { label: 'ATP', path: '/ranking/atp' },
+      { label: 'WTA', path: '/ranking/wta' },
+    ],
   },
   {
     title: '경기일정',

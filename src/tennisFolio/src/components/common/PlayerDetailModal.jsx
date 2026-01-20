@@ -106,7 +106,9 @@ function PlayerDetailModal() {
                     {playerData.playerNameKr || playerData.playerName}
                   </h3>
                   <div className="player-detail-ranking">
-                    <span className="player-detail-label">ATP 랭킹</span>
+                    <span className="player-detail-label">
+                      {playerData.gender === 'F' ? 'WTA' : 'ATP'} 랭킹
+                    </span>
                     <span className="player-detail-value ranking-value">
                       {playerData.curRanking || '-'}위
                     </span>

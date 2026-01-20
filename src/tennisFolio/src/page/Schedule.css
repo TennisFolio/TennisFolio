@@ -372,11 +372,6 @@
   margin-bottom: 10px;
 }
 
-.match-card:hover {
-  transform: translateX(5px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
 .match-header {
   display: flex;
   align-items: center;

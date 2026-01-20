@@ -47,13 +47,13 @@ function LiveEvents({ liveEvents }) {
             </div>
           </div>
 
-          {/* <div className="content-card" onClick={() => navigate('/live/atp')}>
-            <div className="card-icon">📺</div>
+          <div className="content-card" onClick={() => navigate('/schedule')}>
+            <div className="card-icon">📅</div>
             <div className="card-content">
               <h3>경기 일정</h3>
               <p>예정된 경기 일정을 미리 확인해보세요</p>
             </div>
-          </div> */}
+          </div>
         </div>
       )}
       {liveEvents && liveEvents.length > 0 && (

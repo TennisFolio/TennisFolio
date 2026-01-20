@@ -4,10 +4,12 @@ import RankingHeader from '../components/ranking/RankingHeader';
 import RankingSearch from '../components/ranking/RankingSearch';
 import { apiRequest } from '../utils/apiClient';
 import { RankingTableSkeleton } from './RankingSkeleton';
+import { useParams } from 'react-router-dom';
 
 import './ranking.css';
 
 function Ranking() {
+  const { category } = useParams();
   const [rankings, setRankings] = useState([]);
   const [page, setPage] = useState(0);
   const size = 40;
@@ -22,7 +24,11 @@ function Ranking() {
   // API 호출 함수
   const fetchRankings = useCallback(
     async (pageNum, nameKeyword, countryCode) => {
-      const params = { page: pageNum, size, category: 'ATP' };
+      const params = {
+        page: pageNum,
+        size,
+        category: category?.toUpperCase() || 'ATP',
+      };
 
       // 이름과 나라 조건을 모두 확인
       const hasName = nameKeyword && nameKeyword.trim();
@@ -37,12 +43,19 @@ function Ranking() {
 
       return await apiRequest.get('/api/ranking', params);
     },
-    [size]
+    [size, category]
   );
 
-  // 최초 데이터 로드
+  // 최초 데이터 로드 및 category 변경 시 재로드
   useEffect(() => {
     const fetchInitial = async () => {
+      setIsInitialLoading(true);
+      setRankings([]);
+      setPage(0);
+      setIsAllLoaded(false);
+      setSearchNameKeyword(null);
+      setSearchCountryCode(null);
+
       try {
         setHasError(false);
         const res = await fetchRankings(0, null, null);
@@ -58,7 +71,7 @@ function Ranking() {
       }
     };
     fetchInitial();
-  }, [fetchRankings]);
+  }, [category, fetchRankings, size]);
 
   // 추가 데이터 로드
   const handleLoadMore = useCallback(async () => {
@@ -153,7 +166,10 @@ function Ranking() {
         minHeight: '100%',
       }}
     >
-      <RankingHeader lastUpdated={rankings[0]?.rankingLastUpdated} />
+      <RankingHeader
+        lastUpdated={rankings[0]?.rankingLastUpdated}
+        category={category}
+      />
       <RankingSearch onSearch={handleSearch} />
       {isInitialLoading ? (
         <RankingTableSkeleton />

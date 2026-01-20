@@ -6,6 +6,8 @@ import { base_server_url } from '@/constants';
 
 // LiveEvents 관련 API인지 확인하는 함수
 const isLiveEventsAPI = (url) => {
+  // summary API는 MSW 대상에서 제외
+  if (url.includes('/liveEvents/summary')) return false;
   return url.includes('/liveEvents') || url.includes('/liveEventsDetail');
 };
 

@@ -5,9 +5,7 @@ import '../components/ranking/RankingTable.css';
 
 /**
  * Ranking 페이지 전용 스켈레톤 컴포넌트
- */
-
-// 랭킹 테이블 스켈레톤
+ */// 랭킹 테이블 스켈레톤
 export const RankingTableSkeleton = () => {
   return (
     <div className="ranking-table-container">

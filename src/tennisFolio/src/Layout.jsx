@@ -6,7 +6,6 @@ import { useNavigate } from 'react-router-dom';
 import logo from './assets/tennisFolio_logo.png';
 import Footer from './Footer.jsx';
 import LoadingMask from './components/common/LoadingMask.jsx';
-import MSWToggle from './components/dev/MSWToggle.jsx';
 import PlayerDetailModal from './components/common/PlayerDetailModal.jsx';
 
 function Layout({ children }) {
@@ -94,9 +93,6 @@ function Layout({ children }) {
 
       {/* 로딩 마스크 */}
       <LoadingMask />
-
-      {/* MSW 토글 버튼 (개발 모드에서만 표시) */}
-      <MSWToggle />
 
       {/* 선수 상세 정보 팝업 */}
       <PlayerDetailModal />
