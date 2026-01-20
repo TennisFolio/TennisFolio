@@ -16,9 +16,14 @@ export const handlers = [
     });
   }),
 
-  // 라이브 이벤트 상세 조회 API
+  // 라이브 이벤트 상세 조회 API (숫자 ID만 매칭, summary는 제외)
   http.get('*/api/liveEvents/:matchId', ({ params }) => {
     const { matchId } = params;
+
+    // matchId가 숫자가 아니면 (예: summary) MSW 처리 안 함
+    if (isNaN(matchId)) {
+      return;
+    }
 
     // 실제 LiveEvents 구조와 동일한 목 데이터
     const eventDetail = {
