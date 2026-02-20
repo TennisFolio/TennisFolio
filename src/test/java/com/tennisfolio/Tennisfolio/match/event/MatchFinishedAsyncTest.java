@@ -8,6 +8,7 @@ import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.EnableAsync;
@@ -29,6 +30,7 @@ import static org.mockito.Mockito.doAnswer;
 @SpringBootTest
 @EnableAsync
 @ActiveProfiles("test")
+@AutoConfigureMockMvc(addFilters = false)
 public class MatchFinishedAsyncTest {
 
     @MockitoBean
