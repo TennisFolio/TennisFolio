@@ -21,7 +21,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Run tests
-        run: ./gradlew clean test --info --stacktrace
+        run: ./gradlew clean test -Dspring.profiles.active=test --info --stacktrace
 
   # ✅ 2️⃣ CD: Build + Deploy (테스트 통과 후에만 실행)
   deploy:
