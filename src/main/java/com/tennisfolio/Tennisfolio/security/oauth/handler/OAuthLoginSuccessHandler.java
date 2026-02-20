@@ -35,7 +35,7 @@ public class OAuthLoginSuccessHandler implements AuthenticationSuccessHandler {
     private final String frontendUrl;
 
 
-    public OAuthLoginSuccessHandler(JwtTokenProvider jwtTokenProvider, RefreshTokenService refreshTokenService, @Value("${app.frontend.url}") String frontendUrl) {
+    public OAuthLoginSuccessHandler(JwtTokenProvider jwtTokenProvider, RefreshTokenService refreshTokenService, @Value("${app.frontend-url}") String frontendUrl) {
         this.jwtTokenProvider = jwtTokenProvider;
         this.refreshTokenService = refreshTokenService;
         this.frontendUrl = frontendUrl;
