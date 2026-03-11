@@ -94,8 +94,15 @@ public class FakeRankingRepository implements RankingRepository {
     }
 
     @Override
-    public boolean existsByLastUpdateAndCategory(String lastUpdate, RankingCategory category) {
-        return data.stream().anyMatch(item -> lastUpdate.equals(item.getLastUpdate()) && item.getCategory() == category);
+    public List<Ranking> findByLastUpdateAndCategory(String lastUpdate, RankingCategory category) {
+        return data.stream().filter(item -> lastUpdate.equals(item.getLastUpdate()) && item.getCategory() == category).toList();
+    }
+
+    @Override
+    public Optional<String> findTopLastUpdateByCategoryOrderByLastUpdateDesc(RankingCategory category) {
+        return data.stream().filter(item -> item.getCategory() == category)
+                .map(Ranking::getLastUpdate)
+                .max(String::compareTo);
     }
 
     @Override
