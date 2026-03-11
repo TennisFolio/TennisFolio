@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
+import java.util.Optional;
 
 
 public interface RankingJpaRepository extends JpaRepository<RankingEntity, Long>, RankingQueryRepository {
@@ -23,7 +24,9 @@ public interface RankingJpaRepository extends JpaRepository<RankingEntity, Long>
 
     List<RankingEntity> findByLastUpdate(String lastUpdate);
 
-    boolean existsByLastUpdateAndCategory(String lastUpdate, RankingCategory category);
+    List<RankingEntity> findByLastUpdateAndCategory(String lastUpdate, RankingCategory category);
+
+    Optional<RankingEntity> findTopLastUpdateByCategoryOrderByLastUpdateDesc(RankingCategory category);
 
     @Query("""
             SELECT DISTINCT new com.tennisfolio.Tennisfolio.player.repository.CountryEntity(p.countryEntity.countryCode, p.countryEntity.countryName)

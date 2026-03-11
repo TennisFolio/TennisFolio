@@ -65,8 +65,14 @@ public class RankingRepositoryImpl implements RankingRepository{
     }
 
     @Override
-    public boolean existsByLastUpdateAndCategory(String lastUpdate, RankingCategory category) {
-        return rankingJpaRepository.existsByLastUpdateAndCategory(lastUpdate, category);
+    public List<Ranking> findByLastUpdateAndCategory(String lastUpdate, RankingCategory category) {
+        return rankingJpaRepository.findByLastUpdateAndCategory(lastUpdate, category).stream().map(RankingEntity::toModel).toList();
+    }
+
+    @Override
+    public Optional<String> findTopLastUpdateByCategoryOrderByLastUpdateDesc(RankingCategory category){
+        return rankingJpaRepository.findTopLastUpdateByCategoryOrderByLastUpdateDesc(category)
+                .map(RankingEntity::getLastUpdate);
     }
 
     @Override

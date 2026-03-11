@@ -1,5 +1,6 @@
 package com.tennisfolio.Tennisfolio.ranking.application;
 
+import com.tennisfolio.Tennisfolio.common.RankingCategory;
 import com.tennisfolio.Tennisfolio.infrastructure.api.base.*;
 import com.tennisfolio.Tennisfolio.infrastructure.api.player.teamImage.PlayerImageService;
 import com.tennisfolio.Tennisfolio.mock.FakeApiCaller;
@@ -19,95 +20,130 @@ import com.tennisfolio.Tennisfolio.ranking.dto.AtpRankingApiDTO;
 import com.tennisfolio.Tennisfolio.ranking.repository.RankingRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
-public class RankingSyncServiceTest {
+@ExtendWith(MockitoExtension.class)
+class RankingSyncServiceTest {
 
-    RankingSyncService rankingSyncService;
-    ApiCaller fakeApiCaller = new FakeApiCaller();
-    EntityMapper<List<AtpRankingApiDTO>, List<Ranking>> fakeAtpRankingEntityMapper = new FakeAtpRankingEntityMapper();
-    @Mock
-    ResponseParser parser;
-
-    RankingRepository rankingRepository = new FakeRankingRepository();
-    PlayerRepository playerRepository = new FakePlayerRepository();
-
-    EntityMapper<TeamDetailsApiDTO, PlayerAggregate> fakeTeamDetailsMapper = new FakeTeamDetailsEntityMapper();
+    @InjectMocks
+    private RankingSyncService rankingSyncService;
 
     @Mock
-    PlayerImageService playerImageService;
+    private ApiWorker apiWorker;
 
     @Mock
-    private ApiCallCounter apiCallCounter;
+    private RankingRepository rankingRepository;
 
     @Mock
-    private RedisRateLimiter redisRateLimiter;
+    private PlayerProvider playerProvider;
 
-    @BeforeEach
-    void setUp(){
-        MockitoAnnotations.openMocks(this);
-
-        StrategyApiTemplate<List<AtpRankingApiDTO>, List<Ranking>> fakeAtpRankingApiTemplate = new FakeAtpRankingApiTemplate(fakeApiCaller, parser, fakeAtpRankingEntityMapper, apiCallCounter, RapidApi.ATPRANKINGS);
-        StrategyApiTemplate<TeamDetailsApiDTO, PlayerAggregate> teamDetailsApi = new FakeTeamDetailsApiTemplate(fakeApiCaller, parser, fakeTeamDetailsMapper, apiCallCounter, RapidApi.TEAMDETAILS);
-
-        List<StrategyApiTemplate<?,?>> strategyApiTemplates = new ArrayList<>();
-        strategyApiTemplates.add(fakeAtpRankingApiTemplate);
-        strategyApiTemplates.add(teamDetailsApi);
-        ApiWorker apiWorker = new ApiWorker(strategyApiTemplates, redisRateLimiter);
-        when(playerImageService.fetchImage("1")).thenReturn("/player/1");
-        when(playerImageService.fetchImage("2")).thenReturn("/player/2");
-        when(playerImageService.fetchImage("3")).thenReturn("/player/3");
-
-        PlayerProvider playerProvider = new PlayerProvider(playerRepository, playerImageService, apiWorker);
-        this.rankingSyncService = RankingSyncService.builder()
-                .apiWorker(apiWorker)
-                .rankingRepository(rankingRepository)
-                .playerProvider(playerProvider)
-                .build();
-
-    }
+    /**
+     * 이미 최신 데이터라면 저장하지 않는다
+     */
     @Test
-    void batch를_통해_모두_저장_성공(){
-        Player player1 = Player.builder()
-                .playerId(1L)
-                .rapidPlayerId("1")
-                .playerName("Alcaraz")
-                .build();
+    void 이미_최신_데이터면_저장하지_않는다() {
 
-        Player player2 = Player.builder()
-                .playerId(2L)
-                .rapidPlayerId("2")
-                .playerName("Djokobic")
-                .build();
+        // given
+        Ranking ranking = mock(Ranking.class);
 
-        Player player3 = Player.builder()
-                .playerId(3L)
-                .rapidPlayerId("3")
-                .playerName("Sinner")
-                .build();
+        when(ranking.getLastUpdate()).thenReturn("20250301");
 
-        playerRepository.saveAll(List.of(player1, player2, player3));
-        rankingSyncService.saveAtpRanking();
+        when(apiWorker.process(RapidApi.WTARANKINGS))
+                .thenReturn(List.of(ranking));
 
-        List<Ranking> rankings = rankingRepository.findByLastUpdate("20250731");
+        when(rankingRepository.findTopLastUpdateByCategoryOrderByLastUpdateDesc(RankingCategory.WTA))
+                .thenReturn(Optional.of("20250301"));
 
-        Ranking ranking1 = rankings.get(0);
-        Ranking ranking2 = rankings.get(1);
-        Ranking ranking3 = rankings.get(2);
+        // when
+        rankingSyncService.saveWtaRanking();
 
-        assertThat(ranking1.getRankingId()).isEqualTo(1L);
-        assertThat(ranking2.getRankingId()).isEqualTo(2L);
-        assertThat(ranking3.getRankingId()).isEqualTo(3L);
+        // then
+        verify(rankingRepository, never()).collect(anyList());
+        verify(rankingRepository, never()).flushAll();
     }
 
 
+    /**
+     * 이전 랭킹 데이터가 없다면 그대로 저장한다
+     */
+    @Test
+    void 이전_랭킹이_없으면_그대로_저장한다() {
+
+        // given
+        Ranking ranking = mock(Ranking.class);
+        Player player = mock(Player.class);
+
+        when(ranking.getLastUpdate()).thenReturn("20250302");
+        when(ranking.getPlayer()).thenReturn(player);
+
+        when(player.getRapidPlayerId()).thenReturn("1");
+        when(player.getPlayerId()).thenReturn(1L);
+
+        when(apiWorker.process(RapidApi.WTARANKINGS))
+                .thenReturn(List.of(ranking));
+
+        when(rankingRepository.findTopLastUpdateByCategoryOrderByLastUpdateDesc(RankingCategory.WTA))
+                .thenReturn(Optional.empty());
+
+        when(playerProvider.provide("1")).thenReturn(player);
+
+        // when
+        rankingSyncService.saveWtaRanking();
+
+        // then
+        verify(rankingRepository).collect(anyList());
+        verify(rankingRepository).flushAll();
+    }
 
 
+    /**
+     * 이전 랭킹이 있다면 previousPoints를 적용한다
+     */
+    @Test
+    void 이전_랭킹이_있으면_previousPoints를_적용한다() {
+
+        // given
+        Ranking ranking = mock(Ranking.class);
+        Ranking beforeRanking = mock(Ranking.class);
+        Player player = mock(Player.class);
+
+        when(ranking.getLastUpdate()).thenReturn("20250302");
+        when(ranking.getPlayer()).thenReturn(player);
+
+        when(player.getRapidPlayerId()).thenReturn("1");
+        when(player.getPlayerId()).thenReturn(1L);
+
+        when(apiWorker.process(RapidApi.WTARANKINGS))
+                .thenReturn(List.of(ranking));
+
+        when(rankingRepository.findTopLastUpdateByCategoryOrderByLastUpdateDesc(RankingCategory.WTA))
+                .thenReturn(Optional.of("20250301"));
+
+        when(rankingRepository.findByLastUpdateAndCategory("20250301", RankingCategory.WTA))
+                .thenReturn(List.of(beforeRanking));
+
+        when(beforeRanking.getPlayer()).thenReturn(player);
+        when(beforeRanking.getCurPoints()).thenReturn(2000L);
+
+        when(playerProvider.provide("1")).thenReturn(player);
+
+        // when
+        rankingSyncService.saveWtaRanking();
+
+        // then
+        verify(ranking).applyPreviousPoints(2000L);
+        verify(rankingRepository).collect(anyList());
+        verify(rankingRepository).flushAll();
+    }
 }

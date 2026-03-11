@@ -24,7 +24,9 @@ public interface RankingRepository {
 
     List<Ranking> findByLastUpdate(String lastUpdate);
 
-    boolean existsByLastUpdateAndCategory(String lastUpdate, RankingCategory category);
+    List<Ranking> findByLastUpdateAndCategory(String lastUpdate, RankingCategory category);
+
+    Optional<String> findTopLastUpdateByCategoryOrderByLastUpdateDesc(RankingCategory category);
 
     List<Ranking> collect(Ranking ranking);
 

@@ -14,6 +14,9 @@ import lombok.Builder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class RankingSyncService {
@@ -37,7 +40,9 @@ public class RankingSyncService {
                 .map(Ranking::getLastUpdate)
                 .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND));
 
-        if(rankingRepository.existsByLastUpdateAndCategory(lastUpdate, RankingCategory.ATP)) return;
+        List<Ranking> findAtpRanking = rankingRepository.findByLastUpdateAndCategory(lastUpdate, RankingCategory.ATP);
+
+        if(!findAtpRanking.isEmpty()) return;
 
         rankingList.stream().forEach(p -> {
             Player findPlayer = playerProvider.provide(p.getPlayer().getRapidPlayerId());
@@ -51,17 +56,47 @@ public class RankingSyncService {
     @Transactional
     public void saveWtaRanking() {
         List<Ranking> rankingList = apiWorker.process(RapidApi.WTARANKINGS);
+
         String lastUpdate = rankingList.stream()
                 .findFirst()
                 .map(Ranking::getLastUpdate)
                 .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND));
 
-        if(rankingRepository.existsByLastUpdateAndCategory(lastUpdate, RankingCategory.WTA)) return;
+        // 2. 이전 업데이트 날짜 조회
+        Optional<String> beforeLastUpdate =
+                rankingRepository.findTopLastUpdateByCategoryOrderByLastUpdateDesc(RankingCategory.WTA);
 
-        rankingList.stream().forEach(p -> {
-            Player findPlayer = playerProvider.provide(p.getPlayer().getRapidPlayerId());
-            p.updatePlayer(findPlayer);
-        });
+        // 3. 이미 저장된 데이터라면 종료
+        if (beforeLastUpdate.isPresent() && beforeLastUpdate.get().equals(lastUpdate)) {
+            return;
+        }
+
+        // 4. 이전 ranking 조회
+        List<Ranking> beforeRankings = beforeLastUpdate
+                .map(date -> rankingRepository.findByLastUpdateAndCategory(date, RankingCategory.WTA))
+                .orElseGet(List::of);
+
+
+        // 5. 이전 ranking Map 변환
+        Map<Long, Ranking> beforeRankingMap =
+                beforeRankings.stream()
+                        .collect(Collectors.toMap(
+                                r -> r.getPlayer().getPlayerId(),
+                                r -> r
+                        ));
+
+        // 6. ranking 데이터 가공
+        for(Ranking ranking : rankingList){
+
+            Player findPlayer = playerProvider.provide(ranking.getPlayer().getRapidPlayerId());
+            Ranking before = beforeRankingMap.get(findPlayer.getPlayerId());
+
+            if(before != null){
+                ranking.applyPreviousPoints(before.getCurPoints());
+            }
+
+            ranking.updatePlayer(findPlayer);
+        }
 
         rankingRepository.collect(rankingList);
         rankingRepository.flushAll();
