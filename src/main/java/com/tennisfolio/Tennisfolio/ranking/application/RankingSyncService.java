@@ -40,10 +40,16 @@ public class RankingSyncService {
                 .map(Ranking::getLastUpdate)
                 .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND));
 
-        List<Ranking> findAtpRanking = rankingRepository.findByLastUpdateAndCategory(lastUpdate, RankingCategory.ATP);
+        // 이전 업데이트 날짜 조회
+        Optional<String> beforeLastUpdate =
+                rankingRepository.findTopLastUpdateByCategoryOrderByLastUpdateDesc(RankingCategory.ATP);
 
-        if(!findAtpRanking.isEmpty()) return;
+        // 이미 저장된 데이터라면 종료
+        if (beforeLastUpdate.isPresent() && beforeLastUpdate.get().equals(lastUpdate)) {
+            return;
+        }
 
+        // ATP는 API에서 완전한 데이터를 받아오므로 Player만 업데이트 후 저장
         rankingList.stream().forEach(p -> {
             Player findPlayer = playerProvider.provide(p.getPlayer().getRapidPlayerId());
             p.updatePlayer(findPlayer);

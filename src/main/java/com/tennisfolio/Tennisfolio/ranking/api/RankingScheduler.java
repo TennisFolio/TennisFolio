@@ -20,7 +20,7 @@ public class RankingScheduler {
         batchExecutor.run("AtpRankingSync", rankingSyncService::saveAtpRanking);
     }
 
-    @Scheduled(cron = "0 30 9 * * MON", zone = "Asia/Seoul")
+    @Scheduled(cron = "0 40 9 * * MON", zone = "Asia/Seoul")
     public void autoRunWtaRankingBatch(){
         batchExecutor.run("WtaRankingSync", rankingSyncService::saveWtaRanking);
     }
