@@ -24,14 +24,14 @@ public class TennisMatchSchedulerTest {
         ScoreCalculator calculator = new ScoreCalculator();
         CandidateGenerator generator = new CandidateGenerator();
 
-        TennisMatchScheduler scheduler = new TennisMatchScheduler(checker, calculator, generator, 136);
+        TennisMatchScheduler scheduler = new TennisMatchScheduler(checker, calculator, generator);
 
-        int male = 6;
-        int female = 6;
-        int court = 2;
-        int rounds = 6;
+        int male = 15;
+        int female = 25;
+        int court = 10;
+        int rounds = 20;
 
-        ScheduleResult result = scheduler.generate(male, female, court, rounds);
+        ScheduleResult result = scheduler.generateSchedule(male, female, court, rounds, 136);
 
         // 🔥 1. 경기 출력
         System.out.println("\n=== 경기 스케줄 ===");

@@ -5,10 +5,10 @@ import com.tennisfolio.Tennisfolio.matching.domain.MatchCandidate;
 import com.tennisfolio.Tennisfolio.matching.domain.MatchType;
 import org.springframework.stereotype.Component;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Component
 public class ScoreCalculator {
@@ -24,59 +24,41 @@ public class ScoreCalculator {
             int femaleCount
     ) {
         int score = 0;
+        List<GamePlayer> players = c.allPlayers();
+        MatchType type = c.type;
 
-        for (GamePlayer p : c.allPlayers()) {
+        for (GamePlayer p : players) {
             score -= p.totalGames * 300;
             score -= p.consecutiveRounds * 30;
         }
 
-        // 타입 쏠림 방지
-        score -= typeCount.get(c.type) * 100;
+        score -= typeCount.get(type) * 100;
 
-        boolean randomType = isRandomType(c.type);
-
-        // 같은 라운드에 RANDOM_M1F3 + RANDOM_M3F1 같이 나오는 것 방지
-        boolean alreadyHasRandomInRound = roundTypes.stream().anyMatch(this::isRandomType);
+        boolean randomType = isRandomType(type);
+        boolean alreadyHasRandomInRound = roundTypes.contains(MatchType.RANDOM_M3F1)
+                || roundTypes.contains(MatchType.RANDOM_M1F3);
         if (randomType && alreadyHasRandomInRound) {
             score -= 2000;
         }
 
-        // RANDOM은 후반으로 미룸
         if (randomType) {
             score -= (totalRounds - round) * 200;
         }
 
-        // 4명 그룹 중복: 그룹 다양화가 가능한 경우에만 적용
         if (canDiversifyGroup(c, maleCount, femaleCount)) {
-            Set<String> group = c.allPlayers().stream()
-                    .map(p -> p.id)
-                    .collect(Collectors.toSet());
-
-            score -= groupCount.getOrDefault(group, 0) * 500;
+            score -= groupCount.getOrDefault(groupKey(players), 0) * 500;
         }
 
-        // 파트너 중복: 4명만 있어도 팀 조합은 바꿀 수 있으므로 항상 적용
         score -= partnerRepeatPenalty(c) * 200;
-
-        // 상대 중복: 파트너보다는 약하게 적용
         score -= opponentRepeatPenalty(c) * 50;
 
-        List<GamePlayer> players = c.allPlayers();
-        MatchType type = c.type;
-
-        // 🔥 1. 타입 경험 편차 패널티
         for (GamePlayer p : players) {
             int exp = p.typeExperience.getOrDefault(type, 0);
-
-            // 많이 했을수록 강하게 패널티
             score -= exp * 15;
         }
 
-        // 🔥 2. RANDOM 희생 방지 (핵심)
-        if (type == MatchType.RANDOM_M3F1 || type == MatchType.RANDOM_M1F3) {
-
+        if (randomType) {
             for (GamePlayer p : players) {
-
                 int randomExp =
                         p.typeExperience.getOrDefault(MatchType.RANDOM_M3F1, 0)
                                 + p.typeExperience.getOrDefault(MatchType.RANDOM_M1F3, 0);
@@ -86,24 +68,15 @@ public class ScoreCalculator {
                                 + p.typeExperience.getOrDefault(MatchType.MALE, 0)
                                 + p.typeExperience.getOrDefault(MatchType.FEMALE, 0);
 
-                // 👉 RANDOM만 하는 사람 방지
                 if (randomExp > normalExp) {
-                    score -= 100; // 강한 패널티
+                    score -= 100;
                 }
             }
         }
 
-        // 🔥 3. 타입 다양성 보너스
         for (GamePlayer p : players) {
-
-            long experiencedTypes = p.typeExperience.entrySet().stream()
-                    .filter(e -> e.getValue() > 0)
-                    .count();
-
-            // 다양한 타입 경험한 사람 우대
-            score += experiencedTypes * 2;
+            score += experiencedTypeCount(p) * 2;
         }
-
 
         return score;
     }
@@ -135,6 +108,25 @@ public class ScoreCalculator {
 
     private boolean isRandomType(MatchType t) {
         return t == MatchType.RANDOM_M3F1 || t == MatchType.RANDOM_M1F3;
+    }
+
+    private int experiencedTypeCount(GamePlayer p) {
+        int count = 0;
+        for (MatchType type : MatchType.values()) {
+            if (p.typeExperience.getOrDefault(type, 0) > 0) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    private Set<String> groupKey(List<GamePlayer> players) {
+        Set<String> group = new HashSet<>(4);
+        group.add(players.get(0).id);
+        group.add(players.get(1).id);
+        group.add(players.get(2).id);
+        group.add(players.get(3).id);
+        return group;
     }
 
     private boolean canDiversifyGroup(MatchCandidate c, int male, int female) {

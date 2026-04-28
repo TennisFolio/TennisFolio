@@ -7,201 +7,181 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 @Component
 public class CandidateGenerator {
 
-    public List<MatchCandidate> generate(List<GamePlayer> players) {
-
-        List<GamePlayer> men = players.stream()
-                .filter(p -> p.gender == GamePlayer.Gender.MALE)
-                .toList();
-
-        List<GamePlayer> women = players.stream()
-                .filter(p -> p.gender == GamePlayer.Gender.FEMALE)
-                .toList();
-
+    public List<MatchCandidate> generate(List<GamePlayer> players, boolean allowRandom) {
         List<MatchCandidate> result = new ArrayList<>();
-
-        result.addAll(generateMixed(men, women));
-        result.addAll(generateMale(men));
-        result.addAll(generateFemale(women));
-        result.addAll(generateRandomM3F1(men, women));
-        result.addAll(generateRandomM1F3(men, women));
-
+        forEachCandidate(players, allowRandom, result::add);
         return result;
     }
 
-    // 🔥 혼복 (남2 여2)
-    private List<MatchCandidate> generateMixed(List<GamePlayer> men, List<GamePlayer> women) {
+    public void forEachCandidate(List<GamePlayer> players, boolean allowRandom, Consumer<MatchCandidate> consumer) {
+        List<GamePlayer> men = new ArrayList<>();
+        List<GamePlayer> women = new ArrayList<>();
 
-        List<MatchCandidate> result = new ArrayList<>();
-
-        List<List<GamePlayer>> menComb = combinations(men, 2);
-        List<List<GamePlayer>> womenComb = combinations(women, 2);
-
-        for (List<GamePlayer> m : menComb) {
-            for (List<GamePlayer> w : womenComb) {
-
-                // 팀 조합 2가지
-                result.add(new MatchCandidate(
-                        MatchType.MIXED,
-                        List.of(m.get(0), w.get(0)),
-                        List.of(m.get(1), w.get(1))
-                ));
-
-                result.add(new MatchCandidate(
-                        MatchType.MIXED,
-                        List.of(m.get(0), w.get(1)),
-                        List.of(m.get(1), w.get(0))
-                ));
+        for (GamePlayer player : players) {
+            if (player.gender == GamePlayer.Gender.MALE) {
+                men.add(player);
+            } else {
+                women.add(player);
             }
         }
 
-        return result;
-    }
+        generateMixed(men, women, consumer);
+        generateMale(men, consumer);
+        generateFemale(women, consumer);
 
-    // 🔥 남복 (남4)
-    private List<MatchCandidate> generateMale(List<GamePlayer> men) {
-
-        List<MatchCandidate> result = new ArrayList<>();
-
-        List<List<GamePlayer>> comb = combinations(men, 4);
-
-        for (List<GamePlayer> p : comb) {
-
-            result.add(new MatchCandidate(
-                    MatchType.MALE,
-                    List.of(p.get(0), p.get(1)),
-                    List.of(p.get(2), p.get(3))
-            ));
-
-            result.add(new MatchCandidate(
-                    MatchType.MALE,
-                    List.of(p.get(0), p.get(2)),
-                    List.of(p.get(1), p.get(3))
-            ));
-
-            result.add(new MatchCandidate(
-                    MatchType.MALE,
-                    List.of(p.get(0), p.get(3)),
-                    List.of(p.get(1), p.get(2))
-            ));
+        if (allowRandom) {
+            generateRandomM3F1(men, women, consumer);
+            generateRandomM1F3(men, women, consumer);
         }
-
-        return result;
     }
 
-    // 🔥 여복 (여4)
-    private List<MatchCandidate> generateFemale(List<GamePlayer> women) {
+    private void generateMixed(List<GamePlayer> men, List<GamePlayer> women, Consumer<MatchCandidate> consumer) {
+        for (int m1 = 0; m1 < men.size() - 1; m1++) {
+            for (int m2 = m1 + 1; m2 < men.size(); m2++) {
+                for (int w1 = 0; w1 < women.size() - 1; w1++) {
+                    for (int w2 = w1 + 1; w2 < women.size(); w2++) {
+                        GamePlayer man1 = men.get(m1);
+                        GamePlayer man2 = men.get(m2);
+                        GamePlayer woman1 = women.get(w1);
+                        GamePlayer woman2 = women.get(w2);
 
-        List<MatchCandidate> result = new ArrayList<>();
+                        consumer.accept(new MatchCandidate(
+                                MatchType.MIXED,
+                                List.of(man1, woman1),
+                                List.of(man2, woman2)
+                        ));
 
-        List<List<GamePlayer>> comb = combinations(women, 4);
-
-        for (List<GamePlayer> p : comb) {
-
-            result.add(new MatchCandidate(
-                    MatchType.FEMALE,
-                    List.of(p.get(0), p.get(1)),
-                    List.of(p.get(2), p.get(3))
-            ));
-
-            result.add(new MatchCandidate(
-                    MatchType.FEMALE,
-                    List.of(p.get(0), p.get(2)),
-                    List.of(p.get(1), p.get(3))
-            ));
-
-            result.add(new MatchCandidate(
-                    MatchType.FEMALE,
-                    List.of(p.get(0), p.get(3)),
-                    List.of(p.get(1), p.get(2))
-            ));
-        }
-
-        return result;
-    }
-
-    // 🔥 잡복 (남3 여1)
-    private List<MatchCandidate> generateRandomM3F1(List<GamePlayer> men, List<GamePlayer> women) {
-
-        List<MatchCandidate> result = new ArrayList<>();
-
-        List<List<GamePlayer>> menComb = combinations(men, 3);
-
-        for (List<GamePlayer> m : menComb) {
-            for (GamePlayer f : women) {
-
-                result.add(new MatchCandidate(
-                        MatchType.RANDOM_M3F1,
-                        List.of(m.get(0), m.get(1)),
-                        List.of(m.get(2), f)
-                ));
-
-                result.add(new MatchCandidate(
-                        MatchType.RANDOM_M3F1,
-                        List.of(m.get(0), f),
-                        List.of(m.get(1), m.get(2))
-                ));
+                        consumer.accept(new MatchCandidate(
+                                MatchType.MIXED,
+                                List.of(man1, woman2),
+                                List.of(man2, woman1)
+                        ));
+                    }
+                }
             }
         }
-
-        return result;
     }
 
-    // 🔥 잡복 (남1 여3)
-    private List<MatchCandidate> generateRandomM1F3(List<GamePlayer> men, List<GamePlayer> women) {
+    private void generateMale(List<GamePlayer> men, Consumer<MatchCandidate> consumer) {
+        for (int p1 = 0; p1 < men.size() - 3; p1++) {
+            for (int p2 = p1 + 1; p2 < men.size() - 2; p2++) {
+                for (int p3 = p2 + 1; p3 < men.size() - 1; p3++) {
+                    for (int p4 = p3 + 1; p4 < men.size(); p4++) {
+                        GamePlayer player1 = men.get(p1);
+                        GamePlayer player2 = men.get(p2);
+                        GamePlayer player3 = men.get(p3);
+                        GamePlayer player4 = men.get(p4);
 
-        List<MatchCandidate> result = new ArrayList<>();
+                        consumer.accept(new MatchCandidate(
+                                MatchType.MALE,
+                                List.of(player1, player2),
+                                List.of(player3, player4)
+                        ));
 
-        List<List<GamePlayer>> womenComb = combinations(women, 3);
+                        consumer.accept(new MatchCandidate(
+                                MatchType.MALE,
+                                List.of(player1, player3),
+                                List.of(player2, player4)
+                        ));
 
-        for (GamePlayer m : men) {
-            for (List<GamePlayer> w : womenComb) {
-
-                result.add(new MatchCandidate(
-                        MatchType.RANDOM_M1F3,
-                        List.of(m, w.get(0)),
-                        List.of(w.get(1), w.get(2))
-                ));
-
-                result.add(new MatchCandidate(
-                        MatchType.RANDOM_M1F3,
-                        List.of(w.get(0), w.get(1)),
-                        List.of(m, w.get(2))
-                ));
+                        consumer.accept(new MatchCandidate(
+                                MatchType.MALE,
+                                List.of(player1, player4),
+                                List.of(player2, player3)
+                        ));
+                    }
+                }
             }
         }
-
-        return result;
     }
 
-    // 🔥 조합 생성 (핵심 유틸)
-    private <T> List<List<T>> combinations(List<T> list, int size) {
+    private void generateFemale(List<GamePlayer> women, Consumer<MatchCandidate> consumer) {
+        for (int p1 = 0; p1 < women.size() - 3; p1++) {
+            for (int p2 = p1 + 1; p2 < women.size() - 2; p2++) {
+                for (int p3 = p2 + 1; p3 < women.size() - 1; p3++) {
+                    for (int p4 = p3 + 1; p4 < women.size(); p4++) {
+                        GamePlayer player1 = women.get(p1);
+                        GamePlayer player2 = women.get(p2);
+                        GamePlayer player3 = women.get(p3);
+                        GamePlayer player4 = women.get(p4);
 
-        List<List<T>> result = new ArrayList<>();
-        dfs(list, size, 0, new ArrayList<>(), result);
-        return result;
-    }
+                        consumer.accept(new MatchCandidate(
+                                MatchType.FEMALE,
+                                List.of(player1, player2),
+                                List.of(player3, player4)
+                        ));
 
-    private <T> void dfs(
-            List<T> list,
-            int size,
-            int idx,
-            List<T> current,
-            List<List<T>> result
-    ) {
+                        consumer.accept(new MatchCandidate(
+                                MatchType.FEMALE,
+                                List.of(player1, player3),
+                                List.of(player2, player4)
+                        ));
 
-        if (current.size() == size) {
-            result.add(new ArrayList<>(current));
-            return;
+                        consumer.accept(new MatchCandidate(
+                                MatchType.FEMALE,
+                                List.of(player1, player4),
+                                List.of(player2, player3)
+                        ));
+                    }
+                }
+            }
         }
+    }
 
-        for (int i = idx; i < list.size(); i++) {
-            current.add(list.get(i));
-            dfs(list, size, i + 1, current, result);
-            current.remove(current.size() - 1);
+    private void generateRandomM3F1(List<GamePlayer> men, List<GamePlayer> women, Consumer<MatchCandidate> consumer) {
+        for (int m1 = 0; m1 < men.size() - 2; m1++) {
+            for (int m2 = m1 + 1; m2 < men.size() - 1; m2++) {
+                for (int m3 = m2 + 1; m3 < men.size(); m3++) {
+                    for (GamePlayer woman : women) {
+                        GamePlayer man1 = men.get(m1);
+                        GamePlayer man2 = men.get(m2);
+                        GamePlayer man3 = men.get(m3);
+
+                        consumer.accept(new MatchCandidate(
+                                MatchType.RANDOM_M3F1,
+                                List.of(man1, man2),
+                                List.of(man3, woman)
+                        ));
+
+                        consumer.accept(new MatchCandidate(
+                                MatchType.RANDOM_M3F1,
+                                List.of(man1, woman),
+                                List.of(man2, man3)
+                        ));
+                    }
+                }
+            }
+        }
+    }
+
+    private void generateRandomM1F3(List<GamePlayer> men, List<GamePlayer> women, Consumer<MatchCandidate> consumer) {
+        for (GamePlayer man : men) {
+            for (int w1 = 0; w1 < women.size() - 2; w1++) {
+                for (int w2 = w1 + 1; w2 < women.size() - 1; w2++) {
+                    for (int w3 = w2 + 1; w3 < women.size(); w3++) {
+                        GamePlayer woman1 = women.get(w1);
+                        GamePlayer woman2 = women.get(w2);
+                        GamePlayer woman3 = women.get(w3);
+
+                        consumer.accept(new MatchCandidate(
+                                MatchType.RANDOM_M1F3,
+                                List.of(man, woman1),
+                                List.of(woman2, woman3)
+                        ));
+
+                        consumer.accept(new MatchCandidate(
+                                MatchType.RANDOM_M1F3,
+                                List.of(woman1, woman2),
+                                List.of(man, woman3)
+                        ));
+                    }
+                }
+            }
         }
     }
 }

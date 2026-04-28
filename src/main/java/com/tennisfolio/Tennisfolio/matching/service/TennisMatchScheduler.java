@@ -1,13 +1,24 @@
 package com.tennisfolio.Tennisfolio.matching.service;
 
-import com.tennisfolio.Tennisfolio.matching.domain.*;
+import com.tennisfolio.Tennisfolio.matching.domain.GameMatch;
+import com.tennisfolio.Tennisfolio.matching.domain.GamePlayer;
+import com.tennisfolio.Tennisfolio.matching.domain.MatchCandidate;
+import com.tennisfolio.Tennisfolio.matching.domain.MatchType;
+import com.tennisfolio.Tennisfolio.matching.domain.ScheduleResult;
 import com.tennisfolio.Tennisfolio.matching.engine.CandidateGenerator;
 import com.tennisfolio.Tennisfolio.matching.engine.ConstraintChecker;
 import com.tennisfolio.Tennisfolio.matching.engine.ScoreCalculator;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Random;
+import java.util.Set;
 
 @Service
 public class TennisMatchScheduler {
@@ -15,23 +26,20 @@ public class TennisMatchScheduler {
     private final ConstraintChecker constraintChecker;
     private final ScoreCalculator scoreCalculator;
     private final CandidateGenerator generator;
-    private final Random random;
+    private Random random;
 
-
-    public TennisMatchScheduler(ConstraintChecker constraintChecker, ScoreCalculator scoreCalculator, CandidateGenerator generator, long seed) {
+    public TennisMatchScheduler(ConstraintChecker constraintChecker, ScoreCalculator scoreCalculator, CandidateGenerator generator) {
         this.constraintChecker = constraintChecker;
         this.scoreCalculator = scoreCalculator;
         this.generator = generator;
-        this.random = new Random(seed);
     }
 
-    public ScheduleResult generate(int male, int female, int court, int rounds) {
-
+    public ScheduleResult generateSchedule(int male, int female, int court, int rounds, long seed) {
+        this.random = new Random(seed);
         List<GamePlayer> players = createPlayers(male, female);
 
         int totalMatches = court * rounds;
         int totalSlots = totalMatches * 4;
-
         int maxGames = (int) Math.ceil((double) totalSlots / players.size());
 
         ScheduleResult result = new ScheduleResult();
@@ -41,65 +49,50 @@ public class TennisMatchScheduler {
             typeCount.put(t, 0);
         }
 
-        // 🔥 중요: generate마다 초기화
         Map<Set<String>, Integer> groupCount = new HashMap<>();
-
         boolean allowRandom = !canScheduleWithoutRandom(male, female, court);
 
         for (int r = 1; r <= rounds; r++) {
-
             Set<GamePlayer> used = new HashSet<>();
             Set<GamePlayer> playedThisRound = new HashSet<>();
             Set<MatchType> roundTypes = new HashSet<>();
 
-            final int currentRound = r;
-
             for (int c = 1; c <= court; c++) {
+                List<GamePlayer> availablePlayers = players.stream()
+                        .filter(p -> !used.contains(p))
+                        .toList();
 
-                List<MatchCandidate> candidates = generator.generate(players);
+                BestCandidate best = selectBestCandidate(
+                        availablePlayers,
+                        allowRandom,
+                        players,
+                        used,
+                        court,
+                        maxGames,
+                        typeCount,
+                        roundTypes,
+                        r,
+                        rounds,
+                        groupCount,
+                        male,
+                        female
+                );
 
-                MatchCandidate best = candidates.stream()
+                if (best.candidate == null) {
+                    throw new NoSuchElementException("No valid match candidate");
+                }
 
-                        // 1️⃣ 기본 constraint
-                        .filter(x -> constraintChecker.isValid(x, players, used, court, maxGames))
+                apply(best.candidate, groupCount);
 
-                        // 2️⃣ RANDOM 제어
-                        .filter(x -> {
-                            if (!allowRandom && isRandomType(x.type)) {
-                                return false;
-                            }
-                            return true;
-                        })
+                typeCount.put(best.candidate.type, typeCount.get(best.candidate.type) + 1);
+                roundTypes.add(best.candidate.type);
 
-                        // 3️⃣ Score 기반 선택
-                        .max(Comparator
-                                .comparingInt((MatchCandidate x) ->
-                                        scoreCalculator.score(
-                                                x,
-                                                typeCount,
-                                                roundTypes,
-                                                currentRound,
-                                                rounds,
-                                                groupCount,
-                                                male,
-                                                female
-                                        ))
-                                .thenComparingInt(x -> random.nextInt()))
-                        .orElseThrow();
+                result.matches.add(new GameMatch(r, c, best.candidate.type, best.candidate.teamA, best.candidate.teamB));
 
-                apply(best, groupCount);
-
-                // 타입 기록
-                typeCount.put(best.type, typeCount.get(best.type) + 1);
-                roundTypes.add(best.type);
-
-                result.matches.add(new GameMatch(r, c, best.type, best.teamA, best.teamB));
-
-                used.addAll(best.allPlayers());
-                playedThisRound.addAll(best.allPlayers());
+                used.addAll(best.candidate.allPlayers());
+                playedThisRound.addAll(best.candidate.allPlayers());
             }
 
-            // 🔥 연속 경기 카운트
             for (GamePlayer p : players) {
                 if (playedThisRound.contains(p)) {
                     p.consecutiveRounds++;
@@ -110,6 +103,50 @@ public class TennisMatchScheduler {
         }
 
         return result;
+    }
+
+    private BestCandidate selectBestCandidate(
+            List<GamePlayer> availablePlayers,
+            boolean allowRandom,
+            List<GamePlayer> players,
+            Set<GamePlayer> used,
+            int court,
+            int maxGames,
+            Map<MatchType, Integer> typeCount,
+            Set<MatchType> roundTypes,
+            int currentRound,
+            int rounds,
+            Map<Set<String>, Integer> groupCount,
+            int male,
+            int female
+    ) {
+        BestCandidate best = new BestCandidate();
+
+        generator.forEachCandidate(availablePlayers, allowRandom, candidate -> {
+            if (!constraintChecker.isValid(candidate, players, used, court, maxGames)) {
+                return;
+            }
+
+            int score = scoreCalculator.score(
+                    candidate,
+                    typeCount,
+                    roundTypes,
+                    currentRound,
+                    rounds,
+                    groupCount,
+                    male,
+                    female
+            );
+            int tieBreaker = random.nextInt();
+
+            if (best.candidate == null || score > best.score || (score == best.score && tieBreaker > best.tieBreaker)) {
+                best.candidate = candidate;
+                best.score = score;
+                best.tieBreaker = tieBreaker;
+            }
+        });
+
+        return best;
     }
 
     private List<GamePlayer> createPlayers(int male, int female) {
@@ -126,16 +163,14 @@ public class TennisMatchScheduler {
     }
 
     private void apply(MatchCandidate c, Map<Set<String>, Integer> groupCount) {
-
         List<GamePlayer> teamA = c.teamA;
         List<GamePlayer> teamB = c.teamB;
+        List<GamePlayer> allPlayers = c.allPlayers();
 
-        // 🔥 경기 수 증가
-        for (GamePlayer p : c.allPlayers()) {
+        for (GamePlayer p : allPlayers) {
             p.totalGames++;
         }
 
-        // 🔥 파트너 기록
         for (GamePlayer p1 : teamA) {
             for (GamePlayer p2 : teamA) {
                 if (p1 != p2) {
@@ -152,7 +187,6 @@ public class TennisMatchScheduler {
             }
         }
 
-        // 🔥 상대 기록
         for (GamePlayer p1 : teamA) {
             for (GamePlayer p2 : teamB) {
                 p1.opponentCount.merge(p2.id, 1, Integer::sum);
@@ -160,29 +194,24 @@ public class TennisMatchScheduler {
             }
         }
 
-        // 타입 경험 기록
-        for (GamePlayer p : c.allPlayers()){
+        for (GamePlayer p : allPlayers) {
             p.typeExperience.merge(c.type, 1, Integer::sum);
         }
 
-        // 🔥 4명 그룹 기록
-        Set<String> group = c.allPlayers().stream()
-                .map(p -> p.id)
-                .collect(Collectors.toSet());
+        Set<String> group = new HashSet<>(4);
+        group.add(allPlayers.get(0).id);
+        group.add(allPlayers.get(1).id);
+        group.add(allPlayers.get(2).id);
+        group.add(allPlayers.get(3).id);
 
         groupCount.merge(group, 1, Integer::sum);
-
-
     }
 
     private boolean canScheduleWithoutRandom(int male, int female, int court) {
-
         for (int mixed = 0; mixed <= court; mixed++) {
-
             int remainCourts = court - mixed;
 
             for (int maleMatch = 0; maleMatch <= remainCourts; maleMatch++) {
-
                 int femaleMatch = remainCourts - maleMatch;
 
                 int maleNeeded = mixed * 2 + maleMatch * 4;
@@ -197,8 +226,9 @@ public class TennisMatchScheduler {
         return false;
     }
 
-    private boolean isRandomType(MatchType t) {
-        return t == MatchType.RANDOM_M3F1
-                || t == MatchType.RANDOM_M1F3;
+    private static class BestCandidate {
+        private MatchCandidate candidate;
+        private int score = Integer.MIN_VALUE;
+        private int tieBreaker = Integer.MIN_VALUE;
     }
 }
