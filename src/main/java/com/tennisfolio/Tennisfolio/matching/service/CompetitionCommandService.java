@@ -16,6 +16,7 @@ public class CompetitionCommandService {
     private static final int MAX_PLAYER_COUNT = 40;
     private static final int MAX_COURT_COUNT = 10;
     private static final int MAX_HOURS = 10;
+    private static final int ROUNDS_PER_HOUR = 2;
 
     private final TennisMatchScheduler scheduler;
     private final CompetitionService competitionService;
@@ -41,7 +42,7 @@ public class CompetitionCommandService {
     public CompetitionCreateResponse createCompetition(CompetitionCreateRequest request) {
         validateRequest(request);
 
-        int rounds = Math.max(1, request.getHours());
+        int rounds = Math.max(1, request.getHours() * ROUNDS_PER_HOUR);
         long seed = request.getSeed() != null
                 ? request.getSeed()
                 : ThreadLocalRandom.current().nextLong(1, 10000);

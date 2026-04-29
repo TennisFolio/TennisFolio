@@ -1,0 +1,349 @@
+.competition-page {
+  width: min(480px, 100%);
+  min-height: 100vh;
+  margin: 0 auto;
+  padding: 20px 16px 40px;
+}
+
+.competition-hero {
+  position: relative;
+  margin-bottom: 18px;
+  padding: 20px 20px;
+  overflow: hidden;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 28px;
+}
+
+.competition-hero-content {
+  position: relative;
+  z-index: 1;
+}
+
+.competition-hero-label {
+  display: inline-flex;
+  padding: 6px 10px;
+  background: rgba(255, 255, 255, 0.78);
+  border-radius: 999px;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.competition-hero h1 {
+  margin-top: 12px;
+  color: #0f172a;
+  font-size: 28px;
+  font-weight: 900;
+  line-height: 1.18;
+}
+
+.competition-hero p {
+  max-width: 330px;
+  margin-top: 6px;
+  color: #475569;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.55;
+}
+
+.competition-panel {
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 30px;
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.08);
+}
+
+.competition-form {
+  padding: 16px;
+}
+
+.competition-summary {
+  position: relative;
+  overflow: hidden;
+  padding: 22px 20px;
+  background: #0f172a;
+  border-radius: 26px;
+  color: #fff;
+  transition: background 0.24s ease;
+}
+
+.competition-summary.unavailable {
+  background: #2a1118;
+}
+
+.summary-content {
+  position: relative;
+  z-index: 1;
+}
+
+.summary-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.summary-label {
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.summary-number {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  margin-top: 8px;
+}
+
+.summary-number strong {
+  color: #fff;
+  font-size: 50px;
+  font-weight: 900;
+  line-height: 0.9;
+}
+
+.summary-number span {
+  margin-bottom: 4px;
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 18px;
+  font-weight: 900;
+}
+
+.summary-badge {
+  flex-shrink: 0;
+  padding: 8px 11px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.summary-badge.available {
+  background: #059669;
+  color: #fff;
+}
+
+.summary-badge.unavailable {
+  background: #fecdd3;
+  color: #881337;
+}
+
+.summary-details {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+  margin-top: 22px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 22px;
+}
+
+.summary-details p {
+  color: rgba(255, 255, 255, 0.54);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.summary-details strong {
+  display: block;
+  margin-top: 6px;
+  color: #fff;
+  font-size: 22px;
+  font-weight: 900;
+  line-height: 1.25;
+}
+
+.summary-details .status-text {
+  color: #34d399;
+  font-size: 16px;
+  line-height: 1.45;
+}
+
+.summary-details .status-text.unavailable {
+  color: #fecdd3;
+}
+
+.summary-reason {
+  margin-top: 8px;
+  color: rgba(254, 205, 211, 0.92);
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.45;
+}
+
+.competition-config {
+  margin-top: 28px;
+}
+
+.competition-section-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.competition-section-heading h2 {
+  color: #0f172a;
+  font-size: 20px;
+  font-weight: 900;
+}
+
+.competition-section-heading p {
+  margin-top: 5px;
+  color: #64748b;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.competition-rate {
+  flex-shrink: 0;
+  padding: 7px 10px;
+  background: #f1f5f9;
+  border-radius: 999px;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.competition-fields {
+  display: grid;
+  gap: 12px;
+}
+
+.competition-field {
+  padding: 16px;
+  background: #f8fafc;
+  border: 1px solid #eef2f7;
+  border-radius: 24px;
+}
+
+.field-top {
+  margin-bottom: 12px;
+}
+
+.field-top label {
+  display: block;
+  color: #0f172a;
+  font-size: 17px;
+  font-weight: 900;
+}
+
+.field-top span {
+  display: block;
+  margin-top: 4px;
+  color: #94a3b8;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.stepper-control {
+  display: grid;
+  grid-template-columns: 48px 1fr 48px;
+  height: 50px;
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid #dbe3ef;
+  border-radius: 18px;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.04);
+}
+
+.stepper-control button,
+.stepper-control input {
+  border: 0;
+  background: transparent;
+}
+
+.stepper-value {
+  min-width: 0;
+  border-right: 1px solid #eef2f7;
+  border-left: 1px solid #eef2f7;
+}
+
+.stepper-control button {
+  color: #0f172a;
+  font-size: 22px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.stepper-control button.plus {
+  color: #0f172a;
+}
+
+.stepper-control button:hover:not(:disabled) {
+  background: #f1f5f9;
+}
+
+.stepper-control button:disabled {
+  color: #cbd5e1;
+  cursor: not-allowed;
+}
+
+.stepper-control input {
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  color: #0f172a;
+  font-size: 18px;
+  font-weight: 900;
+  text-align: center;
+  outline: none;
+}
+
+.competition-message {
+  margin-top: 18px;
+  padding: 14px 15px;
+  border-radius: 18px;
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.5;
+}
+
+.competition-message.error {
+  background: #fff1f2;
+  border: 1px solid #fecdd3;
+  color: #be123c;
+}
+
+.competition-message.success {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  background: #ecfdf5;
+  border: 1px solid #bbf7d0;
+  color: #047857;
+}
+
+.competition-message.success strong {
+  color: #064e3b;
+  font-weight: 900;
+}
+
+.competition-submit-button {
+  width: 100%;
+  min-height: 56px;
+  margin-top: 18px;
+  border: 0;
+  border-radius: 18px;
+  background: #0f172a;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.2);
+  transition: box-shadow 0.18s ease, background 0.18s ease;
+}
+
+.competition-submit-button:hover:not(:disabled) {
+  box-shadow: 0 18px 36px rgba(15, 23, 42, 0.26);
+}
+
+.competition-submit-button:disabled {
+  background: #cbd5e1;
+  box-shadow: none;
+  cursor: not-allowed;
+}

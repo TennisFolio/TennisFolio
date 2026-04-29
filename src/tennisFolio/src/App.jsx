@@ -10,7 +10,7 @@ import TestList from './page/TestList.jsx';
 import TestResult from './page/TestResult.jsx';
 import { Navigate } from 'react-router-dom';
 import Privacy from './components/main/Privacy.jsx';
-import Main from './page/Main.jsx';
+import Competition from './page/Competition.jsx';
 import Schedule from './page/Schedule.jsx';
 
 window.global ||= window;
@@ -22,7 +22,8 @@ function App() {
     <BrowserRouter>
       <Layout>
         <Routes>
-          <Route path="/" element={<Main />} />
+          <Route path="/" element={<Competition />} />
+          <Route path="/competition" element={<Competition />} />
           <Route path="/live/:category" element={<LiveEventsList />} />
           <Route path="/ranking/:category" element={<Ranking />} />
           <Route path="/liveEvents/:matchId" element={<LiveEventsDetail />} />
