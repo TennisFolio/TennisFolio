@@ -33,6 +33,8 @@ public class QCompetitionStat extends EntityPathBase<CompetitionStat> {
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
+    public final NumberPath<Integer> m2f2SplitCount = createNumber("m2f2SplitCount", Integer.class);
+
     public final NumberPath<Integer> maleCount = createNumber("maleCount", Integer.class);
 
     public final NumberPath<Integer> maxGames = createNumber("maxGames", Integer.class);

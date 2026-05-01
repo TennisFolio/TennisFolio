@@ -69,7 +69,7 @@ export function useCompetitionCreateForm() {
 
   const placementText = useMemo(() => {
     if (canCreateGames) {
-      return '이 조건이면 문제없이 진행돼요';
+      return '이 조건이면 문제없이 진행할 수 있어요';
     }
     return '인원을 늘리거나 코트를 줄이면 좋아요';
   }, [canCreateGames]);
@@ -90,7 +90,7 @@ export function useCompetitionCreateForm() {
   }, [canCreateGames, totalGameSlots, totalPlayers]);
 
   const participantGameText = canCreateGames
-    ? `${expectedGamesText}씩`
+    ? `${expectedGamesText} 예상`
     : '아직 어려워요';
   const unavailableReasonText = `필요 인원 ${minimumPlayers}명, 현재 ${totalPlayers}명`;
 
@@ -123,7 +123,7 @@ export function useCompetitionCreateForm() {
       return '전체 인원은 40명까지만 받을 수 있어요.';
     }
     if (competitionForm.courtCount < 1 || competitionForm.courtCount > 10) {
-      return '코트는 1개부터 10개까지만 입력해 주세요.';
+      return '코트는 1개부터 10개까지 입력해 주세요.';
     }
     if (competitionForm.hours < 1 || competitionForm.hours > 10) {
       return '진행 시간은 1시간부터 10시간까지 선택할 수 있어요.';
@@ -139,7 +139,7 @@ export function useCompetitionCreateForm() {
     const errorMessage = validateCompetitionForm();
     if (errorMessage) {
       setCompetitionError(errorMessage);
-      return;
+      return null;
     }
 
     try {
@@ -154,14 +154,19 @@ export function useCompetitionCreateForm() {
 
       if (response.data.code === '0000') {
         setCompetitionResult(response.data.data);
-      } else {
-        setCompetitionError('대진표를 만들지 못했어요. 잠시 후 다시 시도해 주세요.');
+        return response.data.data;
       }
+
+      setCompetitionError(
+        '대진표를 만들지 못했어요. 잠시 후 다시 시도해 주세요.'
+      );
+      return null;
     } catch (error) {
       const message =
         error.response?.data?.message ||
         '대진표를 만드는 중 문제가 생겼어요. 잠시 후 다시 시도해 주세요.';
       setCompetitionError(message);
+      return null;
     } finally {
       setIsCreatingCompetition(false);
     }

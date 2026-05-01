@@ -60,6 +60,10 @@ public class Competition extends BaseTimeEntity {
         this.seed = seed;
     }
 
+    public void rename(String name) {
+        this.name = name;
+    }
+
 
     public enum CompetitionStatus {
         READY, INPROGRESS, COMPLETED

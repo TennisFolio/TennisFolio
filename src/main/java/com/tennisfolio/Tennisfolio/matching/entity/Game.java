@@ -20,7 +20,7 @@ public class Game extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "ID")
+    @Column(name = "GAME_ID")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -66,6 +66,10 @@ public class Game extends BaseTimeEntity {
         this.teamBTiebreaKScore = teamBTiebreaKScore;
     }
 
+    public void updateMatchType(MatchType matchType) {
+        this.matchType = matchType;
+    }
+
     @PrePersist
     public void prePersist() {
         if (teamAScore == null) {
@@ -83,7 +87,7 @@ public class Game extends BaseTimeEntity {
     }
 
     public enum MatchType {
-        MIXED, MALE, FEMALE, RANDOM_M3F1, RANDOM_M1F3
+        MIXED, MALE, FEMALE, M2F2_SPLIT, RANDOM_M3F1, RANDOM_M1F3
     }
 }
 

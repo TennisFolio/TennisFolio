@@ -18,7 +18,7 @@ function Competition() {
         <div className="competition-hero-content">
           <span className="competition-hero-label">빠르게 시작해요</span>
           <h1>테니스 경기 만들기</h1>
-          <p>참가자와 코트만 입력하면 바로 만들어드릴게요.</p>
+          <p>참가자와 코트만 입력하면 바로 경기 일정을 만들어 드릴게요.</p>
         </div>
       </MotionHeader>
 

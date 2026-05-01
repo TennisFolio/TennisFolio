@@ -40,6 +40,10 @@ public class CompetitionEntry extends BaseTimeEntity {
         this.gender = gender;
     }
 
+    public void updatePlayerName(String playerName) {
+        this.playerName = playerName;
+    }
+
 
     public enum Gender {
         MALE, FEMALE

@@ -14,6 +14,10 @@ public interface CompetitionEntryRepository extends JpaRepository<CompetitionEnt
 
     List<CompetitionEntry> findByCompetitionId(Long competitionId);
 
+    List<CompetitionEntry> findByCompetitionIdOrderByIdAsc(Long competitionId);
+
+    Optional<CompetitionEntry> findByIdAndCompetitionId(Long id, Long competitionId);
+
     Optional<CompetitionEntry> findByPlayerNameAndCompetitionId(String playerName, Long competitionId);
 
     @Query("SELECT ce FROM CompetitionEntry ce WHERE ce.competition.id = :competitionId AND ce.gender = :gender")

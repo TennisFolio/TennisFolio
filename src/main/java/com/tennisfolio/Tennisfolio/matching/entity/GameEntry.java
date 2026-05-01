@@ -17,7 +17,7 @@ public class GameEntry extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "ID")
+    @Column(name = "GAME_ENTRY_ID")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)

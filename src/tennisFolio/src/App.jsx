@@ -11,7 +11,9 @@ import TestResult from './page/TestResult.jsx';
 import { Navigate } from 'react-router-dom';
 import Privacy from './components/main/Privacy.jsx';
 import Competition from './page/Competition.jsx';
+import CompetitionDetail from './page/CompetitionDetail.jsx';
 import Schedule from './page/Schedule.jsx';
+import NotFound from './page/NotFound.jsx';
 
 window.global ||= window;
 window.Buffer ||= Buffer;
@@ -23,7 +25,8 @@ function App() {
       <Layout>
         <Routes>
           <Route path="/" element={<Competition />} />
-          <Route path="/competition" element={<Competition />} />
+          <Route path="/competitions/:publicId" element={<CompetitionDetail />} />
+          <Route path="/competitions/:publicId/manage" element={<CompetitionDetail />} />
           <Route path="/live/:category" element={<LiveEventsList />} />
           <Route path="/ranking/:category" element={<Ranking />} />
           <Route path="/liveEvents/:matchId" element={<LiveEventsDetail />} />
@@ -40,6 +43,7 @@ function App() {
           />
 
           <Route path="/privacy" element={<Privacy />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </Layout>
     </BrowserRouter>

@@ -1,10 +1,12 @@
 import { AnimatePresence, motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import {
   COMPETITION_FIELDS,
   useCompetitionCreateForm,
 } from '../../hooks/useCompetitionCreateForm';
 import CompetitionFieldStepper from './CompetitionFieldStepper';
 import CompetitionSummary from './CompetitionSummary';
+import { saveCompetitionEditToken } from '../../utils/competitionEditToken';
 
 const staggerContainer = {
   hidden: {},
@@ -29,6 +31,7 @@ const MotionDiv = motion.div;
 const MotionSection = motion.section;
 
 function CompetitionCreateForm() {
+  const navigate = useNavigate();
   const {
     competitionForm,
     competitionError,
@@ -44,9 +47,16 @@ function CompetitionCreateForm() {
     createCompetition,
   } = useCompetitionCreateForm();
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    createCompetition();
+    const createdCompetition = await createCompetition();
+    if (createdCompetition?.publicId) {
+      saveCompetitionEditToken(
+        createdCompetition.publicId,
+        createdCompetition.editToken
+      );
+      navigate(`/competitions/${createdCompetition.publicId}/manage`);
+    }
   };
 
   return (
@@ -121,7 +131,7 @@ function CompetitionCreateForm() {
             exit={{ opacity: 0, y: 8 }}
             transition={{ duration: 0.22, ease: 'easeOut' }}
           >
-            <span>대회가 만들어졌어요</span>
+            <span>일정을 만들었어요</span>
             <strong>{competitionResult.publicId}</strong>
           </MotionDiv>
         )}

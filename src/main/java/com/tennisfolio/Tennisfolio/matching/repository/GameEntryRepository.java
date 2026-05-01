@@ -13,6 +13,8 @@ public interface GameEntryRepository extends JpaRepository<GameEntry, Long> {
 
     List<GameEntry> findByGameId(Long gameId);
 
+    void deleteByGameId(Long gameId);
+
     List<GameEntry> findByCompetitionEntryId(Long competitionEntryId);
 
     @Query("SELECT ge FROM GameEntry ge WHERE ge.game.id = :gameId AND ge.team = :team")
@@ -21,6 +23,16 @@ public interface GameEntryRepository extends JpaRepository<GameEntry, Long> {
 
     @Query("SELECT ge FROM GameEntry ge WHERE ge.competitionEntry.id = :competitionEntryId ORDER BY ge.game.round ASC")
     List<GameEntry> findByCompetitionEntryIdOrderByRound(@Param("competitionEntryId") Long competitionEntryId);
+
+    @Query("""
+            SELECT ge
+            FROM GameEntry ge
+            JOIN FETCH ge.game g
+            JOIN FETCH ge.competitionEntry ce
+            WHERE g.competition.id = :competitionId
+            ORDER BY g.round ASC, g.court ASC, g.id ASC, ge.team ASC, ge.position ASC
+            """)
+    List<GameEntry> findScheduleEntriesByCompetitionId(@Param("competitionId") Long competitionId);
 
     long countByCompetitionEntryId(Long competitionEntryId);
 }

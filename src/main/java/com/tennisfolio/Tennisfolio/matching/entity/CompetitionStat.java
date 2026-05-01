@@ -15,7 +15,7 @@ public class CompetitionStat extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "ID")
+    @Column(name = "COMPETITION_STAT_ID")
     private Long id;
 
     @OneToOne(fetch = FetchType.LAZY)
@@ -33,6 +33,9 @@ public class CompetitionStat extends BaseTimeEntity {
 
     @Column(name = "FEMALE_COUNT", nullable = false)
     private Integer femaleCount = 0;
+
+    @Column(name = "M2F2_SPLIT_COUNT", nullable = false)
+    private Integer m2f2SplitCount = 0;
 
     @Column(name = "M3F1_COUNT", nullable = false)
     private Integer randomM3F1Count = 0;
@@ -66,6 +69,10 @@ public class CompetitionStat extends BaseTimeEntity {
         this.femaleCount++;
     }
 
+    public void incrementM2F2SplitCount() {
+        this.m2f2SplitCount++;
+    }
+
     public void incrementRandomM3F1Count() {
         this.randomM3F1Count++;
     }
@@ -75,6 +82,28 @@ public class CompetitionStat extends BaseTimeEntity {
     }
 
     public void updateGameStatistics(int maxGames, int minGames) {
+        this.maxGames = maxGames;
+        this.minGames = minGames;
+    }
+
+    public void replaceStatistics(
+            int totalGames,
+            int mixedCount,
+            int maleCount,
+            int femaleCount,
+            int m2f2SplitCount,
+            int randomM3F1Count,
+            int randomM1F3Count,
+            int maxGames,
+            int minGames
+    ) {
+        this.totalGames = totalGames;
+        this.mixedCount = mixedCount;
+        this.maleCount = maleCount;
+        this.femaleCount = femaleCount;
+        this.m2f2SplitCount = m2f2SplitCount;
+        this.randomM3F1Count = randomM3F1Count;
+        this.randomM1F3Count = randomM1F3Count;
         this.maxGames = maxGames;
         this.minGames = minGames;
     }

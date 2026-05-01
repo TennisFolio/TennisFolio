@@ -7,11 +7,14 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface GameRepository extends JpaRepository<Game, Long> {
 
     List<Game> findByCompetitionId(Long competitionId);
+
+    Optional<Game> findByIdAndCompetitionId(Long id, Long competitionId);
 
     List<Game> findByCompetitionIdAndRound(Long competitionId, Integer round);
 

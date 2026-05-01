@@ -3,6 +3,8 @@ package com.tennisfolio.Tennisfolio.matching.service;
 import com.tennisfolio.Tennisfolio.matching.domain.ScheduleResult;
 import com.tennisfolio.Tennisfolio.matching.dto.CompetitionCreateRequest;
 import com.tennisfolio.Tennisfolio.matching.dto.CompetitionCreateResponse;
+import com.tennisfolio.Tennisfolio.matching.dto.CompetitionUpdateRequest;
+import com.tennisfolio.Tennisfolio.matching.dto.CompetitionUpdateResponse;
 import com.tennisfolio.Tennisfolio.matching.entity.Competition;
 import com.tennisfolio.Tennisfolio.matching.entity.CompetitionEntry;
 import org.springframework.stereotype.Service;
@@ -20,20 +22,20 @@ public class CompetitionCommandService {
 
     private final TennisMatchScheduler scheduler;
     private final CompetitionService competitionService;
-    private final CompetitionEntryService competitionEntryService;
+    private final CompetitionEntryCommandService competitionEntryCommandService;
     private final GameService gameService;
     private final CompetitionStatService competitionStatService;
 
     public CompetitionCommandService(
             TennisMatchScheduler scheduler,
             CompetitionService competitionService,
-            CompetitionEntryService competitionEntryService,
+            CompetitionEntryCommandService competitionEntryCommandService,
             GameService gameService,
             CompetitionStatService competitionStatService
     ) {
         this.scheduler = scheduler;
         this.competitionService = competitionService;
-        this.competitionEntryService = competitionEntryService;
+        this.competitionEntryCommandService = competitionEntryCommandService;
         this.gameService = gameService;
         this.competitionStatService = competitionStatService;
     }
@@ -57,11 +59,21 @@ public class CompetitionCommandService {
                 seed
         );
 
-        Map<String, CompetitionEntry> entriesByPlayerName = competitionEntryService.createCompetitionEntries(competition);
+        Map<String, CompetitionEntry> entriesByPlayerName = competitionEntryCommandService.createCompetitionEntries(competition);
         gameService.saveSchedule(competition, result, entriesByPlayerName);
         competitionStatService.createCompetitionStat(competition, result, entriesByPlayerName);
 
         return CompetitionCreateResponse.from(competition);
+    }
+
+    @Transactional
+    public CompetitionUpdateResponse updateCompetition(
+            String publicId,
+            CompetitionUpdateRequest request,
+            String editToken
+    ) {
+        Competition competition = competitionService.updateCompetitionName(publicId, request.getName(), editToken);
+        return CompetitionUpdateResponse.from(competition);
     }
 
     private void validateRequest(CompetitionCreateRequest request) {

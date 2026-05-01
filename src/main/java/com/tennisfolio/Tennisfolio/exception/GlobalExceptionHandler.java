@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-@RestControllerAdvice(annotations = {RestController.class}, basePackages = {"com.tennisfolio.Tennisfoli.web.controller"})
+@RestControllerAdvice(annotations = {RestController.class}, basePackages = {"com.tennisfolio.Tennisfolio"})
 @Hidden
 public class GlobalExceptionHandler {
 
@@ -52,6 +52,13 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ResponseDTO<Void>> handleTestNotFoundException(TestNotFoundException e){
         ExceptionCode testNotFoundException = ExceptionCode.NOT_FOUND;
         return ResponseEntity.status(testNotFoundException.getHttpStatus())
+                .body(ResponseDTO.error(e.getExceptionCode().getCode(), e.getExceptionCode().getMessage()));
+    }
+
+    @ExceptionHandler(NotFoundException.class)
+    public ResponseEntity<ResponseDTO<Void>> handleNotFoundException(NotFoundException e){
+        ExceptionCode notFoundException = ExceptionCode.NOT_FOUND;
+        return ResponseEntity.status(notFoundException.getHttpStatus())
                 .body(ResponseDTO.error(e.getExceptionCode().getCode(), e.getExceptionCode().getMessage()));
     }
 

@@ -14,6 +14,8 @@ public interface CompetitionRepository extends JpaRepository<Competition, Long> 
 
     Optional<Competition> findByName(String name);
 
+    Optional<Competition> findByPublicId(String publicId);
+
     List<Competition> findByStatus(Competition.CompetitionStatus status);
 
     @Query("SELECT c FROM Competition c WHERE c.isModified = true")

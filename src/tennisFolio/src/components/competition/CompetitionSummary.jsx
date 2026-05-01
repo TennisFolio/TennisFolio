@@ -39,7 +39,7 @@ function CompetitionSummary({
             </div>
           </div>
 
-        <AnimatePresence mode="wait">
+          <AnimatePresence mode="wait">
             <MotionSpan
               key={canCreateGames ? 'available' : 'unavailable'}
               className={`summary-badge ${
@@ -50,14 +50,14 @@ function CompetitionSummary({
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.22, ease: 'easeOut' }}
             >
-              {canCreateGames ? '진행돼요' : '조정이 필요해요'}
+              {canCreateGames ? '진행 가능' : '조정 필요'}
             </MotionSpan>
           </AnimatePresence>
         </div>
 
         <div className="summary-details">
           <div>
-            <p>1인당 경기</p>
+            <p>1명당 경기</p>
             <MotionStrong
               key={participantGameText}
               initial={{ opacity: 0, y: 6 }}
