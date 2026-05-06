@@ -274,6 +274,8 @@ function CompetitionDetail() {
     canManage && adminToken
       ? `${window.location.origin}/competitions/${publicId}?token=${adminToken}`
       : '';
+  const userShareText = `경기 일정과 대진표를 확인하고 점수를 입력하세요.\n${userShareUrl}`;
+  const manageShareText = `대진표 관리 링크입니다. 필요한 운영자에게만 공유하세요.\n${manageShareUrl}`;
   const requestedView = new URLSearchParams(location.search).get('view');
 
   const rejectWithoutPermission = (setError, setSuccess) => {
@@ -286,7 +288,7 @@ function CompetitionDetail() {
     return true;
   };
 
-  const copyUrl = async (url, successMessage) => {
+  const copyUrl = async (url, successMessage, shareText = url) => {
     setShareFeedback('');
 
     if (!url) {
@@ -295,7 +297,7 @@ function CompetitionDetail() {
     }
 
     try {
-      await navigator.clipboard.writeText(url);
+      await navigator.clipboard.writeText(shareText);
       setShareFeedback(successMessage);
       return true;
     } catch {
@@ -310,7 +312,11 @@ function CompetitionDetail() {
   };
 
   const copyAdminLinkFromBanner = async () => {
-    const copied = await copyUrl(manageShareUrl, '관리자 링크를 복사했어요.');
+    const copied = await copyUrl(
+      manageShareUrl,
+      '관리자 링크를 복사했어요.',
+      manageShareText
+    );
     if (copied) {
       dismissAdminLinkBanner();
     }
@@ -1130,7 +1136,12 @@ function CompetitionDetail() {
               onClick={
                 canManage
                   ? toggleSharePanel
-                  : () => copyUrl(userShareUrl, '참여 링크를 복사했어요.')
+                  : () =>
+                    copyUrl(
+                      userShareUrl,
+                      '참여 링크를 복사했어요.',
+                      userShareText
+                    )
               }
               aria-expanded={canManage && isSharePanelOpen}
             >
@@ -1148,7 +1159,8 @@ function CompetitionDetail() {
                   onClick={() =>
                     copyUrl(
                       userShareUrl,
-                      '참여 링크를 복사했어요.'
+                      '참여 링크를 복사했어요.',
+                      userShareText
                     )
                   }
                 >
@@ -1161,7 +1173,8 @@ function CompetitionDetail() {
                   onClick={() =>
                     copyUrl(
                       manageShareUrl,
-                      '관리자 링크를 복사했어요.'
+                      '관리자 링크를 복사했어요.',
+                      manageShareText
                     )
                   }
                 >
