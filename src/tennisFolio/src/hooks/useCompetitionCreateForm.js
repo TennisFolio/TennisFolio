@@ -1,5 +1,9 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { apiRequest } from '../utils/apiClient';
+import {
+  incrementSessionCompetitionCreateCount,
+  trackEvent,
+} from '../utils/analytics';
 
 const GAMES_PER_HOUR = 2;
 
@@ -14,17 +18,14 @@ export const COMPETITION_FIELDS = [
   {
     name: 'maleCount',
     label: '남자 인원',
-    unit: '명',
   },
   {
     name: 'femaleCount',
     label: '여자 인원',
-    unit: '명',
   },
   {
     name: 'courtCount',
     label: '코트 수',
-    unit: '개',
   },
   {
     name: 'hours',
@@ -59,6 +60,7 @@ export function useCompetitionCreateForm() {
   const [competitionError, setCompetitionError] = useState('');
   const [competitionResult, setCompetitionResult] = useState(null);
   const [isCreatingCompetition, setIsCreatingCompetition] = useState(false);
+  const touchedFieldsRef = useRef(new Set());
 
   const totalPlayers = competitionForm.maleCount + competitionForm.femaleCount;
   const totalGames =
@@ -69,9 +71,9 @@ export function useCompetitionCreateForm() {
 
   const placementText = useMemo(() => {
     if (canCreateGames) {
-      return '이 조건이면 문제없이 진행할 수 있어요';
+      return '이 조건이면 바로 대진표를 만들 수 있어요';
     }
-    return '인원을 늘리거나 코트를 줄이면 좋아요';
+    return '인원을 늘리거나 코트를 줄이면 만들 수 있어요';
   }, [canCreateGames]);
 
   const expectedGamesText = useMemo(() => {
@@ -99,7 +101,24 @@ export function useCompetitionCreateForm() {
     setCompetitionResult(null);
   };
 
+  const trackFieldInteraction = (name, interactionType) => {
+    if (touchedFieldsRef.current.has(name)) {
+      return;
+    }
+
+    touchedFieldsRef.current.add(name);
+    trackEvent('competition_create_field_interaction', {
+      field_name: name,
+      interaction_type: interactionType,
+    });
+    trackEvent('competition_create_funnel_step', {
+      funnel_step: 'field_interaction',
+      field_name: name,
+    });
+  };
+
   const updateCompetitionField = (name, value) => {
+    trackFieldInteraction(name, 'input');
     setCompetitionForm((prev) => ({
       ...prev,
       [name]: normalizeCompetitionValue(name, value),
@@ -108,6 +127,7 @@ export function useCompetitionCreateForm() {
   };
 
   const stepCompetitionField = (name, amount) => {
+    trackFieldInteraction(name, 'stepper');
     setCompetitionForm((prev) => ({
       ...prev,
       [name]: normalizeCompetitionValue(name, prev[name] + amount),
@@ -136,9 +156,29 @@ export function useCompetitionCreateForm() {
   };
 
   const createCompetition = async () => {
+    const analyticsPayload = {
+      male_count: competitionForm.maleCount,
+      female_count: competitionForm.femaleCount,
+      total_players: totalPlayers,
+      court_count: competitionForm.courtCount,
+      hours: competitionForm.hours,
+      can_create_games: canCreateGames,
+    };
+
+    trackEvent('competition_create_attempt', analyticsPayload);
+    trackEvent('competition_create_funnel_step', {
+      ...analyticsPayload,
+      funnel_step: 'submit',
+    });
+
     const errorMessage = validateCompetitionForm();
     if (errorMessage) {
       setCompetitionError(errorMessage);
+      trackEvent('competition_create_failure', {
+        ...analyticsPayload,
+        failure_type: 'validation',
+        failure_reason: errorMessage,
+      });
       return null;
     }
 
@@ -154,18 +194,40 @@ export function useCompetitionCreateForm() {
 
       if (response.data.code === '0000') {
         setCompetitionResult(response.data.data);
+        const sessionCreateCount = incrementSessionCompetitionCreateCount();
+        trackEvent('competition_create_success', {
+          ...analyticsPayload,
+          public_id: response.data.data.publicId,
+          session_competition_create_count: sessionCreateCount,
+        });
+        trackEvent('competition_create_funnel_step', {
+          ...analyticsPayload,
+          public_id: response.data.data.publicId,
+          funnel_step: 'created',
+        });
         return response.data.data;
       }
 
       setCompetitionError(
         '대진표를 만들지 못했어요. 잠시 후 다시 시도해 주세요.'
       );
+      trackEvent('competition_create_failure', {
+        ...analyticsPayload,
+        failure_type: 'api_code',
+        failure_reason: response.data.message,
+      });
       return null;
     } catch (error) {
       const message =
         error.response?.data?.message ||
         '대진표를 만드는 중 문제가 생겼어요. 잠시 후 다시 시도해 주세요.';
       setCompetitionError(message);
+      trackEvent('competition_create_failure', {
+        ...analyticsPayload,
+        failure_type: 'network_or_server',
+        failure_reason: message,
+        status_code: error.response?.status,
+      });
       return null;
     } finally {
       setIsCreatingCompetition(false);

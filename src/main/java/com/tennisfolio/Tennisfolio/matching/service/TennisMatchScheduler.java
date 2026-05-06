@@ -35,6 +35,21 @@ public class TennisMatchScheduler {
     }
 
     public ScheduleResult generateSchedule(int male, int female, int court, int rounds, long seed) {
+        int totalMatches = court * rounds;
+        boolean allowRandom = shouldAllowRandomType(male, female, court, totalMatches);
+
+        try {
+            return generateSchedule(male, female, court, rounds, seed, allowRandom);
+        } catch (NoSuchElementException e) {
+            if (allowRandom || !canScheduleRandomType(male, female)) {
+                throw e;
+            }
+
+            return generateSchedule(male, female, court, rounds, seed, true);
+        }
+    }
+
+    private ScheduleResult generateSchedule(int male, int female, int court, int rounds, long seed, boolean allowRandom) {
         this.random = new Random(seed);
         List<GamePlayer> players = createPlayers(male, female);
 
@@ -50,7 +65,6 @@ public class TennisMatchScheduler {
         }
 
         Map<Set<String>, Integer> groupCount = new HashMap<>();
-        boolean allowRandom = !canScheduleWithoutRandom(male, female, court);
 
         for (int r = 1; r <= rounds; r++) {
             Set<GamePlayer> used = new HashSet<>();
@@ -224,6 +238,78 @@ public class TennisMatchScheduler {
         }
 
         return false;
+    }
+
+    private boolean shouldAllowRandomType(int male, int female, int court, int totalMatches) {
+        if (!canScheduleRandomType(male, female)) {
+            return false;
+        }
+
+        if (!canScheduleWithoutRandom(male, female, court)) {
+            return true;
+        }
+
+        if (!canFillGenderSlotsWithoutRandom(male, female, totalMatches)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    private boolean canFillGenderSlotsWithoutRandom(int male, int female, int totalMatches) {
+        int totalSlots = totalMatches * 4;
+        int playerCount = male + female;
+        int minGames = totalSlots / playerCount;
+        int extraGames = totalSlots % playerCount;
+
+        for (int maleExtraGames = 0; maleExtraGames <= extraGames; maleExtraGames++) {
+            int femaleExtraGames = extraGames - maleExtraGames;
+            if (maleExtraGames > male || femaleExtraGames > female) {
+                continue;
+            }
+
+            int maleSlots = male * minGames + maleExtraGames;
+            if (canFillMaleSlotsWithNormalTypes(maleSlots, totalMatches, male, female)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private boolean canFillMaleSlotsWithNormalTypes(int maleSlots, int totalMatches, int male, int female) {
+        if (maleSlots < 0 || maleSlots > totalMatches * 4) {
+            return false;
+        }
+
+        for (int mixed = 0; mixed <= totalMatches; mixed++) {
+            if (mixed > 0 && (male < 2 || female < 2)) {
+                continue;
+            }
+
+            int remainingMatches = totalMatches - mixed;
+            for (int maleMatch = 0; maleMatch <= remainingMatches; maleMatch++) {
+                int femaleMatch = remainingMatches - maleMatch;
+
+                if (maleMatch > 0 && male < 4) {
+                    continue;
+                }
+                if (femaleMatch > 0 && female < 4) {
+                    continue;
+                }
+
+                int normalMaleSlots = mixed * 2 + maleMatch * 4;
+                if (normalMaleSlots == maleSlots) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private boolean canScheduleRandomType(int male, int female) {
+        return (male >= 3 && female >= 1) || (male >= 1 && female >= 3);
     }
 
     private static class BestCandidate {

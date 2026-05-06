@@ -10,9 +10,12 @@ import CompetitionGameEditor from '../components/competition/detail/CompetitionG
 import { apiRequest } from '../utils/apiClient';
 import {
   createEditTokenHeaders,
+  dismissCompetitionAdminLinkPrompt,
   getCompetitionEditToken,
   saveCompetitionEditToken,
+  shouldShowCompetitionAdminLinkPrompt,
 } from '../utils/competitionEditToken';
+import { markCompetitionRevisit, trackEvent } from '../utils/analytics';
 import './CompetitionDetail.css';
 
 const itemTransition = { duration: 0.22, ease: [0.22, 1, 0.36, 1] };
@@ -21,6 +24,22 @@ const MotionSection = motion.section;
 
 function getResponseData(response) {
   return response.data?.data ?? response.data;
+}
+
+function resolveInitialMode({ status, requestedView }) {
+  if (requestedView === 'score') {
+    return COMPETITION_MODES.SCORE;
+  }
+
+  if (requestedView === 'manage') {
+    return COMPETITION_MODES.MANAGE;
+  }
+
+  if (status === 'INPROGRESS') {
+    return COMPETITION_MODES.SCORE;
+  }
+
+  return COMPETITION_MODES.MANAGE;
 }
 
 function normalizeScoreValue(value) {
@@ -62,6 +81,57 @@ function createGameScorePayload(game) {
   }
 
   return payload;
+}
+
+function hasRecordedTiebreakScore(game) {
+  const teamATiebreakScore = Number(game?.score?.teamATiebreakScore ?? 0);
+  const teamBTiebreakScore = Number(game?.score?.teamBTiebreakScore ?? 0);
+
+  return teamATiebreakScore !== 0 || teamBTiebreakScore !== 0;
+}
+
+function hasRecordedScore(game) {
+  const score = game?.score ?? {};
+  return [
+    score.teamAScore,
+    score.teamBScore,
+    score.teamATiebreakScore,
+    score.teamBTiebreakScore,
+  ].some((value) => Number(value ?? 0) > 0);
+}
+
+function createSavedScoreMap(games = []) {
+  return games.reduce((scoreMap, game) => {
+    scoreMap[game.gameId] = game.score ?? {};
+    return scoreMap;
+  }, {});
+}
+
+function hasGameEditorPlayerChanged(gameEditor) {
+  if (!gameEditor?.game) {
+    return false;
+  }
+
+  const currentTeamA = (gameEditor.game.teamA?.players ?? []).map((player) =>
+    String(player.competitionEntryId)
+  );
+  const currentTeamB = (gameEditor.game.teamB?.players ?? []).map((player) =>
+    String(player.competitionEntryId)
+  );
+
+  return (
+    currentTeamA.join('|') !== gameEditor.teamA.join('|') ||
+    currentTeamB.join('|') !== gameEditor.teamB.join('|')
+  );
+}
+
+function createTiebreakOpenState(games = []) {
+  return games.reduce((openState, game) => {
+    if (hasRecordedTiebreakScore(game)) {
+      openState[game.gameId] = true;
+    }
+    return openState;
+  }, {});
 }
 
 function groupGamesByRound(games) {
@@ -168,59 +238,86 @@ function CompetitionDetail() {
   const [savingScoreGameIds, setSavingScoreGameIds] = useState([]);
   const [scoreFeedbackByGameId, setScoreFeedbackByGameId] = useState({});
   const [scoreErrorByGameId, setScoreErrorByGameId] = useState({});
+  const [savedScoreByGameId, setSavedScoreByGameId] = useState({});
   const [isSavingCompetitionName, setIsSavingCompetitionName] = useState(false);
   const [competitionNameError, setCompetitionNameError] = useState('');
   const [competitionNameSuccess, setCompetitionNameSuccess] = useState('');
   const [shareFeedback, setShareFeedback] = useState('');
   const [adminToken, setAdminToken] = useState('');
+  const [showOnlyUnscoredGames, setShowOnlyUnscoredGames] = useState(false);
+  const [isSharePanelOpen, setIsSharePanelOpen] = useState(false);
+  const [showAdminLinkBanner, setShowAdminLinkBanner] = useState(false);
 
-  const isManagePath = location.pathname.endsWith('/manage');
-  const canManage = isManagePath && Boolean(adminToken);
-  const isManageAccessMissing = isManagePath && !adminToken;
+  const canManage = Boolean(adminToken);
+  const isManageAccessMissing = false;
+  const showFullHeader = true;
   const adminRequestOptions = {
     headers: createEditTokenHeaders(adminToken),
   };
+  const permissionDeniedMessage = '관리자 권한이 필요합니다. 관리자 링크로 접속해 주세요.';
   const heroTitle = isManageAccessMissing
     ? '관리자 링크 필요'
-    : canManage
+    : showFullHeader
       ? mode === COMPETITION_MODES.MANAGE
         ? '대진표 관리'
         : '점수 입력 화면'
       : '경기 점수 입력';
   const heroDescription = isManageAccessMissing
     ? '대진표 관리는 관리자 링크로 접속해야 사용할 수 있습니다.'
-    : canManage
+      : showFullHeader
       ? mode === COMPETITION_MODES.MANAGE
-        ? '참가자 정보와 경기 배정을 수정할 수 있는 관리자 화면입니다.'
+        ? '경기 시작 전 참가자 정보와 경기 배정을 조정하는 화면입니다.'
         : '배정된 경기를 확인하고 점수를 입력하세요.'
       : '배정된 경기를 확인하고 점수를 입력하세요.';
   const userShareUrl = `${window.location.origin}/competitions/${publicId}`;
   const manageShareUrl =
     canManage && adminToken
-      ? `${window.location.origin}/competitions/${publicId}/manage?token=${adminToken}`
+      ? `${window.location.origin}/competitions/${publicId}?token=${adminToken}`
       : '';
+  const requestedView = new URLSearchParams(location.search).get('view');
 
-  const shareUrl = async (title, text, url, successMessage) => {
+  const rejectWithoutPermission = (setError, setSuccess) => {
+    if (canManage) {
+      return false;
+    }
+
+    setSuccess?.('');
+    setError(permissionDeniedMessage);
+    return true;
+  };
+
+  const copyUrl = async (url, successMessage) => {
     setShareFeedback('');
 
-    if (navigator.share) {
-      try {
-        await navigator.share({ title, text, url });
-        setShareFeedback(successMessage);
-        return;
-      } catch (error) {
-        if (error.name === 'AbortError') {
-          return;
-        }
-      }
+    if (!url) {
+      setShareFeedback(permissionDeniedMessage);
+      return false;
     }
 
     try {
       await navigator.clipboard.writeText(url);
-      setShareFeedback(`${successMessage} 클립보드에 복사했어요.`);
+      setShareFeedback(successMessage);
+      return true;
     } catch {
-      setShareFeedback('공유에 실패했습니다. 잠시 후 다시 시도해 주세요.');
+      setShareFeedback('링크 복사에 실패했습니다. 잠시 후 다시 시도해 주세요.');
+      return false;
     }
+  };
+
+  const dismissAdminLinkBanner = () => {
+    dismissCompetitionAdminLinkPrompt(publicId);
+    setShowAdminLinkBanner(false);
+  };
+
+  const copyAdminLinkFromBanner = async () => {
+    const copied = await copyUrl(manageShareUrl, '관리자 링크를 복사했어요.');
+    if (copied) {
+      dismissAdminLinkBanner();
+    }
+  };
+
+  const toggleSharePanel = () => {
+    setIsSharePanelOpen((prev) => !prev);
   };
 
   useEffect(() => {
@@ -230,12 +327,16 @@ function CompetitionDetail() {
     if (tokenFromUrl) {
       saveCompetitionEditToken(publicId, tokenFromUrl);
       setAdminToken(tokenFromUrl);
-      navigate(location.pathname, { replace: true });
+      navigate(`/competitions/${publicId}`, { replace: true });
       return;
     }
 
     setAdminToken(getCompetitionEditToken(publicId));
   }, [location.pathname, location.search, navigate, publicId]);
+
+  useEffect(() => {
+    setShowAdminLinkBanner(shouldShowCompetitionAdminLinkPrompt(publicId));
+  }, [publicId]);
 
   useEffect(() => {
     let isActive = true;
@@ -251,16 +352,32 @@ function CompetitionDetail() {
         if (isActive) {
           const data = getResponseData(response);
           const entryData = getResponseData(entriesResponse);
+          const revisit = markCompetitionRevisit(publicId);
+          trackEvent('competition_detail_view', {
+            public_id: publicId,
+            mode: requestedView || 'default',
+            status: data?.status,
+            has_edit_token: canManage,
+            is_revisit: revisit,
+          });
+          if (revisit) {
+            trackEvent('competition_revisit', {
+              public_id: publicId,
+              status: data?.status,
+              has_edit_token: canManage,
+            });
+          }
           setCompetition(data);
+          setTiebreakOpenGames(createTiebreakOpenState(data?.games));
+          setSavedScoreByGameId(createSavedScoreMap(data?.games));
           setBalance(createBalanceFromStat(data?.stat));
           setEntries(entryData);
           setOriginalEntries(entryData);
           setMode(
-            canManage && data?.status === 'INPROGRESS'
-              ? COMPETITION_MODES.SCORE
-              : canManage
-                ? COMPETITION_MODES.MANAGE
-                : COMPETITION_MODES.SCORE
+            resolveInitialMode({
+              status: data?.status,
+              requestedView,
+            })
           );
         }
       } catch (error) {
@@ -282,7 +399,7 @@ function CompetitionDetail() {
     return () => {
       isActive = false;
     };
-  }, [canManage, publicId]);
+  }, [canManage, publicId, requestedView]);
 
   const rounds = useMemo(() => {
     if (!competition?.games?.length) {
@@ -297,6 +414,21 @@ function CompetitionDetail() {
         roundPlayerStatus: analyzeRoundPlayers(games, entries),
       }));
   }, [competition, entries]);
+
+  const visibleRounds = useMemo(() => {
+    if (mode !== COMPETITION_MODES.SCORE || !showOnlyUnscoredGames) {
+      return rounds;
+    }
+
+    return rounds
+      .map((roundGroup) => ({
+        ...roundGroup,
+        games: roundGroup.games.filter(
+          (game) => !hasRecordedScore({ score: savedScoreByGameId[game.gameId] })
+        ),
+      }))
+      .filter((roundGroup) => roundGroup.games.length > 0);
+  }, [mode, rounds, savedScoreByGameId, showOnlyUnscoredGames]);
 
   const dirtyEntries = useMemo(
     () =>
@@ -329,6 +461,10 @@ function CompetitionDetail() {
   };
 
   const saveCompetitionName = async (name) => {
+    if (rejectWithoutPermission(setCompetitionNameError, setCompetitionNameSuccess)) {
+      return;
+    }
+
     const normalizedName = name.trim();
     if (!normalizedName) {
       setCompetitionNameError('대회 이름을 입력해 주세요.');
@@ -455,6 +591,11 @@ function CompetitionDetail() {
 
     if (isOpen) {
       clearTiebreakScore(gameId);
+    } else {
+      trackEvent('competition_tiebreak_enabled', {
+        public_id: publicId,
+        game_id: gameId,
+      });
     }
   };
 
@@ -496,6 +637,27 @@ function CompetitionDetail() {
           ),
         };
       });
+      setSavedScoreByGameId((prev) => ({
+        ...prev,
+        [data.gameId]: data.score ?? {},
+      }));
+      trackEvent('competition_score_saved', {
+        public_id: publicId,
+        game_id: data.gameId,
+        round: data.round,
+        court: data.court,
+        team_a_score: data.score?.teamAScore ?? 0,
+        team_b_score: data.score?.teamBScore ?? 0,
+        team_a_tiebreak_score: data.score?.teamATiebreakScore ?? 0,
+        team_b_tiebreak_score: data.score?.teamBTiebreakScore ?? 0,
+        tiebreak_used:
+          Number(data.score?.teamATiebreakScore ?? 0) > 0 ||
+          Number(data.score?.teamBTiebreakScore ?? 0) > 0,
+      });
+      trackEvent('competition_score_entry_completed', {
+        public_id: publicId,
+        game_id: data.gameId,
+      });
       setScoreFeedbackByGameId((prev) => ({
         ...prev,
         [gameId]: '저장됐어요.',
@@ -513,10 +675,6 @@ function CompetitionDetail() {
   };
 
   const openEntryEditor = async () => {
-    if (!canManage) {
-      return;
-    }
-
     if (isEntryEditorOpen) {
       closeEntryEditor();
       return;
@@ -548,10 +706,6 @@ function CompetitionDetail() {
   };
 
   const changeMode = (nextMode) => {
-    if (!canManage) {
-      return;
-    }
-
     setMode(nextMode);
     if (nextMode === COMPETITION_MODES.SCORE) {
       closeEntryEditor();
@@ -560,6 +714,10 @@ function CompetitionDetail() {
   };
 
   const updateEntryName = (competitionEntryId, playerName) => {
+    if (!canManage) {
+      return;
+    }
+
     const nextPlayerName = playerName.slice(0, 9);
     setEntryEditorError('');
     setEntryEditorSuccess('');
@@ -613,6 +771,10 @@ function CompetitionDetail() {
   };
 
   const saveEntryNames = async () => {
+    if (rejectWithoutPermission(setEntryEditorError, setEntryEditorSuccess)) {
+      return;
+    }
+
     const hasBlankName = entries.some(
       (entry) => entry.playerName.trim() === ''
     );
@@ -628,6 +790,22 @@ function CompetitionDetail() {
     if (hasLongName) {
       setEntryEditorSuccess('');
       setEntryEditorError('참가자 이름은 9자까지 입력할 수 있어요.');
+      return;
+    }
+
+    const nameCounts = entries.reduce((counts, entry) => {
+      const playerName = entry.playerName.trim();
+      counts.set(playerName, (counts.get(playerName) ?? 0) + 1);
+      return counts;
+    }, new Map());
+    const duplicatedNames = Array.from(nameCounts.entries())
+      .filter(([, count]) => count > 1)
+      .map(([playerName]) => playerName);
+    if (duplicatedNames.length > 0) {
+      setEntryEditorSuccess('');
+      setEntryEditorError(
+        `동일한 참가자 이름이 있어요: ${duplicatedNames.join(', ')}`
+      );
       return;
     }
 
@@ -768,6 +946,10 @@ function CompetitionDetail() {
       return;
     }
 
+    if (rejectWithoutPermission(setGameEditorError)) {
+      return;
+    }
+
     const selectedIds = [...gameEditor.teamA, ...gameEditor.teamB];
     if (selectedIds.some((id) => !id)) {
       setGameEditorError('A팀과 B팀 선수를 모두 선택해 주세요.');
@@ -775,6 +957,18 @@ function CompetitionDetail() {
     }
     if (new Set(selectedIds).size !== 4) {
       setGameEditorError('한 경기 안에서 같은 선수를 중복 선택할 수 없어요.');
+      return;
+    }
+
+    const willResetScore =
+      hasGameEditorPlayerChanged(gameEditor) && hasRecordedScore(gameEditor.game);
+
+    if (
+      willResetScore &&
+      !window.confirm(
+        '이 경기에는 이미 입력된 점수가 있습니다. 선수를 변경하면 기존 점수가 초기화됩니다. 계속할까요?'
+      )
+    ) {
       return;
     }
 
@@ -810,6 +1004,17 @@ function CompetitionDetail() {
             game.gameId === data.game.gameId ? data.game : game
           ),
         };
+      });
+      setSavedScoreByGameId((prev) => ({
+        ...prev,
+        [data.game.gameId]: data.game.score ?? {},
+      }));
+      trackEvent('competition_game_entries_saved', {
+        public_id: publicId,
+        game_id: data.game.gameId,
+        round: data.game.round,
+        court: data.game.court,
+        score_reset: willResetScore,
       });
       setBalance(data.balance ?? createBalanceFromStat(data.stat));
       closeGameEditor();
@@ -871,79 +1076,126 @@ function CompetitionDetail() {
               관리자 링크로 접속해야 대진표를 수정할 수 있습니다.
             </div>
           )}
-          {manageShareUrl && (
-            <div className="competition-share-actions">
+          {
+            <div className="competition-view-switch" aria-label="관리자 보기 전환">
               <button
                 type="button"
-                className="secondary"
-                onClick={() =>
-                  shareUrl(
-                    'TennisFolio 경기 링크',
-                    '경기 점수를 입력하고 일정을 확인할 수 있는 링크입니다.',
-                    userShareUrl,
-                    '사용자 링크를 공유했어요.'
-                  )
-                }
+                className={mode === COMPETITION_MODES.MANAGE ? 'active' : ''}
+                onClick={() => changeMode(COMPETITION_MODES.MANAGE)}
               >
-                사용자 링크 공유
+                대진표 관리
               </button>
               <button
                 type="button"
-                onClick={() =>
-                  shareUrl(
-                    'TennisFolio 관리 링크',
-                    '이 링크를 받은 사람은 경기 편성과 참가자 정보를 수정할 수 있습니다.',
-                    manageShareUrl,
-                    '관리자 링크를 공유했어요.'
-                  )
-                }
+                className={mode === COMPETITION_MODES.SCORE ? 'active' : ''}
+                onClick={() => changeMode(COMPETITION_MODES.SCORE)}
               >
-                관리자 링크 공유
+                점수 입력 화면
               </button>
-              <p>
-                사용자 링크는 점수 입력용, 관리자 링크는 수정 권한을 포함합니다.
-              </p>
-              {shareFeedback && (
-                <p className="competition-share-feedback">{shareFeedback}</p>
-              )}
             </div>
-          )}
-          {canManage && (
-            <>
-              <div className="competition-view-switch" aria-label="관리자 보기 전환">
-                <button
-                  type="button"
-                  className={mode === COMPETITION_MODES.MANAGE ? 'active' : ''}
-                  onClick={() => changeMode(COMPETITION_MODES.MANAGE)}
-                >
-                  대진표 관리
-                </button>
-                <button
-                  type="button"
-                  className={mode === COMPETITION_MODES.SCORE ? 'active' : ''}
-                  onClick={() => changeMode(COMPETITION_MODES.SCORE)}
-                >
-                  점수 입력 화면
-                </button>
-              </div>
-              <button
-                className={`competition-entry-edit-button ${
-                  isEntryEditorOpen ? 'active' : ''
-                }`}
-                type="button"
-                onClick={openEntryEditor}
-              >
-                참가자 이름 수정
-              </button>
-            </>
-          )}
+          }
         </div>
       </MotionHeader>
+
+      {!isLoading &&
+        !errorMessage &&
+        competition &&
+        mode === COMPETITION_MODES.MANAGE && (
+        <section className="competition-admin-actions">
+          {canManage && showAdminLinkBanner && (
+            <div className="competition-admin-link-banner">
+              <p>
+                경기 시작 전 조정이 끝나면 일반 링크만 공유해도 됩니다.
+                관리자 링크는 나중에 다시 수정해야 할 때를 대비해 운영자만 보관해 주세요.
+              </p>
+              <div>
+                <button type="button" onClick={copyAdminLinkFromBanner}>
+                  관리자 링크 복사
+                </button>
+                <button
+                  type="button"
+                  className="secondary"
+                  onClick={dismissAdminLinkBanner}
+                >
+                  나중에 하기
+                </button>
+              </div>
+            </div>
+          )}
+
+          <div className={`competition-share-panel ${isSharePanelOpen ? 'open' : ''}`}>
+            <button
+              type="button"
+              className="competition-share-toggle"
+              onClick={
+                canManage
+                  ? toggleSharePanel
+                  : () => copyUrl(userShareUrl, '참여 링크를 복사했어요.')
+              }
+              aria-expanded={canManage && isSharePanelOpen}
+            >
+              링크 복사
+            </button>
+            {!canManage && shareFeedback && (
+              <p className="competition-share-feedback">{shareFeedback}</p>
+            )}
+
+            {canManage && isSharePanelOpen && (
+              <div className={`competition-share-actions ${canManage ? '' : 'viewer'}`}>
+                <button
+                  type="button"
+                  className="secondary"
+                  onClick={() =>
+                    copyUrl(
+                      userShareUrl,
+                      '참여 링크를 복사했어요.'
+                    )
+                  }
+                >
+                  참여 링크 복사
+                </button>
+                {canManage && (
+                  <>
+                <button
+                  type="button"
+                  onClick={() =>
+                    copyUrl(
+                      manageShareUrl,
+                      '관리자 링크를 복사했어요.'
+                    )
+                  }
+                >
+                  관리자 링크 복사
+                </button>
+                <p>
+                  관리자 링크는 수정 권한이 있으니 필요한 사람에게만 공유해주세요.
+                </p>
+                  </>
+                )}
+                {shareFeedback && (
+                  <p className="competition-share-feedback">{shareFeedback}</p>
+                )}
+              </div>
+            )}
+          </div>
+
+          <button
+            className={`competition-entry-edit-button ${
+              isEntryEditorOpen ? 'active' : ''
+            }`}
+            type="button"
+            onClick={openEntryEditor}
+          >
+            {canManage ? '참가자 명단 관리' : '참가자 명단 보기'}
+          </button>
+        </section>
+      )}
 
       {isEntryEditorOpen && (
         <CompetitionEntryEditor
           entries={entries}
           entryGameCounts={entryGameCounts}
+          canManage={canManage}
           errorMessage={entryEditorError}
           successMessage={entryEditorSuccess}
           isLoading={isLoadingEntries}
@@ -963,6 +1215,21 @@ function CompetitionDetail() {
         {renderSummaryPanel()}
       </MotionSection>
 
+      {!isLoading &&
+        !errorMessage &&
+        competition &&
+        mode === COMPETITION_MODES.SCORE && (
+        <section className="competition-secondary-actions">
+          <button
+            className="competition-result-button"
+            type="button"
+            onClick={() => navigate(`/competitions/${publicId}/result`)}
+          >
+            경기 결과 보기
+          </button>
+        </section>
+      )}
+
       {!isLoading && !errorMessage && rounds.length > 0 && (
         <MotionSection
           key={mode}
@@ -971,7 +1238,29 @@ function CompetitionDetail() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
         >
-          {rounds.map(({ round, games, roundPlayerStatus }) => (
+          {mode === COMPETITION_MODES.SCORE && (
+            <div className="score-filter-bar">
+              <button
+                type="button"
+                className={showOnlyUnscoredGames ? 'active' : ''}
+                onClick={() => setShowOnlyUnscoredGames((prev) => !prev)}
+              >
+                {showOnlyUnscoredGames ? '전체 경기 보기' : '미입력 경기만 보기'}
+              </button>
+              <span>
+                {showOnlyUnscoredGames
+                  ? `${visibleRounds.reduce((count, item) => count + item.games.length, 0)}경기 남음`
+                  : '점수 입력이 필요한 경기만 빠르게 볼 수 있어요.'}
+              </span>
+            </div>
+          )}
+
+          {visibleRounds.length === 0 ? (
+            <div className="competition-detail-state">
+              점수를 입력할 경기가 없어요.
+            </div>
+          ) : (
+            visibleRounds.map(({ round, games, roundPlayerStatus }) => (
             <div className="round-section" key={round}>
               <div className="round-heading">
                 <h2>
@@ -1013,6 +1302,7 @@ function CompetitionDetail() {
                       <CompetitionGameCard
                         game={game}
                         mode={mode}
+                        canManage={canManage}
                         isEditing={isEditing}
                         isTiebreakOpen={Boolean(tiebreakOpenGames[game.gameId])}
                         isSavingScore={savingScoreGameIds.includes(game.gameId)}
@@ -1024,7 +1314,7 @@ function CompetitionDetail() {
                         onSaveGameScore={saveGameScore}
                       />
 
-                      {isEditing && (
+                      {canManage && isEditing && (
                         <CompetitionGameEditor
                           gameEditor={gameEditor}
                           errorMessage={gameEditorError}
@@ -1043,7 +1333,8 @@ function CompetitionDetail() {
                 })}
               </div>
             </div>
-          ))}
+            ))
+          )}
         </MotionSection>
       )}
     </main>

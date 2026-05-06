@@ -96,6 +96,18 @@ body {
   font-weight: 700;
 }
 
+.footer-contact-button {
+  margin: 2px 0 8px;
+  padding: 9px 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  background: #ffffff;
+  color: #111827;
+  font-size: 13px;
+  font-weight: 900;
+  line-height: 1;
+}
+
 .footer a {
   display: inline-block;
   color: #5b6472;

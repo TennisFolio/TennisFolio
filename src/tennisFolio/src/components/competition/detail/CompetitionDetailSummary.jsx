@@ -35,6 +35,7 @@ function formatCreatedAt(value) {
 function CompetitionDetailSummary({
   competition,
   balance,
+  mode,
   canManage,
   isSavingName,
   nameError,
@@ -52,6 +53,7 @@ function CompetitionDetailSummary({
   }, [competition.name]);
 
   const isNameChanged = nameDraft.trim() !== (competition.name ?? '');
+  const showNameEditor = canManage && mode === COMPETITION_MODES.MANAGE;
 
   const handleNameSubmit = (event) => {
     event.preventDefault();
@@ -63,7 +65,7 @@ function CompetitionDetailSummary({
 
   return (
     <>
-      {canManage ? (
+      {showNameEditor ? (
         <form className="competition-name-editor" onSubmit={handleNameSubmit}>
           <label htmlFor="competition-name">대회 이름</label>
           <div className="competition-name-row">

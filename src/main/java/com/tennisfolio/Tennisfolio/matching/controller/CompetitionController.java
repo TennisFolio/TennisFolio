@@ -6,6 +6,7 @@ import com.tennisfolio.Tennisfolio.matching.dto.CompetitionCreateResponse;
 import com.tennisfolio.Tennisfolio.matching.dto.CompetitionDetailResponse;
 import com.tennisfolio.Tennisfolio.matching.dto.CompetitionEntryResponse;
 import com.tennisfolio.Tennisfolio.matching.dto.CompetitionEntryUpdateRequest;
+import com.tennisfolio.Tennisfolio.matching.dto.CompetitionResultResponse;
 import com.tennisfolio.Tennisfolio.matching.dto.CompetitionUpdateRequest;
 import com.tennisfolio.Tennisfolio.matching.dto.CompetitionUpdateResponse;
 import com.tennisfolio.Tennisfolio.matching.dto.GameEntryUpdateRequest;
@@ -67,6 +68,14 @@ public class CompetitionController {
             @PathVariable String publicId
     ) {
         CompetitionDetailResponse response = competitionQueryService.getCompetition(publicId);
+        return new ResponseEntity<>(ResponseDTO.success(response), HttpStatus.OK);
+    }
+
+    @GetMapping("/competitions/{publicId}/result")
+    public ResponseEntity<ResponseDTO<CompetitionResultResponse>> getCompetitionResult(
+            @PathVariable String publicId
+    ) {
+        CompetitionResultResponse response = competitionQueryService.getCompetitionResult(publicId);
         return new ResponseEntity<>(ResponseDTO.success(response), HttpStatus.OK);
     }
 

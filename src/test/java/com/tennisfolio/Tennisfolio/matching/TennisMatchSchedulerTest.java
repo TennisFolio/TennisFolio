@@ -101,4 +101,172 @@ public class TennisMatchSchedulerTest {
             assertEquals(4, players.size(), "중복 플레이어 존재");
         }
     }
+
+    @Test
+    void generateSchedule_usesRandomTypeWhenRestingPlayersHaveThreeToOneGenderSplit() {
+        ConstraintChecker checker = new ConstraintChecker();
+        ScoreCalculator calculator = new ScoreCalculator();
+        CandidateGenerator generator = new CandidateGenerator();
+
+        TennisMatchScheduler scheduler = new TennisMatchScheduler(checker, calculator, generator);
+
+        ScheduleResult result = scheduler.generateSchedule(7, 9, 3, 4, 136);
+
+        assertEquals(12, result.matches.size());
+        assertTrue(result.matches.stream()
+                .anyMatch(match -> match.type == MatchType.RANDOM_M1F3 || match.type == MatchType.RANDOM_M3F1));
+
+        Map<String, Integer> gameCount = new HashMap<>();
+
+        for (GameMatch match : result.matches) {
+            Set<String> players = new HashSet<>();
+
+            match.teamA.forEach(p -> {
+                players.add(p.id);
+                gameCount.put(p.id, gameCount.getOrDefault(p.id, 0) + 1);
+            });
+            match.teamB.forEach(p -> {
+                players.add(p.id);
+                gameCount.put(p.id, gameCount.getOrDefault(p.id, 0) + 1);
+            });
+
+            assertEquals(4, players.size());
+        }
+
+        assertEquals(16, gameCount.size());
+        assertEquals(3, Collections.max(gameCount.values()));
+        assertEquals(3, Collections.min(gameCount.values()));
+    }
+
+    @Test
+    void generateSchedule_usesRandomTypeWhenOnlyOnePlayerExistsInOneGender() {
+        ConstraintChecker checker = new ConstraintChecker();
+        ScoreCalculator calculator = new ScoreCalculator();
+        CandidateGenerator generator = new CandidateGenerator();
+
+        TennisMatchScheduler scheduler = new TennisMatchScheduler(checker, calculator, generator);
+
+        ScheduleResult result = scheduler.generateSchedule(1, 4, 1, 4, 136);
+
+        assertEquals(4, result.matches.size());
+        assertTrue(result.matches.stream()
+                .anyMatch(match -> match.type == MatchType.RANDOM_M1F3));
+
+        Map<String, Integer> gameCount = new HashMap<>();
+
+        for (GameMatch match : result.matches) {
+            Set<String> players = new HashSet<>();
+
+            match.teamA.forEach(p -> {
+                players.add(p.id);
+                gameCount.put(p.id, gameCount.getOrDefault(p.id, 0) + 1);
+            });
+            match.teamB.forEach(p -> {
+                players.add(p.id);
+                gameCount.put(p.id, gameCount.getOrDefault(p.id, 0) + 1);
+            });
+
+            assertEquals(4, players.size());
+        }
+
+        assertEquals(5, gameCount.size());
+        assertTrue(Collections.max(gameCount.values()) - Collections.min(gameCount.values()) <= 1);
+    }
+
+    @Test
+    void generateSchedule_usesRandomTypeWhenOneGenderCannotMakeSameGenderMatch() {
+        ConstraintChecker checker = new ConstraintChecker();
+        ScoreCalculator calculator = new ScoreCalculator();
+        CandidateGenerator generator = new CandidateGenerator();
+
+        TennisMatchScheduler scheduler = new TennisMatchScheduler(checker, calculator, generator);
+
+        int[][] cases = {
+                {2, 3, 1},
+                {3, 6, 2},
+                {3, 7, 2},
+                {6, 3, 2},
+                {7, 3, 2}
+        };
+
+        for (int[] testCase : cases) {
+            int male = testCase[0];
+            int female = testCase[1];
+            int court = testCase[2];
+            ScheduleResult result = scheduler.generateSchedule(male, female, court, 4, 136);
+
+            assertEquals(court * 4, result.matches.size());
+            assertTrue(result.matches.stream()
+                    .anyMatch(match -> match.type == MatchType.RANDOM_M1F3 || match.type == MatchType.RANDOM_M3F1));
+
+            Map<String, Integer> gameCount = new HashMap<>();
+
+            for (GameMatch match : result.matches) {
+                Set<String> players = new HashSet<>();
+
+                match.teamA.forEach(p -> {
+                    players.add(p.id);
+                    gameCount.put(p.id, gameCount.getOrDefault(p.id, 0) + 1);
+                });
+                match.teamB.forEach(p -> {
+                    players.add(p.id);
+                    gameCount.put(p.id, gameCount.getOrDefault(p.id, 0) + 1);
+                });
+
+                assertEquals(4, players.size());
+            }
+
+            assertEquals(male + female, gameCount.size());
+            assertTrue(Collections.max(gameCount.values()) - Collections.min(gameCount.values()) <= 1);
+        }
+    }
+
+    @Test
+    void generateSchedule_usesRandomTypeWhenNormalTypesCannotFillOverallGenderSlots() {
+        ConstraintChecker checker = new ConstraintChecker();
+        ScoreCalculator calculator = new ScoreCalculator();
+        CandidateGenerator generator = new CandidateGenerator();
+
+        TennisMatchScheduler scheduler = new TennisMatchScheduler(checker, calculator, generator);
+
+        int[][] cases = {
+                {5, 7, 1},
+                {7, 5, 1},
+                {7, 9, 1},
+                {7, 9, 2},
+                {9, 7, 1},
+                {9, 7, 2}
+        };
+
+        for (int[] testCase : cases) {
+            int male = testCase[0];
+            int female = testCase[1];
+            int court = testCase[2];
+            ScheduleResult result = scheduler.generateSchedule(male, female, court, 4, 136);
+
+            assertEquals(court * 4, result.matches.size());
+            assertTrue(result.matches.stream()
+                    .anyMatch(match -> match.type == MatchType.RANDOM_M1F3 || match.type == MatchType.RANDOM_M3F1));
+
+            Map<String, Integer> gameCount = new HashMap<>();
+
+            for (GameMatch match : result.matches) {
+                Set<String> players = new HashSet<>();
+
+                match.teamA.forEach(p -> {
+                    players.add(p.id);
+                    gameCount.put(p.id, gameCount.getOrDefault(p.id, 0) + 1);
+                });
+                match.teamB.forEach(p -> {
+                    players.add(p.id);
+                    gameCount.put(p.id, gameCount.getOrDefault(p.id, 0) + 1);
+                });
+
+                assertEquals(4, players.size());
+            }
+
+            assertEquals(male + female, gameCount.size());
+            assertTrue(Collections.max(gameCount.values()) - Collections.min(gameCount.values()) <= 1);
+        }
+    }
 }

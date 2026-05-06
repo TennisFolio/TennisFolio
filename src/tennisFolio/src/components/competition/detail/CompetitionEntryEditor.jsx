@@ -6,6 +6,7 @@ const MotionSection = motion.section;
 function CompetitionEntryEditor({
   entries,
   entryGameCounts,
+  canManage,
   errorMessage,
   successMessage,
   isLoading,
@@ -45,6 +46,7 @@ function CompetitionEntryEditor({
               <input
                 maxLength={9}
                 value={entry.playerName}
+                readOnly={!canManage}
                 onChange={(event) =>
                   onUpdateEntryName(
                     entry.competitionEntryId,
@@ -60,7 +62,7 @@ function CompetitionEntryEditor({
         </div>
       )}
 
-      <div className="entry-editor-actions">
+      <div className={`entry-editor-actions ${canManage ? '' : 'viewer'}`}>
         <button
           className="secondary"
           type="button"
@@ -69,9 +71,11 @@ function CompetitionEntryEditor({
         >
           취소
         </button>
-        <button type="button" onClick={onSave} disabled={isLoading || isSaving}>
+        {canManage && (
+          <button type="button" onClick={onSave} disabled={isLoading || isSaving}>
           {isSaving ? '저장 중' : '저장'}
-        </button>
+          </button>
+        )}
       </div>
     </MotionSection>
   );

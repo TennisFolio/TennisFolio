@@ -49,6 +49,7 @@ function TeamView({ game, teamKey, label }) {
 function CompetitionGameCard({
   game,
   mode,
+  canManage,
   isEditing,
   isTiebreakOpen,
   isSavingScore,
@@ -75,7 +76,7 @@ function CompetitionGameCard({
           type="button"
           onClick={() => onToggleTiebreak(game.gameId)}
         >
-          {isTiebreakOpen ? '타이브레이크 사용 중' : '타이브레이크'}
+          타이브레이크
         </button>
 
         <div className="score-input-row">
@@ -168,13 +169,17 @@ function CompetitionGameCard({
         </strong>
       </div>
 
-      <div className="game-match-row">
+      <div
+        className={`game-match-row ${
+          mode === COMPETITION_MODES.SCORE ? 'score-mode' : ''
+        }`}
+      >
         <TeamView game={game} teamKey="teamA" label="A" />
         {renderGameTools()}
         <TeamView game={game} teamKey="teamB" label="B" />
       </div>
 
-      {mode === COMPETITION_MODES.MANAGE && (
+      {canManage && mode === COMPETITION_MODES.MANAGE && (
         <div className="ready-game-actions">
           <button type="button" onClick={() => onOpenGameEditor(game)}>
             선수 변경

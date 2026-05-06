@@ -28,7 +28,7 @@ function CompetitionFieldStepper({ field, value, onChange, onStep }) {
       <div className="field-top">
         <div>
           <label htmlFor={field.name}>{field.label}</label>
-          <span>{field.unit} 단위로 입력해요</span>
+          {field.unit && <span>{field.unit} 단위로 입력해요</span>}
         </div>
       </div>
 

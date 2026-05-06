@@ -68,12 +68,17 @@ public class CompetitionGameCommandService {
 
         Game game = gameRepository.findByIdAndCompetitionId(gameId, competition.getId())
                 .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND));
+        List<GameEntry> currentGameEntries = gameEntryRepository.findByGameId(game.getId());
+        boolean gameEntriesChanged = hasGameEntriesChanged(currentGameEntries, request);
 
         List<CompetitionEntry> teamA = resolveTeamEntries(competition, request.getTeamA());
         List<CompetitionEntry> teamB = resolveTeamEntries(competition, request.getTeamB());
         validateDistinctPlayers(teamA, teamB);
 
         game.updateMatchType(resolveMatchType(teamA, teamB));
+        if (gameEntriesChanged && hasRecordedScore(game)) {
+            game.recordScore(0, 0, 0, 0);
+        }
 
         gameEntryRepository.deleteByGameId(game.getId());
         List<GameEntry> savedGameEntries = gameEntryRepository.saveAll(createGameEntries(game, teamA, teamB));
@@ -114,6 +119,55 @@ public class CompetitionGameCommandService {
             throw new InvalidRequestException(ExceptionCode.INVALID_REQUEST);
         }
         return score;
+    }
+
+    private boolean hasRecordedScore(Game game) {
+        return scoreValue(game.getTeamAScore()) > 0
+                || scoreValue(game.getTeamBScore()) > 0
+                || scoreValue(game.getTeamATiebreaKScore()) > 0
+                || scoreValue(game.getTeamBTiebreaKScore()) > 0;
+    }
+
+    private int scoreValue(Integer score) {
+        return score == null ? 0 : score;
+    }
+
+    private boolean hasGameEntriesChanged(List<GameEntry> currentGameEntries, GameEntryUpdateRequest request) {
+        return hasTeamEntriesChanged(currentGameEntries, GameEntry.Team.A, request.getTeamA())
+                || hasTeamEntriesChanged(currentGameEntries, GameEntry.Team.B, request.getTeamB());
+    }
+
+    private boolean hasTeamEntriesChanged(
+            List<GameEntry> currentGameEntries,
+            GameEntry.Team team,
+            List<GameEntryUpdateRequest.PlayerRequest> playerRequests
+    ) {
+        if (playerRequests == null || playerRequests.size() != 2) {
+            return true;
+        }
+
+        Map<Integer, Long> currentEntryIdsByPosition = new HashMap<>();
+        for (GameEntry gameEntry : currentGameEntries) {
+            if (gameEntry.getTeam() == team) {
+                currentEntryIdsByPosition.put(
+                        gameEntry.getPosition(),
+                        gameEntry.getCompetitionEntry().getId()
+                );
+            }
+        }
+
+        for (int index = 0; index < playerRequests.size(); index++) {
+            GameEntryUpdateRequest.PlayerRequest playerRequest = playerRequests.get(index);
+            if (playerRequest.getCompetitionEntryId() == null) {
+                return true;
+            }
+            Integer position = playerRequest.getPosition() != null ? playerRequest.getPosition() : index + 1;
+            if (!playerRequest.getCompetitionEntryId().equals(currentEntryIdsByPosition.get(position))) {
+                return true;
+            }
+        }
+
+        return currentEntryIdsByPosition.size() != playerRequests.size();
     }
 
     private void validateReadyCompetition(Competition competition) {
