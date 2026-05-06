@@ -4,11 +4,12 @@
 // tennisfolio1029@gmail.com
 
 import React from 'react'
+import './Privacy.css'
 
 function Privacy() {
     return (
-        <div style={{ margin: "0 2.5em" }}>
-          <h1 style={{ width: "10rem", margin: "1rem auto" }}>Privacy Policy</h1>
+        <div className="privacy-page">
+          <h1>Privacy Policy</h1>
           <p>
             TennisFolio by TennisFolio is committed to protecting the privacy of
             visitors to our website, subscribers to our newsletters, and those
