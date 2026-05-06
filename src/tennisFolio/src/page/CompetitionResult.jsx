@@ -103,10 +103,11 @@ function CompetitionResult() {
 
   const copyResultLink = async () => {
     const url = window.location.href;
+    const shareText = `경기 결과와 현재 순위를 확인하세요.\n${url}`;
     setShareFeedback('');
 
     try {
-      await navigator.clipboard.writeText(url);
+      await navigator.clipboard.writeText(shareText);
       setShareFeedback('결과 링크를 복사했어요.');
     } catch {
       setShareFeedback('링크 복사에 실패했습니다. 잠시 후 다시 시도해 주세요.');
