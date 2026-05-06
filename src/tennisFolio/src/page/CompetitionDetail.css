@@ -1377,14 +1377,76 @@
 }
 
 @media (max-width: 420px) {
-  .game-match-row {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  .game-match-row.score-mode {
+    grid-template-columns: minmax(0, 1fr) 76px minmax(0, 1fr);
+    gap: 6px;
   }
 
-  .match-score-editor,
-  .match-versus {
-    grid-column: 1 / -1;
-    grid-row: 2;
+  .game-match-row:not(.score-mode) {
+    grid-template-columns: minmax(0, 1fr) 34px minmax(0, 1fr);
+  }
+
+  .game-match-row:not(.score-mode) .match-versus {
+    grid-column: 2;
+    grid-row: 1;
+    align-self: center;
     justify-self: center;
+  }
+
+  .match-score-editor {
+    grid-column: 2;
+    grid-row: 1;
+    align-self: center;
+    justify-self: center;
+    gap: 4px;
+    width: 76px;
+  }
+
+  .score-input-row {
+    grid-template-columns: 28px 12px 28px;
+  }
+
+  .score-input-row input {
+    width: 28px;
+    height: 30px;
+    border-radius: 9px;
+    font-size: 14px;
+  }
+
+  .score-input-row span {
+    font-size: 11px;
+  }
+
+  .tiebreak-toggle,
+  .score-save-button {
+    min-height: 24px;
+    padding: 0 7px;
+    font-size: 9px;
+  }
+
+  .tiebreak-score-box {
+    width: 76px;
+    padding: 6px 4px;
+    justify-self: center;
+  }
+
+  .tiebreak-score-box p {
+    font-size: 9px;
+    white-space: nowrap;
+  }
+
+  .tiebreak-input-row {
+    grid-template-columns: 24px 10px 24px;
+  }
+
+  .tiebreak-input-row input {
+    width: 24px;
+    height: 26px;
+    border-radius: 8px;
+    font-size: 11px;
+  }
+
+  .tiebreak-input-row span {
+    font-size: 10px;
   }
 }

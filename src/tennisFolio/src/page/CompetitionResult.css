@@ -314,7 +314,25 @@
 
 @media (max-width: 420px) {
   .competition-result-summary {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 7px;
+  }
+
+  .competition-result-summary div {
+    padding: 11px 9px;
+    border-radius: 16px;
+  }
+
+  .competition-result-summary strong {
+    margin-top: 6px;
+    font-size: 18px;
+  }
+
+  .competition-result-summary small {
+    font-size: 10px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .ranking-main {
@@ -328,6 +346,24 @@
   }
 
   .ranking-stats {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 5px;
+  }
+
+  .ranking-stats div {
+    padding: 8px 4px;
+    border-radius: 12px;
+    text-align: center;
+  }
+
+  .ranking-stats span {
+    font-size: 10px;
+    line-height: 1.15;
+    white-space: nowrap;
+  }
+
+  .ranking-stats strong {
+    margin-top: 4px;
+    font-size: 15px;
   }
 }
