@@ -555,8 +555,8 @@ function CompetitionDetail() {
             ...game,
             score: {
               ...game.score,
-              teamATiebreakScore: '',
-              teamBTiebreakScore: '',
+              teamATiebreakScore: 0,
+              teamBTiebreakScore: 0,
             },
           };
         }),
