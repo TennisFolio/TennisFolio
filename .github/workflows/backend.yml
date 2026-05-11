@@ -3,6 +3,20 @@ name: CI/CD - Backend Deploy
 on:
   push:
     branches: [ main ]
+    paths:
+      - 'src/main/**'
+      - 'src/test/**'
+      - 'build.gradle'
+      - 'settings.gradle'
+      - 'gradlew'
+      - 'gradlew.bat'
+      - 'gradle/**'
+      - 'Dockerfile'
+      - 'Dockerfile.stg'
+      - 'docker-compose.yml'
+      - 'docker-compose.stg.yml'
+      - 'nginx/**'
+      - '.github/workflows/backend.yml'
 
 jobs:
   # ✅ 1️⃣ CI: Build + Test
