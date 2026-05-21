@@ -35,5 +35,18 @@ public interface GameEntryRepository extends JpaRepository<GameEntry, Long> {
     List<GameEntry> findScheduleEntriesByCompetitionId(@Param("competitionId") Long competitionId);
 
     long countByCompetitionEntryId(Long competitionEntryId);
+
+    @Query("""
+            SELECT ge
+            FROM GameEntry ge
+            JOIN FETCH ge.game g
+            JOIN FETCH ge.competitionEntry ce
+            WHERE g.competition.id = :competitionId
+              AND g.status = :status
+            """)
+    List<GameEntry> findByCompetitionIdAndGameStatus(
+            @Param("competitionId") Long competitionId,
+            @Param("status") com.tennisfolio.Tennisfolio.matching.entity.Game.GameStatus status
+    );
 }
 

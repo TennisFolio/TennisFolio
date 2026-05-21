@@ -41,7 +41,7 @@ function CompetitionFieldStepper({ field, value, onChange, onStep }) {
           whileTap={isMin ? undefined : { scale: 0.92 }}
           transition={{ duration: 0.16 }}
         >
-          -
+          <span aria-hidden="true">-</span>
         </MotionButton>
         <MotionDiv
           className="stepper-value"
@@ -72,7 +72,7 @@ function CompetitionFieldStepper({ field, value, onChange, onStep }) {
           whileTap={isMax ? undefined : { scale: 0.92 }}
           transition={{ duration: 0.16 }}
         >
-          +
+          <span aria-hidden="true">+</span>
         </MotionButton>
       </div>
     </MotionDiv>

@@ -36,6 +36,8 @@ public class QCompetition extends EntityPathBase<Competition> {
 
     public final NumberPath<Integer> maleCount = createNumber("maleCount", Integer.class);
 
+    public final EnumPath<Competition.CompetitionMode> mode = createEnum("mode", Competition.CompetitionMode.class);
+
     public final StringPath name = createString("name");
 
     public final StringPath publicId = createString("publicId");

@@ -1,12 +1,12 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import CompetitionDetailSummary, {
   COMPETITION_MODES,
 } from '../components/competition/detail/CompetitionDetailSummary';
 import CompetitionEntryEditor from '../components/competition/detail/CompetitionEntryEditor';
-import CompetitionGameCard from '../components/competition/detail/CompetitionGameCard';
-import CompetitionGameEditor from '../components/competition/detail/CompetitionGameEditor';
+import ClubSessionDetail from '../components/competition/detail/ClubSessionDetail';
+import FixedScheduleDetail from '../components/competition/detail/FixedScheduleDetail';
 import { apiRequest } from '../utils/apiClient';
 import {
   createEditTokenHeaders,
@@ -21,6 +21,8 @@ import './CompetitionDetail.css';
 const itemTransition = { duration: 0.22, ease: [0.22, 1, 0.36, 1] };
 const MotionHeader = motion.header;
 const MotionSection = motion.section;
+const DUPLICATE_GAME_PLAYER_MESSAGE =
+  '1게임에 동일한 사람이 포함되어 있어 저장할 수 없어요.';
 
 function getResponseData(response) {
   return response.data?.data ?? response.data;
@@ -66,6 +68,33 @@ function toScoreNumber(value) {
   }
 
   return numberValue;
+}
+
+function formatCompetitionCreatedAt(value) {
+  if (!value) {
+    return '-';
+  }
+
+  const date = Array.isArray(value)
+    ? new Date(
+        value[0],
+        (value[1] ?? 1) - 1,
+        value[2] ?? 1,
+        value[3] ?? 0,
+        value[4] ?? 0,
+        value[5] ?? 0
+      )
+    : new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return '-';
+  }
+
+  return new Intl.DateTimeFormat('ko-KR', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  }).format(date);
 }
 
 function createGameScorePayload(game) {
@@ -143,6 +172,40 @@ function groupGamesByRound(games) {
     rounds.get(round).push(game);
     return rounds;
   }, new Map());
+}
+
+function groupGamesByCourt(games) {
+  return games.reduce((courts, game) => {
+    const court = game.court ?? 0;
+    if (!courts.has(court)) {
+      courts.set(court, []);
+    }
+    courts.get(court).push(game);
+    return courts;
+  }, new Map());
+}
+
+function getCurrentClubSessionGameIds(games = [], courtCount = 0) {
+  const gamesByCourt = groupGamesByCourt(games);
+  const currentGameIds = new Set();
+
+  for (let court = 1; court <= courtCount; court++) {
+    const currentGame = (gamesByCourt.get(court) ?? [])
+      .filter((game) => game.status === 'READY' || game.status === 'IN_PROGRESS')
+      .filter((game) => !hasRecordedScore(game))
+      .sort((a, b) => {
+        if ((a.round ?? 0) !== (b.round ?? 0)) {
+          return (a.round ?? 0) - (b.round ?? 0);
+        }
+        return (a.gameId ?? 0) - (b.gameId ?? 0);
+      })[0];
+
+    if (currentGame) {
+      currentGameIds.add(currentGame.gameId);
+    }
+  }
+
+  return currentGameIds;
 }
 
 function calculateEntryGameCounts(games = []) {
@@ -247,8 +310,17 @@ function CompetitionDetail() {
   const [showOnlyUnscoredGames, setShowOnlyUnscoredGames] = useState(false);
   const [isSharePanelOpen, setIsSharePanelOpen] = useState(false);
   const [showAdminLinkBanner, setShowAdminLinkBanner] = useState(false);
+  const [clubActionError, setClubActionError] = useState('');
+  const [clubActionFeedback, setClubActionFeedback] = useState('');
+  const [busyClubAction, setBusyClubAction] = useState('');
+  const [clubCompletionDrafts, setClubCompletionDrafts] = useState({});
+  const [newEntryDraft, setNewEntryDraft] = useState({
+    playerName: '',
+    gender: 'MALE',
+  });
 
   const canManage = Boolean(adminToken);
+  const isClubSession = competition?.mode === 'CLUB_SESSION';
   const isManageAccessMissing = false;
   const showFullHeader = true;
   const adminRequestOptions = {
@@ -257,6 +329,8 @@ function CompetitionDetail() {
   const permissionDeniedMessage = '관리자 권한이 필요합니다. 관리자 링크로 접속해 주세요.';
   const heroTitle = isManageAccessMissing
     ? '관리자 링크 필요'
+    : isClubSession
+      ? '진행형 대진'
     : showFullHeader
       ? mode === COMPETITION_MODES.MANAGE
         ? '대진표 관리'
@@ -264,6 +338,8 @@ function CompetitionDetail() {
       : '경기 점수 입력';
   const heroDescription = isManageAccessMissing
     ? '대진표 관리는 관리자 링크로 접속해야 사용할 수 있습니다.'
+      : isClubSession
+      ? '경기를 대기열에 쌓아두고, 코트별 진행과 완료를 관리하세요.'
       : showFullHeader
       ? mode === COMPETITION_MODES.MANAGE
         ? '경기 시작 전 참가자 정보와 경기 배정을 조정하는 화면입니다.'
@@ -338,20 +414,51 @@ function CompetitionDetail() {
     setShowAdminLinkBanner(shouldShowCompetitionAdminLinkPrompt(publicId));
   }, [publicId]);
 
+  const refreshCompetition = useCallback(
+    async ({ showLoading = false } = {}) => {
+      if (showLoading) {
+        setIsLoading(true);
+      }
+
+      const response = await apiRequest.get(`/api/competitions/${publicId}`);
+      const entriesResponse = await apiRequest.get(
+        `/api/competitions/${publicId}/entries`
+      );
+      const data = getResponseData(response);
+      const entryData = getResponseData(entriesResponse);
+
+      setCompetition(data);
+      setTiebreakOpenGames(createTiebreakOpenState(data?.games));
+      setSavedScoreByGameId(createSavedScoreMap(data?.games));
+      setBalance(createBalanceFromStat(data?.stat));
+      setEntries(entryData);
+      setOriginalEntries(entryData);
+      setMode(
+        data?.mode === 'CLUB_SESSION'
+          ? COMPETITION_MODES.MANAGE
+          : resolveInitialMode({
+              status: data?.status,
+              requestedView,
+            })
+      );
+
+      if (showLoading) {
+        setIsLoading(false);
+      }
+
+      return { data, entryData };
+    },
+    [publicId, requestedView]
+  );
+
   useEffect(() => {
     let isActive = true;
 
     async function fetchCompetition() {
       try {
-        setIsLoading(true);
         setErrorMessage('');
-        const response = await apiRequest.get(`/api/competitions/${publicId}`);
-        const entriesResponse = await apiRequest.get(
-          `/api/competitions/${publicId}/entries`
-        );
+        const { data } = await refreshCompetition({ showLoading: true });
         if (isActive) {
-          const data = getResponseData(response);
-          const entryData = getResponseData(entriesResponse);
           const revisit = markCompetitionRevisit(publicId);
           trackEvent('competition_detail_view', {
             public_id: publicId,
@@ -367,18 +474,6 @@ function CompetitionDetail() {
               has_edit_token: canManage,
             });
           }
-          setCompetition(data);
-          setTiebreakOpenGames(createTiebreakOpenState(data?.games));
-          setSavedScoreByGameId(createSavedScoreMap(data?.games));
-          setBalance(createBalanceFromStat(data?.stat));
-          setEntries(entryData);
-          setOriginalEntries(entryData);
-          setMode(
-            resolveInitialMode({
-              status: data?.status,
-              requestedView,
-            })
-          );
         }
       } catch (error) {
         if (isActive) {
@@ -399,7 +494,7 @@ function CompetitionDetail() {
     return () => {
       isActive = false;
     };
-  }, [canManage, publicId, requestedView]);
+  }, [canManage, publicId, refreshCompetition, requestedView]);
 
   const rounds = useMemo(() => {
     if (!competition?.games?.length) {
@@ -414,6 +509,23 @@ function CompetitionDetail() {
         roundPlayerStatus: analyzeRoundPlayers(games, entries),
       }));
   }, [competition, entries]);
+
+  const courtGroups = useMemo(() => {
+    if (!competition) {
+      return [];
+    }
+
+    const gamesByCourt = groupGamesByCourt(competition.games ?? []);
+    return Array.from(
+      { length: competition.courtCount ?? 0 },
+      (_, index) => index + 1
+    ).map((court) => ({
+      court,
+      games: (gamesByCourt.get(court) ?? []).sort(
+        (a, b) => (b.round ?? 0) - (a.round ?? 0)
+      ),
+    }));
+  }, [competition]);
 
   const visibleRounds = useMemo(() => {
     if (mode !== COMPETITION_MODES.SCORE || !showOnlyUnscoredGames) {
@@ -449,6 +561,16 @@ function CompetitionDetail() {
     () => calculateEntryGameCounts(competition?.games),
     [competition?.games]
   );
+
+  const clubAvailableEntryCount = useMemo(() => {
+    if (!isClubSession) {
+      return 0;
+    }
+
+    return entries.filter(
+      (entry) => entry.status === 'ACTIVE'
+    ).length;
+  }, [entries, isClubSession]);
 
   const fetchCompetitionEntries = async () => {
     const response = await apiRequest.get(
@@ -891,28 +1013,63 @@ function CompetitionDetail() {
   };
 
   const updateGameEditorSelection = (team, index, value) => {
-    setGameEditor((prev) => {
-      if (!prev) {
-        return prev;
-      }
+    if (!gameEditor) {
+      return;
+    }
 
-      const nextTeam = [...prev[team]];
-      nextTeam[index] = value;
+    const nextTeam = [...gameEditor[team]];
+    nextTeam[index] = value;
+    const nextGameEditor = {
+      ...gameEditor,
+      [team]: nextTeam,
+    };
+    const selectedIds = [...nextGameEditor.teamA, ...nextGameEditor.teamB];
+    const hasDuplicate =
+      selectedIds.every(Boolean) &&
+      new Set(selectedIds).size !== selectedIds.length;
 
-      return {
-        ...prev,
-        [team]: nextTeam,
-      };
-    });
+    setGameEditor(nextGameEditor);
+    setGameEditorError(hasDuplicate ? DUPLICATE_GAME_PLAYER_MESSAGE : '');
   };
 
   const selectedGameEditorIds = gameEditor
     ? [...gameEditor.teamA, ...gameEditor.teamB].filter(Boolean)
     : [];
 
+  const getReadyGameAssignment = (entryId) => {
+    if (!gameEditor || !competition?.games?.length) {
+      return null;
+    }
+
+    const currentClubSessionGameIds = isClubSession
+      ? getCurrentClubSessionGameIds(
+          competition.games,
+          competition.courtCount ?? 0
+        )
+      : null;
+
+    return (
+      competition.games.find(
+        (game) =>
+          game.status === 'READY' &&
+          (!isClubSession || currentClubSessionGameIds.has(game.gameId)) &&
+          game.gameId !== gameEditor.game.gameId &&
+          [...(game.teamA?.players ?? []), ...(game.teamB?.players ?? [])].some(
+            (player) =>
+              String(player.competitionEntryId) === String(entryId)
+          )
+      ) ?? null
+    );
+  };
+
   const getEntryRoundConflictLabel = (entryId) => {
     if (!gameEditor || !competition?.games?.length) {
       return '';
+    }
+
+    if (isClubSession) {
+      const conflictGame = getReadyGameAssignment(entryId);
+      return conflictGame ? `${conflictGame.court}번 코트 배정됨` : '';
     }
 
     const conflictGame = competition.games.find(
@@ -933,11 +1090,18 @@ function CompetitionDetail() {
       return false;
     }
 
-    const currentValue = gameEditor[team][index];
     const entryIdText = String(entryId);
+    const selectedSlots = [
+      { team: 'teamA', index: 0, value: gameEditor.teamA[0] },
+      { team: 'teamA', index: 1, value: gameEditor.teamA[1] },
+      { team: 'teamB', index: 0, value: gameEditor.teamB[0] },
+      { team: 'teamB', index: 1, value: gameEditor.teamB[1] },
+    ];
 
-    return (
-      selectedGameEditorIds.includes(entryIdText) && currentValue !== entryIdText
+    return selectedSlots.some(
+      (slot) =>
+        slot.value === entryIdText &&
+        (slot.team !== team || slot.index !== index)
     );
   };
 
@@ -956,7 +1120,7 @@ function CompetitionDetail() {
       return;
     }
     if (new Set(selectedIds).size !== 4) {
-      setGameEditorError('한 경기 안에서 같은 선수를 중복 선택할 수 없어요.');
+      setGameEditorError(DUPLICATE_GAME_PLAYER_MESSAGE);
       return;
     }
 
@@ -992,23 +1156,29 @@ function CompetitionDetail() {
       );
       const data = getResponseData(response);
 
-      setCompetition((prev) => {
-        if (!prev) {
-          return prev;
-        }
+      if (isClubSession) {
+        await refreshCompetition();
+        setClubActionError('');
+        setClubActionFeedback('경기 편성을 저장했어요.');
+      } else {
+        setCompetition((prev) => {
+          if (!prev) {
+            return prev;
+          }
 
-        return {
+          return {
+            ...prev,
+            stat: data.stat ?? prev.stat,
+            games: prev.games.map((game) =>
+              game.gameId === data.game.gameId ? data.game : game
+            ),
+          };
+        });
+        setSavedScoreByGameId((prev) => ({
           ...prev,
-          stat: data.stat ?? prev.stat,
-          games: prev.games.map((game) =>
-            game.gameId === data.game.gameId ? data.game : game
-          ),
-        };
-      });
-      setSavedScoreByGameId((prev) => ({
-        ...prev,
-        [data.game.gameId]: data.game.score ?? {},
-      }));
+          [data.game.gameId]: data.game.score ?? {},
+        }));
+      }
       trackEvent('competition_game_entries_saved', {
         public_id: publicId,
         game_id: data.game.gameId,
@@ -1025,6 +1195,387 @@ function CompetitionDetail() {
       );
     } finally {
       setIsSavingGameEntries(false);
+    }
+  };
+
+  const createNextCourtGame = async (court) => {
+    if (rejectWithoutPermission(setClubActionError, setClubActionFeedback)) {
+      return;
+    }
+
+    try {
+      setBusyClubAction(`create-${court}`);
+      setClubActionError('');
+      setClubActionFeedback('');
+      await apiRequest.post(
+        `/api/competitions/${publicId}/courts/${court}/games`,
+        null,
+        adminRequestOptions
+      );
+      await refreshCompetition();
+      setClubActionFeedback(`${court}번 코트 대기 경기를 생성했어요.`);
+    } catch (error) {
+      setClubActionError(
+        clubAvailableEntryCount < 4
+          ? `배정 가능한 참가자가 ${clubAvailableEntryCount}명입니다. 새 경기를 만들려면 최소 4명이 필요해요.`
+          : error.response?.data?.message ||
+              '대기 경기를 생성하지 못했어요. 참가 가능 인원을 확인해 주세요.'
+      );
+    } finally {
+      setBusyClubAction('');
+    }
+  };
+
+  const prepareClubCompletion = (gameId) => {
+    setClubCompletionDrafts((prev) =>
+      prev[gameId]
+        ? prev
+        : {
+            ...prev,
+            [gameId]: {
+              teamAScore: 0,
+              teamBScore: 0,
+            },
+          }
+    );
+    setClubActionError('');
+    setClubActionFeedback('');
+  };
+
+  const updateClubCompletionScore = (gameId, field, value) => {
+    if (!field) {
+      prepareClubCompletion(gameId);
+      return;
+    }
+
+    const nextValue = normalizeScoreValue(value);
+    const game = competition?.games?.find((item) => item.gameId === gameId);
+    const defaultScore = {
+      teamAScore: game?.score?.teamAScore ?? 0,
+      teamBScore: game?.score?.teamBScore ?? 0,
+    };
+    setClubActionError('');
+    setClubCompletionDrafts((prev) => ({
+      ...prev,
+      [gameId]: {
+        ...defaultScore,
+        ...(prev[gameId] ?? {}),
+        [field]: nextValue,
+      },
+    }));
+  };
+
+  const submitClubGameCompletion = async (gameId) => {
+    const game = competition?.games?.find((item) => item.gameId === gameId);
+    const score = clubCompletionDrafts[gameId] ?? game?.score ?? {};
+    const hasAnyScoreInput =
+      score.teamAScore !== '' &&
+      score.teamAScore !== null &&
+      score.teamAScore !== undefined &&
+      score.teamBScore !== '' &&
+      score.teamBScore !== null &&
+      score.teamBScore !== undefined;
+
+    if (!hasAnyScoreInput) {
+      setClubActionFeedback('');
+      setClubActionError('점수를 입력해 주세요.');
+      return;
+    }
+
+    const scorePayload = {
+      teamAScore: toScoreNumber(score.teamAScore),
+      teamBScore: toScoreNumber(score.teamBScore),
+    };
+
+    if (Object.values(scorePayload).some((value) => value === null)) {
+      setClubActionFeedback('');
+      setClubActionError('점수는 0~99 사이 숫자로 입력해 주세요.');
+      return;
+    }
+
+    try {
+      setBusyClubAction(`complete-${gameId}`);
+      setClubActionError('');
+      setClubActionFeedback('');
+      await apiRequest.patch(
+        `/api/competitions/${publicId}/games/${gameId}/status`,
+        { status: 'COMPLETED', ...scorePayload },
+        adminRequestOptions
+      );
+      await refreshCompetition();
+      setClubCompletionDrafts((prev) => {
+        const next = { ...prev };
+        delete next[gameId];
+        return next;
+      });
+      setClubActionFeedback('점수와 함께 경기를 완료 처리했어요.');
+    } catch (error) {
+      try {
+        const refreshed = await refreshCompetition();
+        const refreshedGame = refreshed?.data?.games?.find(
+          (item) => item.gameId === gameId
+        );
+        if (refreshedGame?.status === 'COMPLETED') {
+          setClubActionError('');
+          setClubActionFeedback('이미 완료된 경기입니다. 최신 상태로 갱신했어요.');
+          setClubCompletionDrafts((prev) => {
+            const next = { ...prev };
+            delete next[gameId];
+            return next;
+          });
+          return;
+        }
+      } catch {
+        // Keep the original completion error below if the refresh also fails.
+      }
+      setClubActionError(
+        error.response?.data?.message || '경기를 완료 처리하지 못했어요.'
+      );
+    } finally {
+      setBusyClubAction('');
+    }
+  };
+
+  const submitClubCompletedScoreEdit = async (gameId) => {
+    const game = competition?.games?.find((item) => item.gameId === gameId);
+    const score = clubCompletionDrafts[gameId] ?? game?.score ?? {};
+    const scorePayload = {
+      teamAScore: toScoreNumber(score.teamAScore),
+      teamBScore: toScoreNumber(score.teamBScore),
+      teamATiebreakScore: 0,
+      teamBTiebreakScore: 0,
+    };
+
+    if (
+      score.teamAScore === '' ||
+      score.teamBScore === '' ||
+      Object.values(scorePayload).some((value) => value === null)
+    ) {
+      setClubActionFeedback('');
+      setClubActionError('점수는 0~99 사이 숫자로 입력해 주세요.');
+      return false;
+    }
+
+    try {
+      setBusyClubAction(`score-${gameId}`);
+      setClubActionError('');
+      setClubActionFeedback('');
+      await apiRequest.patch(
+        `/api/competitions/${publicId}/games/${gameId}/score`,
+        scorePayload,
+        adminRequestOptions
+      );
+      await refreshCompetition();
+      setClubCompletionDrafts((prev) => {
+        const next = { ...prev };
+        delete next[gameId];
+        return next;
+      });
+      setClubActionFeedback('완료 경기 점수를 수정했어요.');
+      return true;
+    } catch (error) {
+      setClubActionError(
+        error.response?.data?.message || '점수를 수정하지 못했어요.'
+      );
+      return false;
+    } finally {
+      setBusyClubAction('');
+    }
+  };
+
+  const deleteClubGame = async (gameId) => {
+    if (rejectWithoutPermission(setClubActionError, setClubActionFeedback)) {
+      return;
+    }
+    if (!window.confirm('이 경기를 삭제할까요?')) {
+      return;
+    }
+
+    try {
+      setBusyClubAction(`delete-${gameId}`);
+      setClubActionError('');
+      setClubActionFeedback('');
+      await apiRequest.delete(
+        `/api/competitions/${publicId}/games/${gameId}`,
+        adminRequestOptions
+      );
+      await refreshCompetition();
+      setClubCompletionDrafts((prev) => {
+        const next = { ...prev };
+        delete next[gameId];
+        return next;
+      });
+      setClubActionFeedback('경기를 삭제했어요.');
+    } catch (error) {
+      setClubActionError(
+        error.response?.data?.message || '경기를 삭제하지 못했어요.'
+      );
+    } finally {
+      setBusyClubAction('');
+    }
+  };
+
+  const createCompetitionEntry = async () => {
+    if (rejectWithoutPermission(setEntryEditorError, setEntryEditorSuccess)) {
+      return;
+    }
+
+    const playerName = newEntryDraft.playerName.trim();
+    if (!playerName) {
+      setEntryEditorSuccess('');
+      setEntryEditorError('추가할 참가자 이름을 입력해 주세요.');
+      return;
+    }
+
+    try {
+      setIsSavingEntries(true);
+      setEntryEditorError('');
+      setEntryEditorSuccess('');
+      const response = await apiRequest.post(
+        `/api/competitions/${publicId}/entries`,
+        {
+          playerName,
+          gender: newEntryDraft.gender,
+        },
+        adminRequestOptions
+      );
+      const entry = getResponseData(response);
+      const nextEntries = [...entries, entry];
+      setEntries(nextEntries);
+      setOriginalEntries(nextEntries);
+      setCompetition((prev) =>
+        prev
+          ? {
+              ...prev,
+              maleCount:
+                entry.gender === 'MALE'
+                  ? (prev.maleCount ?? 0) + 1
+                  : prev.maleCount,
+              femaleCount:
+                entry.gender === 'FEMALE'
+                  ? (prev.femaleCount ?? 0) + 1
+                  : prev.femaleCount,
+            }
+          : prev
+      );
+      setNewEntryDraft({ playerName: '', gender: 'MALE' });
+      setEntryEditorSuccess('참가자를 추가했어요.');
+    } catch (error) {
+      setEntryEditorError(
+        error.response?.data?.message || '참가자를 추가하지 못했어요.'
+      );
+    } finally {
+      setIsSavingEntries(false);
+    }
+  };
+
+  const updateEntryStatus = async (competitionEntryId, status) => {
+    if (rejectWithoutPermission(setEntryEditorError, setEntryEditorSuccess)) {
+      return;
+    }
+
+    try {
+      setIsSavingEntries(true);
+      setEntryEditorError('');
+      setEntryEditorSuccess('');
+      const response = await apiRequest.patch(
+        `/api/competitions/${publicId}/entries/${competitionEntryId}`,
+        { status },
+        adminRequestOptions
+      );
+      const updatedEntry = getResponseData(response);
+      const nextEntries = entries.map((entry) =>
+        entry.competitionEntryId === updatedEntry.competitionEntryId
+          ? updatedEntry
+          : entry
+      );
+      setEntries(nextEntries);
+      setOriginalEntries(nextEntries);
+      setEntryEditorSuccess(
+        status === 'ACTIVE' ? '참가 상태로 변경했어요.' : '대기 상태로 변경했어요.'
+      );
+    } catch (error) {
+      setEntryEditorError(
+        error.response?.data?.message ||
+          '참가 상태를 변경하지 못했어요. 잠시 후 다시 시도해 주세요.'
+      );
+    } finally {
+      setIsSavingEntries(false);
+    }
+  };
+
+  const addClubCourt = async () => {
+    if (rejectWithoutPermission(setClubActionError, setClubActionFeedback)) {
+      return;
+    }
+
+    const nextCourtCount = (competition?.courtCount ?? 0) + 1;
+    if (nextCourtCount > 10) {
+      setClubActionFeedback('');
+      setClubActionError('코트는 최대 10개까지 추가할 수 있어요.');
+      return;
+    }
+
+    try {
+      setBusyClubAction('add-court');
+      setClubActionError('');
+      setClubActionFeedback('');
+      await apiRequest.patch(
+        `/api/competitions/${publicId}/court-count`,
+        { courtCount: nextCourtCount },
+        adminRequestOptions
+      );
+      await refreshCompetition();
+      setClubActionFeedback(`${nextCourtCount}번 코트를 추가했어요.`);
+    } catch (error) {
+      setClubActionError(
+        error.response?.data?.message || '코트를 추가하지 못했어요.'
+      );
+    } finally {
+      setBusyClubAction('');
+    }
+  };
+
+  const removeClubCourt = async (court, hasReadyGame) => {
+    if (rejectWithoutPermission(setClubActionError, setClubActionFeedback)) {
+      return;
+    }
+
+    const currentCourtCount = competition?.courtCount ?? 0;
+    if (currentCourtCount <= 1) {
+      setClubActionFeedback('');
+      setClubActionError('최소 1개 코트는 남아 있어야 해요.');
+      return;
+    }
+    if (court !== currentCourtCount) {
+      setClubActionFeedback('');
+      setClubActionError('현재 구조에서는 마지막 코트부터 제거할 수 있어요.');
+      return;
+    }
+    const confirmMessage = hasReadyGame
+      ? `${court}번 코트를 제거할까요? 진행 중인 경기는 빈 코트로 이동하고, 완료된 경기 기록은 유지됩니다.`
+      : `${court}번 코트를 제거할까요? 완료된 경기 기록은 유지됩니다.`;
+    if (!window.confirm(confirmMessage)) {
+      return;
+    }
+
+    try {
+      setBusyClubAction(`remove-${court}`);
+      setClubActionError('');
+      setClubActionFeedback('');
+      await apiRequest.patch(
+        `/api/competitions/${publicId}/court-count`,
+        { courtCount: currentCourtCount - 1 },
+        adminRequestOptions
+      );
+      await refreshCompetition();
+      setClubActionFeedback(`${court}번 코트를 제거했어요.`);
+    } catch (error) {
+      setClubActionError(
+        error.response?.data?.message || '코트를 제거하지 못했어요.'
+      );
+    } finally {
+      setBusyClubAction('');
     }
   };
 
@@ -1060,23 +1611,35 @@ function CompetitionDetail() {
   };
 
   return (
-    <main className="competition-detail-page">
-      <MotionHeader
-        className="competition-detail-hero"
-        initial={{ opacity: 0, y: 14 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={itemTransition}
-      >
-        <div className="competition-detail-hero-content">
-          {canManage && <span className="competition-admin-badge">관리자</span>}
-          <h1>{heroTitle}</h1>
-          <p>{heroDescription}</p>
-          {isManageAccessMissing && (
-            <div className="competition-admin-warning">
-              관리자 링크로 접속해야 대진표를 수정할 수 있습니다.
+    <main
+      className={`competition-detail-page ${
+        isClubSession ? 'club-session-detail-page' : ''
+      }`}
+    >
+      {!isClubSession && (
+        <MotionHeader
+          className="competition-detail-hero"
+          initial={{ opacity: 0, y: 14 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={itemTransition}
+        >
+          <div className="competition-detail-hero-content">
+            {canManage && (
+              <div className="competition-detail-label-row">
+                <span className="competition-admin-badge">관리자</span>
+              </div>
+            )}
+            <h1>{heroTitle}</h1>
+            <p>{heroDescription}</p>
+            {isManageAccessMissing && (
+              <div className="competition-admin-warning">
+                관리자 링크로 접속해야 대진표를 수정할 수 있습니다.
+              </div>
+            )}
+            <div className="competition-hero-points" aria-label="대진 운영 상태">
+              <span>복식 대진표</span>
+              <span>점수 입력</span>
             </div>
-          )}
-          {
             <div className="competition-view-switch" aria-label="관리자 보기 전환">
               <button
                 type="button"
@@ -1093,14 +1656,13 @@ function CompetitionDetail() {
                 점수 입력 화면
               </button>
             </div>
-          }
-        </div>
-      </MotionHeader>
+          </div>
+        </MotionHeader>
+      )}
 
       {!isLoading &&
         !errorMessage &&
-        competition &&
-        mode === COMPETITION_MODES.MANAGE && (
+        competition && (
         <section className="competition-admin-actions">
           {canManage && showAdminLinkBanner && (
             <div className="competition-admin-link-banner">
@@ -1204,142 +1766,89 @@ function CompetitionDetail() {
           successMessage={entryEditorSuccess}
           isLoading={isLoadingEntries}
           isSaving={isSavingEntries}
+          isClubSession={isClubSession}
+          newEntryDraft={newEntryDraft}
           onClose={closeEntryEditor}
           onSave={saveEntryNames}
           onUpdateEntryName={updateEntryName}
+          onUpdateEntryStatus={updateEntryStatus}
+          onUpdateNewEntry={setNewEntryDraft}
+          onCreateEntry={createCompetitionEntry}
         />
       )}
 
-      <MotionSection
-        className="competition-detail-panel"
-        initial={{ opacity: 0, y: 18 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ ...itemTransition, delay: 0.08 }}
-      >
-        {renderSummaryPanel()}
-      </MotionSection>
-
-      {!isLoading &&
-        !errorMessage &&
-        competition &&
-        mode === COMPETITION_MODES.SCORE && (
-        <section className="competition-secondary-actions">
-          <button
-            className="competition-result-button"
-            type="button"
-            onClick={() => navigate(`/competitions/${publicId}/result`)}
-          >
-            경기 결과 보기
-          </button>
-        </section>
+      {!isLoading && !errorMessage && competition && isClubSession && (
+        <ClubSessionDetail
+          competition={competition}
+          canManage={canManage}
+          courtCount={competition.courtCount ?? 0}
+          courtGroups={courtGroups}
+          formattedCreatedAt={formatCompetitionCreatedAt(
+            competition.createdAt
+          )}
+          isSavingCompetitionName={isSavingCompetitionName}
+          competitionNameError={competitionNameError}
+          competitionNameSuccess={competitionNameSuccess}
+          clubActionError={clubActionError}
+          clubActionFeedback={clubActionFeedback}
+          busyClubAction={busyClubAction}
+          clubCompletionDrafts={clubCompletionDrafts}
+          clubAvailableEntryCount={clubAvailableEntryCount}
+          gameEditor={gameEditor}
+          gameEditorError={gameEditorError}
+          isSavingGameEntries={isSavingGameEntries}
+          isEntrySelectedElsewhere={isEntrySelectedElsewhere}
+          getEntryRoundConflictLabel={getEntryRoundConflictLabel}
+          onCreateNextCourtGame={createNextCourtGame}
+          onSaveCompetitionName={saveCompetitionName}
+          onOpenGameEditor={openGameEditor}
+          onPrepareCompletion={prepareClubCompletion}
+          onUpdateCompletionScore={updateClubCompletionScore}
+          onSubmitCompletion={submitClubGameCompletion}
+          onSubmitCompletedScoreEdit={submitClubCompletedScoreEdit}
+          onDeleteGame={deleteClubGame}
+          onCloseGameEditor={closeGameEditor}
+          onSaveGameEntries={saveGameEntries}
+          onUpdateGameEditorSelection={updateGameEditorSelection}
+        />
       )}
 
-      {!isLoading && !errorMessage && rounds.length > 0 && (
+      {!isClubSession && (
         <MotionSection
-          key={mode}
-          className="competition-schedule"
-          initial={{ opacity: 0, y: 14 }}
+          className="competition-detail-panel"
+          initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ ...itemTransition, delay: 0.08 }}
         >
-          {mode === COMPETITION_MODES.SCORE && (
-            <div className="score-filter-bar">
-              <button
-                type="button"
-                className={showOnlyUnscoredGames ? 'active' : ''}
-                onClick={() => setShowOnlyUnscoredGames((prev) => !prev)}
-              >
-                {showOnlyUnscoredGames ? '전체 경기 보기' : '미입력 경기만 보기'}
-              </button>
-              <span>
-                {showOnlyUnscoredGames
-                  ? `${visibleRounds.reduce((count, item) => count + item.games.length, 0)}경기 남음`
-                  : '점수 입력이 필요한 경기만 빠르게 볼 수 있어요.'}
-              </span>
-            </div>
-          )}
-
-          {visibleRounds.length === 0 ? (
-            <div className="competition-detail-state">
-              점수를 입력할 경기가 없어요.
-            </div>
-          ) : (
-            visibleRounds.map(({ round, games, roundPlayerStatus }) => (
-            <div className="round-section" key={round}>
-              <div className="round-heading">
-                <h2>
-                  <span>{round}</span>
-                  Round
-                </h2>
-                {(roundPlayerStatus.duplicatedPlayers.length > 0 ||
-                  roundPlayerStatus.idlePlayers.length > 0) && (
-                  <div className="round-warning">
-                    {roundPlayerStatus.duplicatedPlayers.length > 0 && (
-                      <p>
-                        <strong>중복 출전</strong>
-                        {roundPlayerStatus.duplicatedPlayers
-                          .map(
-                            (player) =>
-                              `${player.playerName} ${player.count}회`
-                          )
-                          .join(', ')}
-                      </p>
-                    )}
-                    {roundPlayerStatus.idlePlayers.length > 0 && (
-                      <p>
-                        <strong>쉬는 선수</strong>
-                        {roundPlayerStatus.idlePlayers
-                          .map((player) => player.playerName)
-                          .join(', ')}
-                      </p>
-                    )}
-                  </div>
-                )}
-              </div>
-
-              <div className="game-list">
-                {games.map((game) => {
-                  const isEditing = gameEditor?.game?.gameId === game.gameId;
-
-                  return (
-                    <div className="game-card-group" key={game.gameId}>
-                      <CompetitionGameCard
-                        game={game}
-                        mode={mode}
-                        canManage={canManage}
-                        isEditing={isEditing}
-                        isTiebreakOpen={Boolean(tiebreakOpenGames[game.gameId])}
-                        isSavingScore={savingScoreGameIds.includes(game.gameId)}
-                        scoreFeedback={scoreFeedbackByGameId[game.gameId]}
-                        scoreError={scoreErrorByGameId[game.gameId]}
-                        onOpenGameEditor={openGameEditor}
-                        onToggleTiebreak={toggleTiebreak}
-                        onUpdateGameScore={updateGameScore}
-                        onSaveGameScore={saveGameScore}
-                      />
-
-                      {canManage && isEditing && (
-                        <CompetitionGameEditor
-                          gameEditor={gameEditor}
-                          errorMessage={gameEditorError}
-                          isSaving={isSavingGameEntries}
-                          isEntrySelectedElsewhere={isEntrySelectedElsewhere}
-                          getEntryRoundConflictLabel={
-                            getEntryRoundConflictLabel
-                          }
-                          onClose={closeGameEditor}
-                          onSave={saveGameEntries}
-                          onUpdateSelection={updateGameEditorSelection}
-                        />
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-            ))
-          )}
+          {renderSummaryPanel()}
         </MotionSection>
+      )}
+
+      {!isLoading && !errorMessage && competition && !isClubSession && (
+        <FixedScheduleDetail
+          mode={mode}
+          canManage={canManage}
+          visibleRounds={rounds}
+          showOnlyUnscoredGames={showOnlyUnscoredGames}
+          gameEditor={gameEditor}
+          gameEditorError={gameEditorError}
+          isSavingGameEntries={isSavingGameEntries}
+          tiebreakOpenGames={tiebreakOpenGames}
+          savingScoreGameIds={savingScoreGameIds}
+          scoreFeedbackByGameId={scoreFeedbackByGameId}
+          scoreErrorByGameId={scoreErrorByGameId}
+          onToggleUnscoredGames={() => setShowOnlyUnscoredGames((prev) => !prev)}
+          onOpenResult={() => navigate(`/competitions/${publicId}/result`)}
+          onOpenGameEditor={openGameEditor}
+          onToggleTiebreak={toggleTiebreak}
+          onUpdateGameScore={updateGameScore}
+          onSaveGameScore={saveGameScore}
+          isEntrySelectedElsewhere={isEntrySelectedElsewhere}
+          getEntryRoundConflictLabel={getEntryRoundConflictLabel}
+          onCloseGameEditor={closeGameEditor}
+          onSaveGameEntries={saveGameEntries}
+          onUpdateGameEditorSelection={updateGameEditorSelection}
+        />
       )}
     </main>
   );

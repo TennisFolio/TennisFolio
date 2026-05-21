@@ -4,12 +4,6 @@ import com.tennisfolio.Tennisfolio.common.Entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
-
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Table(name = "tb_competition_entry")
@@ -33,6 +27,10 @@ public class CompetitionEntry extends BaseTimeEntity {
     @Column(name = "GENDER", nullable = false)
     private Gender gender;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "STATUS", nullable = false)
+    private EntryStatus status = EntryStatus.ACTIVE;
+
 
     public CompetitionEntry(Competition competition, String playerName, Gender gender) {
         this.competition = competition;
@@ -44,9 +42,21 @@ public class CompetitionEntry extends BaseTimeEntity {
         this.playerName = playerName;
     }
 
+    public void updateGender(Gender gender) {
+        this.gender = gender;
+    }
+
+    public void updateStatus(EntryStatus status) {
+        this.status = status;
+    }
+
 
     public enum Gender {
         MALE, FEMALE
+    }
+
+    public enum EntryStatus {
+        ACTIVE, INACTIVE
     }
 }
 

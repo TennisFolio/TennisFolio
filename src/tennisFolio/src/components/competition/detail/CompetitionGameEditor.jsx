@@ -72,11 +72,13 @@ function CompetitionGameEditor({
         {openDropdownKey === key && (
           <div className="player-dropdown-menu">
             {gameEditor.entries.map((entry) => {
-              const isDisabled = isEntrySelectedElsewhere(
+              const isInactive = entry.status === 'INACTIVE';
+              const isSelectedElsewhere = isEntrySelectedElsewhere(
                 entry.competitionEntryId,
                 team,
                 index
               );
+              const isDisabled = isInactive;
               const conflictLabel = getEntryRoundConflictLabel(
                 entry.competitionEntryId
               );
@@ -97,7 +99,9 @@ function CompetitionGameEditor({
                     {getGenderLabel(entry.gender)}
                   </span>
                   <strong>{entry.playerName}</strong>
-                  {isDisabled ? (
+                  {isInactive ? (
+                    <em>대기</em>
+                  ) : isSelectedElsewhere ? (
                     <em>선택됨</em>
                   ) : (
                     conflictLabel && <em>{conflictLabel}</em>

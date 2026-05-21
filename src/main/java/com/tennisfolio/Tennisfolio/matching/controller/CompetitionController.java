@@ -4,15 +4,19 @@ import com.tennisfolio.Tennisfolio.common.response.ResponseDTO;
 import com.tennisfolio.Tennisfolio.matching.dto.CompetitionCreateRequest;
 import com.tennisfolio.Tennisfolio.matching.dto.CompetitionCreateResponse;
 import com.tennisfolio.Tennisfolio.matching.dto.CompetitionDetailResponse;
+import com.tennisfolio.Tennisfolio.matching.dto.CompetitionEntryCreateRequest;
 import com.tennisfolio.Tennisfolio.matching.dto.CompetitionEntryResponse;
 import com.tennisfolio.Tennisfolio.matching.dto.CompetitionEntryUpdateRequest;
 import com.tennisfolio.Tennisfolio.matching.dto.CompetitionResultResponse;
+import com.tennisfolio.Tennisfolio.matching.dto.CompetitionStatResponse;
 import com.tennisfolio.Tennisfolio.matching.dto.CompetitionUpdateRequest;
 import com.tennisfolio.Tennisfolio.matching.dto.CompetitionUpdateResponse;
+import com.tennisfolio.Tennisfolio.matching.dto.CourtCountUpdateRequest;
 import com.tennisfolio.Tennisfolio.matching.dto.GameEntryUpdateRequest;
 import com.tennisfolio.Tennisfolio.matching.dto.GameEntryUpdateResponse;
 import com.tennisfolio.Tennisfolio.matching.dto.GameResponse;
 import com.tennisfolio.Tennisfolio.matching.dto.GameScoreUpdateRequest;
+import com.tennisfolio.Tennisfolio.matching.dto.GameStatusUpdateRequest;
 import com.tennisfolio.Tennisfolio.matching.service.CompetitionCommandService;
 import com.tennisfolio.Tennisfolio.matching.service.CompetitionEntryCommandService;
 import com.tennisfolio.Tennisfolio.matching.service.CompetitionEntryQueryService;
@@ -21,6 +25,7 @@ import com.tennisfolio.Tennisfolio.matching.service.CompetitionQueryService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -89,11 +94,35 @@ public class CompetitionController {
         return new ResponseEntity<>(ResponseDTO.success(response), HttpStatus.OK);
     }
 
+    @PatchMapping("/competitions/{publicId}/court-count")
+    public ResponseEntity<ResponseDTO<CompetitionStatResponse>> updateCourtCount(
+            @PathVariable String publicId,
+            @RequestHeader(value = "X-Competition-Edit-Token", required = false) String editToken,
+            @RequestBody CourtCountUpdateRequest request
+    ) {
+        CompetitionStatResponse response = competitionGameCommandService.updateCourtCount(publicId, editToken, request);
+        return new ResponseEntity<>(ResponseDTO.success(response), HttpStatus.OK);
+    }
+
     @GetMapping("/competitions/{publicId}/entries")
     public ResponseEntity<ResponseDTO<List<CompetitionEntryResponse>>> getCompetitionEntries(
             @PathVariable String publicId
     ) {
         List<CompetitionEntryResponse> response = competitionEntryQueryService.getCompetitionEntries(publicId);
+        return new ResponseEntity<>(ResponseDTO.success(response), HttpStatus.OK);
+    }
+
+    @PostMapping("/competitions/{publicId}/entries")
+    public ResponseEntity<ResponseDTO<CompetitionEntryResponse>> createCompetitionEntry(
+            @PathVariable String publicId,
+            @RequestHeader(value = "X-Competition-Edit-Token", required = false) String editToken,
+            @RequestBody CompetitionEntryCreateRequest request
+    ) {
+        CompetitionEntryResponse response = competitionEntryCommandService.createCompetitionEntry(
+                publicId,
+                editToken,
+                request
+        );
         return new ResponseEntity<>(ResponseDTO.success(response), HttpStatus.OK);
     }
 
@@ -129,13 +158,45 @@ public class CompetitionController {
         return new ResponseEntity<>(ResponseDTO.success(response), HttpStatus.OK);
     }
 
+    @PostMapping("/competitions/{publicId}/courts/{court}/games")
+    public ResponseEntity<ResponseDTO<GameResponse>> createNextCourtGame(
+            @PathVariable String publicId,
+            @PathVariable Integer court,
+            @RequestHeader(value = "X-Competition-Edit-Token", required = false) String editToken
+    ) {
+        GameResponse response = competitionGameCommandService.createNextCourtGame(publicId, court, editToken);
+        return new ResponseEntity<>(ResponseDTO.success(response), HttpStatus.OK);
+    }
+
+    @PatchMapping("/competitions/{publicId}/games/{gameId}/status")
+    public ResponseEntity<ResponseDTO<GameResponse>> updateGameStatus(
+            @PathVariable String publicId,
+            @PathVariable Long gameId,
+            @RequestHeader(value = "X-Competition-Edit-Token", required = false) String editToken,
+            @RequestBody GameStatusUpdateRequest request
+    ) {
+        GameResponse response = competitionGameCommandService.updateGameStatus(publicId, gameId, editToken, request);
+        return new ResponseEntity<>(ResponseDTO.success(response), HttpStatus.OK);
+    }
+
+    @DeleteMapping("/competitions/{publicId}/games/{gameId}")
+    public ResponseEntity<ResponseDTO<Void>> deleteGame(
+            @PathVariable String publicId,
+            @PathVariable Long gameId,
+            @RequestHeader(value = "X-Competition-Edit-Token", required = false) String editToken
+    ) {
+        competitionGameCommandService.deleteGame(publicId, gameId, editToken);
+        return new ResponseEntity<>(ResponseDTO.success(null), HttpStatus.OK);
+    }
+
     @PatchMapping("/competitions/{publicId}/games/{gameId}/score")
     public ResponseEntity<ResponseDTO<GameResponse>> updateGameScore(
             @PathVariable String publicId,
             @PathVariable Long gameId,
+            @RequestHeader(value = "X-Competition-Edit-Token", required = false) String editToken,
             @RequestBody GameScoreUpdateRequest request
     ) {
-        GameResponse response = competitionGameCommandService.updateGameScore(publicId, gameId, request);
+        GameResponse response = competitionGameCommandService.updateGameScore(publicId, gameId, editToken, request);
         return new ResponseEntity<>(ResponseDTO.success(response), HttpStatus.OK);
     }
 }

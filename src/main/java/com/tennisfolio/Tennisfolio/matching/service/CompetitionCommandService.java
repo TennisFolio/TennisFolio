@@ -42,9 +42,12 @@ public class CompetitionCommandService {
 
     @Transactional
     public CompetitionCreateResponse createCompetition(CompetitionCreateRequest request) {
-        validateRequest(request);
+        Competition.CompetitionMode mode = resolveMode(request.getMode());
+        validateRequest(request, mode);
 
-        int rounds = Math.max(1, request.getHours() * ROUNDS_PER_HOUR);
+        int rounds = mode == Competition.CompetitionMode.CLUB_SESSION
+                ? 1
+                : Math.max(1, request.getHours() * ROUNDS_PER_HOUR);
         long seed = request.getSeed() != null
                 ? request.getSeed()
                 : ThreadLocalRandom.current().nextLong(1, 10000);
@@ -76,7 +79,7 @@ public class CompetitionCommandService {
         return CompetitionUpdateResponse.from(competition);
     }
 
-    private void validateRequest(CompetitionCreateRequest request) {
+    private void validateRequest(CompetitionCreateRequest request, Competition.CompetitionMode mode) {
 
         if (request.getMaleCount() < 0 || request.getFemaleCount() < 0) {
             throw new IllegalArgumentException("maleCount and femaleCount must be non-negative");
@@ -87,11 +90,13 @@ public class CompetitionCommandService {
         if (request.getCourtCount() > MAX_COURT_COUNT) {
             throw new IllegalArgumentException("courtCount must be " + MAX_COURT_COUNT + " or less");
         }
-        if (request.getHours() <= 0) {
-            throw new IllegalArgumentException("hours must be greater than 0");
-        }
-        if (request.getHours() > MAX_HOURS) {
-            throw new IllegalArgumentException("hours must be " + MAX_HOURS + " or less");
+        if (mode == Competition.CompetitionMode.FIXED_SCHEDULE) {
+            if (request.getHours() <= 0) {
+                throw new IllegalArgumentException("hours must be greater than 0");
+            }
+            if (request.getHours() > MAX_HOURS) {
+                throw new IllegalArgumentException("hours must be " + MAX_HOURS + " or less");
+            }
         }
 
         int playerCount = request.getMaleCount() + request.getFemaleCount();
@@ -105,5 +110,12 @@ public class CompetitionCommandService {
         if (playerCount < request.getCourtCount() * 4) {
             throw new IllegalArgumentException("player count must be at least courtCount * 4");
         }
+    }
+
+    private Competition.CompetitionMode resolveMode(String mode) {
+        if (mode == null || mode.trim().isEmpty()) {
+            return Competition.CompetitionMode.FIXED_SCHEDULE;
+        }
+        return Competition.CompetitionMode.valueOf(mode.trim().toUpperCase());
     }
 }

@@ -18,13 +18,15 @@ public class CompetitionService {
     }
 
     public Competition createCompetition(CompetitionCreateRequest request, int rounds, long seed) {
+        Competition.CompetitionMode mode = resolveMode(request.getMode());
         return competitionRepository.save(new Competition(
                 request.getCompetitionName(),
                 request.getMaleCount(),
                 request.getFemaleCount(),
                 request.getCourtCount(),
                 rounds,
-                seed
+                seed,
+                mode
         ));
     }
 
@@ -56,5 +58,12 @@ public class CompetitionService {
             );
         }
         return normalizedName;
+    }
+
+    private Competition.CompetitionMode resolveMode(String mode) {
+        if (mode == null || mode.trim().isEmpty()) {
+            return Competition.CompetitionMode.FIXED_SCHEDULE;
+        }
+        return Competition.CompetitionMode.valueOf(mode.trim().toUpperCase());
     }
 }

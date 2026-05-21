@@ -4,11 +4,14 @@ import com.tennisfolio.Tennisfolio.common.ExceptionCode;
 import com.tennisfolio.Tennisfolio.exception.InvalidRequestException;
 import com.tennisfolio.Tennisfolio.exception.NotFoundException;
 import com.tennisfolio.Tennisfolio.matching.dto.CompetitionStatResponse;
+import com.tennisfolio.Tennisfolio.matching.dto.CourtCountUpdateRequest;
 import com.tennisfolio.Tennisfolio.matching.dto.GameBalanceResponse;
 import com.tennisfolio.Tennisfolio.matching.dto.GameEntryUpdateRequest;
 import com.tennisfolio.Tennisfolio.matching.dto.GameEntryUpdateResponse;
 import com.tennisfolio.Tennisfolio.matching.dto.GameResponse;
 import com.tennisfolio.Tennisfolio.matching.dto.GameScoreUpdateRequest;
+import com.tennisfolio.Tennisfolio.matching.dto.GameStatusUpdateRequest;
+import com.tennisfolio.Tennisfolio.matching.domain.GameMatch;
 import com.tennisfolio.Tennisfolio.matching.entity.Competition;
 import com.tennisfolio.Tennisfolio.matching.entity.CompetitionEntry;
 import com.tennisfolio.Tennisfolio.matching.entity.CompetitionStat;
@@ -30,6 +33,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ThreadLocalRandom;
 
 @Service
 public class CompetitionGameCommandService {
@@ -39,19 +43,124 @@ public class CompetitionGameCommandService {
     private final CompetitionStatRepository competitionStatRepository;
     private final GameRepository gameRepository;
     private final GameEntryRepository gameEntryRepository;
+    private final TennisMatchScheduler scheduler;
+    private final GameService gameService;
 
     public CompetitionGameCommandService(
             CompetitionRepository competitionRepository,
             CompetitionEntryRepository competitionEntryRepository,
             CompetitionStatRepository competitionStatRepository,
             GameRepository gameRepository,
-            GameEntryRepository gameEntryRepository
+            GameEntryRepository gameEntryRepository,
+            TennisMatchScheduler scheduler,
+            GameService gameService
     ) {
         this.competitionRepository = competitionRepository;
         this.competitionEntryRepository = competitionEntryRepository;
         this.competitionStatRepository = competitionStatRepository;
         this.gameRepository = gameRepository;
         this.gameEntryRepository = gameEntryRepository;
+        this.scheduler = scheduler;
+        this.gameService = gameService;
+    }
+
+    @Transactional
+    public GameResponse createNextCourtGame(String publicId, Integer court, String editToken) {
+        Competition competition = competitionRepository.findByPublicId(publicId)
+                .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND));
+        validateClubSession(competition);
+        validateCourt(competition, court);
+
+        List<CompetitionEntry> candidates = competitionEntryRepository
+                .findByCompetitionIdAndStatus(competition.getId(), CompetitionEntry.EntryStatus.ACTIVE);
+
+        if (candidates.size() < 4) {
+            throw new InvalidRequestException(ExceptionCode.INVALID_REQUEST);
+        }
+
+        int nextRound = gameRepository.findMaxRoundByCompetitionIdAndCourt(competition.getId(), court) + 1;
+        List<GameEntry> history = gameEntryRepository.findScheduleEntriesByCompetitionId(competition.getId());
+        GameMatch match = scheduler.generateNextClubSessionGame(
+                candidates,
+                history,
+                court,
+                nextRound,
+                ThreadLocalRandom.current().nextLong()
+        );
+
+        Map<String, CompetitionEntry> entriesById = new HashMap<>();
+        for (CompetitionEntry candidate : candidates) {
+            entriesById.put(String.valueOf(candidate.getId()), candidate);
+        }
+        Game game = gameService.saveGame(competition, match, entriesById);
+        CompetitionStat stat = recalculateCompetitionStat(competition);
+
+        return GameResponse.from(game, gameEntryRepository.findByGameId(game.getId()));
+    }
+
+    @Transactional
+    public GameResponse updateGameStatus(
+            String publicId,
+            Long gameId,
+            String editToken,
+            GameStatusUpdateRequest request
+    ) {
+        Competition competition = competitionRepository.findByPublicId(publicId)
+                .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND));
+        validateClubSession(competition);
+
+        Game game = gameRepository.findByIdAndCompetitionId(gameId, competition.getId())
+                .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND));
+        Game.GameStatus status = resolveGameStatus(request.getStatus());
+        if (game.getStatus() != Game.GameStatus.READY || status != Game.GameStatus.COMPLETED) {
+            throw new InvalidRequestException(ExceptionCode.INVALID_REQUEST);
+        }
+
+        game.recordScore(
+                normalizeScore(request.getTeamAScore()),
+                normalizeScore(request.getTeamBScore()),
+                0,
+                0
+        );
+        game.complete();
+        return GameResponse.from(game, gameEntryRepository.findByGameId(game.getId()));
+    }
+
+    @Transactional
+    public void deleteGame(String publicId, Long gameId, String editToken) {
+        Competition competition = competitionRepository.findByPublicId(publicId)
+                .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND));
+        validateEditToken(competition, editToken);
+        validateClubSession(competition);
+
+        Game game = gameRepository.findByIdAndCompetitionId(gameId, competition.getId())
+                .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND));
+        if (game.getStatus() != Game.GameStatus.READY) {
+            throw new InvalidRequestException(ExceptionCode.INVALID_REQUEST);
+        }
+
+        gameEntryRepository.deleteByGameId(game.getId());
+        gameRepository.delete(game);
+        recalculateCompetitionStat(competition);
+    }
+
+    @Transactional
+    public CompetitionStatResponse updateCourtCount(
+            String publicId,
+            String editToken,
+            CourtCountUpdateRequest request
+    ) {
+        Competition competition = competitionRepository.findByPublicId(publicId)
+                .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND));
+        validateEditToken(competition, editToken);
+        validateClubSession(competition);
+
+        if (request.getCourtCount() == null || request.getCourtCount() <= 0 || request.getCourtCount() > 10) {
+            throw new InvalidRequestException(ExceptionCode.INVALID_REQUEST);
+        }
+        relocateReadyGamesOutsideCourtLimit(competition, request.getCourtCount());
+        competition.updateCourtCount(request.getCourtCount());
+        return CompetitionStatResponse.from(recalculateCompetitionStat(competition));
     }
 
     @Transactional
@@ -64,16 +173,23 @@ public class CompetitionGameCommandService {
         Competition competition = competitionRepository.findByPublicId(publicId)
                 .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND));
         validateEditToken(competition, editToken);
-        validateReadyCompetition(competition);
 
         Game game = gameRepository.findByIdAndCompetitionId(gameId, competition.getId())
                 .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND));
+        if (competition.getMode() == Competition.CompetitionMode.CLUB_SESSION) {
+            validateReadyGame(game);
+        } else {
+            validateReadyCompetition(competition);
+        }
         List<GameEntry> currentGameEntries = gameEntryRepository.findByGameId(game.getId());
         boolean gameEntriesChanged = hasGameEntriesChanged(currentGameEntries, request);
 
         List<CompetitionEntry> teamA = resolveTeamEntries(competition, request.getTeamA());
         List<CompetitionEntry> teamB = resolveTeamEntries(competition, request.getTeamB());
         validateDistinctPlayers(teamA, teamB);
+        if (competition.getMode() == Competition.CompetitionMode.CLUB_SESSION) {
+            validateClubSessionGameEntries(competition, teamA, teamB);
+        }
 
         game.updateMatchType(resolveMatchType(teamA, teamB));
         if (gameEntriesChanged && hasRecordedScore(game)) {
@@ -95,6 +211,7 @@ public class CompetitionGameCommandService {
     public GameResponse updateGameScore(
             String publicId,
             Long gameId,
+            String editToken,
             GameScoreUpdateRequest request
     ) {
         Competition competition = competitionRepository.findByPublicId(publicId)
@@ -102,10 +219,20 @@ public class CompetitionGameCommandService {
         Game game = gameRepository.findByIdAndCompetitionId(gameId, competition.getId())
                 .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND));
 
+        if (competition.getMode() == Competition.CompetitionMode.CLUB_SESSION) {
+            if (game.getStatus() != Game.GameStatus.COMPLETED) {
+                throw new InvalidRequestException(ExceptionCode.INVALID_REQUEST);
+            }
+        }
+
         Integer teamAScore = normalizeScore(request.getTeamAScore());
         Integer teamBScore = normalizeScore(request.getTeamBScore());
-        Integer teamATiebreakScore = normalizeScore(request.getTeamATiebreakScore());
-        Integer teamBTiebreakScore = normalizeScore(request.getTeamBTiebreakScore());
+        Integer teamATiebreakScore = competition.getMode() == Competition.CompetitionMode.CLUB_SESSION
+                ? 0
+                : normalizeScore(request.getTeamATiebreakScore());
+        Integer teamBTiebreakScore = competition.getMode() == Competition.CompetitionMode.CLUB_SESSION
+                ? 0
+                : normalizeScore(request.getTeamBTiebreakScore());
 
         game.recordScore(teamAScore, teamBScore, teamATiebreakScore, teamBTiebreakScore);
         return GameResponse.from(game, gameEntryRepository.findByGameId(game.getId()));
@@ -176,6 +303,63 @@ public class CompetitionGameCommandService {
         }
     }
 
+    private void validateReadyGame(Game game) {
+        if (game.getStatus() != Game.GameStatus.READY) {
+            throw new InvalidRequestException(ExceptionCode.INVALID_REQUEST);
+        }
+    }
+
+    private void validateClubSession(Competition competition) {
+        if (competition.getMode() != Competition.CompetitionMode.CLUB_SESSION) {
+            throw new InvalidRequestException(ExceptionCode.INVALID_REQUEST);
+        }
+    }
+
+    private void validateCourt(Competition competition, Integer court) {
+        if (court == null || court <= 0 || court > competition.getCourtCount()) {
+            throw new InvalidRequestException(ExceptionCode.INVALID_REQUEST);
+        }
+    }
+
+    private void relocateReadyGamesOutsideCourtLimit(Competition competition, int targetCourtCount) {
+        if (targetCourtCount >= competition.getCourtCount()) {
+            return;
+        }
+
+        List<Game> readyGames = gameRepository.findByCompetitionIdAndStatus(
+                competition.getId(),
+                Game.GameStatus.READY
+        );
+        Set<Integer> occupiedCourts = new HashSet<>();
+        List<Game> gamesToRelocate = new ArrayList<>();
+
+        for (Game game : readyGames) {
+            if (game.getCourt() <= targetCourtCount) {
+                occupiedCourts.add(game.getCourt());
+                continue;
+            }
+            gamesToRelocate.add(game);
+        }
+
+        for (Game game : gamesToRelocate) {
+            Integer emptyCourt = findEmptyCourt(targetCourtCount, occupiedCourts);
+            if (emptyCourt == null) {
+                throw new InvalidRequestException(ExceptionCode.INVALID_REQUEST);
+            }
+            game.assignCourt(emptyCourt);
+            occupiedCourts.add(emptyCourt);
+        }
+    }
+
+    private Integer findEmptyCourt(int courtCount, Set<Integer> occupiedCourts) {
+        for (int court = 1; court <= courtCount; court++) {
+            if (!occupiedCourts.contains(court)) {
+                return court;
+            }
+        }
+        return null;
+    }
+
     private void validateEditToken(Competition competition, String editToken) {
         if (editToken == null || !competition.getEditToken().equals(editToken)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid edit token");
@@ -212,6 +396,36 @@ public class CompetitionGameCommandService {
             entryIds.add(entry.getId());
         }
         if (entryIds.size() != 4) {
+            throw new InvalidRequestException(ExceptionCode.INVALID_REQUEST);
+        }
+    }
+
+    private void validateClubSessionGameEntries(
+            Competition competition,
+            List<CompetitionEntry> teamA,
+            List<CompetitionEntry> teamB
+    ) {
+        for (CompetitionEntry entry : teamA) {
+            validateActiveEntry(entry);
+        }
+        for (CompetitionEntry entry : teamB) {
+            validateActiveEntry(entry);
+        }
+    }
+
+    private void validateActiveEntry(CompetitionEntry entry) {
+        if (entry.getStatus() != CompetitionEntry.EntryStatus.ACTIVE) {
+            throw new InvalidRequestException(ExceptionCode.INVALID_REQUEST);
+        }
+    }
+
+    private Game.GameStatus resolveGameStatus(String status) {
+        if (status == null || status.trim().isEmpty()) {
+            throw new InvalidRequestException(ExceptionCode.INVALID_REQUEST);
+        }
+        try {
+            return Game.GameStatus.valueOf(status.trim().toUpperCase());
+        } catch (IllegalArgumentException e) {
             throw new InvalidRequestException(ExceptionCode.INVALID_REQUEST);
         }
     }

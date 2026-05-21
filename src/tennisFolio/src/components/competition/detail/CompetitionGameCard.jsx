@@ -1,12 +1,14 @@
-import { COMPETITION_MODES } from './CompetitionDetailSummary';
+﻿import { COMPETITION_MODES } from './CompetitionDetailSummary';
+
+import GameScoreEditor from './GameScoreEditor';
 
 const MATCH_TYPE_LABELS = {
   MIXED: '혼복',
   MALE: '남복',
   FEMALE: '여복',
   M2F2_SPLIT: '2:2 배정',
-  RANDOM_M3F1: '남3/여1',
-  RANDOM_M1F3: '남1/여3',
+  RANDOM_M3F1: '랜덤',
+  RANDOM_M1F3: '랜덤',
 };
 
 const MATCH_TYPE_CLASSES = {
@@ -20,6 +22,12 @@ const MATCH_TYPE_CLASSES = {
 
 function getTeamPlayers(team) {
   return team?.players ?? [];
+}
+
+function hasScoreValue(score = {}) {
+  return [score.teamAScore, score.teamBScore].some(
+    (value) => value !== null && value !== undefined && value !== ''
+  );
 }
 
 function TeamView({ game, teamKey, label }) {
@@ -50,120 +58,167 @@ function CompetitionGameCard({
   game,
   mode,
   canManage,
+  isClubSession = false,
+  canComplete = false,
   isEditing,
   isTiebreakOpen,
   isSavingScore,
   scoreFeedback,
   scoreError,
+  scoreSaveLabel = '점수 저장',
+  busyClubAction,
+  clubScoreDraft,
+  canEditCompletedScore = false,
+  isCompletionConfirming = false,
+  completionConfirmationMessage = '',
   onOpenGameEditor,
+  onPrepareCompletion,
+  onUpdateCompletionScore,
+  onRequestCompletionConfirm,
+  onCancelCompletionConfirm,
+  onSubmitCompletion,
+  onSubmitCompletedScoreEdit = () => {},
+  onDeleteGame,
   onToggleTiebreak,
   onUpdateGameScore,
   onSaveGameScore,
 }) {
+  const isReadyClubGame =
+    isClubSession &&
+    canComplete &&
+    mode === COMPETITION_MODES.MANAGE &&
+    (game.status === 'READY' || game.status === 'IN_PROGRESS');
+  const isCompletedClubGame =
+    isClubSession &&
+    mode === COMPETITION_MODES.MANAGE &&
+    game.status === 'COMPLETED';
+  const isWaitingClubGame =
+    isClubSession &&
+    mode === COMPETITION_MODES.MANAGE &&
+    !canComplete &&
+    (game.status === 'READY' || game.status === 'IN_PROGRESS');
+  const clubScore =
+    clubScoreDraft ??
+    (isReadyClubGame ? { teamAScore: 0, teamBScore: 0 } : game.score);
+
   const renderGameTools = () => {
+    if (isReadyClubGame) {
+      return (
+        <GameScoreEditor
+          score={clubScore}
+          variant="compact"
+          showSave
+          isSaving={busyClubAction === `complete-${game.gameId}`}
+          saveLabel="경기 완료"
+          savingLabel="완료 중"
+          onFocus={() => onPrepareCompletion(game.gameId)}
+          onChange={(field, value) =>
+            onUpdateCompletionScore(game.gameId, field, value)
+          }
+          onSave={() => onRequestCompletionConfirm(game.gameId)}
+        />
+      );
+    }
+
+    if (isCompletedClubGame && hasScoreValue(game.score)) {
+      if (canEditCompletedScore) {
+        return (
+          <GameScoreEditor
+            score={clubScore}
+            variant="compact"
+            showSave
+            isSaving={busyClubAction === `score-${game.gameId}`}
+            onChange={(field, value) =>
+              onUpdateCompletionScore(game.gameId, field, value)
+            }
+            onSave={() => onSubmitCompletedScoreEdit(game.gameId)}
+          />
+        );
+      }
+
+      return (
+        <div className="completed-score completed-score-center">
+          {game.score?.teamAScore ?? 0} : {game.score?.teamBScore ?? 0}
+        </div>
+      );
+    }
+
     if (mode === COMPETITION_MODES.MANAGE) {
       return (
-        <div className="match-versus" aria-label="대결">
+        <div className="match-versus" aria-label="대기">
           VS
         </div>
       );
     }
 
     return (
-      <div className="match-score-editor">
-        <button
-          className={`tiebreak-toggle ${isTiebreakOpen ? 'active' : ''}`}
-          type="button"
-          onClick={() => onToggleTiebreak(game.gameId)}
+      <GameScoreEditor
+        score={game.score}
+        variant="full"
+        showTiebreak
+        isTiebreakOpen={isTiebreakOpen}
+        isSaving={isSavingScore}
+        saveLabel={scoreSaveLabel}
+        errorMessage={scoreError}
+        feedbackMessage={scoreFeedback}
+        onToggleTiebreak={() => onToggleTiebreak(game.gameId)}
+        onChange={(field, value) => onUpdateGameScore(game.gameId, field, value)}
+        onSave={() => onSaveGameScore(game.gameId)}
+      />
+    );
+  };
+
+  const renderClubCompletionPanel = () => {
+    if (!isReadyClubGame || !isCompletionConfirming) {
+      return null;
+    }
+
+    return (
+      <div className="club-completion-modal-backdrop" role="presentation">
+        <div
+          className="club-completion-modal"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby={`completion-confirm-title-${game.gameId}`}
         >
-          타이브레이크
-        </button>
-
-        <div className="score-input-row">
-          <input
-            aria-label="A팀 점수"
-            inputMode="numeric"
-            min="0"
-            max="99"
-            type="number"
-            value={game.score?.teamAScore ?? ''}
-            onChange={(event) =>
-              onUpdateGameScore(game.gameId, 'teamAScore', event.target.value)
-            }
-          />
-          <span>:</span>
-          <input
-            aria-label="B팀 점수"
-            inputMode="numeric"
-            min="0"
-            max="99"
-            type="number"
-            value={game.score?.teamBScore ?? ''}
-            onChange={(event) =>
-              onUpdateGameScore(game.gameId, 'teamBScore', event.target.value)
-            }
-          />
-        </div>
-
-        {isTiebreakOpen && (
-          <div className="tiebreak-score-box">
-            <p>타이브레이크 점수</p>
-            <div className="tiebreak-input-row">
-              <input
-                aria-label="A팀 타이브레이크 점수"
-                inputMode="numeric"
-                min="0"
-                max="99"
-                type="number"
-                value={game.score?.teamATiebreakScore ?? ''}
-                onChange={(event) =>
-                  onUpdateGameScore(
-                    game.gameId,
-                    'teamATiebreakScore',
-                    event.target.value
-                  )
-                }
-              />
-              <span>:</span>
-              <input
-                aria-label="B팀 타이브레이크 점수"
-                inputMode="numeric"
-                min="0"
-                max="99"
-                type="number"
-                value={game.score?.teamBTiebreakScore ?? ''}
-                onChange={(event) =>
-                  onUpdateGameScore(
-                    game.gameId,
-                    'teamBTiebreakScore',
-                    event.target.value
-                  )
-                }
-              />
-            </div>
+          <div>
+            <h3 id={`completion-confirm-title-${game.gameId}`}>
+              경기 완료 확인
+            </h3>
+            <p>{completionConfirmationMessage}</p>
           </div>
-        )}
-
-        <button
-          className="score-save-button"
-          type="button"
-          disabled={isSavingScore}
-          onClick={() => onSaveGameScore(game.gameId)}
-        >
-          {isSavingScore ? '저장 중' : '점수 저장'}
-        </button>
-        {scoreError && <p className="score-save-message error">{scoreError}</p>}
-        {!scoreError && scoreFeedback && (
-          <p className="score-save-message success">{scoreFeedback}</p>
-        )}
+          <div className="club-completion-modal-actions">
+            <button
+              type="button"
+              className="secondary"
+              onClick={() => onCancelCompletionConfirm(game.gameId)}
+            >
+              취소
+            </button>
+            <button type="button" onClick={() => onSubmitCompletion(game.gameId)}>
+              완료 확정
+            </button>
+          </div>
+            </div>
       </div>
     );
   };
 
   return (
-    <article className={`game-card ${isEditing ? 'editing' : ''}`}>
+    <article
+      className={`game-card ${isClubSession ? 'club-game-card' : ''} ${
+        isWaitingClubGame ? 'waiting' : ''
+      } ${isEditing ? 'editing' : ''}`}
+    >
       <div className="game-card-top">
-        <span>{game.court}번 코트</span>
+        {isClubSession ? (
+          <span className="game-card-court-label">
+            <b>{game.court}번 코트</b>
+            <em>{isWaitingClubGame ? `대기 #${game.round}` : `#${game.round}`}</em>
+          </span>
+        ) : (
+          <span>{game.court}번 코트</span>
+        )}
         <strong className={MATCH_TYPE_CLASSES[game.matchType] ?? 'random'}>
           {MATCH_TYPE_LABELS[game.matchType] ?? game.matchType}
         </strong>
@@ -179,11 +234,41 @@ function CompetitionGameCard({
         <TeamView game={game} teamKey="teamB" label="B" />
       </div>
 
-      {canManage && mode === COMPETITION_MODES.MANAGE && (
+      {renderClubCompletionPanel()}
+
+      {canManage &&
+        ((isClubSession && mode === COMPETITION_MODES.MANAGE &&
+          (game.status === 'READY' || game.status === 'IN_PROGRESS')) ||
+          !isClubSession) && (
         <div className="ready-game-actions">
-          <button type="button" onClick={() => onOpenGameEditor(game)}>
-            선수 변경
-          </button>
+          {isClubSession && (
+            <>
+              <button
+                type="button"
+                className="action-secondary"
+                onClick={() => onOpenGameEditor(game)}
+              >
+                선수 변경
+              </button>
+              <button
+                type="button"
+                className="danger"
+                disabled={busyClubAction === `delete-${game.gameId}`}
+                onClick={() => onDeleteGame(game.gameId)}
+              >
+                삭제
+              </button>
+            </>
+          )}
+          {!isClubSession && (
+            <button
+              type="button"
+              className="action-secondary"
+              onClick={() => onOpenGameEditor(game)}
+            >
+              선수 변경
+            </button>
+          )}
         </div>
       )}
     </article>

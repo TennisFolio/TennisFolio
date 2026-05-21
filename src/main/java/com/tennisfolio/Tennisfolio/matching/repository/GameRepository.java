@@ -18,6 +18,11 @@ public interface GameRepository extends JpaRepository<Game, Long> {
 
     List<Game> findByCompetitionIdAndRound(Long competitionId, Integer round);
 
+    List<Game> findByCompetitionIdAndStatus(Long competitionId, Game.GameStatus status);
+
+    @Query("SELECT COALESCE(MAX(g.round), 0) FROM Game g WHERE g.competition.id = :competitionId AND g.court = :court")
+    int findMaxRoundByCompetitionIdAndCourt(@Param("competitionId") Long competitionId, @Param("court") Integer court);
+
     @Query("SELECT g FROM Game g WHERE g.competition.id = :competitionId ORDER BY g.round ASC, g.court ASC")
     List<Game> findByCompetitionIdOrderByRoundAndCourt(@Param("competitionId") Long competitionId);
 
