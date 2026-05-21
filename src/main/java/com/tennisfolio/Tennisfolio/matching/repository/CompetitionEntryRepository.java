@@ -16,6 +16,8 @@ public interface CompetitionEntryRepository extends JpaRepository<CompetitionEnt
 
     List<CompetitionEntry> findByCompetitionIdOrderByIdAsc(Long competitionId);
 
+    List<CompetitionEntry> findByCompetitionIdAndStatus(Long competitionId, CompetitionEntry.EntryStatus status);
+
     Optional<CompetitionEntry> findByIdAndCompetitionId(Long id, Long competitionId);
 
     Optional<CompetitionEntry> findByPlayerNameAndCompetitionId(String playerName, Long competitionId);

@@ -5,8 +5,6 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class CompetitionEntryUpdateRequest {
-    private String playerName;
-    private String gender;
-    private String status;
+public class CourtCountUpdateRequest {
+    private Integer courtCount;
 }

@@ -1,10 +1,12 @@
 package com.tennisfolio.Tennisfolio.matching.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.tennisfolio.Tennisfolio.matching.entity.Game;
 import com.tennisfolio.Tennisfolio.matching.entity.GameEntry;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,6 +17,9 @@ public class GameResponse {
     private Integer round;
     private Integer court;
     private String matchType;
+    private String status;
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    private LocalDateTime updatedAt;
     private ScoreResponse score;
     private TeamResponse teamA;
     private TeamResponse teamB;
@@ -68,6 +73,8 @@ public class GameResponse {
                     game.getRound(),
                     game.getCourt(),
                     game.getMatchType().name(),
+                    game.getStatus() == null ? Game.GameStatus.READY.name() : game.getStatus().name(),
+                    game.getUpdateDt(),
                     ScoreResponse.from(game),
                     new TeamResponse(teamAPlayers),
                     new TeamResponse(teamBPlayers)

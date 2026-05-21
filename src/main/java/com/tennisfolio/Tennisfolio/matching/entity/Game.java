@@ -4,17 +4,10 @@ import com.tennisfolio.Tennisfolio.common.Entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
-
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Table(name = "tb_game")
 @Getter
-@Setter
 @NoArgsConstructor
 public class Game extends BaseTimeEntity {
 
@@ -49,6 +42,9 @@ public class Game extends BaseTimeEntity {
     @Column(name = "MATCH_TYPE", nullable = false)
     private MatchType matchType;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "STATUS", nullable = false)
+    private GameStatus status = GameStatus.READY;
 
 
     public Game(Competition competition, Integer round, Integer court, MatchType matchType) {
@@ -70,6 +66,14 @@ public class Game extends BaseTimeEntity {
         this.matchType = matchType;
     }
 
+    public void assignCourt(Integer court) {
+        this.court = court;
+    }
+
+    public void complete() {
+        this.status = GameStatus.COMPLETED;
+    }
+
     @PrePersist
     public void prePersist() {
         if (teamAScore == null) {
@@ -88,6 +92,10 @@ public class Game extends BaseTimeEntity {
 
     public enum MatchType {
         MIXED, MALE, FEMALE, M2F2_SPLIT, RANDOM_M3F1, RANDOM_M1F3
+    }
+
+    public enum GameStatus {
+        READY, COMPLETED
     }
 }
 

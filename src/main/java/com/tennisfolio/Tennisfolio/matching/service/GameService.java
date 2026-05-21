@@ -49,6 +49,26 @@ public class GameService {
         gameEntryRepository.saveAll(gameEntries);
     }
 
+    public Game saveGame(
+            Competition competition,
+            GameMatch match,
+            Map<String, CompetitionEntry> entriesByPlayerName
+    ) {
+        Game game = gameRepository.save(new Game(
+                competition,
+                match.round,
+                match.court,
+                toEntityMatchType(match.type)
+        ));
+
+        List<GameEntry> gameEntries = new ArrayList<>();
+        addGameEntries(gameEntries, game, match.teamA, GameEntry.Team.A, entriesByPlayerName);
+        addGameEntries(gameEntries, game, match.teamB, GameEntry.Team.B, entriesByPlayerName);
+        gameEntryRepository.saveAll(gameEntries);
+
+        return game;
+    }
+
     private void addGameEntries(
             List<GameEntry> gameEntries,
             Game game,

@@ -37,6 +37,8 @@ public class QGame extends EntityPathBase<Game> {
 
     public final NumberPath<Integer> round = createNumber("round", Integer.class);
 
+    public final EnumPath<Game.GameStatus> status = createEnum("status", Game.GameStatus.class);
+
     public final NumberPath<Integer> teamAScore = createNumber("teamAScore", Integer.class);
 
     public final NumberPath<Integer> teamATiebreaKScore = createNumber("teamATiebreaKScore", Integer.class);

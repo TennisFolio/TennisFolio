@@ -10,12 +10,14 @@ public class CompetitionEntryResponse {
     private Long competitionEntryId;
     private String playerName;
     private String gender;
+    private String status;
 
     public static CompetitionEntryResponse from(CompetitionEntry entry) {
         return new CompetitionEntryResponse(
                 entry.getId(),
                 entry.getPlayerName(),
-                entry.getGender().name()
+                entry.getGender().name(),
+                entry.getStatus() == null ? CompetitionEntry.EntryStatus.ACTIVE.name() : entry.getStatus().name()
         );
     }
 }

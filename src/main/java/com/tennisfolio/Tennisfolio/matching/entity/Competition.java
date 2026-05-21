@@ -46,27 +46,48 @@ public class Competition extends BaseTimeEntity {
     @Column(name = "STATUS", nullable = false)
     private CompetitionStatus status = CompetitionStatus.READY;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "MODE", nullable = false)
+    private CompetitionMode mode = CompetitionMode.FIXED_SCHEDULE;
+
     @Column(name = "IS_MODIFIED", nullable = false)
     private Boolean isModified = false;
 
 
     public Competition(String name, Integer maleCount, Integer femaleCount,
-                      Integer courtCount, Integer rounds, Long seed) {
+                      Integer courtCount, Integer rounds, Long seed, CompetitionMode mode) {
         this.name = name;
         this.maleCount = maleCount;
         this.femaleCount = femaleCount;
         this.courtCount = courtCount;
         this.rounds = rounds;
         this.seed = seed;
+        this.mode = mode == null ? CompetitionMode.FIXED_SCHEDULE : mode;
     }
 
     public void rename(String name) {
         this.name = name;
     }
 
+    public void updateCourtCount(Integer courtCount) {
+        this.courtCount = courtCount;
+    }
+
+    public void incrementMaleCount() {
+        this.maleCount++;
+    }
+
+    public void incrementFemaleCount() {
+        this.femaleCount++;
+    }
+
 
     public enum CompetitionStatus {
         READY, INPROGRESS, COMPLETED
+    }
+
+    public enum CompetitionMode {
+        CLUB_SESSION, FIXED_SCHEDULE
     }
 }
 

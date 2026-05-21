@@ -23,12 +23,41 @@ public class ScoreCalculator {
             int maleCount,
             int femaleCount
     ) {
+        return score(c, typeCount, roundTypes, round, totalRounds, groupCount, maleCount, femaleCount, true);
+    }
+
+    public int scoreWithoutTotalGamePenalty(
+            MatchCandidate c,
+            Map<MatchType, Integer> typeCount,
+            Set<MatchType> roundTypes,
+            int round,
+            int totalRounds,
+            Map<Set<String>, Integer> groupCount,
+            int maleCount,
+            int femaleCount
+    ) {
+        return score(c, typeCount, roundTypes, round, totalRounds, groupCount, maleCount, femaleCount, false);
+    }
+
+    private int score(
+            MatchCandidate c,
+            Map<MatchType, Integer> typeCount,
+            Set<MatchType> roundTypes,
+            int round,
+            int totalRounds,
+            Map<Set<String>, Integer> groupCount,
+            int maleCount,
+            int femaleCount,
+            boolean includeTotalGamePenalty
+    ) {
         int score = 0;
         List<GamePlayer> players = c.allPlayers();
         MatchType type = c.type;
 
         for (GamePlayer p : players) {
-            score -= p.totalGames * 300;
+            if (includeTotalGamePenalty) {
+                score -= p.totalGames * 300;
+            }
             score -= p.consecutiveRounds * 30;
         }
 

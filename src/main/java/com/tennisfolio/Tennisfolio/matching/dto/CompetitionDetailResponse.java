@@ -23,6 +23,7 @@ public class CompetitionDetailResponse {
     private Integer courtCount;
     private Integer rounds;
     private String status;
+    private String mode;
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime createdAt;
     private CompetitionStatResponse stat;
@@ -50,6 +51,7 @@ public class CompetitionDetailResponse {
                 competition.getCourtCount(),
                 competition.getRounds(),
                 competition.getStatus().name(),
+                competition.getMode() == null ? Competition.CompetitionMode.FIXED_SCHEDULE.name() : competition.getMode().name(),
                 competition.getCreateDt(),
                 CompetitionStatResponse.from(stat),
                 gameEntriesByGameId.values().stream()

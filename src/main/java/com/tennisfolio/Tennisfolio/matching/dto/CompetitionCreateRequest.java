@@ -8,6 +8,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class CompetitionCreateRequest {
+    private String mode;
     private String competitionName;
     private int maleCount;
     private int femaleCount;

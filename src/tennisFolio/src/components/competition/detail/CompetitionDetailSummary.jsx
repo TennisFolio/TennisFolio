@@ -46,6 +46,7 @@ function CompetitionDetailSummary({
   const totalPlayers =
     (competition.maleCount ?? 0) + (competition.femaleCount ?? 0);
   const estimatedHours = Math.max(1, Math.round((competition.rounds ?? 0) / 2));
+  const isClubSession = competition.mode === 'CLUB_SESSION';
   const [nameDraft, setNameDraft] = useState(competition.name ?? '');
 
   useEffect(() => {
@@ -53,7 +54,8 @@ function CompetitionDetailSummary({
   }, [competition.name]);
 
   const isNameChanged = nameDraft.trim() !== (competition.name ?? '');
-  const showNameEditor = canManage && mode === COMPETITION_MODES.MANAGE;
+  const showNameEditor =
+    canManage && (!isClubSession || mode === COMPETITION_MODES.MANAGE);
 
   const handleNameSubmit = (event) => {
     event.preventDefault();
@@ -67,10 +69,10 @@ function CompetitionDetailSummary({
     <>
       {showNameEditor ? (
         <form className="competition-name-editor" onSubmit={handleNameSubmit}>
-          <label htmlFor="competition-name">대회 이름</label>
           <div className="competition-name-row">
             <input
               id="competition-name"
+              aria-label="대회 이름"
               type="text"
               value={nameDraft}
               maxLength={50}
@@ -90,7 +92,6 @@ function CompetitionDetailSummary({
         </form>
       ) : (
         <div className="competition-name-view">
-          <p>대회 이름</p>
           <h2>{competition.name}</h2>
           <span>생성일 {formatCreatedAt(competition.createdAt)}</span>
         </div>
@@ -106,9 +107,15 @@ function CompetitionDetailSummary({
           <strong>{competition.courtCount}개</strong>
         </div>
         <div>
-          <p>라운드</p>
+          <p>{isClubSession ? '운영 방식' : '라운드'}</p>
           <strong>
-            {competition.rounds}R <small>({estimatedHours}시간)</small>
+            {isClubSession ? (
+              '클럽'
+            ) : (
+              <>
+                {competition.rounds}R <small>({estimatedHours}시간)</small>
+              </>
+            )}
           </strong>
         </div>
       </div>
@@ -146,7 +153,7 @@ function CompetitionDetailSummary({
             </div>
           </div>
 
-          {balance && (
+          {!isClubSession && balance && (
             <div
               className={`competition-balance-message ${
                 balance.difference > 0 ? 'warning' : ''

@@ -7,6 +7,11 @@ import {
 
 const GAMES_PER_HOUR = 2;
 
+export const COMPETITION_CREATE_MODES = {
+  CLUB_SESSION: 'CLUB_SESSION',
+  FIXED_SCHEDULE: 'FIXED_SCHEDULE',
+};
+
 export const COMPETITION_FIELD_LIMITS = {
   maleCount: { min: 0, max: 40 },
   femaleCount: { min: 0, max: 40 },
@@ -35,6 +40,7 @@ export const COMPETITION_FIELDS = [
 ];
 
 const INITIAL_COMPETITION_FORM = {
+  mode: COMPETITION_CREATE_MODES.CLUB_SESSION,
   maleCount: 4,
   femaleCount: 4,
   courtCount: 2,
@@ -63,18 +69,23 @@ export function useCompetitionCreateForm() {
   const touchedFieldsRef = useRef(new Set());
 
   const totalPlayers = competitionForm.maleCount + competitionForm.femaleCount;
+  const isClubSession =
+    competitionForm.mode === COMPETITION_CREATE_MODES.CLUB_SESSION;
   const totalGames =
-    competitionForm.courtCount * competitionForm.hours * GAMES_PER_HOUR;
+    competitionForm.courtCount *
+    (isClubSession ? 1 : competitionForm.hours * GAMES_PER_HOUR);
   const totalGameSlots = totalGames * 4;
   const minimumPlayers = competitionForm.courtCount * 4;
   const canCreateGames = totalPlayers >= 4 && totalPlayers >= minimumPlayers;
 
   const placementText = useMemo(() => {
     if (canCreateGames) {
-      return '이 조건이면 바로 대진표를 만들 수 있어요';
+      return isClubSession
+        ? '대기 경기를 만들고 코트별로 운영해요'
+        : '이 조건이면 바로 대진표를 만들 수 있어요';
     }
     return '인원을 늘리거나 코트를 줄이면 만들 수 있어요';
-  }, [canCreateGames]);
+  }, [canCreateGames, isClubSession]);
 
   const expectedGamesText = useMemo(() => {
     if (!canCreateGames) {
@@ -92,7 +103,9 @@ export function useCompetitionCreateForm() {
   }, [canCreateGames, totalGameSlots, totalPlayers]);
 
   const participantGameText = canCreateGames
-    ? `${expectedGamesText} 예상`
+    ? isClubSession
+      ? '대기 경기 순차 생성'
+      : `${expectedGamesText} 예상`
     : '아직 어려워요';
   const unavailableReasonText = `필요 인원 ${minimumPlayers}명, 현재 ${totalPlayers}명`;
 
@@ -118,6 +131,15 @@ export function useCompetitionCreateForm() {
   };
 
   const updateCompetitionField = (name, value) => {
+    if (name === 'mode') {
+      setCompetitionForm((prev) => ({
+        ...prev,
+        mode: value,
+      }));
+      resetCompetitionFeedback();
+      return;
+    }
+
     trackFieldInteraction(name, 'input');
     setCompetitionForm((prev) => ({
       ...prev,
@@ -145,7 +167,10 @@ export function useCompetitionCreateForm() {
     if (competitionForm.courtCount < 1 || competitionForm.courtCount > 10) {
       return '코트는 1개부터 10개까지 입력해 주세요.';
     }
-    if (competitionForm.hours < 1 || competitionForm.hours > 10) {
+    if (
+      !isClubSession &&
+      (competitionForm.hours < 1 || competitionForm.hours > 10)
+    ) {
       return '진행 시간은 1시간부터 10시간까지 선택할 수 있어요.';
     }
     if (totalPlayers < minimumPlayers) {
@@ -161,7 +186,8 @@ export function useCompetitionCreateForm() {
       female_count: competitionForm.femaleCount,
       total_players: totalPlayers,
       court_count: competitionForm.courtCount,
-      hours: competitionForm.hours,
+      hours: isClubSession ? undefined : competitionForm.hours,
+      mode: competitionForm.mode,
       can_create_games: canCreateGames,
     };
 
@@ -187,10 +213,21 @@ export function useCompetitionCreateForm() {
       setCompetitionError('');
       setCompetitionResult(null);
 
-      const response = await apiRequest.post('/api/competitions', {
-        competitionName: 'TennisFolio 대진표',
-        ...competitionForm,
-      });
+      const payload = {
+        competitionName: isClubSession
+          ? '진행형 Tennisfolio 경기'
+          : 'TennisFolio 대진표',
+        mode: competitionForm.mode,
+        maleCount: competitionForm.maleCount,
+        femaleCount: competitionForm.femaleCount,
+        courtCount: competitionForm.courtCount,
+      };
+
+      if (!isClubSession) {
+        payload.hours = competitionForm.hours;
+      }
+
+      const response = await apiRequest.post('/api/competitions', payload);
 
       if (response.data.code === '0000') {
         setCompetitionResult(response.data.data);
@@ -241,6 +278,7 @@ export function useCompetitionCreateForm() {
     isCreatingCompetition,
     totalPlayers,
     canCreateGames,
+    isClubSession,
     placementText,
     participantGameText,
     unavailableReasonText,

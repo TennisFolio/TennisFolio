@@ -25,7 +25,15 @@ function Competition() {
       >
         <div className="competition-hero-content">
           <h1>복식 대진표 만들기</h1>
-          <p>참가 인원, 코트 수, 진행 시간을 정하면 대진표를 자동으로 만들어요.</p>
+          <p>
+            참가 인원과 코트 수를 입력하면 첫 경기부터 바로 만들고 운영할 수
+            있어요.
+          </p>
+          <div className="competition-hero-points" aria-label="대진표 생성 특징">
+            <span>복식 전용</span>
+            <span>코트별 운영</span>
+            <span>링크 공유</span>
+          </div>
         </div>
       </MotionHeader>
 

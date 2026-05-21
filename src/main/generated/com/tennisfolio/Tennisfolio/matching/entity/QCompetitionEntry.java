@@ -35,6 +35,8 @@ public class QCompetitionEntry extends EntityPathBase<CompetitionEntry> {
 
     public final StringPath playerName = createString("playerName");
 
+    public final EnumPath<CompetitionEntry.EntryStatus> status = createEnum("status", CompetitionEntry.EntryStatus.class);
+
     //inherited
     public final DateTimePath<java.time.LocalDateTime> updateDt = _super.updateDt;
 

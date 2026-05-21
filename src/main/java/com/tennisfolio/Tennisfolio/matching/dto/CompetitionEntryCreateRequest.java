@@ -5,8 +5,7 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class CompetitionEntryUpdateRequest {
+public class CompetitionEntryCreateRequest {
     private String playerName;
     private String gender;
-    private String status;
 }

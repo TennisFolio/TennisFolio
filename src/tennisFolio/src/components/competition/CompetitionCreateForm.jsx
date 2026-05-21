@@ -3,6 +3,7 @@ import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   COMPETITION_FIELDS,
+  COMPETITION_CREATE_MODES,
   useCompetitionCreateForm,
 } from '../../hooks/useCompetitionCreateForm';
 import CompetitionFieldStepper from './CompetitionFieldStepper';
@@ -49,6 +50,7 @@ function CompetitionCreateForm() {
     isCreatingCompetition,
     totalPlayers,
     canCreateGames,
+    isClubSession,
     placementText,
     participantGameText,
     unavailableReasonText,
@@ -56,6 +58,10 @@ function CompetitionCreateForm() {
     stepCompetitionField,
     createCompetition,
   } = useCompetitionCreateForm();
+
+  const visibleFields = isClubSession
+    ? COMPETITION_FIELDS.filter((field) => field.name !== 'hours')
+    : COMPETITION_FIELDS;
 
   latestFormStateRef.current = {
     totalPlayers,
@@ -94,6 +100,7 @@ function CompetitionCreateForm() {
         totalPlayers={totalPlayers}
         participantGameText={participantGameText}
         canCreateGames={canCreateGames}
+        isClubSession={isClubSession}
         placementText={placementText}
         unavailableReasonText={unavailableReasonText}
       />
@@ -108,10 +115,53 @@ function CompetitionCreateForm() {
         <div className="competition-section-heading">
           <div>
             <h2>경기 조건</h2>
-            <p>코트 수와 진행 시간을 기준으로 경기 수를 계산해요.</p>
+            <p>
+              {isClubSession
+                ? '경기를 대기열에 쌓아두고 코트별로 운영해요.'
+                : '진행 시간까지 정해서 처음부터 전체 경기 일정을 생성해요.'}
+            </p>
           </div>
-          <span className="competition-rate">코트당 2경기/h</span>
+          <span className="competition-rate">
+            {isClubSession ? '운영형' : '완성형'}
+          </span>
         </div>
+
+        <div className="competition-mode-toggle" aria-label="대진 생성 방식">
+          <button
+            type="button"
+            className={isClubSession ? 'active' : ''}
+            aria-pressed={isClubSession}
+            onClick={() =>
+              updateCompetitionField(
+                'mode',
+                COMPETITION_CREATE_MODES.CLUB_SESSION
+              )
+            }
+          >
+            <strong>진행형 대진</strong>
+            <span>늦참·중간 퇴장이 있는 현장 운영</span>
+          </button>
+          <button
+            type="button"
+            className={!isClubSession ? 'active' : ''}
+            aria-pressed={!isClubSession}
+            onClick={() =>
+              updateCompetitionField(
+                'mode',
+                COMPETITION_CREATE_MODES.FIXED_SCHEDULE
+              )
+            }
+          >
+            <strong>전체 대진</strong>
+            <span>참가자가 확정된 일정 운영</span>
+          </button>
+        </div>
+
+        <p className="competition-mode-help">
+          {isClubSession
+            ? '참가자를 중간에 추가하거나 대기 처리하면서, 비는 코트마다 다음 경기를 만듭니다.'
+            : '처음 참가자가 확정된 모임에서 전체 라운드를 한 번에 생성합니다.'}
+        </p>
 
         <MotionDiv
           className="competition-fields"
@@ -119,7 +169,7 @@ function CompetitionCreateForm() {
           initial="hidden"
           animate="show"
         >
-          {COMPETITION_FIELDS.map((field) => (
+          {visibleFields.map((field) => (
             <CompetitionFieldStepper
               key={field.name}
               field={field}
@@ -168,13 +218,19 @@ function CompetitionCreateForm() {
 
       <MotionButton
         type="submit"
-        className="competition-submit-button"
+        className={`competition-submit-button ${
+          canCreateGames ? '' : 'needs-adjustment'
+        }`}
         disabled={isCreatingCompetition}
-        whileHover={isCreatingCompetition ? undefined : { scale: 1.03 }}
-        whileTap={isCreatingCompetition ? undefined : { scale: 0.97 }}
+        whileHover={isCreatingCompetition ? undefined : { y: -1 }}
+        whileTap={isCreatingCompetition ? undefined : { scale: 0.985 }}
         transition={{ duration: 0.18, ease: 'easeOut' }}
       >
-        {isCreatingCompetition ? '대진표를 만들고 있어요' : '복식 대진표 만들기'}
+        {isCreatingCompetition
+          ? '대진표를 만들고 있어요'
+          : isClubSession
+            ? '진행형 경기 만들기'
+            : '복식 대진표 만들기'}
       </MotionButton>
     </form>
   );
