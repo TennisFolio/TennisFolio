@@ -25,19 +25,22 @@ public class CompetitionCommandService {
     private final CompetitionEntryCommandService competitionEntryCommandService;
     private final GameService gameService;
     private final CompetitionStatService competitionStatService;
+    private final CompetitionAdminTokenService competitionAdminTokenService;
 
     public CompetitionCommandService(
             TennisMatchScheduler scheduler,
             CompetitionService competitionService,
             CompetitionEntryCommandService competitionEntryCommandService,
             GameService gameService,
-            CompetitionStatService competitionStatService
+            CompetitionStatService competitionStatService,
+            CompetitionAdminTokenService competitionAdminTokenService
     ) {
         this.scheduler = scheduler;
         this.competitionService = competitionService;
         this.competitionEntryCommandService = competitionEntryCommandService;
         this.gameService = gameService;
         this.competitionStatService = competitionStatService;
+        this.competitionAdminTokenService = competitionAdminTokenService;
     }
 
     @Transactional
@@ -66,16 +69,17 @@ public class CompetitionCommandService {
         gameService.saveSchedule(competition, result, entriesByPlayerName);
         competitionStatService.createCompetitionStat(competition, result, entriesByPlayerName);
 
-        return CompetitionCreateResponse.from(competition);
+        String competitionAdminToken = competitionAdminTokenService.createToken(competition.getPublicId());
+        return CompetitionCreateResponse.from(competition, competitionAdminToken);
     }
 
     @Transactional
     public CompetitionUpdateResponse updateCompetition(
             String publicId,
             CompetitionUpdateRequest request,
-            String editToken
+            String adminToken
     ) {
-        Competition competition = competitionService.updateCompetitionName(publicId, request.getName(), editToken);
+        Competition competition = competitionService.updateCompetitionName(publicId, request.getName(), adminToken);
         return CompetitionUpdateResponse.from(competition);
     }
 

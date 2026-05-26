@@ -8,10 +8,7 @@ import {
 } from '../../hooks/useCompetitionCreateForm';
 import CompetitionFieldStepper from './CompetitionFieldStepper';
 import CompetitionSummary from './CompetitionSummary';
-import {
-  markCompetitionAdminLinkPrompt,
-  saveCompetitionEditToken,
-} from '../../utils/competitionEditToken';
+import { saveCompetitionAdminToken } from '../../utils/competitionEditToken';
 import { trackEvent } from '../../utils/analytics';
 
 const staggerContainer = {
@@ -73,11 +70,10 @@ function CompetitionCreateForm() {
     const createdCompetition = await createCompetition();
     if (createdCompetition?.publicId) {
       createdRef.current = true;
-      saveCompetitionEditToken(
+      saveCompetitionAdminToken(
         createdCompetition.publicId,
-        createdCompetition.editToken
+        createdCompetition.competitionAdminToken
       );
-      markCompetitionAdminLinkPrompt(createdCompetition.publicId);
       navigate(`/competitions/${createdCompetition.publicId}`);
     }
   };

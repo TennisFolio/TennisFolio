@@ -26,7 +26,7 @@ public class QCompetition extends EntityPathBase<Competition> {
     //inherited
     public final DateTimePath<java.time.LocalDateTime> createDt = _super.createDt;
 
-    public final StringPath editToken = createString("editToken");
+    public final StringPath adminPasswordHash = createString("adminPasswordHash");
 
     public final NumberPath<Integer> femaleCount = createNumber("femaleCount", Integer.class);
 

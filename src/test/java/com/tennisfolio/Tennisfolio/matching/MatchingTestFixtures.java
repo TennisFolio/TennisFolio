@@ -20,24 +20,24 @@ public final class MatchingTestFixtures {
     private MatchingTestFixtures() {
     }
 
-    public static Competition clubSessionCompetition(Long id, String publicId, String editToken) {
-        return competition(id, publicId, editToken, Competition.CompetitionMode.CLUB_SESSION);
+    public static Competition clubSessionCompetition(Long id, String publicId, String adminPasswordHash) {
+        return competition(id, publicId, adminPasswordHash, Competition.CompetitionMode.CLUB_SESSION);
     }
 
-    public static Competition fixedScheduleCompetition(Long id, String publicId, String editToken) {
-        return competition(id, publicId, editToken, Competition.CompetitionMode.FIXED_SCHEDULE);
+    public static Competition fixedScheduleCompetition(Long id, String publicId, String adminPasswordHash) {
+        return competition(id, publicId, adminPasswordHash, Competition.CompetitionMode.FIXED_SCHEDULE);
     }
 
     public static Competition competition(
             Long id,
             String publicId,
-            String editToken,
+            String adminPasswordHash,
             Competition.CompetitionMode mode
     ) {
         Competition competition = new Competition("club", 3, 3, 2, 1, 136L, mode);
         ReflectionTestUtils.setField(competition, "id", id);
         ReflectionTestUtils.setField(competition, "publicId", publicId);
-        ReflectionTestUtils.setField(competition, "editToken", editToken);
+        ReflectionTestUtils.setField(competition, "adminPasswordHash", adminPasswordHash);
         return competition;
     }
 

@@ -14,6 +14,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
 
@@ -25,6 +27,7 @@ import static com.tennisfolio.Tennisfolio.matching.MatchingTestFixtures.updateEn
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -38,19 +41,23 @@ class CompetitionEntryCommandServiceTest {
     @Mock
     private CompetitionEntryRepository competitionEntryRepository;
 
+    @Mock
+    private CompetitionAdminAuthorizationService competitionAdminAuthorizationService;
+
     private CompetitionEntryCommandService service;
 
     @BeforeEach
     void setUp() {
         service = new CompetitionEntryCommandService(
                 competitionRepository,
-                competitionEntryRepository
+                competitionEntryRepository,
+                competitionAdminAuthorizationService
         );
     }
 
     @Test
     void createCompetitionEntry_addsActiveClubSessionEntryAndIncrementsGenderCount() {
-        Competition competition = clubSessionCompetition(1L, "public-id", "edit-token");
+        Competition competition = clubSessionCompetition(1L, "public-id", null);
         CompetitionEntryCreateRequest request = createEntryRequest(" Newbie ", "male");
 
         when(competitionRepository.findByPublicId("public-id")).thenReturn(Optional.of(competition));
@@ -59,8 +66,9 @@ class CompetitionEntryCommandServiceTest {
             return entry(10L, entry.getCompetition(), entry.getPlayerName(), entry.getGender());
         });
 
-        CompetitionEntryResponse response = service.createCompetitionEntry("public-id", "edit-token", request);
+        CompetitionEntryResponse response = service.createCompetitionEntry("public-id", "admin-token", request);
 
+        verify(competitionAdminAuthorizationService).validateAdminToken("public-id", "admin-token");
         assertEquals(4, competition.getMaleCount());
         assertEquals(3, competition.getFemaleCount());
         assertEquals(10L, response.getCompetitionEntryId());
@@ -75,28 +83,46 @@ class CompetitionEntryCommandServiceTest {
 
     @Test
     void createCompetitionEntry_rejectsFixedScheduleCompetition() {
-        Competition competition = fixedScheduleCompetition(1L, "public-id", "edit-token");
+        Competition competition = fixedScheduleCompetition(1L, "public-id", null);
         CompetitionEntryCreateRequest request = createEntryRequest("Player", "MALE");
 
         when(competitionRepository.findByPublicId("public-id")).thenReturn(Optional.of(competition));
 
         assertThrows(
                 InvalidRequestException.class,
-                () -> service.createCompetitionEntry("public-id", "edit-token", request)
+                () -> service.createCompetitionEntry("public-id", "admin-token", request)
+        );
+        verify(competitionEntryRepository, never()).save(any());
+    }
+
+    @Test
+    void createCompetitionEntry_rejectsInvalidAdminToken() {
+        Competition competition = clubSessionCompetition(1L, "public-id", null);
+        CompetitionEntryCreateRequest request = createEntryRequest("Player", "MALE");
+
+        when(competitionRepository.findByPublicId("public-id")).thenReturn(Optional.of(competition));
+        doThrow(new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid competition admin token"))
+                .when(competitionAdminAuthorizationService)
+                .validateAdminToken("public-id", "bad-token");
+
+        assertThrows(
+                ResponseStatusException.class,
+                () -> service.createCompetitionEntry("public-id", "bad-token", request)
         );
         verify(competitionEntryRepository, never()).save(any());
     }
 
     @Test
     void updateCompetitionEntry_allowsPartialNameGenderAndStatusChanges() {
-        Competition competition = clubSessionCompetition(1L, "public-id", "edit-token");
+        Competition competition = clubSessionCompetition(1L, "public-id", null);
         CompetitionEntry entry = entry(10L, competition, "Old", CompetitionEntry.Gender.MALE);
         CompetitionEntryUpdateRequest request = updateEntryRequest(" New ", "female", "inactive");
 
         when(competitionRepository.findByPublicId("public-id")).thenReturn(Optional.of(competition));
         when(competitionEntryRepository.findByIdAndCompetitionId(10L, 1L)).thenReturn(Optional.of(entry));
-        CompetitionEntryResponse response = service.updateCompetitionEntry("public-id", 10L, "edit-token", request);
+        CompetitionEntryResponse response = service.updateCompetitionEntry("public-id", 10L, "admin-token", request);
 
+        verify(competitionAdminAuthorizationService).validateAdminToken("public-id", "admin-token");
         assertEquals("New", response.getPlayerName());
         assertEquals("FEMALE", response.getGender());
         assertEquals("INACTIVE", response.getStatus());
@@ -106,15 +132,16 @@ class CompetitionEntryCommandServiceTest {
 
     @Test
     void updateCompetitionEntry_allowsInactivatingEntryInReadyGame() {
-        Competition competition = clubSessionCompetition(1L, "public-id", "edit-token");
+        Competition competition = clubSessionCompetition(1L, "public-id", null);
         CompetitionEntry entry = entry(10L, competition, "Player", CompetitionEntry.Gender.MALE);
         CompetitionEntryUpdateRequest request = updateEntryRequest(null, null, "INACTIVE");
 
         when(competitionRepository.findByPublicId("public-id")).thenReturn(Optional.of(competition));
         when(competitionEntryRepository.findByIdAndCompetitionId(10L, 1L)).thenReturn(Optional.of(entry));
 
-        CompetitionEntryResponse response = service.updateCompetitionEntry("public-id", 10L, "edit-token", request);
+        CompetitionEntryResponse response = service.updateCompetitionEntry("public-id", 10L, "admin-token", request);
 
+        verify(competitionAdminAuthorizationService).validateAdminToken("public-id", "admin-token");
         assertEquals("INACTIVE", response.getStatus());
         assertEquals(CompetitionEntry.EntryStatus.INACTIVE, entry.getStatus());
     }

@@ -21,8 +21,8 @@ public class Competition extends BaseTimeEntity {
     @Column(name = "PUBLIC_ID", nullable = false, unique = true, updatable = false, length = 36)
     private String publicId = UUID.randomUUID().toString();
 
-    @Column(name = "EDIT_TOKEN", nullable = false, updatable = false, length = 36)
-    private String editToken = UUID.randomUUID().toString();
+    @Column(name = "ADMIN_PASSWORD_HASH", length = 100)
+    private String adminPasswordHash;
 
     @Column(name = "COMPETITION_NAME", nullable = false)
     private String name;
@@ -71,6 +71,14 @@ public class Competition extends BaseTimeEntity {
 
     public void updateCourtCount(Integer courtCount) {
         this.courtCount = courtCount;
+    }
+
+    public boolean hasAdminPassword() {
+        return adminPasswordHash != null && !adminPasswordHash.isBlank();
+    }
+
+    public void setAdminPasswordHash(String adminPasswordHash) {
+        this.adminPasswordHash = adminPasswordHash;
     }
 
     public void incrementMaleCount() {
