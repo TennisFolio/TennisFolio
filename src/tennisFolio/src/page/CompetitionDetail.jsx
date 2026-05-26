@@ -9,11 +9,9 @@ import ClubSessionDetail from '../components/competition/detail/ClubSessionDetai
 import FixedScheduleDetail from '../components/competition/detail/FixedScheduleDetail';
 import { apiRequest } from '../utils/apiClient';
 import {
-  createEditTokenHeaders,
-  dismissCompetitionAdminLinkPrompt,
-  getCompetitionEditToken,
-  saveCompetitionEditToken,
-  shouldShowCompetitionAdminLinkPrompt,
+  createAdminTokenHeaders,
+  getCompetitionAdminToken,
+  saveCompetitionAdminToken,
 } from '../utils/competitionEditToken';
 import { markCompetitionRevisit, trackEvent } from '../utils/analytics';
 import './CompetitionDetail.css';
@@ -26,6 +24,14 @@ const DUPLICATE_GAME_PLAYER_MESSAGE =
 
 function getResponseData(response) {
   return response.data?.data ?? response.data;
+}
+
+function getErrorMessage(error, fallbackMessage) {
+  const message = error.response?.data?.message;
+  if (!message || message === 'ERROR') {
+    return fallbackMessage;
+  }
+  return message;
 }
 
 function resolveInitialMode({ status, requestedView }) {
@@ -127,13 +133,6 @@ function hasRecordedScore(game) {
     score.teamATiebreakScore,
     score.teamBTiebreakScore,
   ].some((value) => Number(value ?? 0) > 0);
-}
-
-function createSavedScoreMap(games = []) {
-  return games.reduce((scoreMap, game) => {
-    scoreMap[game.gameId] = game.score ?? {};
-    return scoreMap;
-  }, {});
 }
 
 function hasGameEditorPlayerChanged(gameEditor) {
@@ -301,15 +300,17 @@ function CompetitionDetail() {
   const [savingScoreGameIds, setSavingScoreGameIds] = useState([]);
   const [scoreFeedbackByGameId, setScoreFeedbackByGameId] = useState({});
   const [scoreErrorByGameId, setScoreErrorByGameId] = useState({});
-  const [savedScoreByGameId, setSavedScoreByGameId] = useState({});
   const [isSavingCompetitionName, setIsSavingCompetitionName] = useState(false);
   const [competitionNameError, setCompetitionNameError] = useState('');
   const [competitionNameSuccess, setCompetitionNameSuccess] = useState('');
   const [shareFeedback, setShareFeedback] = useState('');
   const [adminToken, setAdminToken] = useState('');
   const [showOnlyUnscoredGames, setShowOnlyUnscoredGames] = useState(false);
-  const [isSharePanelOpen, setIsSharePanelOpen] = useState(false);
-  const [showAdminLinkBanner, setShowAdminLinkBanner] = useState(false);
+  const [adminPasswordModalOpen, setAdminPasswordModalOpen] = useState(false);
+  const [adminPasswordMode, setAdminPasswordMode] = useState('login');
+  const [adminPasswordDraft, setAdminPasswordDraft] = useState('');
+  const [adminPasswordError, setAdminPasswordError] = useState('');
+  const [isSubmittingAdminPassword, setIsSubmittingAdminPassword] = useState(false);
   const [clubActionError, setClubActionError] = useState('');
   const [clubActionFeedback, setClubActionFeedback] = useState('');
   const [busyClubAction, setBusyClubAction] = useState('');
@@ -321,12 +322,14 @@ function CompetitionDetail() {
 
   const canManage = Boolean(adminToken);
   const isClubSession = competition?.mode === 'CLUB_SESSION';
+  const requiresAdminPasswordBeforeShare =
+    canManage && competition?.adminPasswordSet === false;
   const isManageAccessMissing = false;
   const showFullHeader = true;
   const adminRequestOptions = {
-    headers: createEditTokenHeaders(adminToken),
+    headers: createAdminTokenHeaders(adminToken),
   };
-  const permissionDeniedMessage = '관리자 권한이 필요합니다. 관리자 링크로 접속해 주세요.';
+  const permissionDeniedMessage = '관리자 권한이 필요합니다. 관리자 모드로 로그인해 주세요.';
   const heroTitle = isManageAccessMissing
     ? '관리자 링크 필요'
     : isClubSession
@@ -346,10 +349,6 @@ function CompetitionDetail() {
         : '배정된 경기를 확인하고 점수를 입력하세요.'
       : '배정된 경기를 확인하고 점수를 입력하세요.';
   const userShareUrl = `${window.location.origin}/competitions/${publicId}`;
-  const manageShareUrl =
-    canManage && adminToken
-      ? `${window.location.origin}/competitions/${publicId}?token=${adminToken}`
-      : '';
   const requestedView = new URLSearchParams(location.search).get('view');
 
   const rejectWithoutPermission = (setError, setSuccess) => {
@@ -380,38 +379,106 @@ function CompetitionDetail() {
     }
   };
 
-  const dismissAdminLinkBanner = () => {
-    dismissCompetitionAdminLinkPrompt(publicId);
-    setShowAdminLinkBanner(false);
-  };
-
-  const copyAdminLinkFromBanner = async () => {
-    const copied = await copyUrl(manageShareUrl, '관리자 링크를 복사했어요.');
-    if (copied) {
-      dismissAdminLinkBanner();
+  const openAdminLogin = () => {
+    if (competition?.adminPasswordSet !== true) {
+      return;
     }
+    setAdminPasswordMode('login');
+    setAdminPasswordDraft('');
+    setAdminPasswordError('');
+    setAdminPasswordModalOpen(true);
   };
 
-  const toggleSharePanel = () => {
-    setIsSharePanelOpen((prev) => !prev);
+  const closeAdminPasswordModal = () => {
+    setAdminPasswordModalOpen(false);
+    setAdminPasswordDraft('');
+    setAdminPasswordError('');
   };
 
-  useEffect(() => {
-    const searchParams = new URLSearchParams(location.search);
-    const tokenFromUrl = searchParams.get('token');
+  const openAdminPasswordSetup = () => {
+    if (!canManage || competition?.adminPasswordSet !== false) {
+      return;
+    }
+    setAdminPasswordMode('setup');
+    setAdminPasswordDraft('');
+    setAdminPasswordError('');
+    setAdminPasswordModalOpen(true);
+  };
 
-    if (tokenFromUrl) {
-      saveCompetitionEditToken(publicId, tokenFromUrl);
-      setAdminToken(tokenFromUrl);
-      navigate(`/competitions/${publicId}`, { replace: true });
+  const handleShareClick = () => {
+    if (canManage && competition?.adminPasswordSet === false) {
+      openAdminPasswordSetup();
+      return;
+    }
+    copyUrl(userShareUrl, '참여 링크를 복사했어요.');
+  };
+
+  const validateAdminPasswordDraft = () => {
+    if (!/^\d{4,6}$/.test(adminPasswordDraft)) {
+      setAdminPasswordError('관리자 비밀번호는 4~6자리 숫자로 입력해 주세요.');
+      return false;
+    }
+    return true;
+  };
+
+  const submitAdminPasswordSetup = async () => {
+    if (!validateAdminPasswordDraft()) {
       return;
     }
 
-    setAdminToken(getCompetitionEditToken(publicId));
-  }, [location.pathname, location.search, navigate, publicId]);
+    try {
+      setIsSubmittingAdminPassword(true);
+      setAdminPasswordError('');
+      const response = await apiRequest.post(
+        `/api/competitions/${publicId}/admin-password`,
+        { password: adminPasswordDraft },
+        adminRequestOptions
+      );
+      const data = getResponseData(response);
+      saveCompetitionAdminToken(publicId, data.competitionAdminToken);
+      setAdminToken(data.competitionAdminToken);
+      closeAdminPasswordModal();
+      await refreshCompetition();
+      await copyUrl(userShareUrl, '참여 링크를 복사했어요.');
+    } catch (error) {
+      setAdminPasswordError(
+        getErrorMessage(
+          error,
+          '관리자 비밀번호를 설정하지 못했어요. 잠시 후 다시 시도해 주세요.'
+        )
+      );
+    } finally {
+      setIsSubmittingAdminPassword(false);
+    }
+  };
+
+  const submitAdminLogin = async () => {
+    if (!validateAdminPasswordDraft()) {
+      return;
+    }
+
+    try {
+      setIsSubmittingAdminPassword(true);
+      setAdminPasswordError('');
+      const response = await apiRequest.post(
+        `/api/competitions/${publicId}/admin-login`,
+        { password: adminPasswordDraft }
+      );
+      const data = getResponseData(response);
+      saveCompetitionAdminToken(publicId, data.competitionAdminToken);
+      setAdminToken(data.competitionAdminToken);
+      closeAdminPasswordModal();
+    } catch (error) {
+      setAdminPasswordError(
+        getErrorMessage(error, '관리자 비밀번호가 올바르지 않습니다.')
+      );
+    } finally {
+      setIsSubmittingAdminPassword(false);
+    }
+  };
 
   useEffect(() => {
-    setShowAdminLinkBanner(shouldShowCompetitionAdminLinkPrompt(publicId));
+    setAdminToken(getCompetitionAdminToken(publicId));
   }, [publicId]);
 
   const refreshCompetition = useCallback(
@@ -429,7 +496,6 @@ function CompetitionDetail() {
 
       setCompetition(data);
       setTiebreakOpenGames(createTiebreakOpenState(data?.games));
-      setSavedScoreByGameId(createSavedScoreMap(data?.games));
       setBalance(createBalanceFromStat(data?.stat));
       setEntries(entryData);
       setOriginalEntries(entryData);
@@ -526,21 +592,6 @@ function CompetitionDetail() {
       ),
     }));
   }, [competition]);
-
-  const visibleRounds = useMemo(() => {
-    if (mode !== COMPETITION_MODES.SCORE || !showOnlyUnscoredGames) {
-      return rounds;
-    }
-
-    return rounds
-      .map((roundGroup) => ({
-        ...roundGroup,
-        games: roundGroup.games.filter(
-          (game) => !hasRecordedScore({ score: savedScoreByGameId[game.gameId] })
-        ),
-      }))
-      .filter((roundGroup) => roundGroup.games.length > 0);
-  }, [mode, rounds, savedScoreByGameId, showOnlyUnscoredGames]);
 
   const dirtyEntries = useMemo(
     () =>
@@ -722,6 +773,13 @@ function CompetitionDetail() {
   };
 
   const saveGameScore = async (gameId) => {
+    if (rejectWithoutPermission(
+      (message) => setScoreErrorByGameId((prev) => ({ ...prev, [gameId]: message })),
+      (message) => setScoreFeedbackByGameId((prev) => ({ ...prev, [gameId]: message }))
+    )) {
+      return;
+    }
+
     const game = competition?.games?.find((item) => item.gameId === gameId);
     if (!game) {
       return;
@@ -743,7 +801,8 @@ function CompetitionDetail() {
       setScoreErrorByGameId((prev) => ({ ...prev, [gameId]: '' }));
       const response = await apiRequest.patch(
         `/api/competitions/${publicId}/games/${gameId}/score`,
-        payload
+        payload,
+        adminRequestOptions
       );
       const data = getResponseData(response);
 
@@ -759,10 +818,6 @@ function CompetitionDetail() {
           ),
         };
       });
-      setSavedScoreByGameId((prev) => ({
-        ...prev,
-        [data.gameId]: data.score ?? {},
-      }));
       trackEvent('competition_score_saved', {
         public_id: publicId,
         game_id: data.gameId,
@@ -1032,10 +1087,6 @@ function CompetitionDetail() {
     setGameEditorError(hasDuplicate ? DUPLICATE_GAME_PLAYER_MESSAGE : '');
   };
 
-  const selectedGameEditorIds = gameEditor
-    ? [...gameEditor.teamA, ...gameEditor.teamB].filter(Boolean)
-    : [];
-
   const getReadyGameAssignment = (entryId) => {
     if (!gameEditor || !competition?.games?.length) {
       return null;
@@ -1174,10 +1225,6 @@ function CompetitionDetail() {
             ),
           };
         });
-        setSavedScoreByGameId((prev) => ({
-          ...prev,
-          [data.game.gameId]: data.game.score ?? {},
-        }));
       }
       trackEvent('competition_game_entries_saved', {
         public_id: publicId,
@@ -1504,81 +1551,6 @@ function CompetitionDetail() {
     }
   };
 
-  const addClubCourt = async () => {
-    if (rejectWithoutPermission(setClubActionError, setClubActionFeedback)) {
-      return;
-    }
-
-    const nextCourtCount = (competition?.courtCount ?? 0) + 1;
-    if (nextCourtCount > 10) {
-      setClubActionFeedback('');
-      setClubActionError('코트는 최대 10개까지 추가할 수 있어요.');
-      return;
-    }
-
-    try {
-      setBusyClubAction('add-court');
-      setClubActionError('');
-      setClubActionFeedback('');
-      await apiRequest.patch(
-        `/api/competitions/${publicId}/court-count`,
-        { courtCount: nextCourtCount },
-        adminRequestOptions
-      );
-      await refreshCompetition();
-      setClubActionFeedback(`${nextCourtCount}번 코트를 추가했어요.`);
-    } catch (error) {
-      setClubActionError(
-        error.response?.data?.message || '코트를 추가하지 못했어요.'
-      );
-    } finally {
-      setBusyClubAction('');
-    }
-  };
-
-  const removeClubCourt = async (court, hasReadyGame) => {
-    if (rejectWithoutPermission(setClubActionError, setClubActionFeedback)) {
-      return;
-    }
-
-    const currentCourtCount = competition?.courtCount ?? 0;
-    if (currentCourtCount <= 1) {
-      setClubActionFeedback('');
-      setClubActionError('최소 1개 코트는 남아 있어야 해요.');
-      return;
-    }
-    if (court !== currentCourtCount) {
-      setClubActionFeedback('');
-      setClubActionError('현재 구조에서는 마지막 코트부터 제거할 수 있어요.');
-      return;
-    }
-    const confirmMessage = hasReadyGame
-      ? `${court}번 코트를 제거할까요? 진행 중인 경기는 빈 코트로 이동하고, 완료된 경기 기록은 유지됩니다.`
-      : `${court}번 코트를 제거할까요? 완료된 경기 기록은 유지됩니다.`;
-    if (!window.confirm(confirmMessage)) {
-      return;
-    }
-
-    try {
-      setBusyClubAction(`remove-${court}`);
-      setClubActionError('');
-      setClubActionFeedback('');
-      await apiRequest.patch(
-        `/api/competitions/${publicId}/court-count`,
-        { courtCount: currentCourtCount - 1 },
-        adminRequestOptions
-      );
-      await refreshCompetition();
-      setClubActionFeedback(`${court}번 코트를 제거했어요.`);
-    } catch (error) {
-      setClubActionError(
-        error.response?.data?.message || '코트를 제거하지 못했어요.'
-      );
-    } finally {
-      setBusyClubAction('');
-    }
-  };
-
   const renderSummaryPanel = () => {
     if (isLoading) {
       return (
@@ -1664,86 +1636,36 @@ function CompetitionDetail() {
         !errorMessage &&
         competition && (
         <section className="competition-admin-actions">
-          {canManage && showAdminLinkBanner && (
-            <div className="competition-admin-link-banner">
-              <p>
-                경기 시작 전 조정이 끝나면 일반 링크만 공유해도 됩니다.
-                관리자 링크는 나중에 다시 수정해야 할 때를 대비해 운영자만 보관해 주세요.
-              </p>
-              <div>
-                <button type="button" onClick={copyAdminLinkFromBanner}>
-                  관리자 링크 복사
-                </button>
-                <button
-                  type="button"
-                  className="secondary"
-                  onClick={dismissAdminLinkBanner}
-                >
-                  나중에 하기
-                </button>
-              </div>
-            </div>
-          )}
-
-          <div className={`competition-share-panel ${isSharePanelOpen ? 'open' : ''}`}>
+          <div className="competition-share-panel">
             <button
               type="button"
               className="competition-share-toggle"
-              onClick={
-                canManage
-                  ? toggleSharePanel
-                  : () =>
-                    copyUrl(
-                      userShareUrl,
-                      '참여 링크를 복사했어요.'
-                    )
-              }
-              aria-expanded={canManage && isSharePanelOpen}
+              onClick={handleShareClick}
             >
-              링크 복사
+              {requiresAdminPasswordBeforeShare
+                ? '관리자 비밀번호 설정 후 링크 복사'
+                : '공유 링크 복사'}
             </button>
-            {!canManage && shareFeedback && (
+            {shareFeedback && (
               <p className="competition-share-feedback">{shareFeedback}</p>
             )}
-
-            {canManage && isSharePanelOpen && (
-              <div className={`competition-share-actions ${canManage ? '' : 'viewer'}`}>
-                <button
-                  type="button"
-                  className="secondary"
-                  onClick={() =>
-                    copyUrl(
-                      userShareUrl,
-                      '참여 링크를 복사했어요.'
-                    )
-                  }
-                >
-                  참여 링크 복사
-                </button>
-                {canManage && (
-                  <>
-                <button
-                  type="button"
-                  onClick={() =>
-                    copyUrl(
-                      manageShareUrl,
-                      '관리자 링크를 복사했어요.'
-                    )
-                  }
-                >
-                  관리자 링크 복사
-                </button>
-                <p>
-                  관리자 링크는 수정 권한이 있으니 필요한 사람에게만 공유해주세요.
-                </p>
-                  </>
-                )}
-                {shareFeedback && (
-                  <p className="competition-share-feedback">{shareFeedback}</p>
-                )}
-              </div>
-            )}
           </div>
+
+          {!canManage && competition.adminPasswordSet === false && (
+            <p className="competition-admin-notice">
+              아직 관리자가 관리자 비밀번호를 설정하지 않았습니다.
+            </p>
+          )}
+
+          {!canManage && competition.adminPasswordSet === true && (
+            <button
+              type="button"
+              className="competition-admin-mode-button secondary"
+              onClick={openAdminLogin}
+            >
+              관리자 모드
+            </button>
+          )}
 
           <button
             className={`competition-entry-edit-button ${
@@ -1849,6 +1771,80 @@ function CompetitionDetail() {
           onSaveGameEntries={saveGameEntries}
           onUpdateGameEditorSelection={updateGameEditorSelection}
         />
+      )}
+
+      {adminPasswordModalOpen && (
+        <div className="competition-admin-password-modal" role="presentation">
+          <div
+            className="competition-admin-password-dialog"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="competition-admin-password-title"
+          >
+            <div className="competition-admin-password-heading">
+              <h2 id="competition-admin-password-title">
+                {adminPasswordMode === 'setup'
+                  ? '관리자 비밀번호 설정'
+                  : '관리자 모드'}
+              </h2>
+              <button
+                type="button"
+                aria-label="닫기"
+                onClick={closeAdminPasswordModal}
+              >
+                ×
+              </button>
+            </div>
+            <p>
+              {adminPasswordMode === 'setup'
+                ? '공유 전에 운영자가 사용할 4~6자리 숫자를 설정해 주세요.'
+                : '관리자 비밀번호를 입력하면 이 브라우저에서 관리자 기능을 사용할 수 있어요.'}
+            </p>
+            <input
+              type="password"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              maxLength={6}
+              value={adminPasswordDraft}
+              onChange={(event) => {
+                setAdminPasswordDraft(event.target.value.replace(/\D/g, '').slice(0, 6));
+                setAdminPasswordError('');
+              }}
+              placeholder="4~6자리 숫자"
+              autoFocus
+            />
+            {adminPasswordError && (
+              <div className="competition-admin-password-error">
+                {adminPasswordError}
+              </div>
+            )}
+            <div className="competition-admin-password-actions">
+              <button
+                type="button"
+                className="secondary"
+                onClick={closeAdminPasswordModal}
+                disabled={isSubmittingAdminPassword}
+              >
+                취소
+              </button>
+              <button
+                type="button"
+                onClick={
+                  adminPasswordMode === 'setup'
+                    ? submitAdminPasswordSetup
+                    : submitAdminLogin
+                }
+                disabled={isSubmittingAdminPassword}
+              >
+                {isSubmittingAdminPassword
+                  ? '확인 중'
+                  : adminPasswordMode === 'setup'
+                    ? '설정하고 공유'
+                    : '관리자 로그인'}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </main>
   );

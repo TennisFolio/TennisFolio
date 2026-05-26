@@ -22,10 +22,8 @@ import com.tennisfolio.Tennisfolio.matching.repository.CompetitionRepository;
 import com.tennisfolio.Tennisfolio.matching.repository.CompetitionStatRepository;
 import com.tennisfolio.Tennisfolio.matching.repository.GameEntryRepository;
 import com.tennisfolio.Tennisfolio.matching.repository.GameRepository;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -45,6 +43,7 @@ public class CompetitionGameCommandService {
     private final GameEntryRepository gameEntryRepository;
     private final TennisMatchScheduler scheduler;
     private final GameService gameService;
+    private final CompetitionAdminAuthorizationService competitionAdminAuthorizationService;
 
     public CompetitionGameCommandService(
             CompetitionRepository competitionRepository,
@@ -53,7 +52,8 @@ public class CompetitionGameCommandService {
             GameRepository gameRepository,
             GameEntryRepository gameEntryRepository,
             TennisMatchScheduler scheduler,
-            GameService gameService
+            GameService gameService,
+            CompetitionAdminAuthorizationService competitionAdminAuthorizationService
     ) {
         this.competitionRepository = competitionRepository;
         this.competitionEntryRepository = competitionEntryRepository;
@@ -62,12 +62,14 @@ public class CompetitionGameCommandService {
         this.gameEntryRepository = gameEntryRepository;
         this.scheduler = scheduler;
         this.gameService = gameService;
+        this.competitionAdminAuthorizationService = competitionAdminAuthorizationService;
     }
 
     @Transactional
-    public GameResponse createNextCourtGame(String publicId, Integer court, String editToken) {
+    public GameResponse createNextCourtGame(String publicId, Integer court, String adminToken) {
         Competition competition = competitionRepository.findByPublicId(publicId)
                 .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND));
+        competitionAdminAuthorizationService.validateAdminToken(publicId, adminToken);
         validateClubSession(competition);
         validateCourt(competition, court);
 
@@ -102,11 +104,12 @@ public class CompetitionGameCommandService {
     public GameResponse updateGameStatus(
             String publicId,
             Long gameId,
-            String editToken,
+            String adminToken,
             GameStatusUpdateRequest request
     ) {
         Competition competition = competitionRepository.findByPublicId(publicId)
                 .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND));
+        competitionAdminAuthorizationService.validateAdminToken(publicId, adminToken);
         validateClubSession(competition);
 
         Game game = gameRepository.findByIdAndCompetitionId(gameId, competition.getId())
@@ -127,10 +130,10 @@ public class CompetitionGameCommandService {
     }
 
     @Transactional
-    public void deleteGame(String publicId, Long gameId, String editToken) {
+    public void deleteGame(String publicId, Long gameId, String adminToken) {
         Competition competition = competitionRepository.findByPublicId(publicId)
                 .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND));
-        validateEditToken(competition, editToken);
+        competitionAdminAuthorizationService.validateAdminToken(publicId, adminToken);
         validateClubSession(competition);
 
         Game game = gameRepository.findByIdAndCompetitionId(gameId, competition.getId())
@@ -147,12 +150,12 @@ public class CompetitionGameCommandService {
     @Transactional
     public CompetitionStatResponse updateCourtCount(
             String publicId,
-            String editToken,
+            String adminToken,
             CourtCountUpdateRequest request
     ) {
         Competition competition = competitionRepository.findByPublicId(publicId)
                 .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND));
-        validateEditToken(competition, editToken);
+        competitionAdminAuthorizationService.validateAdminToken(publicId, adminToken);
         validateClubSession(competition);
 
         if (request.getCourtCount() == null || request.getCourtCount() <= 0 || request.getCourtCount() > 10) {
@@ -167,12 +170,12 @@ public class CompetitionGameCommandService {
     public GameEntryUpdateResponse updateGameEntries(
             String publicId,
             Long gameId,
-            String editToken,
+            String adminToken,
             GameEntryUpdateRequest request
     ) {
         Competition competition = competitionRepository.findByPublicId(publicId)
                 .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND));
-        validateEditToken(competition, editToken);
+        competitionAdminAuthorizationService.validateAdminToken(publicId, adminToken);
 
         Game game = gameRepository.findByIdAndCompetitionId(gameId, competition.getId())
                 .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND));
@@ -211,11 +214,12 @@ public class CompetitionGameCommandService {
     public GameResponse updateGameScore(
             String publicId,
             Long gameId,
-            String editToken,
+            String adminToken,
             GameScoreUpdateRequest request
     ) {
         Competition competition = competitionRepository.findByPublicId(publicId)
                 .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND));
+        competitionAdminAuthorizationService.validateAdminToken(publicId, adminToken);
         Game game = gameRepository.findByIdAndCompetitionId(gameId, competition.getId())
                 .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND));
 
@@ -358,12 +362,6 @@ public class CompetitionGameCommandService {
             }
         }
         return null;
-    }
-
-    private void validateEditToken(Competition competition, String editToken) {
-        if (editToken == null || !competition.getEditToken().equals(editToken)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid edit token");
-        }
     }
 
     private List<CompetitionEntry> resolveTeamEntries(

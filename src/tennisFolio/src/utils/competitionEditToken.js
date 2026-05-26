@@ -1,53 +1,30 @@
-const editTokenKey = (publicId) => `competition:${publicId}:editToken`;
-const adminLinkPromptKey = (publicId) => `competition:${publicId}:adminLinkPrompt`;
-const adminLinkPromptDismissedKey = (publicId) =>
-  `competition:${publicId}:adminLinkPromptDismissed`;
+const adminTokenKey = (publicId) => `competition:${publicId}:adminToken`;
 
-export function getCompetitionEditToken(publicId) {
+export function getCompetitionAdminToken(publicId) {
   if (!publicId) {
     return '';
   }
-  return localStorage.getItem(editTokenKey(publicId)) ?? '';
+  return localStorage.getItem(adminTokenKey(publicId)) ?? '';
 }
 
-export function saveCompetitionEditToken(publicId, editToken) {
-  if (!publicId || !editToken) {
+export function saveCompetitionAdminToken(publicId, adminToken) {
+  if (!publicId || !adminToken) {
     return;
   }
-  localStorage.setItem(editTokenKey(publicId), editToken);
+  localStorage.setItem(adminTokenKey(publicId), adminToken);
 }
 
-export function markCompetitionAdminLinkPrompt(publicId) {
+export function clearCompetitionAdminToken(publicId) {
   if (!publicId) {
     return;
   }
-  localStorage.setItem(adminLinkPromptKey(publicId), '1');
+  localStorage.removeItem(adminTokenKey(publicId));
 }
 
-export function shouldShowCompetitionAdminLinkPrompt(publicId) {
-  if (!publicId) {
-    return false;
-  }
-
-  return (
-    localStorage.getItem(adminLinkPromptKey(publicId)) === '1' &&
-    localStorage.getItem(adminLinkPromptDismissedKey(publicId)) !== '1'
-  );
-}
-
-export function dismissCompetitionAdminLinkPrompt(publicId) {
-  if (!publicId) {
-    return;
-  }
-
-  localStorage.setItem(adminLinkPromptDismissedKey(publicId), '1');
-  localStorage.removeItem(adminLinkPromptKey(publicId));
-}
-
-export function createEditTokenHeaders(editToken) {
-  return editToken
+export function createAdminTokenHeaders(adminToken) {
+  return adminToken
     ? {
-        'X-Competition-Edit-Token': editToken,
+        'X-Competition-Admin-Token': adminToken,
       }
     : {};
 }

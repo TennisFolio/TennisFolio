@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestControllerAdvice(annotations = {RestController.class}, basePackages = {"com.tennisfolio.Tennisfolio"})
 @Hidden
@@ -33,6 +34,16 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ResponseDTO<Void>> handleException(Exception e){
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(ResponseDTO.error(e.getMessage(), "ERROR"));
+    }
+
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<ResponseDTO<Void>> handleResponseStatusException(ResponseStatusException e) {
+        String message = e.getReason() == null || e.getReason().isBlank()
+                ? "요청을 처리할 수 없습니다."
+                : e.getReason();
+        HttpStatus status = HttpStatus.valueOf(e.getStatusCode().value());
+        return ResponseEntity.status(e.getStatusCode())
+                .body(ResponseDTO.error(status.name(), message));
     }
 
     @ExceptionHandler(InvalidRequestException.class)

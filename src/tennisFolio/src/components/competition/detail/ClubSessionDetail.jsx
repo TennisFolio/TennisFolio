@@ -205,7 +205,7 @@ function ClubSessionDetail({
     onCreateNextCourtGame(nextCreateCourt);
   };
 
-  const getCompletionConfirmationMessage = (game) => {
+  const getCompletionConfirmationMessage = () => {
     return '완료 후에는 진행 상태로 변경할 수 없습니다.';
   };
 
@@ -443,8 +443,8 @@ function ClubSessionDetail({
                       renderGameCard(currentGame, { canCompleteGame: true })
                     ) : (
                       <div className="empty-court-state">
-                        <strong>바로 시작할 경기가 없습니다</strong>
-                        <p>참가자 4명이 가능하면 이 코트에 대기 경기를 만들 수 있습니다.</p>
+                        <strong>진행 중인 경기가 없습니다</strong>
+                        <p>다음 경기 준비 버튼으로 이 코트에 경기를 만들 수 있습니다.</p>
                         {!canManage && <span>현재 배정된 경기가 없습니다.</span>}
                       </div>
                     )}

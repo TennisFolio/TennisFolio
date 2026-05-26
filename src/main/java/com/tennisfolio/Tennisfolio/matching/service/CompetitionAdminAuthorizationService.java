@@ -1,0 +1,72 @@
+package com.tennisfolio.Tennisfolio.matching.service;
+
+import com.tennisfolio.Tennisfolio.matching.entity.Competition;
+import com.tennisfolio.Tennisfolio.matching.repository.CompetitionRepository;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.util.regex.Pattern;
+
+@Service
+public class CompetitionAdminAuthorizationService {
+    private static final Pattern PASSWORD_PATTERN = Pattern.compile("\\d{4,6}");
+
+    private final CompetitionRepository competitionRepository;
+    private final CompetitionAdminTokenService tokenService;
+    private final BCryptPasswordEncoder passwordEncoder;
+
+    public CompetitionAdminAuthorizationService(
+            CompetitionRepository competitionRepository,
+            CompetitionAdminTokenService tokenService,
+            BCryptPasswordEncoder passwordEncoder
+    ) {
+        this.competitionRepository = competitionRepository;
+        this.tokenService = tokenService;
+        this.passwordEncoder = passwordEncoder;
+    }
+
+    @Transactional
+    public String setAdminPassword(String publicId, String adminToken, String password) {
+        Competition competition = findCompetition(publicId);
+        validateAdminToken(publicId, adminToken);
+        validatePasswordFormat(password);
+        if (competition.hasAdminPassword()) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "관리자 비밀번호가 이미 설정되었습니다.");
+        }
+        competition.setAdminPasswordHash(passwordEncoder.encode(password));
+        return tokenService.createToken(publicId);
+    }
+
+    @Transactional(readOnly = true)
+    public String login(String publicId, String password) {
+        Competition competition = findCompetition(publicId);
+        if (!competition.hasAdminPassword()) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "아직 관리자가 관리자 비밀번호를 설정하지 않았습니다.");
+        }
+        if (!passwordEncoder.matches(password, competition.getAdminPasswordHash())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "관리자 비밀번호가 올바르지 않습니다.");
+        }
+        return tokenService.createToken(publicId);
+    }
+
+    public void validateAdminToken(String publicId, String adminToken) {
+        String tokenPublicId = tokenService.validateAndGetPublicId(adminToken);
+        if (!publicId.equals(tokenPublicId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "관리자 권한이 올바르지 않습니다. 다시 로그인해 주세요.");
+        }
+    }
+
+    private void validatePasswordFormat(String password) {
+        if (password == null || !PASSWORD_PATTERN.matcher(password).matches()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "관리자 비밀번호는 4~6자리 숫자로 입력해 주세요.");
+        }
+    }
+
+    private Competition findCompetition(String publicId) {
+        return competitionRepository.findByPublicId(publicId)
+                .orElseThrow(() -> new IllegalArgumentException("Competition not found"));
+    }
+}

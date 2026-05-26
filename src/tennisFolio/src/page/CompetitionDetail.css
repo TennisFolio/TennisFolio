@@ -306,47 +306,6 @@
   box-shadow: 0 18px 38px rgba(15, 23, 42, 0.07);
 }
 
-.competition-admin-link-banner {
-  display: grid;
-  gap: 10px;
-  padding: 12px;
-  border: 1px solid #fed7aa;
-  border-radius: 16px;
-  background: #fff7ed;
-}
-
-.competition-admin-link-banner p {
-  margin: 0;
-  color: #9a3412;
-  font-size: 13px;
-  font-weight: 900;
-  line-height: 1.45;
-}
-
-.competition-admin-link-banner div {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-}
-
-.competition-admin-link-banner button {
-  min-height: 38px;
-  padding: 0 10px;
-  border: 0;
-  border-radius: 12px;
-  background: #0f172a;
-  color: #ffffff;
-  font-size: 12px;
-  font-weight: 900;
-  cursor: pointer;
-}
-
-.competition-admin-link-banner button.secondary {
-  border: 1px solid #fed7aa;
-  background: #ffffff;
-  color: #9a3412;
-}
-
 .competition-user-actions {
   display: grid;
   gap: 8px;
@@ -632,6 +591,143 @@
   font-size: 12px;
   font-weight: 900;
   text-align: center;
+}
+
+.competition-admin-notice {
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  background: #f8fafc;
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.45;
+}
+
+.competition-admin-mode-button {
+  width: 100%;
+  min-height: 42px;
+  border: 1px solid #cbd5e1;
+  border-radius: 14px;
+  background: #ffffff;
+  color: #475569;
+  font-size: 14px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.competition-admin-password-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgba(15, 23, 42, 0.42);
+}
+
+.competition-admin-password-dialog {
+  display: grid;
+  gap: 14px;
+  width: min(420px, 100%);
+  padding: 20px;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.22);
+}
+
+.competition-admin-password-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.competition-admin-password-heading h2 {
+  margin: 0;
+  color: #0f172a;
+  font-size: 18px;
+  font-weight: 900;
+  line-height: 1.25;
+}
+
+.competition-admin-password-heading button {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid #e2e8f0;
+  border-radius: 50%;
+  background: #ffffff;
+  color: #475569;
+  font-size: 20px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.competition-admin-password-dialog p {
+  margin: 0;
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.45;
+}
+
+.competition-admin-password-dialog input {
+  width: 100%;
+  height: 46px;
+  padding: 0 14px;
+  border: 1px solid #dbe3ef;
+  border-radius: 12px;
+  color: #0f172a;
+  font-size: 18px;
+  font-weight: 900;
+  outline: none;
+}
+
+.competition-admin-password-dialog input:focus {
+  border-color: #0f172a;
+  box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.08);
+}
+
+.competition-admin-password-error {
+  padding: 10px 12px;
+  border: 1px solid #fecdd3;
+  border-radius: 12px;
+  background: #fff1f2;
+  color: #be123c;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.competition-admin-password-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.competition-admin-password-actions button {
+  min-height: 42px;
+  border: 0;
+  border-radius: 12px;
+  background: #0f172a;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.competition-admin-password-actions button.secondary {
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #475569;
+}
+
+.competition-admin-password-actions button:disabled {
+  background: #cbd5e1;
+  color: #64748b;
+  cursor: not-allowed;
 }
 
 .competition-name-view {

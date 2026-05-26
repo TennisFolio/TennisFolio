@@ -10,10 +10,8 @@ import com.tennisfolio.Tennisfolio.matching.entity.Competition;
 import com.tennisfolio.Tennisfolio.matching.entity.CompetitionEntry;
 import com.tennisfolio.Tennisfolio.matching.repository.CompetitionEntryRepository;
 import com.tennisfolio.Tennisfolio.matching.repository.CompetitionRepository;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,13 +23,16 @@ public class CompetitionEntryCommandService {
 
     private final CompetitionRepository competitionRepository;
     private final CompetitionEntryRepository competitionEntryRepository;
+    private final CompetitionAdminAuthorizationService competitionAdminAuthorizationService;
 
     public CompetitionEntryCommandService(
             CompetitionRepository competitionRepository,
-            CompetitionEntryRepository competitionEntryRepository
+            CompetitionEntryRepository competitionEntryRepository,
+            CompetitionAdminAuthorizationService competitionAdminAuthorizationService
     ) {
         this.competitionRepository = competitionRepository;
         this.competitionEntryRepository = competitionEntryRepository;
+        this.competitionAdminAuthorizationService = competitionAdminAuthorizationService;
     }
 
     public Map<String, CompetitionEntry> createCompetitionEntries(Competition competition) {
@@ -55,12 +56,12 @@ public class CompetitionEntryCommandService {
     @Transactional
     public CompetitionEntryResponse createCompetitionEntry(
             String publicId,
-            String editToken,
+            String adminToken,
             CompetitionEntryCreateRequest request
     ) {
         Competition competition = competitionRepository.findByPublicId(publicId)
                 .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND));
-        validateEditToken(competition, editToken);
+        competitionAdminAuthorizationService.validateAdminToken(publicId, adminToken);
         validateClubSession(competition);
 
         String playerName = normalizePlayerName(request.getPlayerName());
@@ -80,7 +81,7 @@ public class CompetitionEntryCommandService {
     public CompetitionEntryResponse updateCompetitionEntry(
             String publicId,
             Long entryId,
-            String editToken,
+            String adminToken,
             CompetitionEntryUpdateRequest request
     ) {
         if (request.getPlayerName() == null && request.getGender() == null && request.getStatus() == null) {
@@ -89,7 +90,7 @@ public class CompetitionEntryCommandService {
 
         Competition competition = competitionRepository.findByPublicId(publicId)
                 .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND));
-        validateEditToken(competition, editToken);
+        competitionAdminAuthorizationService.validateAdminToken(publicId, adminToken);
         CompetitionEntry entry = competitionEntryRepository
                 .findByIdAndCompetitionId(entryId, competition.getId())
                 .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND));
@@ -147,9 +148,4 @@ public class CompetitionEntryCommandService {
         }
     }
 
-    private void validateEditToken(Competition competition, String editToken) {
-        if (editToken == null || !competition.getEditToken().equals(editToken)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid edit token");
-        }
-    }
 }

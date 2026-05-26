@@ -25,6 +25,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
@@ -42,6 +44,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -70,6 +73,9 @@ class CompetitionGameCommandServiceTest {
     @Mock
     private GameService gameService;
 
+    @Mock
+    private CompetitionAdminAuthorizationService competitionAdminAuthorizationService;
+
     private CompetitionGameCommandService service;
 
     @BeforeEach
@@ -81,7 +87,8 @@ class CompetitionGameCommandServiceTest {
                 gameRepository,
                 gameEntryRepository,
                 scheduler,
-                gameService
+                gameService,
+                competitionAdminAuthorizationService
         );
     }
 
@@ -123,8 +130,9 @@ class CompetitionGameCommandServiceTest {
         when(competitionStatRepository.save(any(CompetitionStat.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(gameEntryRepository.findByGameId(20L)).thenReturn(savedGameEntries);
 
-        GameResponse response = service.createNextCourtGame("public-id", 1, "edit-token");
+        GameResponse response = service.createNextCourtGame("public-id", 1, "admin-token");
 
+        verify(competitionAdminAuthorizationService).validateAdminToken("public-id", "admin-token");
         assertEquals(20L, response.getGameId());
         assertEquals(3, response.getRound());
         assertEquals(1, response.getCourt());
@@ -172,8 +180,9 @@ class CompetitionGameCommandServiceTest {
         when(competitionStatRepository.save(any(CompetitionStat.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(gameEntryRepository.findByGameId(20L)).thenReturn(List.of());
 
-        GameResponse response = service.createNextCourtGame("public-id", 1, "edit-token");
+        GameResponse response = service.createNextCourtGame("public-id", 1, "admin-token");
 
+        verify(competitionAdminAuthorizationService).validateAdminToken("public-id", "admin-token");
         assertEquals(20L, response.getGameId());
         assertEquals(2, response.getRound());
         verify(scheduler).generateNextClubSessionGame(any(), any(), eq(1), eq(2), anyLong());
@@ -189,26 +198,29 @@ class CompetitionGameCommandServiceTest {
         when(gameRepository.findByIdAndCompetitionId(10L, 1L)).thenReturn(Optional.of(game));
         when(gameEntryRepository.findByGameId(10L)).thenReturn(List.of());
 
-        GameResponse response = service.updateGameStatus("public-id", 10L, "edit-token", request);
+        GameResponse response = service.updateGameStatus("public-id", 10L, "admin-token", request);
 
+        verify(competitionAdminAuthorizationService).validateAdminToken("public-id", "admin-token");
         assertEquals("COMPLETED", response.getStatus());
         assertEquals(Game.GameStatus.COMPLETED, game.getStatus());
     }
 
     @Test
-    void updateGameStatus_allowsCompletionWithoutEditToken() {
+    void updateGameStatus_rejectsInvalidAdminToken() {
         Competition competition = clubSessionCompetition(1L, "public-id", "edit-token");
         Game game = game(10L, competition, 1, 1, Game.MatchType.MIXED);
         GameStatusUpdateRequest request = gameStatusUpdateRequest("completed");
 
         when(competitionRepository.findByPublicId("public-id")).thenReturn(Optional.of(competition));
-        when(gameRepository.findByIdAndCompetitionId(10L, 1L)).thenReturn(Optional.of(game));
-        when(gameEntryRepository.findByGameId(10L)).thenReturn(List.of());
+        doThrow(new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid competition admin token"))
+                .when(competitionAdminAuthorizationService)
+                .validateAdminToken("public-id", "bad-token");
 
-        GameResponse response = service.updateGameStatus("public-id", 10L, null, request);
-
-        assertEquals("COMPLETED", response.getStatus());
-        assertEquals(Game.GameStatus.COMPLETED, game.getStatus());
+        assertThrows(
+                ResponseStatusException.class,
+                () -> service.updateGameStatus("public-id", 10L, "bad-token", request)
+        );
+        verify(gameRepository, never()).findByIdAndCompetitionId(10L, 1L);
     }
 
     @Test
@@ -223,7 +235,7 @@ class CompetitionGameCommandServiceTest {
 
         assertThrows(
                 InvalidRequestException.class,
-                () -> service.updateGameStatus("public-id", 10L, "edit-token", request)
+                () -> service.updateGameStatus("public-id", 10L, "admin-token", request)
         );
     }
 
@@ -239,15 +251,16 @@ class CompetitionGameCommandServiceTest {
         when(competitionStatRepository.findByCompetitionId(1L)).thenReturn(Optional.empty());
         when(competitionStatRepository.save(any(CompetitionStat.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        service.deleteGame("public-id", 10L, "edit-token");
+        service.deleteGame("public-id", 10L, "admin-token");
 
+        verify(competitionAdminAuthorizationService).validateAdminToken("public-id", "admin-token");
         verify(gameEntryRepository).deleteByGameId(10L);
         verify(gameRepository).delete(game);
         verify(competitionStatRepository).save(any(CompetitionStat.class));
     }
 
     @Test
-    void updateGameScore_allowsCompletedClubSessionGameWithoutEditToken() {
+    void updateGameScore_allowsCompletedClubSessionGameWithAdminToken() {
         Competition competition = clubSessionCompetition(1L, "public-id", "edit-token");
         Game game = game(10L, competition, 1, 1, Game.MatchType.MIXED);
         game.complete();
@@ -259,8 +272,9 @@ class CompetitionGameCommandServiceTest {
         when(gameRepository.findByIdAndCompetitionId(10L, 1L)).thenReturn(Optional.of(game));
         when(gameEntryRepository.findByGameId(10L)).thenReturn(List.of());
 
-        GameResponse response = service.updateGameScore("public-id", 10L, null, request);
+        GameResponse response = service.updateGameScore("public-id", 10L, "admin-token", request);
 
+        verify(competitionAdminAuthorizationService).validateAdminToken("public-id", "admin-token");
         assertEquals(6, response.getScore().getTeamAScore());
         assertEquals(4, response.getScore().getTeamBScore());
     }
@@ -276,8 +290,9 @@ class CompetitionGameCommandServiceTest {
         when(competitionStatRepository.findByCompetitionId(1L)).thenReturn(Optional.empty());
         when(competitionStatRepository.save(any(CompetitionStat.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        CompetitionStatResponse response = service.updateCourtCount("public-id", "edit-token", request);
+        CompetitionStatResponse response = service.updateCourtCount("public-id", "admin-token", request);
 
+        verify(competitionAdminAuthorizationService).validateAdminToken("public-id", "admin-token");
         assertEquals(3, competition.getCourtCount());
         assertEquals(0, response.getTotalGames());
     }
@@ -298,8 +313,9 @@ class CompetitionGameCommandServiceTest {
         when(competitionStatRepository.findByCompetitionId(1L)).thenReturn(Optional.empty());
         when(competitionStatRepository.save(any(CompetitionStat.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        service.updateCourtCount("public-id", "edit-token", request);
+        service.updateCourtCount("public-id", "admin-token", request);
 
+        verify(competitionAdminAuthorizationService).validateAdminToken("public-id", "admin-token");
         assertEquals(2, competition.getCourtCount());
         assertEquals(1, readyOnCourt3.getCourt());
         assertEquals(2, readyOnCourt2.getCourt());
@@ -320,7 +336,7 @@ class CompetitionGameCommandServiceTest {
 
         assertThrows(
                 InvalidRequestException.class,
-                () -> service.updateCourtCount("public-id", "edit-token", request)
+                () -> service.updateCourtCount("public-id", "admin-token", request)
         );
         assertEquals(3, competition.getCourtCount());
         assertEquals(3, readyOnCourt3.getCourt());

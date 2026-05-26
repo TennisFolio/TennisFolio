@@ -12,9 +12,14 @@ public class CompetitionService {
     private static final int MAX_COMPETITION_NAME_LENGTH = 50;
 
     private final CompetitionRepository competitionRepository;
+    private final CompetitionAdminAuthorizationService competitionAdminAuthorizationService;
 
-    public CompetitionService(CompetitionRepository competitionRepository) {
+    public CompetitionService(
+            CompetitionRepository competitionRepository,
+            CompetitionAdminAuthorizationService competitionAdminAuthorizationService
+    ) {
         this.competitionRepository = competitionRepository;
+        this.competitionAdminAuthorizationService = competitionAdminAuthorizationService;
     }
 
     public Competition createCompetition(CompetitionCreateRequest request, int rounds, long seed) {
@@ -30,19 +35,17 @@ public class CompetitionService {
         ));
     }
 
-    public Competition updateCompetitionName(String publicId, String name, String editToken) {
+    public Competition updateCompetitionName(String publicId, String name, String adminToken) {
         String normalizedName = normalizeName(name);
-        Competition competition = findEditableCompetition(publicId, editToken);
+        Competition competition = findEditableCompetition(publicId, adminToken);
         competition.rename(normalizedName);
         return competition;
     }
 
-    public Competition findEditableCompetition(String publicId, String editToken) {
+    public Competition findEditableCompetition(String publicId, String adminToken) {
         Competition competition = competitionRepository.findByPublicId(publicId)
                 .orElseThrow(() -> new IllegalArgumentException("Competition not found"));
-        if (editToken == null || !competition.getEditToken().equals(editToken)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid edit token");
-        }
+        competitionAdminAuthorizationService.validateAdminToken(publicId, adminToken);
         return competition;
     }
 
