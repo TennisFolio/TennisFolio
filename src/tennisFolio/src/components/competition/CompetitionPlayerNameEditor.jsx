@@ -19,10 +19,10 @@ function CompetitionPlayerNameEditor({
         onClick={onToggle}
       >
         <span>
-          <strong>참가자 이름 직접 입력</strong>
-          <small>기본 이름을 바꾸고 싶은 사람만 수정해요</small>
+          <em>선택</em>
+          <strong>참가자 이름 입력</strong>
         </span>
-        <b aria-hidden="true">{isOpen ? '닫기' : '열기'}</b>
+        <b aria-hidden="true">{isOpen ? '닫기' : '입력하기'}</b>
       </button>
 
       <AnimatePresence initial={false}>
