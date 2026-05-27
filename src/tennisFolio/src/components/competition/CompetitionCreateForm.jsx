@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from 'framer-motion';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   COMPETITION_FIELDS,
@@ -7,6 +7,7 @@ import {
   useCompetitionCreateForm,
 } from '../../hooks/useCompetitionCreateForm';
 import CompetitionFieldStepper from './CompetitionFieldStepper';
+import CompetitionPlayerNameEditor from './CompetitionPlayerNameEditor';
 import CompetitionSummary from './CompetitionSummary';
 import { saveCompetitionAdminToken } from '../../utils/competitionEditToken';
 import { trackEvent } from '../../utils/analytics';
@@ -35,6 +36,7 @@ const MotionSection = motion.section;
 
 function CompetitionCreateForm() {
   const navigate = useNavigate();
+  const [isPlayerNameEditorOpen, setIsPlayerNameEditorOpen] = useState(false);
   const createdRef = useRef(false);
   const latestFormStateRef = useRef({
     totalPlayers: 0,
@@ -53,6 +55,7 @@ function CompetitionCreateForm() {
     unavailableReasonText,
     updateCompetitionField,
     stepCompetitionField,
+    updateCompetitionPlayerName,
     createCompetition,
   } = useCompetitionCreateForm();
 
@@ -175,6 +178,14 @@ function CompetitionCreateForm() {
             />
           ))}
         </MotionDiv>
+
+        <CompetitionPlayerNameEditor
+          isOpen={isPlayerNameEditorOpen}
+          malePlayerNames={competitionForm.malePlayerNames}
+          femalePlayerNames={competitionForm.femalePlayerNames}
+          onToggle={() => setIsPlayerNameEditorOpen((prev) => !prev)}
+          onChange={updateCompetitionPlayerName}
+        />
       </MotionSection>
 
       <AnimatePresence mode="wait">

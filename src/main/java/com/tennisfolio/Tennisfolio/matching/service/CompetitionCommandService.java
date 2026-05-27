@@ -65,7 +65,7 @@ public class CompetitionCommandService {
                 seed
         );
 
-        Map<String, CompetitionEntry> entriesByPlayerName = competitionEntryCommandService.createCompetitionEntries(competition);
+        Map<String, CompetitionEntry> entriesByPlayerName = competitionEntryCommandService.createCompetitionEntries(competition, request);
         gameService.saveSchedule(competition, result, entriesByPlayerName);
         competitionStatService.createCompetitionStat(competition, result, entriesByPlayerName);
 

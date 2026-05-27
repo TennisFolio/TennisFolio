@@ -391,6 +391,153 @@
   outline: none;
 }
 
+.competition-player-names {
+  margin-top: 10px;
+  border-top: 1px solid #e8edf4;
+  padding-top: 10px;
+}
+
+.player-name-toggle {
+  display: flex;
+  width: 100%;
+  min-height: 56px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 11px 12px;
+  border: 1px solid #dce4ef;
+  border-radius: 15px;
+  background: #ffffff;
+  color: #0f172a;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.18s ease, background 0.18s ease,
+    transform 0.18s ease;
+}
+
+.player-name-toggle:hover {
+  border-color: #b7c4d7;
+  background: #f8fafc;
+}
+
+.player-name-toggle:active {
+  transform: scale(0.99);
+}
+
+.player-name-toggle span {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.player-name-toggle strong {
+  color: #0f172a;
+  font-size: 14px;
+  font-weight: 900;
+  line-height: 1.2;
+}
+
+.player-name-toggle small {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.player-name-toggle b {
+  flex-shrink: 0;
+  min-width: 42px;
+  color: #334155;
+  font-size: 12px;
+  font-weight: 900;
+  text-align: right;
+}
+
+.player-name-panel {
+  overflow: hidden;
+}
+
+.player-name-group {
+  margin-top: 10px;
+  padding: 12px;
+  border: 1px solid #e8edf4;
+  border-radius: 15px;
+  background: #f9fbfd;
+}
+
+.player-name-group-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.player-name-group-heading h3 {
+  color: #0f172a;
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.player-name-group-heading span {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.player-name-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.player-name-field {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  min-height: 42px;
+  overflow: hidden;
+  border: 1px solid #dce4ef;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.player-name-field span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-right: 1px solid #eef2f7;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.player-name-field.male span {
+  background: #eaf2ff;
+  border-right-color: #c9dcff;
+  color: #1d4ed8;
+}
+
+.player-name-field.female span {
+  background: #fff0f6;
+  border-right-color: #ffd0e1;
+  color: #be185d;
+}
+
+.player-name-field input {
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  color: #0f172a;
+  font-size: 14px;
+  font-weight: 900;
+  outline: none;
+  padding: 0 10px;
+}
+
+.player-name-field input:focus {
+  background: #f8fafc;
+}
+
 .competition-message {
   margin-top: 14px;
   padding: 12px 13px;
@@ -457,6 +604,10 @@
   }
 
   .competition-mode-toggle {
+    grid-template-columns: 1fr;
+  }
+
+  .player-name-grid {
     grid-template-columns: 1fr;
   }
 
