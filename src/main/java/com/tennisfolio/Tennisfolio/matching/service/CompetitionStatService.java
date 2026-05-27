@@ -30,8 +30,8 @@ public class CompetitionStatService {
         CompetitionStat stat = new CompetitionStat(competition);
 
         Map<String, Integer> playerGameCount = new HashMap<>();
-        for (CompetitionEntry entry : entriesByPlayerName.values()) {
-            playerGameCount.put(entry.getPlayerName(), 0);
+        for (String playerId : entriesByPlayerName.keySet()) {
+            playerGameCount.put(playerId, 0);
         }
 
         for (GameMatch match : result.matches) {

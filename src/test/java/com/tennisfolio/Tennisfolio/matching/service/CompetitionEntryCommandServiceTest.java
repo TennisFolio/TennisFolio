@@ -1,6 +1,7 @@
 package com.tennisfolio.Tennisfolio.matching.service;
 
 import com.tennisfolio.Tennisfolio.exception.InvalidRequestException;
+import com.tennisfolio.Tennisfolio.matching.dto.CompetitionCreateRequest;
 import com.tennisfolio.Tennisfolio.matching.dto.CompetitionEntryCreateRequest;
 import com.tennisfolio.Tennisfolio.matching.dto.CompetitionEntryResponse;
 import com.tennisfolio.Tennisfolio.matching.dto.CompetitionEntryUpdateRequest;
@@ -17,6 +18,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import static com.tennisfolio.Tennisfolio.matching.MatchingTestFixtures.clubSessionCompetition;
@@ -52,6 +55,152 @@ class CompetitionEntryCommandServiceTest {
                 competitionRepository,
                 competitionEntryRepository,
                 competitionAdminAuthorizationService
+        );
+    }
+
+    @Test
+    void createCompetitionEntries_usesProvidedPlayerNames() {
+        Competition competition = clubSessionCompetition(1L, "public-id", null);
+        CompetitionCreateRequest request = createCompetitionRequest(
+                List.of("민수", " M2 ", "준호"),
+                List.of("지연", "F2", "수진")
+        );
+
+        when(competitionEntryRepository.saveAll(any())).thenAnswer(invocation -> {
+            Iterable<CompetitionEntry> entries = invocation.getArgument(0);
+            List<CompetitionEntry> savedEntries = new ArrayList<>();
+            entries.forEach(savedEntries::add);
+            return savedEntries;
+        });
+
+        service.createCompetitionEntries(competition, request);
+
+        ArgumentCaptor<Iterable<CompetitionEntry>> entriesCaptor = ArgumentCaptor.forClass(Iterable.class);
+        verify(competitionEntryRepository).saveAll(entriesCaptor.capture());
+        List<CompetitionEntry> entries = new ArrayList<>();
+        entriesCaptor.getValue().forEach(entries::add);
+
+        assertEquals("민수", entries.get(0).getPlayerName());
+        assertEquals("M2", entries.get(1).getPlayerName());
+        assertEquals("준호", entries.get(2).getPlayerName());
+        assertEquals("지연", entries.get(3).getPlayerName());
+        assertEquals("F2", entries.get(4).getPlayerName());
+        assertEquals("수진", entries.get(5).getPlayerName());
+    }
+
+    @Test
+    void createCompetitionEntries_fallsBackToDefaultNamesWhenNamesAreMissingOrBlank() {
+        Competition competition = clubSessionCompetition(1L, "public-id", null);
+        CompetitionCreateRequest request = createCompetitionRequest(
+                List.of("민수", " ", ""),
+                List.of("지연")
+        );
+
+        when(competitionEntryRepository.saveAll(any())).thenAnswer(invocation -> {
+            Iterable<CompetitionEntry> entries = invocation.getArgument(0);
+            List<CompetitionEntry> savedEntries = new ArrayList<>();
+            entries.forEach(savedEntries::add);
+            return savedEntries;
+        });
+
+        service.createCompetitionEntries(competition, request);
+
+        ArgumentCaptor<Iterable<CompetitionEntry>> entriesCaptor = ArgumentCaptor.forClass(Iterable.class);
+        verify(competitionEntryRepository).saveAll(entriesCaptor.capture());
+        List<CompetitionEntry> entries = new ArrayList<>();
+        entriesCaptor.getValue().forEach(entries::add);
+
+        assertEquals("민수", entries.get(0).getPlayerName());
+        assertEquals("M2", entries.get(1).getPlayerName());
+        assertEquals("M3", entries.get(2).getPlayerName());
+        assertEquals("지연", entries.get(3).getPlayerName());
+        assertEquals("F2", entries.get(4).getPlayerName());
+        assertEquals("F3", entries.get(5).getPlayerName());
+    }
+
+    @Test
+    void createCompetitionEntries_keepsDefaultNamesWhenRequestHasNoNames() {
+        Competition competition = clubSessionCompetition(1L, "public-id", null);
+        CompetitionCreateRequest request = createCompetitionRequest(null, null);
+
+        when(competitionEntryRepository.saveAll(any())).thenAnswer(invocation -> {
+            Iterable<CompetitionEntry> entries = invocation.getArgument(0);
+            List<CompetitionEntry> savedEntries = new ArrayList<>();
+            entries.forEach(savedEntries::add);
+            return savedEntries;
+        });
+
+        service.createCompetitionEntries(competition, request);
+
+        ArgumentCaptor<Iterable<CompetitionEntry>> entriesCaptor = ArgumentCaptor.forClass(Iterable.class);
+        verify(competitionEntryRepository).saveAll(entriesCaptor.capture());
+        List<CompetitionEntry> entries = new ArrayList<>();
+        entriesCaptor.getValue().forEach(entries::add);
+
+        assertEquals("M1", entries.get(0).getPlayerName());
+        assertEquals("M2", entries.get(1).getPlayerName());
+        assertEquals("M3", entries.get(2).getPlayerName());
+        assertEquals("F1", entries.get(3).getPlayerName());
+        assertEquals("F2", entries.get(4).getPlayerName());
+        assertEquals("F3", entries.get(5).getPlayerName());
+    }
+
+    @Test
+    void createCompetitionEntries_allowsDuplicateNames() {
+        Competition competition = clubSessionCompetition(1L, "public-id", null);
+        CompetitionCreateRequest request = createCompetitionRequest(
+                List.of("민수", "민수", "민수"),
+                null
+        );
+
+        when(competitionEntryRepository.saveAll(any())).thenAnswer(invocation -> {
+            Iterable<CompetitionEntry> entries = invocation.getArgument(0);
+            List<CompetitionEntry> savedEntries = new ArrayList<>();
+            entries.forEach(savedEntries::add);
+            return savedEntries;
+        });
+
+        service.createCompetitionEntries(competition, request);
+
+        ArgumentCaptor<Iterable<CompetitionEntry>> entriesCaptor = ArgumentCaptor.forClass(Iterable.class);
+        verify(competitionEntryRepository).saveAll(entriesCaptor.capture());
+        List<CompetitionEntry> entries = new ArrayList<>();
+        entriesCaptor.getValue().forEach(entries::add);
+
+        assertEquals("민수", entries.get(0).getPlayerName());
+        assertEquals("민수", entries.get(1).getPlayerName());
+        assertEquals("민수", entries.get(2).getPlayerName());
+    }
+
+    @Test
+    void createCompetitionEntries_rejectsNamesLongerThanNineCharacters() {
+        Competition competition = clubSessionCompetition(1L, "public-id", null);
+        CompetitionCreateRequest request = createCompetitionRequest(
+                List.of("1234567890"),
+                null
+        );
+
+        assertThrows(
+                InvalidRequestException.class,
+                () -> service.createCompetitionEntries(competition, request)
+        );
+        verify(competitionEntryRepository, never()).saveAll(any());
+    }
+
+    private CompetitionCreateRequest createCompetitionRequest(
+            List<String> malePlayerNames,
+            List<String> femalePlayerNames
+    ) {
+        return new CompetitionCreateRequest(
+                "CLUB_SESSION",
+                "Club",
+                3,
+                3,
+                2,
+                1,
+                136L,
+                malePlayerNames,
+                femalePlayerNames
         );
     }
 

@@ -3,6 +3,7 @@ package com.tennisfolio.Tennisfolio.matching.service;
 import com.tennisfolio.Tennisfolio.common.ExceptionCode;
 import com.tennisfolio.Tennisfolio.exception.InvalidRequestException;
 import com.tennisfolio.Tennisfolio.exception.NotFoundException;
+import com.tennisfolio.Tennisfolio.matching.dto.CompetitionCreateRequest;
 import com.tennisfolio.Tennisfolio.matching.dto.CompetitionEntryCreateRequest;
 import com.tennisfolio.Tennisfolio.matching.dto.CompetitionEntryResponse;
 import com.tennisfolio.Tennisfolio.matching.dto.CompetitionEntryUpdateRequest;
@@ -36,19 +37,40 @@ public class CompetitionEntryCommandService {
     }
 
     public Map<String, CompetitionEntry> createCompetitionEntries(Competition competition) {
+        return createCompetitionEntries(competition, null);
+    }
+
+    public Map<String, CompetitionEntry> createCompetitionEntries(
+            Competition competition,
+            CompetitionCreateRequest request
+    ) {
         List<CompetitionEntry> entries = new ArrayList<>();
 
         for (int i = 1; i <= competition.getMaleCount(); i++) {
-            entries.add(new CompetitionEntry(competition, "M" + i, CompetitionEntry.Gender.MALE));
+            String defaultName = "M" + i;
+            entries.add(new CompetitionEntry(
+                    competition,
+                    normalizeInitialPlayerName(playerNameAt(request == null ? null : request.getMalePlayerNames(), i), defaultName),
+                    CompetitionEntry.Gender.MALE
+            ));
         }
         for (int i = 1; i <= competition.getFemaleCount(); i++) {
-            entries.add(new CompetitionEntry(competition, "F" + i, CompetitionEntry.Gender.FEMALE));
+            String defaultName = "F" + i;
+            entries.add(new CompetitionEntry(
+                    competition,
+                    normalizeInitialPlayerName(playerNameAt(request == null ? null : request.getFemalePlayerNames(), i), defaultName),
+                    CompetitionEntry.Gender.FEMALE
+            ));
         }
 
         List<CompetitionEntry> savedEntries = competitionEntryRepository.saveAll(entries);
         Map<String, CompetitionEntry> entryMap = new HashMap<>();
-        for (CompetitionEntry entry : savedEntries) {
-            entryMap.put(entry.getPlayerName(), entry);
+        for (int i = 0; i < savedEntries.size(); i++) {
+            CompetitionEntry entry = savedEntries.get(i);
+            String defaultName = i < competition.getMaleCount()
+                    ? "M" + (i + 1)
+                    : "F" + (i - competition.getMaleCount() + 1);
+            entryMap.put(defaultName, entry);
         }
         return entryMap;
     }
@@ -118,6 +140,20 @@ public class CompetitionEntryCommandService {
             throw new InvalidRequestException(ExceptionCode.INVALID_REQUEST);
         }
         return normalizedPlayerName;
+    }
+
+    private String playerNameAt(List<String> playerNames, int oneBasedIndex) {
+        if (playerNames == null || playerNames.size() < oneBasedIndex) {
+            return null;
+        }
+        return playerNames.get(oneBasedIndex - 1);
+    }
+
+    private String normalizeInitialPlayerName(String playerName, String defaultPlayerName) {
+        if (playerName == null || playerName.trim().isEmpty()) {
+            return defaultPlayerName;
+        }
+        return normalizePlayerName(playerName);
     }
 
     private CompetitionEntry.Gender resolveGender(String gender) {
