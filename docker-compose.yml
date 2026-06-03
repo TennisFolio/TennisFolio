@@ -10,6 +10,9 @@ services:
       SPRING_DATA_REDIS_HOST: redis
       SPRING_DATA_REDIS_PORT: 6379
       SPRING_DATA_REDIS_PASSWORD: ${REDIS_PASSWORD}
+      SPRING_DATASOURCE_URL: jdbc:mariadb://mariadb:3306/tennisfolio
+      SPRING_DATASOURCE_USERNAME: tennisfolio
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
     ports:
       - "8080:8080"
     volumes:
@@ -17,13 +20,18 @@ services:
       - /var/log/tennisfolio:/var/log/tennisfolio
     networks:
       - tennisnet
+    depends_on:
+      - redis
+      - mariadb
+    restart: unless-stopped
 
   nginx:
     image: nginx
     container_name: nginx
     volumes:
       - ./nginx/conf.d:/etc/nginx/conf.d
-      - ./certs:/etc/letsencrypt
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - /etc/letsencrypt:/etc/letsencrypt:ro
     ports:
       - "80:80"
       - "443:443"
@@ -31,6 +39,7 @@ services:
       - tennisnet
     depends_on:
       - app
+    restart: unless-stopped
 
   redis:
     image: redis:7-alpine
@@ -39,14 +48,25 @@ services:
       - "6379:6379"
     volumes:
       - redis_data:/data
-    command: [ "redis-server", "--appendonly", "yes", "--requirepass", "${REDIS_PASSWORD}" ]
+    command: ["redis-server", "--appendonly", "yes", "--requirepass", "${REDIS_PASSWORD}"]
+    restart: unless-stopped
+
+  mariadb:
+    image: mariadb:11
+    container_name: mariadb
+    environment:
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MARIADB_DATABASE: tennisfolio
+      MARIADB_USER: tennisfolio
+      MARIADB_PASSWORD: ${DB_PASSWORD}
+      TZ: Asia/Seoul
+    ports:
+      - "3306:3306"
+    volumes:
+      - mariadb_data:/var/lib/mysql
     networks:
       - tennisnet
-    deploy:
-      resources:
-        limits:
-          cpus: '0.25'
-          memory: 256M
+    restart: unless-stopped
 
   prometheus:
     image: prom/prometheus
@@ -59,11 +79,6 @@ services:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
     networks:
       - tennisnet
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
-          memory: 256M
 
   grafana:
     image: grafana/grafana
@@ -71,21 +86,17 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - GF_SECURITY_ADMIN_USER=admin
-      - GF_SECURITY_ADMIN_PASSWORD=admin
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
     volumes:
       - grafana_data:/var/lib/grafana
     networks:
       - tennisnet
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
-          memory: 256M
 
 volumes:
   grafana_data:
-  redis_data: {}
+  redis_data:
+  mariadb_data:
 
 networks:
   tennisnet:
