@@ -21,12 +21,12 @@ public class QCompetition extends EntityPathBase<Competition> {
 
     public final com.tennisfolio.Tennisfolio.common.Entity.QBaseTimeEntity _super = new com.tennisfolio.Tennisfolio.common.Entity.QBaseTimeEntity(this);
 
+    public final StringPath adminPasswordHash = createString("adminPasswordHash");
+
     public final NumberPath<Integer> courtCount = createNumber("courtCount", Integer.class);
 
     //inherited
     public final DateTimePath<java.time.LocalDateTime> createDt = _super.createDt;
-
-    public final StringPath adminPasswordHash = createString("adminPasswordHash");
 
     public final NumberPath<Integer> femaleCount = createNumber("femaleCount", Integer.class);
 

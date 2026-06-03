@@ -391,6 +391,172 @@
   outline: none;
 }
 
+.competition-player-names {
+  margin-top: 10px;
+  border-top: 1px solid #e8edf4;
+  padding-top: 10px;
+}
+
+.player-name-toggle {
+  display: flex;
+  width: 100%;
+  min-height: 56px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid #b7d4ec;
+  border-radius: 15px;
+  background: #eef8ff;
+  color: #0f172a;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72),
+    0 10px 22px rgba(14, 116, 144, 0.08);
+  transition: border-color 0.18s ease, background 0.18s ease,
+    box-shadow 0.18s ease, transform 0.18s ease;
+}
+
+.player-name-toggle:hover {
+  border-color: #7ab8d8;
+  background: #e3f4ff;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.78),
+    0 12px 26px rgba(14, 116, 144, 0.12);
+}
+
+.player-name-toggle:active {
+  transform: scale(0.99);
+}
+
+.player-name-toggle span {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 8px;
+  align-items: center;
+  min-width: 0;
+}
+
+.player-name-toggle em {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 22px;
+  padding: 0 8px;
+  border: 1px solid #94cce6;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #036981;
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.player-name-toggle strong {
+  min-width: 0;
+  color: #0f172a;
+  font-size: 14px;
+  font-weight: 900;
+  line-height: 1.2;
+}
+
+.player-name-toggle b {
+  flex-shrink: 0;
+  min-width: 68px;
+  padding: 8px 10px;
+  border-radius: 999px;
+  background: #0f172a;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 900;
+  text-align: center;
+}
+
+.player-name-panel {
+  overflow: hidden;
+}
+
+.player-name-group {
+  margin-top: 10px;
+  padding: 12px;
+  border: 1px solid #e8edf4;
+  border-radius: 15px;
+  background: #f9fbfd;
+}
+
+.player-name-group-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.player-name-group-heading h3 {
+  color: #0f172a;
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.player-name-group-heading span {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.player-name-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.player-name-field {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  min-height: 42px;
+  overflow: hidden;
+  border: 1px solid #dce4ef;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.player-name-field span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-right: 1px solid #eef2f7;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.player-name-field.male span {
+  background: #eaf2ff;
+  border-right-color: #c9dcff;
+  color: #1d4ed8;
+}
+
+.player-name-field.female span {
+  background: #fff0f6;
+  border-right-color: #ffd0e1;
+  color: #be185d;
+}
+
+.player-name-field input {
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  color: #0f172a;
+  font-size: 14px;
+  font-weight: 900;
+  outline: none;
+  padding: 0 10px;
+}
+
+.player-name-field input:focus {
+  background: #f8fafc;
+}
+
 .competition-message {
   margin-top: 14px;
   padding: 12px 13px;
@@ -457,6 +623,10 @@
   }
 
   .competition-mode-toggle {
+    grid-template-columns: 1fr;
+  }
+
+  .player-name-grid {
     grid-template-columns: 1fr;
   }
 

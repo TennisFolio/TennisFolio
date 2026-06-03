@@ -60,27 +60,31 @@ class CompetitionCommandServiceTest {
 
     @Test
     void createCompetition_returnsCompetitionAdminToken() {
-        CompetitionCreateRequest request = new CompetitionCreateRequest();
-        request.setMode("CLUB_SESSION");
-        request.setCompetitionName("Club");
-        request.setMaleCount(4);
-        request.setFemaleCount(4);
-        request.setCourtCount(2);
-        request.setHours(1);
-        request.setSeed(136L);
+        CompetitionCreateRequest request = new CompetitionCreateRequest(
+                "CLUB_SESSION",
+                "Club",
+                4,
+                4,
+                2,
+                1,
+                136L,
+                null,
+                null
+        );
         Competition competition = clubSessionCompetition(1L, "public-id", null);
         ScheduleResult scheduleResult = new ScheduleResult();
         Map<String, CompetitionEntry> entriesByPlayerName = Map.of();
 
         when(competitionService.createCompetition(request, 1, 136L)).thenReturn(competition);
         when(scheduler.generateSchedule(4, 4, 2, 1, 136L)).thenReturn(scheduleResult);
-        when(competitionEntryCommandService.createCompetitionEntries(competition)).thenReturn(entriesByPlayerName);
+        when(competitionEntryCommandService.createCompetitionEntries(competition, request)).thenReturn(entriesByPlayerName);
         when(competitionAdminTokenService.createToken("public-id")).thenReturn("creator-token");
 
         CompetitionCreateResponse response = service.createCompetition(request);
 
         assertEquals("public-id", response.getPublicId());
         assertEquals("creator-token", response.getCompetitionAdminToken());
+        verify(competitionEntryCommandService).createCompetitionEntries(competition, request);
         verify(gameService).saveSchedule(competition, scheduleResult, entriesByPlayerName);
         verify(competitionStatService).createCompetitionStat(competition, scheduleResult, entriesByPlayerName);
     }

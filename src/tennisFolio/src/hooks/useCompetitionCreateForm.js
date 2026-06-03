@@ -4,6 +4,11 @@ import {
   incrementSessionCompetitionCreateCount,
   trackEvent,
 } from '../utils/analytics';
+import {
+  createDefaultPlayerNames,
+  hasInvalidPlayerNameLength,
+  syncPlayerNames,
+} from './competitionCreateFormNames';
 
 const GAMES_PER_HOUR = 2;
 
@@ -45,6 +50,8 @@ const INITIAL_COMPETITION_FORM = {
   femaleCount: 4,
   courtCount: 2,
   hours: 2,
+  malePlayerNames: createDefaultPlayerNames('M', 4),
+  femalePlayerNames: createDefaultPlayerNames('F', 4),
 };
 
 function normalizeCompetitionValue(name, value) {
@@ -143,7 +150,11 @@ export function useCompetitionCreateForm() {
     trackFieldInteraction(name, 'input');
     setCompetitionForm((prev) => ({
       ...prev,
-      [name]: normalizeCompetitionValue(name, value),
+      ...createCompetitionFormUpdate(
+        prev,
+        name,
+        normalizeCompetitionValue(name, value)
+      ),
     }));
     resetCompetitionFeedback();
   };
@@ -152,7 +163,23 @@ export function useCompetitionCreateForm() {
     trackFieldInteraction(name, 'stepper');
     setCompetitionForm((prev) => ({
       ...prev,
-      [name]: normalizeCompetitionValue(name, prev[name] + amount),
+      ...createCompetitionFormUpdate(
+        prev,
+        name,
+        normalizeCompetitionValue(name, prev[name] + amount)
+      ),
+    }));
+    resetCompetitionFeedback();
+  };
+
+  const updateCompetitionPlayerName = (gender, index, value) => {
+    const fieldName =
+      gender === 'MALE' ? 'malePlayerNames' : 'femalePlayerNames';
+    setCompetitionForm((prev) => ({
+      ...prev,
+      [fieldName]: prev[fieldName].map((playerName, playerIndex) =>
+        playerIndex === index ? value : playerName
+      ),
     }));
     resetCompetitionFeedback();
   };
@@ -175,6 +202,12 @@ export function useCompetitionCreateForm() {
     }
     if (totalPlayers < minimumPlayers) {
       return '코트 1개당 최소 4명이 필요해요.';
+    }
+    if (
+      hasInvalidPlayerNameLength(competitionForm.malePlayerNames) ||
+      hasInvalidPlayerNameLength(competitionForm.femalePlayerNames)
+    ) {
+      return '참가자 이름은 9자까지 입력할 수 있어요.';
     }
 
     return '';
@@ -221,6 +254,8 @@ export function useCompetitionCreateForm() {
         maleCount: competitionForm.maleCount,
         femaleCount: competitionForm.femaleCount,
         courtCount: competitionForm.courtCount,
+        malePlayerNames: competitionForm.malePlayerNames,
+        femalePlayerNames: competitionForm.femalePlayerNames,
       };
 
       if (!isClubSession) {
@@ -284,6 +319,27 @@ export function useCompetitionCreateForm() {
     unavailableReasonText,
     updateCompetitionField,
     stepCompetitionField,
+    updateCompetitionPlayerName,
     createCompetition,
+  };
+}
+
+function createCompetitionFormUpdate(prev, name, value) {
+  if (name === 'maleCount') {
+    return {
+      maleCount: value,
+      malePlayerNames: syncPlayerNames(prev.malePlayerNames, 'M', value),
+    };
+  }
+
+  if (name === 'femaleCount') {
+    return {
+      femaleCount: value,
+      femalePlayerNames: syncPlayerNames(prev.femalePlayerNames, 'F', value),
+    };
+  }
+
+  return {
+    [name]: value,
   };
 }
