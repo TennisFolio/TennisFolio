@@ -1,10 +1,7 @@
 services:
   app:
-    image: tennisfolio
+    image: tennisfolio:latest
     container_name: app
-    build:
-      context: .
-      dockerfile: Dockerfile
     environment:
       SPRING_PROFILES_ACTIVE: prod
       SPRING_DATA_REDIS_HOST: redis

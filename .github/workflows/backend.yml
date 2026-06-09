@@ -51,11 +51,19 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: Build Docker image
-        run: docker build -t tennisfolio .
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build ARM64 Docker Image
+        run: |
+          docker buildx build \
+            --platform linux/arm64 \
+            -t tennisfolio:latest \
+            --load \
+            .
 
       - name: Save Docker image to tar
-        run: docker save tennisfolio -o tennisfolio.tar
+        run: docker save tennisfolio:latest -o tennisfolio.tar
 
       - name: Copy Docker image to EC2
         uses: appleboy/scp-action@master
@@ -75,6 +83,7 @@ jobs:
           script: |
             cd /home/ubuntu/TennisFolio
             git pull origin main
-            docker load -i tennisfolio.tar
             docker compose down
+            docker rmi tennisfolio:latest || true
+            docker load -i tennisfolio.tar
             docker compose up -d
