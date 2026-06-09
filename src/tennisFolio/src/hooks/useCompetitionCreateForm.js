@@ -5,53 +5,21 @@ import {
   trackEvent,
 } from '../utils/analytics';
 import {
-  createDefaultPlayerNames,
   hasInvalidPlayerNameLength,
   syncPlayerNames,
 } from './competitionCreateFormNames';
+import {
+  COMPETITION_CREATE_MODES,
+  COMPETITION_FIELD_LIMITS,
+  COMPETITION_FIELDS,
+  createCompetitionPayload,
+  INITIAL_COMPETITION_FORM,
+} from './competitionCreateFormConfig';
 
-const GAMES_PER_HOUR = 2;
-
-export const COMPETITION_CREATE_MODES = {
-  CLUB_SESSION: 'CLUB_SESSION',
-  FIXED_SCHEDULE: 'FIXED_SCHEDULE',
-};
-
-export const COMPETITION_FIELD_LIMITS = {
-  maleCount: { min: 0, max: 40 },
-  femaleCount: { min: 0, max: 40 },
-  courtCount: { min: 1, max: 10 },
-  hours: { min: 1, max: 10 },
-};
-
-export const COMPETITION_FIELDS = [
-  {
-    name: 'maleCount',
-    label: '남자 인원',
-  },
-  {
-    name: 'femaleCount',
-    label: '여자 인원',
-  },
-  {
-    name: 'courtCount',
-    label: '코트 수',
-  },
-  {
-    name: 'hours',
-    label: '진행 시간',
-    unit: '시간',
-  },
-];
-
-const INITIAL_COMPETITION_FORM = {
-  mode: COMPETITION_CREATE_MODES.CLUB_SESSION,
-  maleCount: 4,
-  femaleCount: 4,
-  courtCount: 2,
-  hours: 2,
-  malePlayerNames: createDefaultPlayerNames('M', 4),
-  femalePlayerNames: createDefaultPlayerNames('F', 4),
+export {
+  COMPETITION_CREATE_MODES,
+  COMPETITION_FIELD_LIMITS,
+  COMPETITION_FIELDS,
 };
 
 function normalizeCompetitionValue(name, value) {
@@ -79,8 +47,7 @@ export function useCompetitionCreateForm() {
   const isClubSession =
     competitionForm.mode === COMPETITION_CREATE_MODES.CLUB_SESSION;
   const totalGames =
-    competitionForm.courtCount *
-    (isClubSession ? 1 : competitionForm.hours * GAMES_PER_HOUR);
+    isClubSession ? competitionForm.courtCount : competitionForm.totalGames;
   const totalGameSlots = totalGames * 4;
   const minimumPlayers = competitionForm.courtCount * 4;
   const canCreateGames = totalPlayers >= 4 && totalPlayers >= minimumPlayers;
@@ -196,9 +163,10 @@ export function useCompetitionCreateForm() {
     }
     if (
       !isClubSession &&
-      (competitionForm.hours < 1 || competitionForm.hours > 10)
+      (competitionForm.totalGames < 1 ||
+        competitionForm.totalGames > competitionForm.courtCount * 20)
     ) {
-      return '진행 시간은 1시간부터 10시간까지 선택할 수 있어요.';
+      return `총 경기 수는 1게임부터 ${competitionForm.courtCount * 20}게임까지 선택할 수 있어요.`;
     }
     if (totalPlayers < minimumPlayers) {
       return '코트 1개당 최소 4명이 필요해요.';
@@ -219,7 +187,7 @@ export function useCompetitionCreateForm() {
       female_count: competitionForm.femaleCount,
       total_players: totalPlayers,
       court_count: competitionForm.courtCount,
-      hours: isClubSession ? undefined : competitionForm.hours,
+      total_games: isClubSession ? undefined : competitionForm.totalGames,
       mode: competitionForm.mode,
       can_create_games: canCreateGames,
     };
@@ -246,21 +214,10 @@ export function useCompetitionCreateForm() {
       setCompetitionError('');
       setCompetitionResult(null);
 
-      const payload = {
-        competitionName: isClubSession
-          ? '진행형 Tennisfolio 경기'
-          : 'TennisFolio 대진표',
-        mode: competitionForm.mode,
-        maleCount: competitionForm.maleCount,
-        femaleCount: competitionForm.femaleCount,
-        courtCount: competitionForm.courtCount,
-        malePlayerNames: competitionForm.malePlayerNames,
-        femalePlayerNames: competitionForm.femalePlayerNames,
-      };
-
-      if (!isClubSession) {
-        payload.hours = competitionForm.hours;
-      }
+      const payload = createCompetitionPayload({
+        form: competitionForm,
+        isClubSession,
+      });
 
       const response = await apiRequest.post('/api/competitions', payload);
 

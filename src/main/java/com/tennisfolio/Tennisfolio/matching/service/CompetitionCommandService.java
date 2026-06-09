@@ -17,8 +17,7 @@ import java.util.concurrent.ThreadLocalRandom;
 public class CompetitionCommandService {
     private static final int MAX_PLAYER_COUNT = 40;
     private static final int MAX_COURT_COUNT = 10;
-    private static final int MAX_HOURS = 10;
-    private static final int ROUNDS_PER_HOUR = 2;
+    private static final int MAX_ROUNDS = 20;
 
     private final TennisMatchScheduler scheduler;
     private final CompetitionService competitionService;
@@ -50,7 +49,7 @@ public class CompetitionCommandService {
 
         int rounds = mode == Competition.CompetitionMode.CLUB_SESSION
                 ? 1
-                : Math.max(1, request.getHours() * ROUNDS_PER_HOUR);
+                : calculateRounds(request.getTotalGames(), request.getCourtCount());
         long seed = request.getSeed() != null
                 ? request.getSeed()
                 : ThreadLocalRandom.current().nextLong(1, 10000);
@@ -61,7 +60,7 @@ public class CompetitionCommandService {
                 request.getMaleCount(),
                 request.getFemaleCount(),
                 request.getCourtCount(),
-                rounds,
+                mode == Competition.CompetitionMode.CLUB_SESSION ? rounds : request.getTotalGames(),
                 seed
         );
 
@@ -95,11 +94,11 @@ public class CompetitionCommandService {
             throw new IllegalArgumentException("courtCount must be " + MAX_COURT_COUNT + " or less");
         }
         if (mode == Competition.CompetitionMode.FIXED_SCHEDULE) {
-            if (request.getHours() <= 0) {
-                throw new IllegalArgumentException("hours must be greater than 0");
+            if (request.getTotalGames() <= 0) {
+                throw new IllegalArgumentException("totalGames must be greater than 0");
             }
-            if (request.getHours() > MAX_HOURS) {
-                throw new IllegalArgumentException("hours must be " + MAX_HOURS + " or less");
+            if (request.getTotalGames() > request.getCourtCount() * MAX_ROUNDS) {
+                throw new IllegalArgumentException("totalGames must be courtCount * " + MAX_ROUNDS + " or less");
             }
         }
 
@@ -121,5 +120,9 @@ public class CompetitionCommandService {
             return Competition.CompetitionMode.FIXED_SCHEDULE;
         }
         return Competition.CompetitionMode.valueOf(mode.trim().toUpperCase());
+    }
+
+    private int calculateRounds(int totalGames, int courtCount) {
+        return (int) Math.ceil((double) totalGames / courtCount);
     }
 }

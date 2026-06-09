@@ -13,7 +13,7 @@ public class CompetitionCreateRequest {
     private final int maleCount;
     private final int femaleCount;
     private final int courtCount;
-    private final int hours;
+    private final int totalGames;
     private final Long seed;
     private final List<String> malePlayerNames;
     private final List<String> femalePlayerNames;
@@ -25,7 +25,7 @@ public class CompetitionCreateRequest {
             @JsonProperty("maleCount") int maleCount,
             @JsonProperty("femaleCount") int femaleCount,
             @JsonProperty("courtCount") int courtCount,
-            @JsonProperty("hours") int hours,
+            @JsonProperty("totalGames") int totalGames,
             @JsonProperty("seed") Long seed,
             @JsonProperty("malePlayerNames") List<String> malePlayerNames,
             @JsonProperty("femalePlayerNames") List<String> femalePlayerNames
@@ -35,7 +35,7 @@ public class CompetitionCreateRequest {
         this.maleCount = maleCount;
         this.femaleCount = femaleCount;
         this.courtCount = courtCount;
-        this.hours = hours;
+        this.totalGames = totalGames;
         this.seed = seed;
         this.malePlayerNames = malePlayerNames;
         this.femalePlayerNames = femalePlayerNames;

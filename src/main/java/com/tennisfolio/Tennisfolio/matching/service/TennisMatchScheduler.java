@@ -28,8 +28,8 @@ public class TennisMatchScheduler {
         this.clubSessionNextGameGenerator = new ClubSessionNextGameGenerator(scoreCalculator, generator);
     }
 
-    public ScheduleResult generateSchedule(int male, int female, int court, int rounds, long seed) {
-        return fixedScheduleGenerator.generateSchedule(male, female, court, rounds, seed);
+    public ScheduleResult generateSchedule(int male, int female, int court, int totalGames, long seed) {
+        return fixedScheduleGenerator.generateSchedule(male, female, court, totalGames, seed);
     }
 
     public GameMatch generateNextClubSessionGame(

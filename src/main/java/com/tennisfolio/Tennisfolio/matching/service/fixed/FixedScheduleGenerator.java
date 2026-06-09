@@ -36,27 +36,34 @@ public class FixedScheduleGenerator {
         this.generator = generator;
     }
 
-    public ScheduleResult generateSchedule(int male, int female, int court, int rounds, long seed) {
-        int totalMatches = court * rounds;
-        boolean allowRandom = shouldAllowRandomType(male, female, court, totalMatches);
+    public ScheduleResult generateSchedule(int male, int female, int court, int totalGames, long seed) {
+        int rounds = calculateRounds(totalGames, court);
+        boolean allowRandom = shouldAllowRandomType(male, female, court, totalGames);
 
         try {
-            return generateSchedule(male, female, court, rounds, seed, allowRandom);
+            return generateSchedule(male, female, court, totalGames, rounds, seed, allowRandom);
         } catch (NoSuchElementException e) {
             if (allowRandom || !canScheduleRandomType(male, female)) {
                 throw e;
             }
 
-            return generateSchedule(male, female, court, rounds, seed, true);
+            return generateSchedule(male, female, court, totalGames, rounds, seed, true);
         }
     }
 
-    private ScheduleResult generateSchedule(int male, int female, int court, int rounds, long seed, boolean allowRandom) {
+    private ScheduleResult generateSchedule(
+            int male,
+            int female,
+            int court,
+            int totalGames,
+            int rounds,
+            long seed,
+            boolean allowRandom
+    ) {
         this.random = new Random(seed);
         List<GamePlayer> players = createPlayers(male, female);
 
-        int totalMatches = court * rounds;
-        int totalSlots = totalMatches * 4;
+        int totalSlots = totalGames * 4;
         int maxGames = (int) Math.ceil((double) totalSlots / players.size());
 
         ScheduleResult result = new ScheduleResult();
@@ -68,12 +75,14 @@ public class FixedScheduleGenerator {
 
         Map<Set<String>, Integer> groupCount = new HashMap<>();
 
+        int remainingGames = totalGames;
         for (int r = 1; r <= rounds; r++) {
             Set<GamePlayer> used = new HashSet<>();
             Set<GamePlayer> playedThisRound = new HashSet<>();
             Set<MatchType> roundTypes = new HashSet<>();
+            int gamesInRound = Math.min(court, remainingGames);
 
-            for (int c = 1; c <= court; c++) {
+            for (int c = 1; c <= gamesInRound; c++) {
                 List<GamePlayer> availablePlayers = players.stream()
                         .filter(p -> !used.contains(p))
                         .toList();
@@ -104,6 +113,7 @@ public class FixedScheduleGenerator {
                 roundTypes.add(best.candidate.type);
 
                 result.matches.add(new GameMatch(r, c, best.candidate.type, best.candidate.teamA, best.candidate.teamB));
+                remainingGames--;
 
                 used.addAll(best.candidate.allPlayers());
                 playedThisRound.addAll(best.candidate.allPlayers());
@@ -119,6 +129,10 @@ public class FixedScheduleGenerator {
         }
 
         return result;
+    }
+
+    private int calculateRounds(int totalGames, int court) {
+        return (int) Math.ceil((double) totalGames / court);
     }
 
     private BestCandidate selectBestCandidate(

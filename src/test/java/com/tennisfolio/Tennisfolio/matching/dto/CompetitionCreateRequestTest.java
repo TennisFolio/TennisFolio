@@ -18,7 +18,7 @@ class CompetitionCreateRequestTest {
                   "maleCount": 3,
                   "femaleCount": 2,
                   "courtCount": 1,
-                  "hours": 1,
+                  "totalGames": 10,
                   "seed": 136,
                   "malePlayerNames": ["M1", "민수", "M3"],
                   "femalePlayerNames": ["F1", "지연"]
@@ -32,7 +32,7 @@ class CompetitionCreateRequestTest {
         assertEquals(3, request.getMaleCount());
         assertEquals(2, request.getFemaleCount());
         assertEquals(1, request.getCourtCount());
-        assertEquals(1, request.getHours());
+        assertEquals(10, request.getTotalGames());
         assertEquals(136L, request.getSeed());
         assertEquals("민수", request.getMalePlayerNames().get(1));
         assertEquals("지연", request.getFemalePlayerNames().get(1));
