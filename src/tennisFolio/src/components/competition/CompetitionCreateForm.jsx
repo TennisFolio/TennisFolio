@@ -60,7 +60,7 @@ function CompetitionCreateForm() {
   } = useCompetitionCreateForm();
 
   const visibleFields = isClubSession
-    ? COMPETITION_FIELDS.filter((field) => field.name !== 'hours')
+    ? COMPETITION_FIELDS.filter((field) => field.name !== 'totalGames')
     : COMPETITION_FIELDS;
 
   latestFormStateRef.current = {
@@ -117,7 +117,7 @@ function CompetitionCreateForm() {
             <p>
               {isClubSession
                 ? '경기를 대기열에 쌓아두고 코트별로 운영해요.'
-                : '진행 시간까지 정해서 처음부터 전체 경기 일정을 생성해요.'}
+                : '총 경기 수를 정해서 처음부터 전체 경기 일정을 생성해요.'}
             </p>
           </div>
           <span className="competition-rate">
@@ -159,7 +159,7 @@ function CompetitionCreateForm() {
         <p className="competition-mode-help">
           {isClubSession
             ? '참가자를 중간에 추가하거나 대기 처리하면서, 비는 코트마다 다음 경기를 만듭니다.'
-            : '처음 참가자가 확정된 모임에서 전체 라운드를 한 번에 생성합니다.'}
+            : '참가자가 확정된 모임에서 입력한 총 경기 수만큼 전체 대진을 한 번에 생성합니다.'}
         </p>
 
         <MotionDiv

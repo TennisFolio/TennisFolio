@@ -10,16 +10,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.Map;
 
 import static com.tennisfolio.Tennisfolio.matching.MatchingTestFixtures.clubSessionCompetition;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -87,5 +83,67 @@ class CompetitionCommandServiceTest {
         verify(competitionEntryCommandService).createCompetitionEntries(competition, request);
         verify(gameService).saveSchedule(competition, scheduleResult, entriesByPlayerName);
         verify(competitionStatService).createCompetitionStat(competition, scheduleResult, entriesByPlayerName);
+    }
+
+    @Test
+    void createCompetition_derivesRoundsFromTotalGamesForFixedSchedule() {
+        CompetitionCreateRequest request = new CompetitionCreateRequest(
+                "FIXED_SCHEDULE",
+                "Fixed",
+                6,
+                6,
+                3,
+                10,
+                136L,
+                null,
+                null
+        );
+        Competition competition = new Competition("Fixed", 6, 6, 3, 4, 136L, Competition.CompetitionMode.FIXED_SCHEDULE);
+        ScheduleResult scheduleResult = new ScheduleResult();
+        Map<String, CompetitionEntry> entriesByPlayerName = Map.of();
+
+        when(competitionService.createCompetition(request, 4, 136L)).thenReturn(competition);
+        when(scheduler.generateSchedule(6, 6, 3, 10, 136L)).thenReturn(scheduleResult);
+        when(competitionEntryCommandService.createCompetitionEntries(competition, request)).thenReturn(entriesByPlayerName);
+        when(competitionAdminTokenService.createToken(competition.getPublicId())).thenReturn("creator-token");
+
+        service.createCompetition(request);
+
+        verify(competitionService).createCompetition(request, 4, 136L);
+        verify(scheduler).generateSchedule(6, 6, 3, 10, 136L);
+    }
+
+    @Test
+    void createCompetition_rejectsNonPositiveTotalGamesForFixedSchedule() {
+        CompetitionCreateRequest request = new CompetitionCreateRequest(
+                "FIXED_SCHEDULE",
+                "Fixed",
+                4,
+                4,
+                2,
+                0,
+                136L,
+                null,
+                null
+        );
+
+        assertThrows(IllegalArgumentException.class, () -> service.createCompetition(request));
+    }
+
+    @Test
+    void createCompetition_rejectsTotalGamesGreaterThanCourtCountTimesTwenty() {
+        CompetitionCreateRequest request = new CompetitionCreateRequest(
+                "FIXED_SCHEDULE",
+                "Fixed",
+                4,
+                4,
+                2,
+                41,
+                136L,
+                null,
+                null
+        );
+
+        assertThrows(IllegalArgumentException.class, () -> service.createCompetition(request));
     }
 }

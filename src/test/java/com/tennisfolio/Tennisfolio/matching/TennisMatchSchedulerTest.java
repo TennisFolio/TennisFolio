@@ -38,7 +38,7 @@ public class TennisMatchSchedulerTest {
         int court = 10;
         int rounds = 20;
 
-        ScheduleResult result = scheduler.generateSchedule(male, female, court, rounds, 136);
+        ScheduleResult result = scheduler.generateSchedule(male, female, court, court * rounds, 136);
 
         // 🔥 1. 경기 출력
         System.out.println("\n=== 경기 스케줄 ===");
@@ -117,7 +117,7 @@ public class TennisMatchSchedulerTest {
 
         TennisMatchScheduler scheduler = new TennisMatchScheduler(checker, calculator, generator);
 
-        ScheduleResult result = scheduler.generateSchedule(7, 9, 3, 4, 136);
+        ScheduleResult result = scheduler.generateSchedule(7, 9, 3, 12, 136);
 
         assertEquals(12, result.matches.size());
         assertTrue(result.matches.stream()
@@ -200,7 +200,7 @@ public class TennisMatchSchedulerTest {
             int male = testCase[0];
             int female = testCase[1];
             int court = testCase[2];
-            ScheduleResult result = scheduler.generateSchedule(male, female, court, 4, 136);
+            ScheduleResult result = scheduler.generateSchedule(male, female, court, court * 4, 136);
 
             assertEquals(court * 4, result.matches.size());
             assertTrue(result.matches.stream()
@@ -249,7 +249,7 @@ public class TennisMatchSchedulerTest {
             int male = testCase[0];
             int female = testCase[1];
             int court = testCase[2];
-            ScheduleResult result = scheduler.generateSchedule(male, female, court, 4, 136);
+            ScheduleResult result = scheduler.generateSchedule(male, female, court, court * 4, 136);
 
             assertEquals(court * 4, result.matches.size());
             assertTrue(result.matches.stream()
@@ -286,7 +286,7 @@ public class TennisMatchSchedulerTest {
         int court = 3;
         int rounds = 5;
 
-        ScheduleResult result = scheduler.generateSchedule(male, female, court, rounds, 136);
+        ScheduleResult result = scheduler.generateSchedule(male, female, court, court * rounds, 136);
 
         assertEquals(court * rounds, result.matches.size());
 
@@ -312,10 +312,37 @@ public class TennisMatchSchedulerTest {
     }
 
     @Test
+    void generateSchedule_allowsPartialFinalRoundWhenTotalGamesDoesNotFillAllCourts() {
+        TennisMatchScheduler scheduler = createScheduler();
+
+        ScheduleResult result = scheduler.generateSchedule(6, 6, 3, 10, 136);
+
+        assertEquals(10, result.matches.size());
+        assertEquals(4, result.matches.stream().mapToInt(match -> match.round).max().orElseThrow());
+
+        List<GameMatch> finalRoundMatches = result.matches.stream()
+                .filter(match -> match.round == 4)
+                .toList();
+
+        assertEquals(1, finalRoundMatches.size());
+        assertEquals(1, finalRoundMatches.get(0).court);
+
+        for (int round = 1; round <= 4; round++) {
+            int currentRound = round;
+            Set<String> playersInRound = new HashSet<>();
+            result.matches.stream()
+                    .filter(match -> match.round == currentRound)
+                    .forEach(match -> allPlayers(match).forEach(player ->
+                            assertTrue(playersInRound.add(player.id), "Player appears more than once in round " + currentRound)
+                    ));
+        }
+    }
+
+    @Test
     void generateSchedule_createsTeamsMatchingDeclaredMatchType() {
         TennisMatchScheduler scheduler = createScheduler();
 
-        ScheduleResult result = scheduler.generateSchedule(7, 9, 3, 4, 136);
+        ScheduleResult result = scheduler.generateSchedule(7, 9, 3, 12, 136);
 
         for (GameMatch match : result.matches) {
             assertEquals(2, match.teamA.size());
@@ -358,8 +385,8 @@ public class TennisMatchSchedulerTest {
     void generateSchedule_returnsSameScheduleForSameSeed() {
         TennisMatchScheduler scheduler = createScheduler();
 
-        ScheduleResult first = scheduler.generateSchedule(8, 8, 3, 5, 136);
-        ScheduleResult second = scheduler.generateSchedule(8, 8, 3, 5, 136);
+        ScheduleResult first = scheduler.generateSchedule(8, 8, 3, 15, 136);
+        ScheduleResult second = scheduler.generateSchedule(8, 8, 3, 15, 136);
 
         assertEquals(scheduleSignature(first), scheduleSignature(second));
     }
