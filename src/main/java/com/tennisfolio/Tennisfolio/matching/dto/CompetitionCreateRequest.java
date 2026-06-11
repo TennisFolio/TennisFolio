@@ -17,6 +17,7 @@ public class CompetitionCreateRequest {
     private final Long seed;
     private final List<String> malePlayerNames;
     private final List<String> femalePlayerNames;
+    private final boolean sameGenderDoublesOnly;
 
     @JsonCreator
     public CompetitionCreateRequest(
@@ -28,7 +29,8 @@ public class CompetitionCreateRequest {
             @JsonProperty("totalGames") int totalGames,
             @JsonProperty("seed") Long seed,
             @JsonProperty("malePlayerNames") List<String> malePlayerNames,
-            @JsonProperty("femalePlayerNames") List<String> femalePlayerNames
+            @JsonProperty("femalePlayerNames") List<String> femalePlayerNames,
+            @JsonProperty("sameGenderDoublesOnly") boolean sameGenderDoublesOnly
     ) {
         this.mode = mode;
         this.competitionName = competitionName;
@@ -39,5 +41,31 @@ public class CompetitionCreateRequest {
         this.seed = seed;
         this.malePlayerNames = malePlayerNames;
         this.femalePlayerNames = femalePlayerNames;
+        this.sameGenderDoublesOnly = sameGenderDoublesOnly;
+    }
+
+    public CompetitionCreateRequest(
+            String mode,
+            String competitionName,
+            int maleCount,
+            int femaleCount,
+            int courtCount,
+            int totalGames,
+            Long seed,
+            List<String> malePlayerNames,
+            List<String> femalePlayerNames
+    ) {
+        this(
+                mode,
+                competitionName,
+                maleCount,
+                femaleCount,
+                courtCount,
+                totalGames,
+                seed,
+                malePlayerNames,
+                femalePlayerNames,
+                false
+        );
     }
 }

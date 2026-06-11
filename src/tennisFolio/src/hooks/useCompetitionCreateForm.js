@@ -13,6 +13,7 @@ import {
   COMPETITION_FIELD_LIMITS,
   COMPETITION_FIELDS,
   createCompetitionPayload,
+  getSameGenderDoublesOnlyUnavailableReason,
   INITIAL_COMPETITION_FORM,
 } from './competitionCreateFormConfig';
 
@@ -51,6 +52,18 @@ export function useCompetitionCreateForm() {
   const totalGameSlots = totalGames * 4;
   const minimumPlayers = competitionForm.courtCount * 4;
   const canCreateGames = totalPlayers >= 4 && totalPlayers >= minimumPlayers;
+  const sameGenderDoublesOnlyUnavailableReason =
+    getSameGenderDoublesOnlyUnavailableReason(competitionForm);
+  const sameGenderDoublesOnlyUnavailable = Boolean(
+    sameGenderDoublesOnlyUnavailableReason
+  );
+  const canSubmitCompetition =
+    canCreateGames
+    && !(
+      !isClubSession
+      && competitionForm.sameGenderDoublesOnly
+      && sameGenderDoublesOnlyUnavailable
+    );
 
   const placementText = useMemo(() => {
     if (canCreateGames) {
@@ -114,6 +127,15 @@ export function useCompetitionCreateForm() {
       return;
     }
 
+    if (name === 'sameGenderDoublesOnly') {
+      setCompetitionForm((prev) => ({
+        ...prev,
+        sameGenderDoublesOnly: value === true,
+      }));
+      resetCompetitionFeedback();
+      return;
+    }
+
     trackFieldInteraction(name, 'input');
     setCompetitionForm((prev) => ({
       ...prev,
@@ -172,6 +194,13 @@ export function useCompetitionCreateForm() {
       return '코트 1개당 최소 4명이 필요해요.';
     }
     if (
+      !isClubSession &&
+      competitionForm.sameGenderDoublesOnly &&
+      sameGenderDoublesOnlyUnavailable
+    ) {
+      return sameGenderDoublesOnlyUnavailableReason;
+    }
+    if (
       hasInvalidPlayerNameLength(competitionForm.malePlayerNames) ||
       hasInvalidPlayerNameLength(competitionForm.femalePlayerNames)
     ) {
@@ -189,6 +218,9 @@ export function useCompetitionCreateForm() {
       court_count: competitionForm.courtCount,
       total_games: isClubSession ? undefined : competitionForm.totalGames,
       mode: competitionForm.mode,
+      same_gender_doubles_only: isClubSession
+        ? undefined
+        : competitionForm.sameGenderDoublesOnly,
       can_create_games: canCreateGames,
     };
 
@@ -270,7 +302,10 @@ export function useCompetitionCreateForm() {
     isCreatingCompetition,
     totalPlayers,
     canCreateGames,
+    canSubmitCompetition,
     isClubSession,
+    sameGenderDoublesOnlyUnavailable,
+    sameGenderDoublesOnlyUnavailableReason,
     placementText,
     participantGameText,
     unavailableReasonText,

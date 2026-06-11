@@ -392,6 +392,131 @@ public class TennisMatchSchedulerTest {
     }
 
     @Test
+    void generateSchedule_sameGenderOnlyUsesSeedToVaryCandidateOrder() {
+        TennisMatchScheduler scheduler = createScheduler();
+
+        ScheduleResult first = scheduler.generateSchedule(
+                8,
+                8,
+                2,
+                16,
+                136,
+                EnumSet.of(MatchType.MALE, MatchType.FEMALE)
+        );
+        ScheduleResult second = scheduler.generateSchedule(
+                8,
+                8,
+                2,
+                16,
+                137,
+                EnumSet.of(MatchType.MALE, MatchType.FEMALE)
+        );
+
+        assertNotEquals(scheduleSignature(first), scheduleSignature(second));
+    }
+
+    @Test
+    void generateSchedule_withSameGenderOnlyAllowedTypesCreatesOnlyMaleAndFemaleMatches() {
+        TennisMatchScheduler scheduler = createScheduler();
+
+        ScheduleResult result = scheduler.generateSchedule(
+                8,
+                8,
+                2,
+                8,
+                136,
+                EnumSet.of(MatchType.MALE, MatchType.FEMALE)
+        );
+
+        assertEquals(8, result.matches.size());
+        assertTrue(result.matches.stream()
+                .allMatch(match -> match.type == MatchType.MALE || match.type == MatchType.FEMALE));
+    }
+
+    @Test
+    void generateSchedule_withSameGenderOnlyAllowedTypesDoesNotFallbackToMixedOrRandom() {
+        TennisMatchScheduler scheduler = createScheduler();
+
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> scheduler.generateSchedule(
+                        2,
+                        2,
+                        1,
+                        1,
+                        136,
+                        EnumSet.of(MatchType.MALE, MatchType.FEMALE)
+                )
+        );
+        assertEquals(
+                "sameGenderDoublesOnly cannot allocate same-gender game counts for the requested player distribution",
+                exception.getMessage()
+        );
+    }
+
+    @Test
+    void generateSchedule_withOnlyMenProducesMaleMatchesInDefaultAndSameGenderOnlyPolicies() {
+        TennisMatchScheduler scheduler = createScheduler();
+
+        ScheduleResult defaultResult = scheduler.generateSchedule(8, 0, 2, 4, 136);
+        ScheduleResult sameGenderOnlyResult = scheduler.generateSchedule(
+                8,
+                0,
+                2,
+                4,
+                136,
+                EnumSet.of(MatchType.MALE, MatchType.FEMALE)
+        );
+
+        assertTrue(defaultResult.matches.stream().allMatch(match -> match.type == MatchType.MALE));
+        assertTrue(sameGenderOnlyResult.matches.stream().allMatch(match -> match.type == MatchType.MALE));
+    }
+
+    @Test
+    void generateSchedule_sameGenderOnlyCreatesSixMenFiveWomenElevenGames() {
+        TennisMatchScheduler scheduler = createScheduler();
+
+        ScheduleResult result = scheduler.generateSchedule(
+                6,
+                5,
+                2,
+                11,
+                136,
+                EnumSet.of(MatchType.MALE, MatchType.FEMALE)
+        );
+
+        assertEquals(11, result.matches.size());
+        assertEquals(6, result.matches.stream().filter(match -> match.type == MatchType.MALE).count());
+        assertEquals(5, result.matches.stream().filter(match -> match.type == MatchType.FEMALE).count());
+        assertTrue(result.matches.stream()
+                .allMatch(match -> match.type == MatchType.MALE || match.type == MatchType.FEMALE));
+        assertEquals(11, playerGameCounts(result).size());
+        assertTrue(playerGameCounts(result).values().stream().allMatch(count -> count == 4));
+    }
+
+    @Test
+    void generateSchedule_sameGenderOnlyDoesNotForceEveryoneToFourGamesWhenRangeIsThreeToFour() {
+        TennisMatchScheduler scheduler = createScheduler();
+
+        ScheduleResult result = scheduler.generateSchedule(
+                6,
+                5,
+                2,
+                10,
+                136,
+                EnumSet.of(MatchType.MALE, MatchType.FEMALE)
+        );
+
+        assertEquals(10, result.matches.size());
+        assertEquals(5, result.matches.stream().filter(match -> match.type == MatchType.MALE).count());
+        assertEquals(5, result.matches.stream().filter(match -> match.type == MatchType.FEMALE).count());
+        assertTrue(result.matches.stream()
+                .allMatch(match -> match.type == MatchType.MALE || match.type == MatchType.FEMALE));
+        assertEquals(11, playerGameCounts(result).size());
+        assertTrue(playerGameCounts(result).values().stream().allMatch(count -> count >= 3 && count <= 4));
+    }
+
+    @Test
     void generateNextClubSessionGame_usesCandidateEntryIdsAndRequestedCourtRound() {
         TennisMatchScheduler scheduler = createScheduler();
         Competition competition = clubSessionCompetition(1L, "public-id", "edit-token");
@@ -555,6 +680,16 @@ public class TennisMatchSchedulerTest {
         return allPlayers(match).stream()
                 .map(player -> player.id)
                 .collect(Collectors.toSet());
+    }
+
+    private Map<String, Integer> playerGameCounts(ScheduleResult result) {
+        Map<String, Integer> gameCount = new HashMap<>();
+        for (GameMatch match : result.matches) {
+            for (GamePlayer player : allPlayers(match)) {
+                gameCount.merge(player.id, 1, Integer::sum);
+            }
+        }
+        return gameCount;
     }
 
     private List<String> scheduleSignature(ScheduleResult result) {

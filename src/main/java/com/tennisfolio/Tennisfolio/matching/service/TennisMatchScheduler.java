@@ -1,6 +1,7 @@
 package com.tennisfolio.Tennisfolio.matching.service;
 
 import com.tennisfolio.Tennisfolio.matching.domain.GameMatch;
+import com.tennisfolio.Tennisfolio.matching.domain.MatchType;
 import com.tennisfolio.Tennisfolio.matching.domain.ScheduleResult;
 import com.tennisfolio.Tennisfolio.matching.engine.CandidateGenerator;
 import com.tennisfolio.Tennisfolio.matching.engine.ConstraintChecker;
@@ -12,6 +13,7 @@ import com.tennisfolio.Tennisfolio.matching.service.fixed.FixedScheduleGenerator
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class TennisMatchScheduler {
@@ -30,6 +32,17 @@ public class TennisMatchScheduler {
 
     public ScheduleResult generateSchedule(int male, int female, int court, int totalGames, long seed) {
         return fixedScheduleGenerator.generateSchedule(male, female, court, totalGames, seed);
+    }
+
+    public ScheduleResult generateSchedule(
+            int male,
+            int female,
+            int court,
+            int totalGames,
+            long seed,
+            Set<MatchType> allowedMatchTypes
+    ) {
+        return fixedScheduleGenerator.generateSchedule(male, female, court, totalGames, seed, allowedMatchTypes);
     }
 
     public GameMatch generateNextClubSessionGame(
