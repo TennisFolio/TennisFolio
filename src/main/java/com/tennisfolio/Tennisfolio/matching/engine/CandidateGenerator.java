@@ -6,11 +6,23 @@ import com.tennisfolio.Tennisfolio.matching.domain.MatchType;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Consumer;
 
 @Component
 public class CandidateGenerator {
+    private static final EnumSet<MatchType> NORMAL_TYPES = EnumSet.of(
+            MatchType.MIXED,
+            MatchType.MALE,
+            MatchType.FEMALE
+    );
+
+    private static final EnumSet<MatchType> RANDOM_TYPES = EnumSet.of(
+            MatchType.RANDOM_M3F1,
+            MatchType.RANDOM_M1F3
+    );
 
     public List<MatchCandidate> generate(List<GamePlayer> players, boolean allowRandom) {
         List<MatchCandidate> result = new ArrayList<>();
@@ -18,7 +30,25 @@ public class CandidateGenerator {
         return result;
     }
 
+    public List<MatchCandidate> generate(List<GamePlayer> players, Set<MatchType> allowedMatchTypes) {
+        List<MatchCandidate> result = new ArrayList<>();
+        forEachCandidate(players, allowedMatchTypes, result::add);
+        return result;
+    }
+
     public void forEachCandidate(List<GamePlayer> players, boolean allowRandom, Consumer<MatchCandidate> consumer) {
+        EnumSet<MatchType> allowedMatchTypes = EnumSet.copyOf(NORMAL_TYPES);
+        if (allowRandom) {
+            allowedMatchTypes.addAll(RANDOM_TYPES);
+        }
+        forEachCandidate(players, allowedMatchTypes, consumer);
+    }
+
+    public void forEachCandidate(
+            List<GamePlayer> players,
+            Set<MatchType> allowedMatchTypes,
+            Consumer<MatchCandidate> consumer
+    ) {
         List<GamePlayer> men = new ArrayList<>();
         List<GamePlayer> women = new ArrayList<>();
 
@@ -30,12 +60,19 @@ public class CandidateGenerator {
             }
         }
 
-        generateMixed(men, women, consumer);
-        generateMale(men, consumer);
-        generateFemale(women, consumer);
-
-        if (allowRandom) {
+        if (allowedMatchTypes.contains(MatchType.MIXED)) {
+            generateMixed(men, women, consumer);
+        }
+        if (allowedMatchTypes.contains(MatchType.MALE)) {
+            generateMale(men, consumer);
+        }
+        if (allowedMatchTypes.contains(MatchType.FEMALE)) {
+            generateFemale(women, consumer);
+        }
+        if (allowedMatchTypes.contains(MatchType.RANDOM_M3F1)) {
             generateRandomM3F1(men, women, consumer);
+        }
+        if (allowedMatchTypes.contains(MatchType.RANDOM_M1F3)) {
             generateRandomM1F3(men, women, consumer);
         }
     }

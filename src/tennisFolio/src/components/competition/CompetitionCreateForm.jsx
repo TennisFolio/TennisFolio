@@ -49,7 +49,10 @@ function CompetitionCreateForm() {
     isCreatingCompetition,
     totalPlayers,
     canCreateGames,
+    canSubmitCompetition,
     isClubSession,
+    sameGenderDoublesOnlyUnavailable,
+    sameGenderDoublesOnlyUnavailableReason,
     placementText,
     participantGameText,
     unavailableReasonText,
@@ -162,6 +165,45 @@ function CompetitionCreateForm() {
             : '참가자가 확정된 모임에서 입력한 총 경기 수만큼 전체 대진을 한 번에 생성합니다.'}
         </p>
 
+        {!isClubSession && (
+          <div
+            className={`same-gender-option ${
+              competitionForm.sameGenderDoublesOnly
+              && sameGenderDoublesOnlyUnavailable
+                ? 'disabled'
+                : ''
+            }`}
+          >
+            <button
+              type="button"
+              className={`same-gender-switch ${
+                competitionForm.sameGenderDoublesOnly ? 'active' : ''
+              }`}
+              role="switch"
+              aria-checked={competitionForm.sameGenderDoublesOnly}
+              onClick={() =>
+                updateCompetitionField(
+                  'sameGenderDoublesOnly',
+                  !competitionForm.sameGenderDoublesOnly
+                )
+              }
+            >
+              <span className="same-gender-switch-track">
+                <span className="same-gender-switch-thumb" />
+              </span>
+              <span className="same-gender-switch-copy">
+                <strong>혼복 제외</strong>
+              </span>
+            </button>
+            {competitionForm.sameGenderDoublesOnly
+              && sameGenderDoublesOnlyUnavailable && (
+              <p className="same-gender-option-warning">
+                {sameGenderDoublesOnlyUnavailableReason}
+              </p>
+            )}
+          </div>
+        )}
+
         <MotionDiv
           className="competition-fields"
           variants={staggerContainer}
@@ -226,9 +268,9 @@ function CompetitionCreateForm() {
       <MotionButton
         type="submit"
         className={`competition-submit-button ${
-          canCreateGames ? '' : 'needs-adjustment'
+          canSubmitCompetition ? '' : 'needs-adjustment'
         }`}
-        disabled={isCreatingCompetition}
+        disabled={isCreatingCompetition || !canSubmitCompetition}
         whileHover={isCreatingCompetition ? undefined : { y: -1 }}
         whileTap={isCreatingCompetition ? undefined : { scale: 0.985 }}
         transition={{ duration: 0.18, ease: 'easeOut' }}

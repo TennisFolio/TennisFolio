@@ -10,7 +10,9 @@ import com.tennisfolio.Tennisfolio.matching.engine.ConstraintChecker;
 import com.tennisfolio.Tennisfolio.matching.engine.ScoreCalculator;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.EnumMap;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -20,10 +22,20 @@ import java.util.Random;
 import java.util.Set;
 
 public class FixedScheduleGenerator {
+    private static final EnumSet<MatchType> NORMAL_TYPES = EnumSet.of(
+            MatchType.MIXED,
+            MatchType.MALE,
+            MatchType.FEMALE
+    );
+    private static final EnumSet<MatchType> SAME_GENDER_TYPES = EnumSet.of(
+            MatchType.MALE,
+            MatchType.FEMALE
+    );
 
     private final ConstraintChecker constraintChecker;
     private final ScoreCalculator scoreCalculator;
     private final CandidateGenerator generator;
+    private final SameGenderScheduleTargetCalculator sameGenderTargetCalculator = new SameGenderScheduleTargetCalculator();
     private Random random;
 
     public FixedScheduleGenerator(
@@ -39,16 +51,236 @@ public class FixedScheduleGenerator {
     public ScheduleResult generateSchedule(int male, int female, int court, int totalGames, long seed) {
         int rounds = calculateRounds(totalGames, court);
         boolean allowRandom = shouldAllowRandomType(male, female, court, totalGames);
+        EnumSet<MatchType> allowedMatchTypes = EnumSet.copyOf(NORMAL_TYPES);
+        if (allowRandom) {
+            allowedMatchTypes.add(MatchType.RANDOM_M3F1);
+            allowedMatchTypes.add(MatchType.RANDOM_M1F3);
+        }
 
         try {
-            return generateSchedule(male, female, court, totalGames, rounds, seed, allowRandom);
+            return generateSchedule(male, female, court, totalGames, rounds, seed, allowedMatchTypes);
         } catch (NoSuchElementException e) {
             if (allowRandom || !canScheduleRandomType(male, female)) {
                 throw e;
             }
 
-            return generateSchedule(male, female, court, totalGames, rounds, seed, true);
+            EnumSet<MatchType> fallbackAllowedTypes = EnumSet.copyOf(NORMAL_TYPES);
+            fallbackAllowedTypes.add(MatchType.RANDOM_M3F1);
+            fallbackAllowedTypes.add(MatchType.RANDOM_M1F3);
+            return generateSchedule(male, female, court, totalGames, rounds, seed, fallbackAllowedTypes);
         }
+    }
+
+    public ScheduleResult generateSchedule(
+            int male,
+            int female,
+            int court,
+            int totalGames,
+            long seed,
+            Set<MatchType> allowedMatchTypes
+    ) {
+        if (isSameGenderOnly(allowedMatchTypes)) {
+            return generateSameGenderOnlySchedule(male, female, court, totalGames, seed);
+        }
+
+        int rounds = calculateRounds(totalGames, court);
+        return generateSchedule(male, female, court, totalGames, rounds, seed, allowedMatchTypes);
+    }
+
+    private boolean isSameGenderOnly(Set<MatchType> allowedMatchTypes) {
+        return allowedMatchTypes.size() == SAME_GENDER_TYPES.size()
+                && allowedMatchTypes.containsAll(SAME_GENDER_TYPES);
+    }
+
+    private ScheduleResult generateSameGenderOnlySchedule(
+            int male,
+            int female,
+            int court,
+            int totalGames,
+            long seed
+    ) {
+        List<SameGenderScheduleTarget> targets = sameGenderTargetCalculator.calculate(male, female, totalGames);
+        if (targets.isEmpty()) {
+            throw new IllegalArgumentException(
+                    "sameGenderDoublesOnly cannot allocate same-gender game counts for the requested player distribution"
+            );
+        }
+
+        NoSuchElementException lastFailure = null;
+        for (SameGenderScheduleTarget target : targets) {
+            try {
+                return generateSameGenderOnlySchedule(male, female, court, totalGames, seed, target);
+            } catch (NoSuchElementException e) {
+                lastFailure = e;
+            }
+        }
+
+        if (lastFailure != null) {
+            throw lastFailure;
+        }
+        throw new NoSuchElementException("No valid match candidate");
+    }
+
+    private ScheduleResult generateSameGenderOnlySchedule(
+            int male,
+            int female,
+            int court,
+            int totalGames,
+            long seed,
+            SameGenderScheduleTarget target
+    ) {
+        this.random = new Random(seed);
+        List<GamePlayer> players = createPlayers(male, female);
+        ScheduleResult result = new ScheduleResult();
+        Map<MatchType, Integer> typeCount = new EnumMap<>(MatchType.class);
+        for (MatchType type : MatchType.values()) {
+            typeCount.put(type, 0);
+        }
+        Map<Set<String>, Integer> groupCount = new HashMap<>();
+        int rounds = calculateRounds(totalGames, court);
+
+        boolean solved = fillSameGenderOnly(
+                players,
+                result,
+                typeCount,
+                groupCount,
+                target,
+                court,
+                totalGames,
+                rounds,
+                male,
+                female,
+                0
+        );
+
+        if (!solved) {
+            throw new NoSuchElementException("No valid match candidate");
+        }
+        return result;
+    }
+
+    private boolean fillSameGenderOnly(
+            List<GamePlayer> players,
+            ScheduleResult result,
+            Map<MatchType, Integer> typeCount,
+            Map<Set<String>, Integer> groupCount,
+            SameGenderScheduleTarget target,
+            int court,
+            int totalGames,
+            int rounds,
+            int male,
+            int female,
+            int gameIndex
+    ) {
+        if (gameIndex == totalGames) {
+            return typeCount.get(MatchType.MALE) == target.maleGames()
+                    && typeCount.get(MatchType.FEMALE) == target.femaleGames()
+                    && players.stream().allMatch(player -> player.totalGames >= target.minGamesPerPlayer()
+                            && player.totalGames <= target.maxGamesPerPlayer());
+        }
+
+        int round = gameIndex / court + 1;
+        int courtNumber = gameIndex % court + 1;
+        Set<GamePlayer> usedThisRound = usedPlayersInRound(result, round);
+        List<GamePlayer> availablePlayers = players.stream()
+                .filter(player -> !usedThisRound.contains(player))
+                .toList();
+
+        List<MatchCandidate> candidates = new ArrayList<>();
+        generator.forEachCandidate(availablePlayers, SAME_GENDER_TYPES, candidate -> {
+            if (typeCount.get(candidate.type) >= targetCount(target, candidate.type)) {
+                return;
+            }
+            if (!isValidSameGenderCandidate(candidate, usedThisRound, target.maxGamesPerPlayer())) {
+                return;
+            }
+            candidates.add(candidate);
+        });
+
+        Collections.shuffle(candidates, random);
+        candidates.sort((left, right) -> Integer.compare(
+                scoreSameGenderCandidate(right, typeCount, round, rounds, groupCount, male, female),
+                scoreSameGenderCandidate(left, typeCount, round, rounds, groupCount, male, female)
+        ));
+
+        for (MatchCandidate candidate : candidates) {
+            apply(candidate, groupCount);
+            typeCount.put(candidate.type, typeCount.get(candidate.type) + 1);
+            result.matches.add(new GameMatch(round, courtNumber, candidate.type, candidate.teamA, candidate.teamB));
+
+            if (fillSameGenderOnly(players, result, typeCount, groupCount, target, court, totalGames, rounds, male, female, gameIndex + 1)) {
+                return true;
+            }
+
+            result.matches.remove(result.matches.size() - 1);
+            typeCount.put(candidate.type, typeCount.get(candidate.type) - 1);
+            rollback(candidate, groupCount);
+        }
+
+        return false;
+    }
+
+    private boolean isValidSameGenderCandidate(
+            MatchCandidate candidate,
+            Set<GamePlayer> usedThisRound,
+            int maxGames
+    ) {
+        List<GamePlayer> players = candidate.allPlayers();
+        Set<GamePlayer> uniquePlayers = new HashSet<>(players);
+        if (uniquePlayers.size() != players.size()) {
+            return false;
+        }
+
+        for (GamePlayer player : players) {
+            if (usedThisRound.contains(player)) {
+                return false;
+            }
+            if (player.totalGames + 1 > maxGames) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private Set<GamePlayer> usedPlayersInRound(ScheduleResult result, int round) {
+        Set<GamePlayer> used = new HashSet<>();
+        for (GameMatch match : result.matches) {
+            if (match.round == round) {
+                used.addAll(match.teamA);
+                used.addAll(match.teamB);
+            }
+        }
+        return used;
+    }
+
+    private int targetCount(SameGenderScheduleTarget target, MatchType type) {
+        return switch (type) {
+            case MALE -> target.maleGames();
+            case FEMALE -> target.femaleGames();
+            case MIXED, RANDOM_M3F1, RANDOM_M1F3 -> 0;
+        };
+    }
+
+    private int scoreSameGenderCandidate(
+            MatchCandidate candidate,
+            Map<MatchType, Integer> typeCount,
+            int round,
+            int rounds,
+            Map<Set<String>, Integer> groupCount,
+            int male,
+            int female
+    ) {
+        return scoreCalculator.score(
+                candidate,
+                typeCount,
+                Set.of(),
+                round,
+                rounds,
+                groupCount,
+                male,
+                female
+        );
     }
 
     private ScheduleResult generateSchedule(
@@ -58,7 +290,7 @@ public class FixedScheduleGenerator {
             int totalGames,
             int rounds,
             long seed,
-            boolean allowRandom
+            Set<MatchType> allowedMatchTypes
     ) {
         this.random = new Random(seed);
         List<GamePlayer> players = createPlayers(male, female);
@@ -89,7 +321,6 @@ public class FixedScheduleGenerator {
 
                 BestCandidate best = selectBestCandidate(
                         availablePlayers,
-                        allowRandom,
                         players,
                         used,
                         court,
@@ -100,7 +331,8 @@ public class FixedScheduleGenerator {
                         rounds,
                         groupCount,
                         male,
-                        female
+                        female,
+                        allowedMatchTypes
                 );
 
                 if (best.candidate == null) {
@@ -137,7 +369,6 @@ public class FixedScheduleGenerator {
 
     private BestCandidate selectBestCandidate(
             List<GamePlayer> availablePlayers,
-            boolean allowRandom,
             List<GamePlayer> players,
             Set<GamePlayer> used,
             int court,
@@ -148,11 +379,12 @@ public class FixedScheduleGenerator {
             int rounds,
             Map<Set<String>, Integer> groupCount,
             int male,
-            int female
+            int female,
+            Set<MatchType> allowedMatchTypes
     ) {
         BestCandidate best = new BestCandidate();
 
-        generator.forEachCandidate(availablePlayers, allowRandom, candidate -> {
+        generator.forEachCandidate(availablePlayers, allowedMatchTypes, candidate -> {
             if (!constraintChecker.isValid(candidate, players, used, court, maxGames)) {
                 return;
             }
@@ -235,6 +467,59 @@ public class FixedScheduleGenerator {
         group.add(allPlayers.get(3).id);
 
         groupCount.merge(group, 1, Integer::sum);
+    }
+
+    private void rollback(MatchCandidate c, Map<Set<String>, Integer> groupCount) {
+        List<GamePlayer> teamA = c.teamA;
+        List<GamePlayer> teamB = c.teamB;
+        List<GamePlayer> allPlayers = c.allPlayers();
+
+        for (GamePlayer p : allPlayers) {
+            p.totalGames--;
+            p.typeExperience.merge(c.type, -1, Integer::sum);
+            if (p.typeExperience.getOrDefault(c.type, 0) <= 0) {
+                p.typeExperience.remove(c.type);
+            }
+        }
+
+        for (GamePlayer p1 : teamA) {
+            for (GamePlayer p2 : teamA) {
+                if (p1 != p2) {
+                    decrementCount(p1.partnerCount, p2.id);
+                }
+            }
+        }
+
+        for (GamePlayer p1 : teamB) {
+            for (GamePlayer p2 : teamB) {
+                if (p1 != p2) {
+                    decrementCount(p1.partnerCount, p2.id);
+                }
+            }
+        }
+
+        for (GamePlayer p1 : teamA) {
+            for (GamePlayer p2 : teamB) {
+                decrementCount(p1.opponentCount, p2.id);
+                decrementCount(p2.opponentCount, p1.id);
+            }
+        }
+
+        Set<String> group = new HashSet<>(4);
+        group.add(allPlayers.get(0).id);
+        group.add(allPlayers.get(1).id);
+        group.add(allPlayers.get(2).id);
+        group.add(allPlayers.get(3).id);
+        decrementCount(groupCount, group);
+    }
+
+    private <K> void decrementCount(Map<K, Integer> counts, K key) {
+        int next = counts.getOrDefault(key, 0) - 1;
+        if (next <= 0) {
+            counts.remove(key);
+        } else {
+            counts.put(key, next);
+        }
     }
 
     private boolean canScheduleWithoutRandom(int male, int female, int court) {

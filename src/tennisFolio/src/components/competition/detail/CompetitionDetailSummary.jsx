@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { formatRoundSummary } from './competitionDetailSummaryLabels';
 
 const COMPETITION_MODES = {
   MANAGE: 'manage',
@@ -45,7 +46,6 @@ function CompetitionDetailSummary({
   const stat = competition.stat;
   const totalPlayers =
     (competition.maleCount ?? 0) + (competition.femaleCount ?? 0);
-  const estimatedHours = Math.max(1, Math.round((competition.rounds ?? 0) / 2));
   const isClubSession = competition.mode === 'CLUB_SESSION';
   const [nameDraft, setNameDraft] = useState(competition.name ?? '');
 
@@ -113,7 +113,7 @@ function CompetitionDetailSummary({
               '클럽'
             ) : (
               <>
-                {competition.rounds}R <small>({estimatedHours}시간)</small>
+                {formatRoundSummary(competition.rounds)}
               </>
             )}
           </strong>

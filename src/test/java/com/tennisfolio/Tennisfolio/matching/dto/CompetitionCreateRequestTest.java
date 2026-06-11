@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class CompetitionCreateRequestTest {
 
@@ -36,5 +38,48 @@ class CompetitionCreateRequestTest {
         assertEquals(136L, request.getSeed());
         assertEquals("민수", request.getMalePlayerNames().get(1));
         assertEquals("지연", request.getFemalePlayerNames().get(1));
+    }
+
+    @Test
+    void deserializesSameGenderDoublesOnly() throws Exception {
+        String json = """
+                {
+                  "mode": "FIXED_SCHEDULE",
+                  "competitionName": "Fixed",
+                  "maleCount": 8,
+                  "femaleCount": 8,
+                  "courtCount": 2,
+                  "totalGames": 12,
+                  "seed": 136,
+                  "sameGenderDoublesOnly": true,
+                  "malePlayerNames": ["M1", "M2"],
+                  "femalePlayerNames": ["F1", "F2"]
+                }
+                """;
+
+        CompetitionCreateRequest request = objectMapper.readValue(json, CompetitionCreateRequest.class);
+
+        assertTrue(request.isSameGenderDoublesOnly());
+    }
+
+    @Test
+    void defaultsSameGenderDoublesOnlyToFalseWhenMissing() throws Exception {
+        String json = """
+                {
+                  "mode": "FIXED_SCHEDULE",
+                  "competitionName": "Fixed",
+                  "maleCount": 8,
+                  "femaleCount": 8,
+                  "courtCount": 2,
+                  "totalGames": 12,
+                  "seed": 136,
+                  "malePlayerNames": ["M1", "M2"],
+                  "femalePlayerNames": ["F1", "F2"]
+                }
+                """;
+
+        CompetitionCreateRequest request = objectMapper.readValue(json, CompetitionCreateRequest.class);
+
+        assertFalse(request.isSameGenderDoublesOnly());
     }
 }

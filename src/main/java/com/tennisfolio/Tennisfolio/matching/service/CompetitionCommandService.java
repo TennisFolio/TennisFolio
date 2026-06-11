@@ -1,5 +1,6 @@
 package com.tennisfolio.Tennisfolio.matching.service;
 
+import com.tennisfolio.Tennisfolio.matching.domain.MatchType;
 import com.tennisfolio.Tennisfolio.matching.domain.ScheduleResult;
 import com.tennisfolio.Tennisfolio.matching.dto.CompetitionCreateRequest;
 import com.tennisfolio.Tennisfolio.matching.dto.CompetitionCreateResponse;
@@ -7,9 +8,13 @@ import com.tennisfolio.Tennisfolio.matching.dto.CompetitionUpdateRequest;
 import com.tennisfolio.Tennisfolio.matching.dto.CompetitionUpdateResponse;
 import com.tennisfolio.Tennisfolio.matching.entity.Competition;
 import com.tennisfolio.Tennisfolio.matching.entity.CompetitionEntry;
+import com.tennisfolio.Tennisfolio.matching.service.fixed.SameGenderScheduleTargetCalculator;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
+import java.util.EnumSet;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -18,6 +23,10 @@ public class CompetitionCommandService {
     private static final int MAX_PLAYER_COUNT = 40;
     private static final int MAX_COURT_COUNT = 10;
     private static final int MAX_ROUNDS = 20;
+    private static final EnumSet<MatchType> SAME_GENDER_DOUBLES_TYPES = EnumSet.of(
+            MatchType.MALE,
+            MatchType.FEMALE
+    );
 
     private final TennisMatchScheduler scheduler;
     private final CompetitionService competitionService;
@@ -25,6 +34,7 @@ public class CompetitionCommandService {
     private final GameService gameService;
     private final CompetitionStatService competitionStatService;
     private final CompetitionAdminTokenService competitionAdminTokenService;
+    private final SameGenderScheduleTargetCalculator sameGenderTargetCalculator = new SameGenderScheduleTargetCalculator();
 
     public CompetitionCommandService(
             TennisMatchScheduler scheduler,
@@ -56,13 +66,8 @@ public class CompetitionCommandService {
 
         Competition competition = competitionService.createCompetition(request, rounds, seed);
 
-        ScheduleResult result = scheduler.generateSchedule(
-                request.getMaleCount(),
-                request.getFemaleCount(),
-                request.getCourtCount(),
-                mode == Competition.CompetitionMode.CLUB_SESSION ? rounds : request.getTotalGames(),
-                seed
-        );
+        int scheduleGames = mode == Competition.CompetitionMode.CLUB_SESSION ? rounds : request.getTotalGames();
+        ScheduleResult result = generateSchedule(request, mode, scheduleGames, seed);
 
         Map<String, CompetitionEntry> entriesByPlayerName = competitionEntryCommandService.createCompetitionEntries(competition, request);
         gameService.saveSchedule(competition, result, entriesByPlayerName);
@@ -70,6 +75,32 @@ public class CompetitionCommandService {
 
         String competitionAdminToken = competitionAdminTokenService.createToken(competition.getPublicId());
         return CompetitionCreateResponse.from(competition, competitionAdminToken);
+    }
+
+    private ScheduleResult generateSchedule(
+            CompetitionCreateRequest request,
+            Competition.CompetitionMode mode,
+            int scheduleGames,
+            long seed
+    ) {
+        if (mode == Competition.CompetitionMode.FIXED_SCHEDULE && request.isSameGenderDoublesOnly()) {
+            return scheduler.generateSchedule(
+                    request.getMaleCount(),
+                    request.getFemaleCount(),
+                    request.getCourtCount(),
+                    scheduleGames,
+                    seed,
+                    SAME_GENDER_DOUBLES_TYPES
+            );
+        }
+
+        return scheduler.generateSchedule(
+                request.getMaleCount(),
+                request.getFemaleCount(),
+                request.getCourtCount(),
+                scheduleGames,
+                seed
+        );
     }
 
     @Transactional
@@ -113,6 +144,39 @@ public class CompetitionCommandService {
         if (playerCount < request.getCourtCount() * 4) {
             throw new IllegalArgumentException("player count must be at least courtCount * 4");
         }
+
+        if (mode == Competition.CompetitionMode.FIXED_SCHEDULE && request.isSameGenderDoublesOnly()) {
+            validateSameGenderDoublesOnly(request);
+        }
+    }
+
+    private void validateSameGenderDoublesOnly(CompetitionCreateRequest request) {
+        if (isIncludedGenderBelowDoublesMinimum(request)) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "sameGenderDoublesOnly requires each included gender to have at least 4 players"
+            );
+        }
+
+        if (sameGenderTargetCalculator.calculate(
+                request.getMaleCount(),
+                request.getFemaleCount(),
+                request.getTotalGames()
+        ).isEmpty()) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "sameGenderDoublesOnly cannot allocate same-gender game counts for the requested player distribution"
+            );
+        }
+    }
+
+    private boolean isIncludedGenderBelowDoublesMinimum(CompetitionCreateRequest request) {
+        return isIncludedButBelowDoublesMinimum(request.getMaleCount())
+                || isIncludedButBelowDoublesMinimum(request.getFemaleCount());
+    }
+
+    private boolean isIncludedButBelowDoublesMinimum(int playerCount) {
+        return playerCount > 0 && playerCount < 4;
     }
 
     private Competition.CompetitionMode resolveMode(String mode) {
