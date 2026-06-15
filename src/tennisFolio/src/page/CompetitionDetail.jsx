@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import CompetitionDetailSummary, {
@@ -14,11 +14,13 @@ import {
   saveCompetitionAdminToken,
 } from '../utils/competitionEditToken';
 import { markCompetitionRevisit, trackEvent } from '../utils/analytics';
+import { createDebouncedAction } from '../utils/debouncedAction';
 import './CompetitionDetail.css';
 
 const itemTransition = { duration: 0.22, ease: [0.22, 1, 0.36, 1] };
 const MotionHeader = motion.header;
 const MotionSection = motion.section;
+const SCORE_AUTOSAVE_DELAY_MS = 500;
 const DUPLICATE_GAME_PLAYER_MESSAGE =
   '1게임에 동일한 사람이 포함되어 있어 저장할 수 없어요.';
 
@@ -319,6 +321,14 @@ function CompetitionDetail() {
     playerName: '',
     gender: 'MALE',
   });
+  const saveGameScoreRef = useRef(null);
+  const debouncedScoreSaveRef = useRef(null);
+
+  if (debouncedScoreSaveRef.current === null) {
+    debouncedScoreSaveRef.current = createDebouncedAction((gameId) => {
+      saveGameScoreRef.current?.(gameId);
+    }, SCORE_AUTOSAVE_DELAY_MS);
+  }
 
   const canManage = Boolean(adminToken);
   const isClubSession = competition?.mode === 'CLUB_SESSION';
@@ -709,6 +719,8 @@ function CompetitionDetail() {
         }),
       };
     });
+
+    debouncedScoreSaveRef.current?.schedule(gameId);
   };
 
   const clearTiebreakScore = (gameId) => {
@@ -773,13 +785,6 @@ function CompetitionDetail() {
   };
 
   const saveGameScore = async (gameId) => {
-    if (rejectWithoutPermission(
-      (message) => setScoreErrorByGameId((prev) => ({ ...prev, [gameId]: message })),
-      (message) => setScoreFeedbackByGameId((prev) => ({ ...prev, [gameId]: message }))
-    )) {
-      return;
-    }
-
     const game = competition?.games?.find((item) => item.gameId === gameId);
     if (!game) {
       return;
@@ -850,6 +855,8 @@ function CompetitionDetail() {
       setSavingScoreGameIds((prev) => prev.filter((id) => id !== gameId));
     }
   };
+
+  saveGameScoreRef.current = saveGameScore;
 
   const openEntryEditor = async () => {
     if (isEntryEditorOpen) {
