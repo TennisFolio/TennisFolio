@@ -219,7 +219,6 @@ public class CompetitionGameCommandService {
     ) {
         Competition competition = competitionRepository.findByPublicId(publicId)
                 .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND));
-        competitionAdminAuthorizationService.validateAdminToken(publicId, adminToken);
         Game game = gameRepository.findByIdAndCompetitionId(gameId, competition.getId())
                 .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND));
 

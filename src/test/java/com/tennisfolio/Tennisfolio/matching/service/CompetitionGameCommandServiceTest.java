@@ -260,7 +260,7 @@ class CompetitionGameCommandServiceTest {
     }
 
     @Test
-    void updateGameScore_allowsCompletedClubSessionGameWithAdminToken() {
+    void updateGameScore_allowsCompletedClubSessionGameWithoutAdminToken() {
         Competition competition = clubSessionCompetition(1L, "public-id", "edit-token");
         Game game = game(10L, competition, 1, 1, Game.MatchType.MIXED);
         game.complete();
@@ -272,9 +272,9 @@ class CompetitionGameCommandServiceTest {
         when(gameRepository.findByIdAndCompetitionId(10L, 1L)).thenReturn(Optional.of(game));
         when(gameEntryRepository.findByGameId(10L)).thenReturn(List.of());
 
-        GameResponse response = service.updateGameScore("public-id", 10L, "admin-token", request);
+        GameResponse response = service.updateGameScore("public-id", 10L, null, request);
 
-        verify(competitionAdminAuthorizationService).validateAdminToken("public-id", "admin-token");
+        verify(competitionAdminAuthorizationService, never()).validateAdminToken(any(), any());
         assertEquals(6, response.getScore().getTeamAScore());
         assertEquals(4, response.getScore().getTeamBScore());
     }

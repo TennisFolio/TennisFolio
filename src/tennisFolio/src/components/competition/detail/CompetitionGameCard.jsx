@@ -65,6 +65,7 @@ function CompetitionGameCard({
   isSavingScore,
   scoreFeedback,
   scoreError,
+  scoreAutoSave = false,
   scoreSaveLabel = '점수 저장',
   busyClubAction,
   clubScoreDraft,
@@ -159,6 +160,7 @@ function CompetitionGameCard({
         isTiebreakOpen={isTiebreakOpen}
         isSaving={isSavingScore}
         saveLabel={scoreSaveLabel}
+        showSave={!scoreAutoSave}
         errorMessage={scoreError}
         feedbackMessage={scoreFeedback}
         onToggleTiebreak={() => onToggleTiebreak(game.gameId)}

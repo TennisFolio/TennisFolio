@@ -91,6 +91,7 @@ function FixedScheduleDetail({
                         isSavingScore={savingScoreGameIds.includes(game.gameId)}
                         scoreFeedback={scoreFeedbackByGameId[game.gameId]}
                         scoreError={scoreErrorByGameId[game.gameId]}
+                        scoreAutoSave
                         scoreSaveLabel="경기 완료"
                         onOpenGameEditor={onOpenGameEditor}
                         onCompleteGame={() => {}}
