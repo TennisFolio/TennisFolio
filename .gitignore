@@ -36,6 +36,9 @@ application.properties
 ### VS Code ###
 .vscode/
 
+### Git Worktrees ###
+.worktrees/
+
 ### Environment Variables ###
 .env
 .env.development
