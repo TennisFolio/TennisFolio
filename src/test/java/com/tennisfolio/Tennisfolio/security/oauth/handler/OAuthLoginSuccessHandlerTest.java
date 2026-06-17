@@ -7,7 +7,6 @@ import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -33,19 +32,19 @@ class OAuthLoginSuccessHandlerTest {
     @Mock
     RefreshTokenService refreshTokenService;
 
-    @InjectMocks
     OAuthLoginSuccessHandler successHandler;
 
     @BeforeEach
     void setUp() {
-        // 프론트엔드 URL 설정 (테스트용)
-        successHandler = new OAuthLoginSuccessHandler(jwtTokenProvider, refreshTokenService, "http://localhost:4173");
+        successHandler = new OAuthLoginSuccessHandler(
+                jwtTokenProvider,
+                refreshTokenService,
+                "http://localhost:4173"
+        );
     }
 
     @Test
-    void 로그인_성공시_토큰발급_저장_응답세팅() throws Exception {
-
-        // given
+    void oauthSuccess_setsAuthCookiesAndRedirects() throws Exception {
         Long userId = 1L;
 
         CustomOAuth2User principal = CustomOAuth2User.builder()
@@ -59,48 +58,49 @@ class OAuthLoginSuccessHandlerTest {
 
         when(jwtTokenProvider.createAccessToken(userId))
                 .thenReturn("access-token");
-
         when(jwtTokenProvider.createRefreshToken(userId))
                 .thenReturn("refresh-token");
 
-
         MockHttpServletResponse response = new MockHttpServletResponse();
 
-        // when
         successHandler.onAuthenticationSuccess(
                 new MockHttpServletRequest(),
                 response,
                 authentication
         );
 
-        // then
-
-        // 1️⃣ 토큰 생성 호출 검증
         verify(jwtTokenProvider).createAccessToken(userId);
         verify(jwtTokenProvider).createRefreshToken(userId);
-
-        // 2️⃣ refresh token 저장 검증
         verify(refreshTokenService)
                 .save(eq(userId), anyString(), eq("refresh-token"));
 
-        // 3️⃣ 헤더 검증
-        assertThat(response.getHeader("Authorization"))
-                .isEqualTo("Bearer access-token");
+        assertThat(response.getHeader("Authorization")).isNull();
 
-        // 4️⃣ 쿠키 검증
         Cookie[] cookies = response.getCookies();
-        assertThat(cookies).hasSize(2);
+        assertThat(cookies).hasSize(3);
+        assertThat(cookie(cookies, "access_token").getValue())
+                .isEqualTo("access-token");
+        assertThat(cookie(cookies, "refresh_token").getValue())
+                .isEqualTo("refresh-token");
+        assertThat(cookie(cookies, "session_id").getValue())
+                .isNotBlank();
 
-        assertThat(Arrays.stream(cookies)
-                .anyMatch(c -> c.getName().equals("refresh_token")))
-                .isTrue();
+        assertThat(cookie(cookies, "access_token").isHttpOnly()).isTrue();
+        assertThat(cookie(cookies, "access_token").getSecure()).isTrue();
+        assertThat(cookie(cookies, "access_token").getPath()).isEqualTo("/");
+        assertThat(cookie(cookies, "access_token").getAttribute("SameSite"))
+                .isEqualTo("Lax");
+        assertThat(cookie(cookies, "refresh_token").getMaxAge())
+                .isEqualTo(60 * 60 * 24 * 14);
 
-        assertThat(Arrays.stream(cookies)
-                .anyMatch(c -> c.getName().equals("session_id")))
-                .isTrue();
-
-        // 5️⃣ 리다이렉트 검증
         assertThat(response.getRedirectedUrl())
                 .isEqualTo("http://localhost:4173");
+    }
+
+    private static Cookie cookie(Cookie[] cookies, String name) {
+        return Arrays.stream(cookies)
+                .filter(cookie -> cookie.getName().equals(name))
+                .findFirst()
+                .orElseThrow();
     }
 }
