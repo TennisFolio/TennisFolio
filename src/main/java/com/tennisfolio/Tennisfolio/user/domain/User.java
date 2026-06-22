@@ -10,5 +10,16 @@ public class User {
     private Long userId;
     private String email;
     private String nickName;
+    private Gender gender;
     private UserStatus status;
+
+    public User updateProfile(String nickName, Gender gender) {
+        return User.builder()
+                .userId(this.userId)
+                .email(this.email)
+                .nickName(nickName)
+                .gender(gender)
+                .status(this.status)
+                .build();
+    }
 }

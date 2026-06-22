@@ -31,9 +31,14 @@ public class SecurityConfig {
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
+                .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/me", "/api/auth/logout").authenticated()
-                        .requestMatchers("/api/auth/reissue", "/api/auth/reIssue").permitAll()
+                        .requestMatchers("/api/auth/me", "/api/auth/profile").authenticated()
+                        .requestMatchers(
+                                "/api/auth/logout",
+                                "/api/auth/reissue",
+                                "/api/auth/reIssue"
+                        ).permitAll()
                         .anyRequest().permitAll()
                 )
                 .oauth2Login(oauth -> oauth

@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import {
   BrowserRouter,
   Navigate,
@@ -23,6 +23,9 @@ import CompetitionResult from './page/CompetitionResult.jsx';
 import Schedule from './page/Schedule.jsx';
 import NotFound from './page/NotFound.jsx';
 import { trackPageView } from './utils/analytics';
+import { getCurrentUser, updateProfile } from './utils/authApi';
+import ProfileSetupSheet from './components/auth/ProfileSetupSheet.jsx';
+import { shouldShowProfileSetup } from './utils/profileSetup.js';
 
 window.global ||= window;
 window.Buffer ||= Buffer;
@@ -54,10 +57,37 @@ function AnalyticsRouteTracker() {
 }
 
 function App() {
+  const [currentUser, setCurrentUser] = useState(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    getCurrentUser()
+      .then((response) => {
+        if (!cancelled) {
+          setCurrentUser(response.data.data);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setCurrentUser(null);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const handleProfileSubmit = async (profile) => {
+    const response = await updateProfile(profile);
+    setCurrentUser(response.data.data);
+  };
+
   return (
     <BrowserRouter>
       <AnalyticsRouteTracker />
-      <Layout>
+      <Layout currentUser={currentUser} onLogout={() => setCurrentUser(null)}>
         <Routes>
           <Route path="/" element={<Competition />} />
           <Route path="/competitions/:publicId" element={<CompetitionDetail />} />
@@ -84,6 +114,9 @@ function App() {
           <Route path="/privacy" element={<Privacy />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
+        {shouldShowProfileSetup(currentUser) && (
+          <ProfileSetupSheet onSubmit={handleProfileSubmit} />
+        )}
       </Layout>
     </BrowserRouter>
   );

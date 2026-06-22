@@ -5,6 +5,7 @@ import com.tennisfolio.Tennisfolio.Tournament.repository.TournamentEntity;
 import com.tennisfolio.Tennisfolio.common.Entity.BaseTimeEntity;
 import com.tennisfolio.Tennisfolio.common.RankingCategory;
 import com.tennisfolio.Tennisfolio.common.UserStatus;
+import com.tennisfolio.Tennisfolio.user.domain.Gender;
 import com.tennisfolio.Tennisfolio.user.domain.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -31,6 +32,9 @@ public class UserEntity extends BaseTimeEntity {
     @Column(name="NICKNAME")
     private String nickName;
     @Enumerated(EnumType.STRING)
+    @Column(name="GENDER")
+    private Gender gender;
+    @Enumerated(EnumType.STRING)
     @Column(name="STATUS")
     private UserStatus status;
 
@@ -40,6 +44,7 @@ public class UserEntity extends BaseTimeEntity {
                 .userId(user.getUserId())
                 .email(user.getEmail())
                 .nickName(user.getNickName())
+                .gender(user.getGender())
                 .status(user.getStatus())
                 .build();
     }
@@ -49,6 +54,7 @@ public class UserEntity extends BaseTimeEntity {
                 .userId(this.userId)
                 .email(this.email)
                 .nickName(this.nickName)
+                .gender(this.gender)
                 .status(this.status)
                 .build();
     }
