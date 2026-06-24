@@ -24,7 +24,7 @@ import java.util.concurrent.Executors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Testcontainers
+@Testcontainers(disabledWithoutDocker = true)
 @SpringBootTest
 @ActiveProfiles("mysql-test")
 public class OAuthLoginServiceTest {

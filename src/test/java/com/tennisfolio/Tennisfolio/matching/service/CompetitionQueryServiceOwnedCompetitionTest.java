@@ -1,5 +1,6 @@
 package com.tennisfolio.Tennisfolio.matching.service;
 
+import com.tennisfolio.Tennisfolio.config.QuerydslConfig;
 import com.tennisfolio.Tennisfolio.matching.dto.CompetitionDetailResponse;
 import com.tennisfolio.Tennisfolio.matching.dto.CompetitionSummaryResponse;
 import com.tennisfolio.Tennisfolio.matching.entity.Competition;
@@ -15,7 +16,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @DataJpaTest
-@Import(CompetitionQueryService.class)
+@Import({CompetitionQueryService.class, QuerydslConfig.class})
 class CompetitionQueryServiceOwnedCompetitionTest {
 
     @Autowired

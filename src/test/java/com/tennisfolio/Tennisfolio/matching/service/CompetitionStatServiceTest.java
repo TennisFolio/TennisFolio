@@ -54,10 +54,10 @@ class CompetitionStatServiceTest {
                 )
         ));
         Map<String, CompetitionEntry> entriesByPlayerName = Map.of(
-                "M1", entry(1L, competition, "민수", CompetitionEntry.Gender.MALE),
-                "M2", entry(2L, competition, "민수", CompetitionEntry.Gender.MALE),
-                "M3", entry(3L, competition, "민수", CompetitionEntry.Gender.MALE),
-                "F1", entry(4L, competition, "민수", CompetitionEntry.Gender.FEMALE)
+                "M1", entry(1L, competition, "誘쇱닔", CompetitionEntry.Gender.MALE),
+                "M2", entry(2L, competition, "誘쇱닔", CompetitionEntry.Gender.MALE),
+                "M3", entry(3L, competition, "誘쇱닔", CompetitionEntry.Gender.MALE),
+                "F1", entry(4L, competition, "誘쇱닔", CompetitionEntry.Gender.FEMALE)
         );
 
         when(competitionStatRepository.save(any(CompetitionStat.class))).thenAnswer(invocation -> invocation.getArgument(0));
