@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 
 import {
+  COMPETITION_CREATE_MODES,
   COMPETITION_FIELD_LIMITS,
   COMPETITION_FIELDS,
   canAllocateSameGenderDoublesOnlyGames,
@@ -10,6 +11,13 @@ import {
   getSameGenderDoublesOnlyUnavailableReason,
   isSameGenderDoublesOnlyUnavailable,
 } from './competitionCreateFormConfig.js';
+
+test('competition create form defaults to fixed schedule mode', () => {
+  assert.equal(
+    INITIAL_COMPETITION_FORM.mode,
+    COMPETITION_CREATE_MODES.FIXED_SCHEDULE
+  );
+});
 
 test('fixed schedule uses totalGames field with default of eight games', () => {
   assert.equal(INITIAL_COMPETITION_FORM.totalGames, 8);

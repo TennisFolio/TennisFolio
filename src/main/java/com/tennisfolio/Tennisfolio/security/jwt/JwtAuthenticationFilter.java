@@ -18,11 +18,27 @@ import static com.tennisfolio.Tennisfolio.util.CookieUtils.getCookie;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
+    private static final String[] ACCESS_TOKEN_FILTER_SKIP_PATHS = {
+            "/api/auth/reissue",
+            "/api/auth/reIssue",
+            "/api/auth/logout"
+    };
 
     private final JwtTokenProvider jwtTokenProvider;
 
     public JwtAuthenticationFilter(JwtTokenProvider jwtTokenProvider) {
         this.jwtTokenProvider = jwtTokenProvider;
+    }
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String requestUri = request.getRequestURI();
+        for (String skipPath : ACCESS_TOKEN_FILTER_SKIP_PATHS) {
+            if (skipPath.equals(requestUri)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

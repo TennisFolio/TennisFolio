@@ -9,6 +9,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -32,5 +33,13 @@ class AuthLogoutServiceTest {
         verify(jwtTokenProvider).validateOrThrow("refresh-token");
         verify(jwtTokenProvider).getUserId("refresh-token");
         verify(refreshTokenService).delete(1L, "session-1");
+    }
+
+    @Test
+    void logout_ignoresMissingRefreshToken() {
+        authLogoutService.logout(null, "session-1");
+
+        verifyNoInteractions(jwtTokenProvider);
+        verifyNoInteractions(refreshTokenService);
     }
 }

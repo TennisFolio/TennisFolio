@@ -1,4 +1,13 @@
 HELP.md
+README*
+SKILL.md
+
+### Codex / Agent Skills ###
+.agents/
+.superpowers/
+skills-lock.json
+docs/superpowers/
+
 .gradle
 build/
 !gradle/wrapper/gradle-wrapper.jar

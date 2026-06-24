@@ -1,15 +1,32 @@
 import { useEffect, useRef, useState } from 'react';
 import './Layout.css';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import logo from './assets/tennisFolio_logo.png';
 import Footer from './Footer.jsx';
 import LoadingMask from './components/common/LoadingMask.jsx';
 import PlayerDetailModal from './components/common/PlayerDetailModal.jsx';
 import { default_oauth_provider } from './constants/urls.js';
+import { clearCompetitionAdminToken } from './utils/competitionEditToken';
 import { loginWithProvider, logout } from './utils/authApi';
+
+function getCurrentCompetitionPublicId(pathname) {
+  const match = pathname.match(/^\/competitions\/([^/]+)/);
+  return match ? decodeURIComponent(match[1]) : '';
+}
+
+function getProfileName(user) {
+  const nickName = user?.nickName?.trim();
+  return nickName || '프로필';
+}
+
+function getProfileInitial(user) {
+  const name = getProfileName(user);
+  return name.slice(0, 1).toUpperCase();
+}
 
 function Layout({ children, currentUser, onLogout }) {
   const navigate = useNavigate();
+  const location = useLocation();
   const [sheetMode, setSheetMode] = useState(null);
   const sheetRef = useRef(null);
 
@@ -29,8 +46,40 @@ function Layout({ children, currentUser, onLogout }) {
     };
   }, [sheetMode]);
 
+  useEffect(() => {
+    if (!currentUser) {
+      return;
+    }
+
+    const redirectAfterLogin =
+      sessionStorage.getItem('tennisfolio:postLoginRedirect') ||
+      localStorage.getItem('tennisfolio:postLoginRedirect');
+    if (
+      !redirectAfterLogin ||
+      !redirectAfterLogin.startsWith('/') ||
+      redirectAfterLogin.startsWith('//')
+    ) {
+      return;
+    }
+
+    sessionStorage.removeItem('tennisfolio:postLoginRedirect');
+    localStorage.removeItem('tennisfolio:postLoginRedirect');
+    navigate(redirectAfterLogin, { replace: true });
+  }, [currentUser, navigate]);
+
   const handleLogout = async () => {
     await logout();
+    const currentCompetitionPublicId = getCurrentCompetitionPublicId(
+      location.pathname
+    );
+    if (currentCompetitionPublicId) {
+      clearCompetitionAdminToken(currentCompetitionPublicId);
+      window.dispatchEvent(
+        new CustomEvent('competition-admin-token-cleared', {
+          detail: { publicId: currentCompetitionPublicId },
+        })
+      );
+    }
     setSheetMode(null);
     onLogout?.();
   };
@@ -52,13 +101,25 @@ function Layout({ children, currentUser, onLogout }) {
 
           <div className="header-actions">
             {currentUser ? (
-              <button
-                type="button"
-                className="auth-button auth-button-account"
-                onClick={() => setSheetMode('account')}
-              >
-                내 계정
-              </button>
+              <>
+                <button
+                  type="button"
+                  className="auth-button header-my-competitions-button"
+                  onClick={() => navigate('/me/competitions')}
+                >
+                  내 경기
+                </button>
+                <button
+                  type="button"
+                  className="auth-button auth-button-account"
+                  aria-label="프로필"
+                  onClick={() => setSheetMode('account')}
+                >
+                  <span className="header-profile-avatar" aria-hidden="true">
+                    {getProfileInitial(currentUser)}
+                  </span>
+                </button>
+              </>
             ) : (
               <button
                 type="button"
@@ -87,7 +148,7 @@ function Layout({ children, currentUser, onLogout }) {
             onClick={(event) => event.stopPropagation()}
           >
             <div className="login-sheet-header">
-              <h2 id="login-sheet-title">내 계정</h2>
+              <h2 id="login-sheet-title">프로필</h2>
               <button
                 type="button"
                 className="login-sheet-close"
@@ -98,10 +159,25 @@ function Layout({ children, currentUser, onLogout }) {
             </div>
 
             <div className="account-sheet-content">
-              <div className="account-email">
-                <span>로그인한 이메일</span>
-                <strong>{currentUser.email}</strong>
+              <div className="account-profile-summary">
+                <div className="account-avatar" aria-hidden="true">
+                  {getProfileInitial(currentUser)}
+                </div>
+                <div className="account-profile-copy">
+                  <strong>{getProfileName(currentUser)}</strong>
+                  <span>{currentUser.email}</span>
+                </div>
               </div>
+              <button
+                type="button"
+                className="account-my-competitions-button"
+                onClick={() => {
+                  setSheetMode(null);
+                  navigate('/me/competitions');
+                }}
+              >
+                내 경기 보기
+              </button>
               <button
                 type="button"
                 className="account-logout-button"

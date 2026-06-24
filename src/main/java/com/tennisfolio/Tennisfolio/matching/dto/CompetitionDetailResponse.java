@@ -25,6 +25,8 @@ public class CompetitionDetailResponse {
     private String status;
     private String mode;
     private Boolean adminPasswordSet;
+    private Boolean ownerUserIdSet;
+    private Boolean ownedByCurrentUser;
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime createdAt;
     private CompetitionStatResponse stat;
@@ -34,6 +36,15 @@ public class CompetitionDetailResponse {
             Competition competition,
             CompetitionStat stat,
             List<GameEntry> gameEntries
+    ) {
+        return from(competition, stat, gameEntries, null);
+    }
+
+    public static CompetitionDetailResponse from(
+            Competition competition,
+            CompetitionStat stat,
+            List<GameEntry> gameEntries,
+            Long currentUserId
     ) {
         Map<Long, List<GameEntry>> gameEntriesByGameId = new LinkedHashMap<>();
 
@@ -54,6 +65,8 @@ public class CompetitionDetailResponse {
                 competition.getStatus().name(),
                 competition.getMode() == null ? Competition.CompetitionMode.FIXED_SCHEDULE.name() : competition.getMode().name(),
                 competition.hasAdminPassword(),
+                competition.getOwnerUserId() != null,
+                currentUserId != null && currentUserId.equals(competition.getOwnerUserId()),
                 competition.getCreateDt(),
                 CompetitionStatResponse.from(stat),
                 gameEntriesByGameId.values().stream()

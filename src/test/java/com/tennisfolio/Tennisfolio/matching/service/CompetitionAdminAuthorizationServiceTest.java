@@ -2,18 +2,23 @@ package com.tennisfolio.Tennisfolio.matching.service;
 
 import com.tennisfolio.Tennisfolio.matching.entity.Competition;
 import com.tennisfolio.Tennisfolio.matching.repository.CompetitionRepository;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
 import java.util.Optional;
 
 import static com.tennisfolio.Tennisfolio.matching.MatchingTestFixtures.clubSessionCompetition;
+import static com.tennisfolio.Tennisfolio.matching.MatchingTestFixtures.ownedCompetition;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -43,11 +48,16 @@ class CompetitionAdminAuthorizationServiceTest {
         );
     }
 
+    @AfterEach
+    void tearDown() {
+        SecurityContextHolder.clearContext();
+    }
+
     @Test
     void setAdminPassword_storesHashAndReturnsToken() {
         Competition competition = clubSessionCompetition(1L, "public-id", null);
         assertFalse(competition.hasAdminPassword());
-        when(competitionRepository.findByPublicId("public-id")).thenReturn(Optional.of(competition));
+        when(competitionRepository.findByPublicIdAndDeletedAtIsNull("public-id")).thenReturn(Optional.of(competition));
         when(tokenService.validateAndGetPublicId("creator-token")).thenReturn("public-id");
         when(tokenService.createToken("public-id")).thenReturn("fresh-token");
 
@@ -62,7 +72,7 @@ class CompetitionAdminAuthorizationServiceTest {
     @Test
     void setAdminPassword_rejectsViewerWithoutAdminToken() {
         Competition competition = clubSessionCompetition(1L, "public-id", null);
-        when(competitionRepository.findByPublicId("public-id")).thenReturn(Optional.of(competition));
+        when(competitionRepository.findByPublicIdAndDeletedAtIsNull("public-id")).thenReturn(Optional.of(competition));
         when(tokenService.validateAndGetPublicId(null))
                 .thenThrow(new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid competition admin token"));
 
@@ -78,7 +88,7 @@ class CompetitionAdminAuthorizationServiceTest {
     @Test
     void setAdminPassword_rejectsInvalidPasswordFormat() {
         Competition competition = clubSessionCompetition(1L, "public-id", null);
-        when(competitionRepository.findByPublicId("public-id")).thenReturn(Optional.of(competition));
+        when(competitionRepository.findByPublicIdAndDeletedAtIsNull("public-id")).thenReturn(Optional.of(competition));
         when(tokenService.validateAndGetPublicId("creator-token")).thenReturn("public-id");
 
         ResponseStatusException exception = assertThrows(
@@ -92,7 +102,7 @@ class CompetitionAdminAuthorizationServiceTest {
     @Test
     void setAdminPassword_rejectsAlreadySetPassword() {
         Competition competition = clubSessionCompetition(1L, "public-id", passwordEncoder.encode("1234"));
-        when(competitionRepository.findByPublicId("public-id")).thenReturn(Optional.of(competition));
+        when(competitionRepository.findByPublicIdAndDeletedAtIsNull("public-id")).thenReturn(Optional.of(competition));
         when(tokenService.validateAndGetPublicId("creator-token")).thenReturn("public-id");
 
         ResponseStatusException exception = assertThrows(
@@ -106,7 +116,7 @@ class CompetitionAdminAuthorizationServiceTest {
     @Test
     void login_returnsTokenWhenPasswordMatches() {
         Competition competition = clubSessionCompetition(1L, "public-id", passwordEncoder.encode("1234"));
-        when(competitionRepository.findByPublicId("public-id")).thenReturn(Optional.of(competition));
+        when(competitionRepository.findByPublicIdAndDeletedAtIsNull("public-id")).thenReturn(Optional.of(competition));
         when(tokenService.createToken("public-id")).thenReturn("admin-token");
 
         assertEquals("admin-token", service.login("public-id", "1234"));
@@ -115,7 +125,7 @@ class CompetitionAdminAuthorizationServiceTest {
     @Test
     void login_rejectsUnsetAdminPassword() {
         Competition competition = clubSessionCompetition(1L, "public-id", null);
-        when(competitionRepository.findByPublicId("public-id")).thenReturn(Optional.of(competition));
+        when(competitionRepository.findByPublicIdAndDeletedAtIsNull("public-id")).thenReturn(Optional.of(competition));
 
         ResponseStatusException exception = assertThrows(
                 ResponseStatusException.class,
@@ -128,7 +138,7 @@ class CompetitionAdminAuthorizationServiceTest {
     @Test
     void login_rejectsWrongPassword() {
         Competition competition = clubSessionCompetition(1L, "public-id", passwordEncoder.encode("1234"));
-        when(competitionRepository.findByPublicId("public-id")).thenReturn(Optional.of(competition));
+        when(competitionRepository.findByPublicIdAndDeletedAtIsNull("public-id")).thenReturn(Optional.of(competition));
 
         ResponseStatusException exception = assertThrows(
                 ResponseStatusException.class,
@@ -136,6 +146,17 @@ class CompetitionAdminAuthorizationServiceTest {
         );
 
         assertEquals(HttpStatus.FORBIDDEN, exception.getStatusCode());
+    }
+
+    @Test
+    void login_rejectsDeletedCompetitionAsNotFound() {
+        when(competitionRepository.findByPublicIdAndDeletedAtIsNull("public-id"))
+                .thenReturn(Optional.empty());
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> service.login("public-id", "1234")
+        );
     }
 
     @Test
@@ -148,5 +169,21 @@ class CompetitionAdminAuthorizationServiceTest {
         );
 
         assertEquals(HttpStatus.FORBIDDEN, exception.getStatusCode());
+    }
+
+    @Test
+    void validateAdminToken_allowsOwnerWithoutAdminToken() {
+        Competition competition = ownedCompetition(
+                1L,
+                "public-id",
+                10L,
+                Competition.CompetitionMode.CLUB_SESSION
+        );
+        when(competitionRepository.findByPublicIdAndDeletedAtIsNull("public-id")).thenReturn(Optional.of(competition));
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken(10L, null, List.of())
+        );
+
+        service.validateAdminToken("public-id", null);
     }
 }

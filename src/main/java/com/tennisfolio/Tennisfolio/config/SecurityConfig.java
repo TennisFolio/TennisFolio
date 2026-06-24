@@ -33,7 +33,13 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/me", "/api/auth/profile").authenticated()
+                        .requestMatchers(
+                                "/api/auth/me",
+                                "/api/auth/profile",
+                                "/api/auth/me/competitions",
+                                "/api/auth/me/competitions/*",
+                                "/api/auth/me/competitions/*/claim"
+                        ).authenticated()
                         .requestMatchers(
                                 "/api/auth/logout",
                                 "/api/auth/reissue",

@@ -1,0 +1,247 @@
+.my-competitions-page {
+  width: min(480px, 100%);
+  margin: 0 auto;
+  padding: 18px 14px 32px;
+}
+
+.my-competitions-header {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 18px;
+  padding: 16px;
+  border: 1px solid var(--competition-border);
+  border-radius: 8px;
+  background: var(--competition-surface);
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.05);
+}
+
+.my-competitions-title-block {
+  min-width: 0;
+}
+
+.my-competitions-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.my-competitions-header h1 {
+  margin: 0;
+  color: var(--competition-text-strong);
+  font-size: 24px;
+  font-weight: 900;
+  line-height: 1.15;
+}
+
+.my-competitions-title-row span {
+  flex: 0 0 auto;
+  padding: 4px 8px;
+  border: 1px solid var(--competition-border-soft);
+  border-radius: 999px;
+  background: var(--competition-surface-soft);
+  color: var(--competition-text-muted);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.my-competitions-header p {
+  margin: 6px 0 0;
+  color: var(--competition-text-muted);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.my-competitions-create-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  height: 40px;
+  padding: 0 14px;
+  border: 1px solid var(--competition-primary);
+  border-radius: 8px;
+  background: var(--competition-primary);
+  color: var(--competition-text-inverse);
+  font-size: 13px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.my-competitions-create-button span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  background: var(--competition-text-inverse);
+  color: var(--competition-primary);
+  font-size: 14px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.my-competitions-create-button:active {
+  transform: translateY(1px);
+}
+
+.my-competitions-state,
+.my-competitions-empty {
+  padding: 18px;
+  border: 1px solid var(--competition-border);
+  border-radius: 8px;
+  background: var(--competition-surface);
+  color: var(--competition-text-body);
+}
+
+.my-competitions-state {
+  margin: 0 0 10px;
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.5;
+}
+
+.my-competitions-state.error {
+  border-color: var(--competition-danger-border);
+  color: var(--competition-danger);
+  background: var(--competition-danger-bg);
+}
+
+.my-competitions-state.success {
+  border-color: var(--competition-ok-border);
+  color: var(--competition-ok);
+  background: var(--competition-ok-bg);
+}
+
+.my-competitions-empty h2 {
+  margin: 0 0 6px;
+  color: var(--competition-text-strong);
+  font-size: 18px;
+  font-weight: 900;
+}
+
+.my-competitions-empty p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.my-competitions-list {
+  display: grid;
+  gap: 10px;
+}
+
+.my-competition-item {
+  display: grid;
+  width: 100%;
+  gap: 10px;
+  padding: 15px;
+  border: 1px solid var(--competition-border);
+  border-radius: 8px;
+  background: var(--competition-surface);
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.05);
+}
+
+.my-competition-open-button {
+  display: grid;
+  width: 100%;
+  gap: 7px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  text-align: left;
+}
+
+.my-competition-open-button:active {
+  transform: translateY(1px);
+}
+
+.my-competition-topline {
+  width: fit-content;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: var(--competition-surface-accent);
+  color: var(--competition-primary-muted);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.my-competition-name {
+  overflow: hidden;
+  color: var(--competition-text-strong);
+  font-size: 17px;
+  font-weight: 900;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.my-competition-created {
+  color: var(--competition-text-muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.my-competition-meta-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.my-competition-stats {
+  display: flex;
+  flex: 1 1 auto;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-width: 0;
+}
+
+.my-competition-stats span {
+  padding: 5px 8px;
+  border: 1px solid var(--competition-border-soft);
+  border-radius: 6px;
+  background: var(--competition-surface-soft);
+  color: var(--competition-text-body);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.my-competition-actions {
+  display: flex;
+  flex: 0 0 auto;
+  justify-content: flex-end;
+}
+
+.my-competition-delete-button {
+  min-width: 64px;
+  height: 32px;
+  padding: 0 10px;
+  border: 1px solid var(--competition-danger-border);
+  border-radius: 6px;
+  background: var(--competition-danger-bg);
+  color: var(--competition-danger);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.my-competition-delete-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.my-competitions-load-more-button {
+  width: 100%;
+  height: 42px;
+  border: 1px solid var(--competition-border-strong);
+  border-radius: 8px;
+  background: var(--competition-surface);
+  color: var(--competition-text-body);
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.my-competitions-load-more-button:active {
+  transform: translateY(1px);
+}

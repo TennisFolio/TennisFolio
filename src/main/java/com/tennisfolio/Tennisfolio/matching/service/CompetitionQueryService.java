@@ -5,6 +5,7 @@ import com.tennisfolio.Tennisfolio.exception.NotFoundException;
 import com.tennisfolio.Tennisfolio.matching.dto.CompetitionDetailResponse;
 import com.tennisfolio.Tennisfolio.matching.dto.CompetitionRankingResponse;
 import com.tennisfolio.Tennisfolio.matching.dto.CompetitionResultResponse;
+import com.tennisfolio.Tennisfolio.matching.dto.CompetitionSummaryResponse;
 import com.tennisfolio.Tennisfolio.matching.entity.Competition;
 import com.tennisfolio.Tennisfolio.matching.entity.CompetitionEntry;
 import com.tennisfolio.Tennisfolio.matching.entity.CompetitionStat;
@@ -46,18 +47,29 @@ public class CompetitionQueryService {
 
     @Transactional(readOnly = true)
     public CompetitionDetailResponse getCompetition(String publicId) {
-        Competition competition = competitionRepository.findByPublicId(publicId)
-                .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND));
+        return getCompetition(publicId, null);
+    }
+
+    @Transactional(readOnly = true)
+    public CompetitionDetailResponse getCompetition(String publicId, Long currentUserId) {
+        Competition competition = findActiveCompetition(publicId);
         CompetitionStat stat = competitionStatRepository.findByCompetitionId(competition.getId()).orElse(null);
         List<GameEntry> gameEntries = gameEntryRepository.findScheduleEntriesByCompetitionId(competition.getId());
 
-        return CompetitionDetailResponse.from(competition, stat, gameEntries);
+        return CompetitionDetailResponse.from(competition, stat, gameEntries, currentUserId);
+    }
+
+    @Transactional(readOnly = true)
+    public List<CompetitionSummaryResponse> getOwnedCompetitions(Long ownerUserId) {
+        return competitionRepository.findByOwnerUserIdOrderByCreateDtDesc(ownerUserId)
+                .stream()
+                .map(CompetitionSummaryResponse::from)
+                .toList();
     }
 
     @Transactional(readOnly = true)
     public CompetitionResultResponse getCompetitionResult(String publicId) {
-        Competition competition = competitionRepository.findByPublicId(publicId)
-                .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND));
+        Competition competition = findActiveCompetition(publicId);
         List<CompetitionEntry> entries = competitionEntryRepository.findByCompetitionId(competition.getId());
         List<GameEntry> gameEntries = gameEntryRepository.findScheduleEntriesByCompetitionId(competition.getId());
         Map<Long, List<GameEntry>> gameEntriesByGameId = groupGameEntriesByGameId(gameEntries);
@@ -75,6 +87,11 @@ public class CompetitionQueryService {
                         toRankings(aggregates, aggregate -> aggregate.entry.getGender() == CompetitionEntry.Gender.FEMALE)
                 )
         );
+    }
+
+    private Competition findActiveCompetition(String publicId) {
+        return competitionRepository.findByPublicIdAndDeletedAtIsNull(publicId)
+                .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND));
     }
 
     private Map<Long, List<GameEntry>> groupGameEntriesByGameId(List<GameEntry> gameEntries) {

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { default_oauth_provider } from '@/constants';
 import CompetitionDetailSummary, {
   COMPETITION_MODES,
 } from '../components/competition/detail/CompetitionDetailSummary';
@@ -8,6 +9,11 @@ import CompetitionEntryEditor from '../components/competition/detail/Competition
 import ClubSessionDetail from '../components/competition/detail/ClubSessionDetail';
 import FixedScheduleDetail from '../components/competition/detail/FixedScheduleDetail';
 import { apiRequest } from '../utils/apiClient';
+import {
+  claimMyCompetition,
+  getCurrentUser,
+  loginWithProvider,
+} from '../utils/authApi';
 import {
   createAdminTokenHeaders,
   getCompetitionAdminToken,
@@ -306,7 +312,14 @@ function CompetitionDetail() {
   const [competitionNameError, setCompetitionNameError] = useState('');
   const [competitionNameSuccess, setCompetitionNameSuccess] = useState('');
   const [shareFeedback, setShareFeedback] = useState('');
-  const [adminToken, setAdminToken] = useState('');
+  const [adminToken, setAdminToken] = useState(() =>
+    getCompetitionAdminToken(publicId)
+  );
+  const [accountClaimMessage, setAccountClaimMessage] = useState('');
+  const [accountClaimError, setAccountClaimError] = useState('');
+  const [isClaimingAccount, setIsClaimingAccount] = useState(false);
+  const [accountUser, setAccountUser] = useState(null);
+  const [isAccountChecked, setIsAccountChecked] = useState(false);
   const [showOnlyUnscoredGames, setShowOnlyUnscoredGames] = useState(false);
   const [adminPasswordModalOpen, setAdminPasswordModalOpen] = useState(false);
   const [adminPasswordMode, setAdminPasswordMode] = useState('login');
@@ -330,7 +343,7 @@ function CompetitionDetail() {
     }, SCORE_AUTOSAVE_DELAY_MS);
   }
 
-  const canManage = Boolean(adminToken);
+  const canManage = Boolean(adminToken) || competition?.ownedByCurrentUser === true;
   const isClubSession = competition?.mode === 'CLUB_SESSION';
   const requiresAdminPasswordBeforeShare =
     canManage && competition?.adminPasswordSet === false;
@@ -359,7 +372,23 @@ function CompetitionDetail() {
         : '배정된 경기를 확인하고 점수를 입력하세요.'
       : '배정된 경기를 확인하고 점수를 입력하세요.';
   const userShareUrl = `${window.location.origin}/competitions/${publicId}`;
-  const requestedView = new URLSearchParams(location.search).get('view');
+  const searchParams = new URLSearchParams(location.search);
+  const requestedView = searchParams.get('view');
+  const claimAfterLogin = searchParams.get('claimAfterLogin') === '1';
+  const canShowAccountClaim =
+    competition?.ownerUserIdSet === false && Boolean(adminToken);
+  const isAccountLoggedIn = Boolean(accountUser);
+  const accountClaimTitle = isAccountLoggedIn
+    ? '이 경기를 내 계정에 저장할 수 있어요.'
+    : '로그인하면 이 경기를 저장할 수 있어요.';
+  const accountClaimDescription = isAccountLoggedIn
+    ? '저장하면 내 경기에서 다시 찾고 관리할 수 있습니다.'
+    : '로그인 후 내 경기에서 다시 찾고 관리할 수 있습니다.';
+  const accountClaimButtonLabel = !isAccountChecked
+    ? '확인 중'
+    : isAccountLoggedIn
+      ? '내 계정에 저장'
+      : '로그인 후 저장';
 
   const rejectWithoutPermission = (setError, setSuccess) => {
     if (canManage) {
@@ -491,6 +520,69 @@ function CompetitionDetail() {
     setAdminToken(getCompetitionAdminToken(publicId));
   }, [publicId]);
 
+  useEffect(() => {
+    let isActive = true;
+
+    getCurrentUser()
+      .then((response) => {
+        if (isActive) {
+          setAccountUser(response.data?.data ?? null);
+        }
+      })
+      .catch(() => {
+        if (isActive) {
+          setAccountUser(null);
+        }
+      })
+      .finally(() => {
+        if (isActive) {
+          setIsAccountChecked(true);
+        }
+      });
+
+    return () => {
+      isActive = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!accountClaimMessage && !accountClaimError) {
+      return undefined;
+    }
+
+    const timerId = setTimeout(() => {
+      setAccountClaimMessage('');
+      setAccountClaimError('');
+    }, 2400);
+
+    return () => {
+      clearTimeout(timerId);
+    };
+  }, [accountClaimMessage, accountClaimError]);
+
+  useEffect(() => {
+    const handleAdminTokenCleared = (event) => {
+      if (event.detail?.publicId === publicId) {
+        setAdminToken('');
+        setCompetition((prev) =>
+          prev ? { ...prev, ownedByCurrentUser: false } : prev
+        );
+      }
+    };
+
+    window.addEventListener(
+      'competition-admin-token-cleared',
+      handleAdminTokenCleared
+    );
+
+    return () => {
+      window.removeEventListener(
+        'competition-admin-token-cleared',
+        handleAdminTokenCleared
+      );
+    };
+  }, [publicId]);
+
   const refreshCompetition = useCallback(
     async ({ showLoading = false } = {}) => {
       if (showLoading) {
@@ -526,6 +618,78 @@ function CompetitionDetail() {
     },
     [publicId, requestedView]
   );
+
+  const removeClaimAfterLoginParam = useCallback(() => {
+    const params = new URLSearchParams(location.search);
+    if (!params.has('claimAfterLogin')) {
+      return;
+    }
+
+    params.delete('claimAfterLogin');
+    const nextSearch = params.toString();
+    navigate(
+      {
+        pathname: location.pathname,
+        search: nextSearch ? `?${nextSearch}` : '',
+      },
+      { replace: true }
+    );
+  }, [location.pathname, location.search, navigate]);
+
+  const claimCompetitionForAccount = useCallback(async () => {
+    if (!adminToken) {
+      setAccountClaimMessage('');
+      setAccountClaimError('관리자 권한이 있어야 내 계정에 저장할 수 있습니다.');
+      removeClaimAfterLoginParam();
+      return;
+    }
+
+    try {
+      setIsClaimingAccount(true);
+      setAccountClaimMessage('');
+      setAccountClaimError('');
+      await claimMyCompetition(publicId, adminToken);
+      setAccountClaimMessage('내 계정에 저장했어요.');
+      await refreshCompetition();
+    } catch (error) {
+      setAccountClaimMessage('');
+      if (error.response?.status === 409) {
+        setAccountClaimError('이미 다른 계정에 저장된 경기입니다.');
+      } else if (error.response?.status === 401) {
+        setAccountClaimError('로그인 후 다시 시도해 주세요.');
+      } else {
+        setAccountClaimError(
+          error.response?.data?.message || '내 계정에 저장하지 못했어요.'
+        );
+      }
+    } finally {
+      setIsClaimingAccount(false);
+      removeClaimAfterLoginParam();
+    }
+  }, [
+    adminToken,
+    publicId,
+    refreshCompetition,
+    removeClaimAfterLoginParam,
+  ]);
+
+  const handleAccountClaimClick = async () => {
+    if (!isAccountChecked) {
+      return;
+    }
+
+    if (!isAccountLoggedIn) {
+      const params = new URLSearchParams(location.search);
+      params.set('claimAfterLogin', '1');
+      const redirectPath = `${location.pathname}?${params.toString()}`;
+      sessionStorage.setItem('tennisfolio:postLoginRedirect', redirectPath);
+      localStorage.setItem('tennisfolio:postLoginRedirect', redirectPath);
+      loginWithProvider(default_oauth_provider);
+      return;
+    }
+
+    await claimCompetitionForAccount();
+  };
 
   useEffect(() => {
     let isActive = true;
@@ -571,6 +735,34 @@ function CompetitionDetail() {
       isActive = false;
     };
   }, [canManage, publicId, refreshCompetition, requestedView]);
+
+  useEffect(() => {
+    if (!claimAfterLogin || !competition || isClaimingAccount) {
+      return;
+    }
+
+    if (!isAccountChecked) {
+      return;
+    }
+
+    if (!isAccountLoggedIn) {
+      setAccountClaimMessage('');
+      setAccountClaimError('로그인 후 다시 시도해 주세요.');
+      removeClaimAfterLoginParam();
+      return;
+    }
+
+    claimCompetitionForAccount();
+  }, [
+    accountUser,
+    claimAfterLogin,
+    competition,
+    isAccountChecked,
+    isClaimingAccount,
+    isAccountLoggedIn,
+    claimCompetitionForAccount,
+    removeClaimAfterLoginParam,
+  ]);
 
   const rounds = useMemo(() => {
     if (!competition?.games?.length) {
@@ -1638,6 +1830,41 @@ function CompetitionDetail() {
           </div>
         </MotionHeader>
       )}
+
+      {!isLoading &&
+        !errorMessage &&
+        competition &&
+        (canShowAccountClaim ||
+          accountClaimMessage ||
+          accountClaimError) && (
+          <section className="competition-account-claim-panel">
+            {canShowAccountClaim && (
+              <div className="competition-account-claim">
+                <div>
+                  <strong>{accountClaimTitle}</strong>
+                  <p>{accountClaimDescription}</p>
+                </div>
+                <button
+                  type="button"
+                  disabled={isClaimingAccount || !isAccountChecked}
+                  onClick={handleAccountClaimClick}
+                >
+                  {isClaimingAccount ? '저장 중' : accountClaimButtonLabel}
+                </button>
+              </div>
+            )}
+            {accountClaimMessage && (
+              <div className="competition-account-claim-message success">
+                {accountClaimMessage}
+              </div>
+            )}
+            {accountClaimError && (
+              <div className="competition-account-claim-message error">
+                {accountClaimError}
+              </div>
+            )}
+          </section>
+        )}
 
       {!isLoading &&
         !errorMessage &&

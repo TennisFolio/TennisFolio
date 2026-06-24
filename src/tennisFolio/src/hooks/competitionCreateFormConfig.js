@@ -33,7 +33,7 @@ export const COMPETITION_FIELDS = [
 ];
 
 export const INITIAL_COMPETITION_FORM = {
-  mode: COMPETITION_CREATE_MODES.CLUB_SESSION,
+  mode: COMPETITION_CREATE_MODES.FIXED_SCHEDULE,
   sameGenderDoublesOnly: false,
   maleCount: 4,
   femaleCount: 4,

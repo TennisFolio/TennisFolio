@@ -19,6 +19,9 @@ public class AuthLogoutService {
     }
 
     public void logout(String refreshToken, String sessionId) {
+        if (refreshToken == null || refreshToken.isBlank()) {
+            return;
+        }
         jwtTokenProvider.validateOrThrow(refreshToken);
         Long userId = jwtTokenProvider.getUserId(refreshToken);
         refreshTokenService.delete(userId, sessionId);

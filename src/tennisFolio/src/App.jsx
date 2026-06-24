@@ -20,6 +20,7 @@ import Privacy from './components/main/Privacy.jsx';
 import Competition from './page/Competition.jsx';
 import CompetitionDetail from './page/CompetitionDetail.jsx';
 import CompetitionResult from './page/CompetitionResult.jsx';
+import MyCompetitions from './page/MyCompetitions.jsx';
 import Schedule from './page/Schedule.jsx';
 import NotFound from './page/NotFound.jsx';
 import { trackPageView } from './utils/analytics';
@@ -90,6 +91,7 @@ function App() {
       <Layout currentUser={currentUser} onLogout={() => setCurrentUser(null)}>
         <Routes>
           <Route path="/" element={<Competition />} />
+          <Route path="/me/competitions" element={<MyCompetitions />} />
           <Route path="/competitions/:publicId" element={<CompetitionDetail />} />
           <Route
             path="/competitions/:publicId/manage"

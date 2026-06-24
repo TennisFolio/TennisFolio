@@ -1,0 +1,46 @@
+:root {
+  --competition-page-bg: #f5f7fa;
+  --competition-surface: #ffffff;
+  --competition-surface-soft: #f8fafc;
+  --competition-surface-subtle: #f9fbfd;
+  --competition-surface-accent: #eef8ff;
+  --competition-surface-accent-hover: #e3f4ff;
+
+  --competition-primary: #0f172a;
+  --competition-primary-hover: #1e293b;
+  --competition-primary-muted: #334155;
+  --competition-primary-disabled: #cbd5e1;
+
+  --competition-text-strong: #0f172a;
+  --competition-text-body: #475569;
+  --competition-text-muted: #64748b;
+  --competition-text-disabled: #94a3b8;
+  --competition-text-inverse: #ffffff;
+
+  --competition-border: #e3e8ef;
+  --competition-border-soft: #e8edf4;
+  --competition-border-muted: #e2e8f0;
+  --competition-border-control: #dce4ef;
+  --competition-border-strong: #cbd5e1;
+
+  --competition-ok: #047857;
+  --competition-ok-strong: #064e3b;
+  --competition-ok-bg: #ecfdf5;
+  --competition-ok-bg-strong: #d8f3e5;
+  --competition-ok-border: #bbf7d0;
+
+  --competition-danger: #be123c;
+  --competition-danger-strong: #881337;
+  --competition-danger-bg: #fff1f2;
+  --competition-danger-bg-strong: #fecdd3;
+  --competition-danger-border: #fecdd3;
+
+  --competition-warning: #9a3412;
+  --competition-warning-bg: #fff7ed;
+  --competition-warning-border: #fed7aa;
+
+  --competition-male: #2563eb;
+  --competition-male-bg: #eff6ff;
+  --competition-female: #db2777;
+  --competition-female-bg: #fdf2f8;
+}

@@ -67,7 +67,7 @@ public class CompetitionGameCommandService {
 
     @Transactional
     public GameResponse createNextCourtGame(String publicId, Integer court, String adminToken) {
-        Competition competition = competitionRepository.findByPublicId(publicId)
+        Competition competition = competitionRepository.findByPublicIdAndDeletedAtIsNull(publicId)
                 .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND));
         competitionAdminAuthorizationService.validateAdminToken(publicId, adminToken);
         validateClubSession(competition);
@@ -107,7 +107,7 @@ public class CompetitionGameCommandService {
             String adminToken,
             GameStatusUpdateRequest request
     ) {
-        Competition competition = competitionRepository.findByPublicId(publicId)
+        Competition competition = competitionRepository.findByPublicIdAndDeletedAtIsNull(publicId)
                 .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND));
         competitionAdminAuthorizationService.validateAdminToken(publicId, adminToken);
         validateClubSession(competition);
@@ -131,7 +131,7 @@ public class CompetitionGameCommandService {
 
     @Transactional
     public void deleteGame(String publicId, Long gameId, String adminToken) {
-        Competition competition = competitionRepository.findByPublicId(publicId)
+        Competition competition = competitionRepository.findByPublicIdAndDeletedAtIsNull(publicId)
                 .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND));
         competitionAdminAuthorizationService.validateAdminToken(publicId, adminToken);
         validateClubSession(competition);
@@ -153,7 +153,7 @@ public class CompetitionGameCommandService {
             String adminToken,
             CourtCountUpdateRequest request
     ) {
-        Competition competition = competitionRepository.findByPublicId(publicId)
+        Competition competition = competitionRepository.findByPublicIdAndDeletedAtIsNull(publicId)
                 .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND));
         competitionAdminAuthorizationService.validateAdminToken(publicId, adminToken);
         validateClubSession(competition);
@@ -173,7 +173,7 @@ public class CompetitionGameCommandService {
             String adminToken,
             GameEntryUpdateRequest request
     ) {
-        Competition competition = competitionRepository.findByPublicId(publicId)
+        Competition competition = competitionRepository.findByPublicIdAndDeletedAtIsNull(publicId)
                 .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND));
         competitionAdminAuthorizationService.validateAdminToken(publicId, adminToken);
 
@@ -217,7 +217,7 @@ public class CompetitionGameCommandService {
             String adminToken,
             GameScoreUpdateRequest request
     ) {
-        Competition competition = competitionRepository.findByPublicId(publicId)
+        Competition competition = competitionRepository.findByPublicIdAndDeletedAtIsNull(publicId)
                 .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND));
         Game game = gameRepository.findByIdAndCompetitionId(gameId, competition.getId())
                 .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND));

@@ -6,7 +6,7 @@ const MATCH_TYPE_LABELS = {
   MIXED: '혼복',
   MALE: '남복',
   FEMALE: '여복',
-  M2F2_SPLIT: '2:2 배정',
+  M2F2_SPLIT: '남2:여2',
   RANDOM_M3F1: '랜덤',
   RANDOM_M1F3: '랜덤',
 };

@@ -27,7 +27,7 @@ public class CompetitionEntryQueryService {
 
     @Transactional(readOnly = true)
     public List<CompetitionEntryResponse> getCompetitionEntries(String publicId) {
-        Competition competition = competitionRepository.findByPublicId(publicId)
+        Competition competition = competitionRepository.findByPublicIdAndDeletedAtIsNull(publicId)
                 .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND));
 
         return competitionEntryRepository.findByCompetitionIdOrderByIdAsc(competition.getId())

@@ -1,6 +1,7 @@
 package com.tennisfolio.Tennisfolio.matching.service;
 
 import com.tennisfolio.Tennisfolio.exception.InvalidRequestException;
+import com.tennisfolio.Tennisfolio.exception.NotFoundException;
 import com.tennisfolio.Tennisfolio.matching.domain.GameMatch;
 import com.tennisfolio.Tennisfolio.matching.domain.GamePlayer;
 import com.tennisfolio.Tennisfolio.matching.domain.MatchType;
@@ -118,7 +119,7 @@ class CompetitionGameCommandServiceTest {
                 new GameEntry(savedGame, entries.get(4), GameEntry.Team.B, 2)
         );
 
-        when(competitionRepository.findByPublicId("public-id")).thenReturn(Optional.of(competition));
+        when(competitionRepository.findByPublicIdAndDeletedAtIsNull("public-id")).thenReturn(Optional.of(competition));
         when(competitionEntryRepository.findByCompetitionIdAndStatus(1L, CompetitionEntry.EntryStatus.ACTIVE))
                 .thenReturn(entries);
         when(gameRepository.findMaxRoundByCompetitionIdAndCourt(1L, 1)).thenReturn(2);
@@ -168,7 +169,7 @@ class CompetitionGameCommandServiceTest {
         );
         Game savedGame = game(20L, competition, 2, 1, Game.MatchType.MIXED);
 
-        when(competitionRepository.findByPublicId("public-id")).thenReturn(Optional.of(competition));
+        when(competitionRepository.findByPublicIdAndDeletedAtIsNull("public-id")).thenReturn(Optional.of(competition));
         when(competitionEntryRepository.findByCompetitionIdAndStatus(1L, CompetitionEntry.EntryStatus.ACTIVE))
                 .thenReturn(entries);
         when(gameRepository.findMaxRoundByCompetitionIdAndCourt(1L, 1)).thenReturn(1);
@@ -194,7 +195,7 @@ class CompetitionGameCommandServiceTest {
         Game game = game(10L, competition, 1, 1, Game.MatchType.MIXED);
         GameStatusUpdateRequest request = gameStatusUpdateRequest("completed");
 
-        when(competitionRepository.findByPublicId("public-id")).thenReturn(Optional.of(competition));
+        when(competitionRepository.findByPublicIdAndDeletedAtIsNull("public-id")).thenReturn(Optional.of(competition));
         when(gameRepository.findByIdAndCompetitionId(10L, 1L)).thenReturn(Optional.of(game));
         when(gameEntryRepository.findByGameId(10L)).thenReturn(List.of());
 
@@ -211,7 +212,7 @@ class CompetitionGameCommandServiceTest {
         Game game = game(10L, competition, 1, 1, Game.MatchType.MIXED);
         GameStatusUpdateRequest request = gameStatusUpdateRequest("completed");
 
-        when(competitionRepository.findByPublicId("public-id")).thenReturn(Optional.of(competition));
+        when(competitionRepository.findByPublicIdAndDeletedAtIsNull("public-id")).thenReturn(Optional.of(competition));
         doThrow(new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid competition admin token"))
                 .when(competitionAdminAuthorizationService)
                 .validateAdminToken("public-id", "bad-token");
@@ -230,7 +231,7 @@ class CompetitionGameCommandServiceTest {
         game.complete();
         GameStatusUpdateRequest request = gameStatusUpdateRequest("completed");
 
-        when(competitionRepository.findByPublicId("public-id")).thenReturn(Optional.of(competition));
+        when(competitionRepository.findByPublicIdAndDeletedAtIsNull("public-id")).thenReturn(Optional.of(competition));
         when(gameRepository.findByIdAndCompetitionId(10L, 1L)).thenReturn(Optional.of(game));
 
         assertThrows(
@@ -244,7 +245,7 @@ class CompetitionGameCommandServiceTest {
         Competition competition = clubSessionCompetition(1L, "public-id", "edit-token");
         Game game = game(10L, competition, 1, 1, Game.MatchType.MIXED);
 
-        when(competitionRepository.findByPublicId("public-id")).thenReturn(Optional.of(competition));
+        when(competitionRepository.findByPublicIdAndDeletedAtIsNull("public-id")).thenReturn(Optional.of(competition));
         when(gameRepository.findByIdAndCompetitionId(10L, 1L)).thenReturn(Optional.of(game));
         when(competitionEntryRepository.findByCompetitionId(1L)).thenReturn(List.of());
         when(gameEntryRepository.findScheduleEntriesByCompetitionId(1L)).thenReturn(List.of());
@@ -268,7 +269,7 @@ class CompetitionGameCommandServiceTest {
         request.setTeamAScore(6);
         request.setTeamBScore(4);
 
-        when(competitionRepository.findByPublicId("public-id")).thenReturn(Optional.of(competition));
+        when(competitionRepository.findByPublicIdAndDeletedAtIsNull("public-id")).thenReturn(Optional.of(competition));
         when(gameRepository.findByIdAndCompetitionId(10L, 1L)).thenReturn(Optional.of(game));
         when(gameEntryRepository.findByGameId(10L)).thenReturn(List.of());
 
@@ -280,11 +281,23 @@ class CompetitionGameCommandServiceTest {
     }
 
     @Test
+    void updateGameScore_rejectsDeletedCompetitionAsNotFound() {
+        GameScoreUpdateRequest request = new GameScoreUpdateRequest();
+        when(competitionRepository.findByPublicIdAndDeletedAtIsNull("public-id"))
+                .thenReturn(Optional.empty());
+
+        assertThrows(
+                NotFoundException.class,
+                () -> service.updateGameScore("public-id", 10L, null, request)
+        );
+    }
+
+    @Test
     void updateCourtCount_allowsClubSessionCountBetweenOneAndTen() {
         Competition competition = clubSessionCompetition(1L, "public-id", "edit-token");
         CourtCountUpdateRequest request = courtCountUpdateRequest(3);
 
-        when(competitionRepository.findByPublicId("public-id")).thenReturn(Optional.of(competition));
+        when(competitionRepository.findByPublicIdAndDeletedAtIsNull("public-id")).thenReturn(Optional.of(competition));
         when(competitionEntryRepository.findByCompetitionId(1L)).thenReturn(List.of());
         when(gameEntryRepository.findScheduleEntriesByCompetitionId(1L)).thenReturn(List.of());
         when(competitionStatRepository.findByCompetitionId(1L)).thenReturn(Optional.empty());
@@ -305,7 +318,7 @@ class CompetitionGameCommandServiceTest {
         Game readyOnCourt3 = game(11L, competition, 1, 3, Game.MatchType.MIXED);
         CourtCountUpdateRequest request = courtCountUpdateRequest(2);
 
-        when(competitionRepository.findByPublicId("public-id")).thenReturn(Optional.of(competition));
+        when(competitionRepository.findByPublicIdAndDeletedAtIsNull("public-id")).thenReturn(Optional.of(competition));
         when(gameRepository.findByCompetitionIdAndStatus(1L, Game.GameStatus.READY))
                 .thenReturn(List.of(readyOnCourt2, readyOnCourt3));
         when(competitionEntryRepository.findByCompetitionId(1L)).thenReturn(List.of());
@@ -330,7 +343,7 @@ class CompetitionGameCommandServiceTest {
         Game readyOnCourt3 = game(12L, competition, 1, 3, Game.MatchType.MIXED);
         CourtCountUpdateRequest request = courtCountUpdateRequest(2);
 
-        when(competitionRepository.findByPublicId("public-id")).thenReturn(Optional.of(competition));
+        when(competitionRepository.findByPublicIdAndDeletedAtIsNull("public-id")).thenReturn(Optional.of(competition));
         when(gameRepository.findByCompetitionIdAndStatus(1L, Game.GameStatus.READY))
                 .thenReturn(List.of(readyOnCourt1, readyOnCourt2, readyOnCourt3));
 
