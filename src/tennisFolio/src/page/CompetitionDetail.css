@@ -86,8 +86,8 @@
   margin-bottom: 12px;
   padding: 18px 18px 16px;
   overflow: hidden;
-  background: #ffffff;
-  border: 1px solid #e3e8ef;
+  background: var(--competition-surface);
+  border: 1px solid var(--competition-border);
   border-radius: 20px;
   box-shadow: 0 12px 30px rgba(15, 23, 42, 0.05);
 }
@@ -110,14 +110,14 @@
   min-height: 24px;
   padding: 0 9px;
   border-radius: 999px;
-  background: #111827;
-  color: #fff;
+  background: var(--competition-primary);
+  color: var(--competition-text-inverse);
   font-size: 11px;
   font-weight: 900;
 }
 
 .competition-detail-hero h1 {
-  color: #0f172a;
+  color: var(--competition-text-strong);
   font-size: 30px;
   font-weight: 900;
   line-height: 1.12;
@@ -131,7 +131,7 @@
 .competition-detail-hero p {
   max-width: 360px;
   margin-top: 8px;
-  color: #475569;
+  color: var(--competition-text-body);
   font-size: 14px;
   font-weight: 700;
   line-height: 1.5;
@@ -149,10 +149,10 @@
   align-items: center;
   min-height: 26px;
   padding: 0 10px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--competition-border-muted);
   border-radius: 999px;
-  background: #ffffff;
-  color: #475569;
+  background: var(--competition-surface);
+  color: var(--competition-text-body);
   font-size: 12px;
   font-weight: 900;
 }
@@ -168,9 +168,9 @@
   gap: 12px;
   margin: 0 0 12px;
   padding: 12px;
-  border: 1px solid #e3e8ef;
+  border: 1px solid var(--competition-border);
   border-radius: 22px;
-  background: #ffffff;
+  background: var(--competition-surface);
   box-shadow: 0 18px 38px rgba(15, 23, 42, 0.07);
 }
 
@@ -188,14 +188,14 @@
 }
 
 .club-session-info-heading span {
-  color: #64748b;
+  color: var(--competition-text-muted);
   font-size: 12px;
   font-weight: 900;
 }
 
 .club-session-info-heading > strong {
   flex-shrink: 0;
-  color: #475569;
+  color: var(--competition-text-body);
   font-size: 12px;
   font-weight: 900;
   line-height: 1.4;
@@ -218,45 +218,45 @@
   min-width: 0;
   height: 48px;
   padding: 0 14px;
-  border: 1px solid #dce4ef;
+  border: 1px solid var(--competition-border-control);
   border-radius: 14px;
-  background: #f9fbfd;
-  color: #0f172a;
+  background: var(--competition-surface-subtle);
+  color: var(--competition-text-strong);
   font-size: 18px;
   font-weight: 900;
   outline: none;
 }
 
 .club-session-name-row input:focus {
-  border-color: #0f172a;
+  border-color: var(--competition-primary);
   box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.08);
 }
 
 .club-session-name-view input {
   width: 100%;
-  color: #475569;
+  color: var(--competition-text-body);
 }
 
 .club-session-name-row button {
   height: 48px;
   border: 0;
   border-radius: 14px;
-  background: #111827;
-  color: #ffffff;
+  background: var(--competition-primary);
+  color: var(--competition-text-inverse);
   font-size: 13px;
   font-weight: 900;
   cursor: pointer;
 }
 
 .club-session-name-row button:disabled {
-  background: #cbd5e1;
-  color: #64748b;
+  background: var(--competition-primary-disabled);
+  color: var(--competition-text-muted);
   cursor: not-allowed;
 }
 
 .club-session-name-view h2 {
   margin: 0;
-  color: #0f172a;
+  color: var(--competition-text-strong);
   font-size: 22px;
   font-weight: 900;
   line-height: 1.25;
@@ -3667,5 +3667,84 @@
 
   .tiebreak-input-row span {
     font-size: 10px;
+  }
+}
+.competition-account-claim-panel {
+  display: grid;
+  gap: 8px;
+  width: 100%;
+}
+
+.competition-account-claim {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid var(--competition-border);
+  border-radius: 8px;
+  background: var(--competition-surface-accent);
+}
+
+.competition-account-claim strong {
+  display: block;
+  color: var(--competition-text-strong);
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.competition-account-claim p {
+  margin: 4px 0 0;
+  color: var(--competition-text-body);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.competition-account-claim button {
+  flex: 0 0 auto;
+  min-width: 104px;
+  height: 36px;
+  border: 1px solid var(--competition-primary);
+  border-radius: 8px;
+  background: var(--competition-primary);
+  color: var(--competition-text-inverse);
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.competition-account-claim button:disabled {
+  border-color: var(--competition-primary-disabled);
+  background: var(--competition-primary-disabled);
+  color: var(--competition-text-muted);
+}
+
+.competition-account-claim-message {
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.competition-account-claim-message.success {
+  border: 1px solid var(--competition-ok-border);
+  background: var(--competition-ok-bg);
+  color: var(--competition-ok);
+}
+
+.competition-account-claim-message.error {
+  border: 1px solid var(--competition-danger-border);
+  background: var(--competition-danger-bg);
+  color: var(--competition-danger);
+}
+
+@media (max-width: 520px) {
+  .competition-account-claim {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .competition-account-claim button {
+    width: 100%;
   }
 }

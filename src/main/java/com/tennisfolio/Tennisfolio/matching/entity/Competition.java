@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -53,9 +54,20 @@ public class Competition extends BaseTimeEntity {
     @Column(name = "IS_MODIFIED", nullable = false)
     private Boolean isModified = false;
 
+    @Column(name = "OWNER_USER_ID")
+    private Long ownerUserId;
+
+    @Column(name = "DEL_DT")
+    private LocalDateTime deletedAt;
+
 
     public Competition(String name, Integer maleCount, Integer femaleCount,
                       Integer courtCount, Integer rounds, Long seed, CompetitionMode mode) {
+        this(name, maleCount, femaleCount, courtCount, rounds, seed, mode, null);
+    }
+
+    public Competition(String name, Integer maleCount, Integer femaleCount,
+                      Integer courtCount, Integer rounds, Long seed, CompetitionMode mode, Long ownerUserId) {
         this.name = name;
         this.maleCount = maleCount;
         this.femaleCount = femaleCount;
@@ -63,6 +75,7 @@ public class Competition extends BaseTimeEntity {
         this.rounds = rounds;
         this.seed = seed;
         this.mode = mode == null ? CompetitionMode.FIXED_SCHEDULE : mode;
+        this.ownerUserId = ownerUserId;
     }
 
     public void rename(String name) {
@@ -87,6 +100,22 @@ public class Competition extends BaseTimeEntity {
 
     public void incrementFemaleCount() {
         this.femaleCount++;
+    }
+
+    public void delete(LocalDateTime deletedAt) {
+        if (this.deletedAt == null) {
+            this.deletedAt = deletedAt;
+        }
+    }
+
+    public void claimOwner(Long ownerUserId) {
+        if (this.ownerUserId == null) {
+            this.ownerUserId = ownerUserId;
+        }
+    }
+
+    public boolean isDeleted() {
+        return deletedAt != null;
     }
 
 

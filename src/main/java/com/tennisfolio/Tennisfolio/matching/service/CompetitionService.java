@@ -23,6 +23,15 @@ public class CompetitionService {
     }
 
     public Competition createCompetition(CompetitionCreateRequest request, int rounds, long seed) {
+        return createCompetition(request, rounds, seed, null);
+    }
+
+    public Competition createCompetition(
+            CompetitionCreateRequest request,
+            int rounds,
+            long seed,
+            Long ownerUserId
+    ) {
         Competition.CompetitionMode mode = resolveMode(request.getMode());
         return competitionRepository.save(new Competition(
                 request.getCompetitionName(),
@@ -31,7 +40,8 @@ public class CompetitionService {
                 request.getCourtCount(),
                 rounds,
                 seed,
-                mode
+                mode,
+                ownerUserId
         ));
     }
 
@@ -43,7 +53,7 @@ public class CompetitionService {
     }
 
     public Competition findEditableCompetition(String publicId, String adminToken) {
-        Competition competition = competitionRepository.findByPublicId(publicId)
+        Competition competition = competitionRepository.findByPublicIdAndDeletedAtIsNull(publicId)
                 .orElseThrow(() -> new IllegalArgumentException("Competition not found"));
         competitionAdminAuthorizationService.validateAdminToken(publicId, adminToken);
         return competition;

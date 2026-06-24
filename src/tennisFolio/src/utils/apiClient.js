@@ -25,6 +25,7 @@ const isMSWActiveForLiveEvents = (url) => {
 const apiClient = axios.create({
   baseURL: '', // 동적으로 설정
   timeout: 20000,
+  withCredentials: true,
 });
 
 // 요청 인터셉터 - 로딩 시작 및 동적 baseURL 설정
@@ -65,9 +66,31 @@ apiClient.interceptors.response.use(
     }
     return response;
   },
-  (error) => {
+  async (error) => {
     if (error.config?.showLoading !== false) {
       store.dispatch(hideLoading());
+    }
+    const originalRequest = error.config;
+    const status = error.response?.status;
+    const url = originalRequest?.url || '';
+    const isAuthRetryEndpoint =
+      url.includes('/api/auth/reissue') || url.includes('/api/auth/reIssue');
+    const isLogoutEndpoint = url.includes('/api/auth/logout');
+
+    if (
+      status === 401 &&
+      originalRequest &&
+      !originalRequest._authRetry &&
+      !isAuthRetryEndpoint &&
+      !isLogoutEndpoint
+    ) {
+      originalRequest._authRetry = true;
+      try {
+        await apiClient.post('/api/auth/reissue', {}, { showLoading: false });
+        return apiClient(originalRequest);
+      } catch (reissueError) {
+        return Promise.reject(reissueError);
+      }
     }
     return Promise.reject(error);
   }

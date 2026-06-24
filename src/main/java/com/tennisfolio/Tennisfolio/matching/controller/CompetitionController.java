@@ -27,6 +27,7 @@ import com.tennisfolio.Tennisfolio.matching.service.CompetitionGameCommandServic
 import com.tennisfolio.Tennisfolio.matching.service.CompetitionQueryService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -68,17 +69,25 @@ public class CompetitionController {
 
     @PostMapping("/competitions")
     public ResponseEntity<ResponseDTO<CompetitionCreateResponse>> createCompetition(
+            Authentication authentication,
             @RequestBody CompetitionCreateRequest request
     ) {
-        CompetitionCreateResponse response = competitionCommandService.createCompetition(request);
+        CompetitionCreateResponse response = competitionCommandService.createCompetition(
+                request,
+                resolveAuthenticatedUserId(authentication)
+        );
         return new ResponseEntity<>(ResponseDTO.success(response), HttpStatus.OK);
     }
 
     @GetMapping("/competitions/{publicId}")
     public ResponseEntity<ResponseDTO<CompetitionDetailResponse>> getCompetition(
+            Authentication authentication,
             @PathVariable String publicId
     ) {
-        CompetitionDetailResponse response = competitionQueryService.getCompetition(publicId);
+        CompetitionDetailResponse response = competitionQueryService.getCompetition(
+                publicId,
+                resolveAuthenticatedUserId(authentication)
+        );
         return new ResponseEntity<>(ResponseDTO.success(response), HttpStatus.OK);
     }
 
@@ -233,5 +242,18 @@ public class CompetitionController {
     ) {
         GameResponse response = competitionGameCommandService.updateGameScore(publicId, gameId, adminToken, request);
         return new ResponseEntity<>(ResponseDTO.success(response), HttpStatus.OK);
+    }
+
+    private Long resolveAuthenticatedUserId(Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return null;
+        }
+
+        Object principal = authentication.getPrincipal();
+        if (principal instanceof Long userId) {
+            return userId;
+        }
+
+        return null;
     }
 }

@@ -5,6 +5,7 @@ import store from './store/store';
 import { HelmetProvider } from 'react-helmet-async';
 import './reset.css';
 import './tailwind.css';
+import './styles/competition-theme.css';
 
 // MSW 초기화 (개발 모드에서만)
 async function initApp() {

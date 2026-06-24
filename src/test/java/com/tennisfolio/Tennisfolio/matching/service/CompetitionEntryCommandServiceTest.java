@@ -1,6 +1,7 @@
 package com.tennisfolio.Tennisfolio.matching.service;
 
 import com.tennisfolio.Tennisfolio.exception.InvalidRequestException;
+import com.tennisfolio.Tennisfolio.exception.NotFoundException;
 import com.tennisfolio.Tennisfolio.matching.dto.CompetitionCreateRequest;
 import com.tennisfolio.Tennisfolio.matching.dto.CompetitionEntryCreateRequest;
 import com.tennisfolio.Tennisfolio.matching.dto.CompetitionEntryResponse;
@@ -62,8 +63,8 @@ class CompetitionEntryCommandServiceTest {
     void createCompetitionEntries_usesProvidedPlayerNames() {
         Competition competition = clubSessionCompetition(1L, "public-id", null);
         CompetitionCreateRequest request = createCompetitionRequest(
-                List.of("민수", " M2 ", "준호"),
-                List.of("지연", "F2", "수진")
+                List.of("민수", " M2 ", "준??),
+                List.of("지??, "F2", "?�진")
         );
 
         when(competitionEntryRepository.saveAll(any())).thenAnswer(invocation -> {
@@ -82,10 +83,10 @@ class CompetitionEntryCommandServiceTest {
 
         assertEquals("민수", entries.get(0).getPlayerName());
         assertEquals("M2", entries.get(1).getPlayerName());
-        assertEquals("준호", entries.get(2).getPlayerName());
-        assertEquals("지연", entries.get(3).getPlayerName());
+        assertEquals("준??, entries.get(2).getPlayerName());
+        assertEquals("지??, entries.get(3).getPlayerName());
         assertEquals("F2", entries.get(4).getPlayerName());
-        assertEquals("수진", entries.get(5).getPlayerName());
+        assertEquals("?�진", entries.get(5).getPlayerName());
     }
 
     @Test
@@ -93,7 +94,7 @@ class CompetitionEntryCommandServiceTest {
         Competition competition = clubSessionCompetition(1L, "public-id", null);
         CompetitionCreateRequest request = createCompetitionRequest(
                 List.of("민수", " ", ""),
-                List.of("지연")
+                List.of("지??)
         );
 
         when(competitionEntryRepository.saveAll(any())).thenAnswer(invocation -> {
@@ -113,7 +114,7 @@ class CompetitionEntryCommandServiceTest {
         assertEquals("민수", entries.get(0).getPlayerName());
         assertEquals("M2", entries.get(1).getPlayerName());
         assertEquals("M3", entries.get(2).getPlayerName());
-        assertEquals("지연", entries.get(3).getPlayerName());
+        assertEquals("지??, entries.get(3).getPlayerName());
         assertEquals("F2", entries.get(4).getPlayerName());
         assertEquals("F3", entries.get(5).getPlayerName());
     }
@@ -209,7 +210,7 @@ class CompetitionEntryCommandServiceTest {
         Competition competition = clubSessionCompetition(1L, "public-id", null);
         CompetitionEntryCreateRequest request = createEntryRequest(" Newbie ", "male");
 
-        when(competitionRepository.findByPublicId("public-id")).thenReturn(Optional.of(competition));
+        when(competitionRepository.findByPublicIdAndDeletedAtIsNull("public-id")).thenReturn(Optional.of(competition));
         when(competitionEntryRepository.save(any(CompetitionEntry.class))).thenAnswer(invocation -> {
             CompetitionEntry entry = invocation.getArgument(0);
             return entry(10L, entry.getCompetition(), entry.getPlayerName(), entry.getGender());
@@ -235,7 +236,7 @@ class CompetitionEntryCommandServiceTest {
         Competition competition = fixedScheduleCompetition(1L, "public-id", null);
         CompetitionEntryCreateRequest request = createEntryRequest("Player", "MALE");
 
-        when(competitionRepository.findByPublicId("public-id")).thenReturn(Optional.of(competition));
+        when(competitionRepository.findByPublicIdAndDeletedAtIsNull("public-id")).thenReturn(Optional.of(competition));
 
         assertThrows(
                 InvalidRequestException.class,
@@ -249,7 +250,7 @@ class CompetitionEntryCommandServiceTest {
         Competition competition = clubSessionCompetition(1L, "public-id", null);
         CompetitionEntryCreateRequest request = createEntryRequest("Player", "MALE");
 
-        when(competitionRepository.findByPublicId("public-id")).thenReturn(Optional.of(competition));
+        when(competitionRepository.findByPublicIdAndDeletedAtIsNull("public-id")).thenReturn(Optional.of(competition));
         doThrow(new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid competition admin token"))
                 .when(competitionAdminAuthorizationService)
                 .validateAdminToken("public-id", "bad-token");
@@ -261,13 +262,26 @@ class CompetitionEntryCommandServiceTest {
         verify(competitionEntryRepository, never()).save(any());
     }
 
+
+    @Test
+    void createCompetitionEntry_rejectsDeletedCompetitionAsNotFound() {
+        CompetitionEntryCreateRequest request = createEntryRequest("Player", "MALE");
+        when(competitionRepository.findByPublicIdAndDeletedAtIsNull("public-id"))
+                .thenReturn(Optional.empty());
+
+        assertThrows(
+                NotFoundException.class,
+                () -> service.createCompetitionEntry("public-id", "admin-token", request)
+        );
+        verify(competitionEntryRepository, never()).save(any());
+    }
     @Test
     void updateCompetitionEntry_allowsPartialNameGenderAndStatusChanges() {
         Competition competition = clubSessionCompetition(1L, "public-id", null);
         CompetitionEntry entry = entry(10L, competition, "Old", CompetitionEntry.Gender.MALE);
         CompetitionEntryUpdateRequest request = updateEntryRequest(" New ", "female", "inactive");
 
-        when(competitionRepository.findByPublicId("public-id")).thenReturn(Optional.of(competition));
+        when(competitionRepository.findByPublicIdAndDeletedAtIsNull("public-id")).thenReturn(Optional.of(competition));
         when(competitionEntryRepository.findByIdAndCompetitionId(10L, 1L)).thenReturn(Optional.of(entry));
         CompetitionEntryResponse response = service.updateCompetitionEntry("public-id", 10L, "admin-token", request);
 
@@ -285,7 +299,7 @@ class CompetitionEntryCommandServiceTest {
         CompetitionEntry entry = entry(10L, competition, "Player", CompetitionEntry.Gender.MALE);
         CompetitionEntryUpdateRequest request = updateEntryRequest(null, null, "INACTIVE");
 
-        when(competitionRepository.findByPublicId("public-id")).thenReturn(Optional.of(competition));
+        when(competitionRepository.findByPublicIdAndDeletedAtIsNull("public-id")).thenReturn(Optional.of(competition));
         when(competitionEntryRepository.findByIdAndCompetitionId(10L, 1L)).thenReturn(Optional.of(entry));
 
         CompetitionEntryResponse response = service.updateCompetitionEntry("public-id", 10L, "admin-token", request);

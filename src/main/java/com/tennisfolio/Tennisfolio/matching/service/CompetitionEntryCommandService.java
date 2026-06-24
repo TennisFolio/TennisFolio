@@ -81,7 +81,7 @@ public class CompetitionEntryCommandService {
             String adminToken,
             CompetitionEntryCreateRequest request
     ) {
-        Competition competition = competitionRepository.findByPublicId(publicId)
+        Competition competition = competitionRepository.findByPublicIdAndDeletedAtIsNull(publicId)
                 .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND));
         competitionAdminAuthorizationService.validateAdminToken(publicId, adminToken);
         validateClubSession(competition);
@@ -110,7 +110,7 @@ public class CompetitionEntryCommandService {
             throw new InvalidRequestException(ExceptionCode.INVALID_REQUEST);
         }
 
-        Competition competition = competitionRepository.findByPublicId(publicId)
+        Competition competition = competitionRepository.findByPublicIdAndDeletedAtIsNull(publicId)
                 .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND));
         competitionAdminAuthorizationService.validateAdminToken(publicId, adminToken);
         CompetitionEntry entry = competitionEntryRepository

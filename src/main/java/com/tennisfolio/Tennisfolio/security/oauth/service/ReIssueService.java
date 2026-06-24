@@ -1,7 +1,7 @@
 package com.tennisfolio.Tennisfolio.security.oauth.service;
 
 import com.tennisfolio.Tennisfolio.security.jwt.JwtTokenProvider;
-import jakarta.servlet.http.HttpServletResponse;
+import com.tennisfolio.Tennisfolio.security.oauth.dto.ReissuedToken;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -14,7 +14,7 @@ public class ReIssueService {
         this.refreshTokenService = refreshTokenService;
     }
 
-    public String reIssue(
+    public ReissuedToken reIssue(
             String refreshToken,
             String sessionId
     ){
@@ -35,7 +35,8 @@ public class ReIssueService {
                 newRefreshToken
         );
 
-        return jwtTokenProvider.createAccessToken(userId);
+        String newAccessToken = jwtTokenProvider.createAccessToken(userId);
+        return new ReissuedToken(newAccessToken, newRefreshToken);
 
     }
 }

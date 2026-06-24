@@ -140,7 +140,7 @@ function CompetitionDetailSummary({
               <strong>{stat.mixedCount ?? 0}</strong>
             </div>
             <div className="type-mixed">
-              <span>2:2 배정</span>
+              <span>남2:여2</span>
               <strong>{stat.m2f2SplitCount ?? 0}</strong>
             </div>
             <div className="type-random">

@@ -3,6 +3,8 @@ package com.tennisfolio.Tennisfolio.matching.service;
 import com.tennisfolio.Tennisfolio.matching.entity.Competition;
 import com.tennisfolio.Tennisfolio.matching.repository.CompetitionRepository;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -53,10 +55,39 @@ public class CompetitionAdminAuthorizationService {
     }
 
     public void validateAdminToken(String publicId, String adminToken) {
+        if (isCurrentUserOwner(publicId)) {
+            return;
+        }
+
         String tokenPublicId = tokenService.validateAndGetPublicId(adminToken);
         if (!publicId.equals(tokenPublicId)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "관리자 권한이 올바르지 않습니다. 다시 로그인해 주세요.");
         }
+    }
+
+    private boolean isCurrentUserOwner(String publicId) {
+        Long currentUserId = getCurrentUserId();
+        if (currentUserId == null) {
+            return false;
+        }
+
+        return competitionRepository.findByPublicIdAndDeletedAtIsNull(publicId)
+                .map(competition -> currentUserId.equals(competition.getOwnerUserId()))
+                .orElse(false);
+    }
+
+    private Long getCurrentUserId() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return null;
+        }
+
+        Object principal = authentication.getPrincipal();
+        if (principal instanceof Long userId) {
+            return userId;
+        }
+
+        return null;
     }
 
     private void validatePasswordFormat(String password) {
@@ -66,7 +97,7 @@ public class CompetitionAdminAuthorizationService {
     }
 
     private Competition findCompetition(String publicId) {
-        return competitionRepository.findByPublicId(publicId)
+        return competitionRepository.findByPublicIdAndDeletedAtIsNull(publicId)
                 .orElseThrow(() -> new IllegalArgumentException("Competition not found"));
     }
 }

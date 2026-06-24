@@ -1,5 +1,7 @@
 package com.tennisfolio.Tennisfolio.matching.service;
 
+import com.tennisfolio.Tennisfolio.common.ExceptionCode;
+import com.tennisfolio.Tennisfolio.exception.NotFoundException;
 import com.tennisfolio.Tennisfolio.matching.domain.MatchType;
 import com.tennisfolio.Tennisfolio.matching.domain.ScheduleResult;
 import com.tennisfolio.Tennisfolio.matching.dto.CompetitionCreateRequest;
@@ -8,12 +10,14 @@ import com.tennisfolio.Tennisfolio.matching.dto.CompetitionUpdateRequest;
 import com.tennisfolio.Tennisfolio.matching.dto.CompetitionUpdateResponse;
 import com.tennisfolio.Tennisfolio.matching.entity.Competition;
 import com.tennisfolio.Tennisfolio.matching.entity.CompetitionEntry;
+import com.tennisfolio.Tennisfolio.matching.repository.CompetitionRepository;
 import com.tennisfolio.Tennisfolio.matching.service.fixed.SameGenderScheduleTargetCalculator;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDateTime;
 import java.util.EnumSet;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
@@ -34,6 +38,7 @@ public class CompetitionCommandService {
     private final GameService gameService;
     private final CompetitionStatService competitionStatService;
     private final CompetitionAdminTokenService competitionAdminTokenService;
+    private final CompetitionRepository competitionRepository;
     private final SameGenderScheduleTargetCalculator sameGenderTargetCalculator = new SameGenderScheduleTargetCalculator();
 
     public CompetitionCommandService(
@@ -42,7 +47,8 @@ public class CompetitionCommandService {
             CompetitionEntryCommandService competitionEntryCommandService,
             GameService gameService,
             CompetitionStatService competitionStatService,
-            CompetitionAdminTokenService competitionAdminTokenService
+            CompetitionAdminTokenService competitionAdminTokenService,
+            CompetitionRepository competitionRepository
     ) {
         this.scheduler = scheduler;
         this.competitionService = competitionService;
@@ -50,10 +56,24 @@ public class CompetitionCommandService {
         this.gameService = gameService;
         this.competitionStatService = competitionStatService;
         this.competitionAdminTokenService = competitionAdminTokenService;
+        this.competitionRepository = competitionRepository;
     }
 
     @Transactional
     public CompetitionCreateResponse createCompetition(CompetitionCreateRequest request) {
+        return createCompetition(request, null, false);
+    }
+
+    @Transactional
+    public CompetitionCreateResponse createCompetition(CompetitionCreateRequest request, Long ownerUserId) {
+        return createCompetition(request, ownerUserId, true);
+    }
+
+    private CompetitionCreateResponse createCompetition(
+            CompetitionCreateRequest request,
+            Long ownerUserId,
+            boolean ownerResolved
+    ) {
         Competition.CompetitionMode mode = resolveMode(request.getMode());
         validateRequest(request, mode);
 
@@ -64,7 +84,9 @@ public class CompetitionCommandService {
                 ? request.getSeed()
                 : ThreadLocalRandom.current().nextLong(1, 10000);
 
-        Competition competition = competitionService.createCompetition(request, rounds, seed);
+        Competition competition = ownerResolved
+                ? competitionService.createCompetition(request, rounds, seed, ownerUserId)
+                : competitionService.createCompetition(request, rounds, seed);
 
         int scheduleGames = mode == Competition.CompetitionMode.CLUB_SESSION ? rounds : request.getTotalGames();
         ScheduleResult result = generateSchedule(request, mode, scheduleGames, seed);
@@ -111,6 +133,42 @@ public class CompetitionCommandService {
     ) {
         Competition competition = competitionService.updateCompetitionName(publicId, request.getName(), adminToken);
         return CompetitionUpdateResponse.from(competition);
+    }
+
+    @Transactional
+    public void deleteOwnedCompetition(String publicId, Long ownerUserId) {
+        Competition competition = competitionRepository
+                .findByPublicIdAndOwnerUserId(publicId, ownerUserId)
+                .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND));
+        competition.delete(LocalDateTime.now());
+    }
+
+    @Transactional
+    public void claimCompetition(String publicId, Long ownerUserId, String adminToken) {
+        Competition competition = competitionRepository
+                .findByPublicIdAndDeletedAtIsNull(publicId)
+                .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND));
+
+        if (ownerUserId.equals(competition.getOwnerUserId())) {
+            return;
+        }
+
+        String tokenPublicId = competitionAdminTokenService.validateAndGetPublicId(adminToken);
+        if (!publicId.equals(tokenPublicId)) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "관리자 권한이 올바르지 않습니다. 다시 로그인해 주세요."
+            );
+        }
+
+        if (competition.getOwnerUserId() != null) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "이미 다른 계정에 저장된 경기입니다."
+            );
+        }
+
+        competition.claimOwner(ownerUserId);
     }
 
     private void validateRequest(CompetitionCreateRequest request, Competition.CompetitionMode mode) {

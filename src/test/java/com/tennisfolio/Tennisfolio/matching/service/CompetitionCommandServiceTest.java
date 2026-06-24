@@ -6,6 +6,7 @@ import com.tennisfolio.Tennisfolio.matching.dto.CompetitionCreateRequest;
 import com.tennisfolio.Tennisfolio.matching.dto.CompetitionCreateResponse;
 import com.tennisfolio.Tennisfolio.matching.entity.Competition;
 import com.tennisfolio.Tennisfolio.matching.entity.CompetitionEntry;
+import com.tennisfolio.Tennisfolio.matching.repository.CompetitionRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -46,6 +47,9 @@ class CompetitionCommandServiceTest {
     @Mock
     private CompetitionAdminTokenService competitionAdminTokenService;
 
+    @Mock
+    private CompetitionRepository competitionRepository;
+
     private CompetitionCommandService service;
 
     @BeforeEach
@@ -56,7 +60,8 @@ class CompetitionCommandServiceTest {
                 competitionEntryCommandService,
                 gameService,
                 competitionStatService,
-                competitionAdminTokenService
+                competitionAdminTokenService,
+                competitionRepository
         );
     }
 
@@ -89,6 +94,34 @@ class CompetitionCommandServiceTest {
         verify(competitionEntryCommandService).createCompetitionEntries(competition, request);
         verify(gameService).saveSchedule(competition, scheduleResult, entriesByPlayerName);
         verify(competitionStatService).createCompetitionStat(competition, scheduleResult, entriesByPlayerName);
+    }
+
+    @Test
+    void createCompetition_passesOwnerUserIdWhenAuthenticated() {
+        CompetitionCreateRequest request = new CompetitionCreateRequest(
+                "CLUB_SESSION",
+                "Club",
+                4,
+                4,
+                2,
+                1,
+                136L,
+                null,
+                null
+        );
+        Competition competition = clubSessionCompetition(1L, "public-id", null);
+        ScheduleResult scheduleResult = new ScheduleResult();
+        Map<String, CompetitionEntry> entriesByPlayerName = Map.of();
+
+        when(competitionService.createCompetition(request, 1, 136L, 10L)).thenReturn(competition);
+        when(scheduler.generateSchedule(4, 4, 2, 1, 136L)).thenReturn(scheduleResult);
+        when(competitionEntryCommandService.createCompetitionEntries(competition, request)).thenReturn(entriesByPlayerName);
+        when(competitionAdminTokenService.createToken("public-id")).thenReturn("creator-token");
+
+        CompetitionCreateResponse response = service.createCompetition(request, 10L);
+
+        assertEquals("public-id", response.getPublicId());
+        verify(competitionService).createCompetition(request, 1, 136L, 10L);
     }
 
     @Test

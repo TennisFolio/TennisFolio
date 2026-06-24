@@ -41,6 +41,28 @@ public final class MatchingTestFixtures {
         return competition;
     }
 
+    public static Competition ownedCompetition(
+            Long id,
+            String publicId,
+            Long ownerUserId,
+            Competition.CompetitionMode mode
+    ) {
+        Competition competition = competition(id, publicId, null, mode);
+        ReflectionTestUtils.setField(competition, "ownerUserId", ownerUserId);
+        return competition;
+    }
+
+    public static Competition deletedOwnedCompetition(
+            Long id,
+            String publicId,
+            Long ownerUserId,
+            Competition.CompetitionMode mode
+    ) {
+        Competition competition = ownedCompetition(id, publicId, ownerUserId, mode);
+        competition.delete(java.time.LocalDateTime.of(2026, 6, 23, 12, 0));
+        return competition;
+    }
+
     public static CompetitionEntry entry(
             Long id,
             Competition competition,
