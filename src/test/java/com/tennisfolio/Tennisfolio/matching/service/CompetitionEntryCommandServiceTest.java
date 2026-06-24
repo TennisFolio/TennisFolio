@@ -63,8 +63,8 @@ class CompetitionEntryCommandServiceTest {
     void createCompetitionEntries_usesProvidedPlayerNames() {
         Competition competition = clubSessionCompetition(1L, "public-id", null);
         CompetitionCreateRequest request = createCompetitionRequest(
-                List.of("민수", " M2 ", "준??),
-                List.of("지??, "F2", "?�진")
+                List.of("민수", " M2 ", "준성"),
+                List.of("지민", "F2", "재진")
         );
 
         when(competitionEntryRepository.saveAll(any())).thenAnswer(invocation -> {
@@ -83,10 +83,10 @@ class CompetitionEntryCommandServiceTest {
 
         assertEquals("민수", entries.get(0).getPlayerName());
         assertEquals("M2", entries.get(1).getPlayerName());
-        assertEquals("준??, entries.get(2).getPlayerName());
-        assertEquals("지??, entries.get(3).getPlayerName());
+        assertEquals("준성", entries.get(2).getPlayerName());
+        assertEquals("지민", entries.get(3).getPlayerName());
         assertEquals("F2", entries.get(4).getPlayerName());
-        assertEquals("?�진", entries.get(5).getPlayerName());
+        assertEquals("재진", entries.get(5).getPlayerName());
     }
 
     @Test
@@ -94,7 +94,7 @@ class CompetitionEntryCommandServiceTest {
         Competition competition = clubSessionCompetition(1L, "public-id", null);
         CompetitionCreateRequest request = createCompetitionRequest(
                 List.of("민수", " ", ""),
-                List.of("지??)
+                List.of("지민")
         );
 
         when(competitionEntryRepository.saveAll(any())).thenAnswer(invocation -> {
@@ -114,7 +114,7 @@ class CompetitionEntryCommandServiceTest {
         assertEquals("민수", entries.get(0).getPlayerName());
         assertEquals("M2", entries.get(1).getPlayerName());
         assertEquals("M3", entries.get(2).getPlayerName());
-        assertEquals("지??, entries.get(3).getPlayerName());
+        assertEquals("지민", entries.get(3).getPlayerName());
         assertEquals("F2", entries.get(4).getPlayerName());
         assertEquals("F3", entries.get(5).getPlayerName());
     }
@@ -150,7 +150,7 @@ class CompetitionEntryCommandServiceTest {
     void createCompetitionEntries_allowsDuplicateNames() {
         Competition competition = clubSessionCompetition(1L, "public-id", null);
         CompetitionCreateRequest request = createCompetitionRequest(
-                List.of("민수", "민수", "민수"),
+                List.of("誘쇱닔", "誘쇱닔", "誘쇱닔"),
                 null
         );
 
@@ -168,9 +168,9 @@ class CompetitionEntryCommandServiceTest {
         List<CompetitionEntry> entries = new ArrayList<>();
         entriesCaptor.getValue().forEach(entries::add);
 
-        assertEquals("민수", entries.get(0).getPlayerName());
-        assertEquals("민수", entries.get(1).getPlayerName());
-        assertEquals("민수", entries.get(2).getPlayerName());
+        assertEquals("誘쇱닔", entries.get(0).getPlayerName());
+        assertEquals("誘쇱닔", entries.get(1).getPlayerName());
+        assertEquals("誘쇱닔", entries.get(2).getPlayerName());
     }
 
     @Test
@@ -262,7 +262,6 @@ class CompetitionEntryCommandServiceTest {
         verify(competitionEntryRepository, never()).save(any());
     }
 
-
     @Test
     void createCompetitionEntry_rejectsDeletedCompetitionAsNotFound() {
         CompetitionEntryCreateRequest request = createEntryRequest("Player", "MALE");
@@ -275,6 +274,7 @@ class CompetitionEntryCommandServiceTest {
         );
         verify(competitionEntryRepository, never()).save(any());
     }
+
     @Test
     void updateCompetitionEntry_allowsPartialNameGenderAndStatusChanges() {
         Competition competition = clubSessionCompetition(1L, "public-id", null);

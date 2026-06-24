@@ -1,6 +1,8 @@
 package com.tennisfolio.Tennisfolio.config;
 
 import com.tennisfolio.Tennisfolio.common.monitoring.query.config.QueryCountInterceptor;
+import com.tennisfolio.Tennisfolio.matching.service.CompetitionCommandService;
+import com.tennisfolio.Tennisfolio.matching.service.CompetitionQueryService;
 import com.tennisfolio.Tennisfolio.security.jwt.JwtAuthenticationFilter;
 import com.tennisfolio.Tennisfolio.security.oauth.handler.OAuthLoginSuccessHandler;
 import com.tennisfolio.Tennisfolio.security.oauth.service.CustomOAuth2UserService;
@@ -13,9 +15,13 @@ import com.tennisfolio.Tennisfolio.security.oauth.service.ReIssueService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+
+
 import org.springframework.context.annotation.Import;
+import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.http.HttpHeaders;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.options;
@@ -29,31 +35,43 @@ class SecurityCorsTest {
     @Autowired
     MockMvc mockMvc;
 
-    @MockBean
+    @MockitoBean
     OAuthLoginSuccessHandler oAuthLoginSuccessHandler;
 
-    @MockBean
+    @MockitoBean
     CustomOAuth2UserService customOAuth2UserService;
 
-    @MockBean
+    @MockitoBean
     JwtAuthenticationFilter jwtAuthenticationFilter;
 
-    @MockBean
+    @MockitoBean
+    ClientRegistrationRepository clientRegistrationRepository;
+
+    @MockitoBean
+    JpaMetamodelMappingContext jpaMetamodelMappingContext;
+
+    @MockitoBean
     OAuthUnlinkService oAuthUnlinkService;
 
-    @MockBean
+    @MockitoBean
     ReIssueService reIssueService;
 
-    @MockBean
+    @MockitoBean
     AuthQueryService authQueryService;
 
-    @MockBean
+    @MockitoBean
     AuthLogoutService authLogoutService;
 
-    @MockBean
+    @MockitoBean
     AuthProfileService authProfileService;
 
-    @MockBean
+    @MockitoBean
+    CompetitionQueryService competitionQueryService;
+
+    @MockitoBean
+    CompetitionCommandService competitionCommandService;
+
+    @MockitoBean
     QueryCountInterceptor queryCountInterceptor;
 
     @Test

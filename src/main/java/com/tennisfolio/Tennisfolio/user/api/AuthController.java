@@ -128,9 +128,11 @@ public class AuthController {
         String refreshToken = getCookie(request, "refresh_token");
         String sessionId = getCookie(request, "session_id");
 
-        try {
-            authLogoutService.logout(refreshToken, sessionId);
-        } catch (RuntimeException ignored) {
+        if (refreshToken != null && !refreshToken.isBlank()) {
+            try {
+                authLogoutService.logout(refreshToken, sessionId);
+            } catch (RuntimeException ignored) {
+            }
         }
 
         deleteCookie(response, "access_token");
