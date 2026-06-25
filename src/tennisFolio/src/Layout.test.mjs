@@ -23,6 +23,13 @@ test('logged-in account button uses a compact profile avatar', () => {
   assert.doesNotMatch(layoutSource, /className="auth-button-label"/);
 });
 
+test('mobile account button keeps the avatar centered in a fixed circle', () => {
+  assert.match(
+    layoutCss,
+    /@media\s*\(max-width:\s*560px\)\s*\{[\s\S]*\.auth-button-account\s*\{[^}]*width:\s*32px;[^}]*height:\s*32px;[^}]*padding:\s*0;[^}]*\}/,
+  );
+});
+
 test('layout consumes post-login redirect after authentication', () => {
   assert.match(layoutSource, /tennisfolio:postLoginRedirect/);
   assert.match(layoutSource, /if \(!currentUser\) \{/);
