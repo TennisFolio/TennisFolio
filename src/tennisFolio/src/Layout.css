@@ -326,6 +326,12 @@ body {
     font-size: 12px;
   }
 
+  .auth-button-account {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+  }
+
   .login-sheet-backdrop {
     padding: 14px;
   }
