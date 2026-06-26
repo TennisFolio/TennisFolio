@@ -5,12 +5,14 @@ import com.tennisfolio.Tennisfolio.meeting.dto.MeetingAttendanceResponse;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingAttendanceUpsertRequest;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingCreateRequest;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingCreateResponse;
+import com.tennisfolio.Tennisfolio.meeting.dto.MeetingCompetitionCreateResponse;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingDetailResponse;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingStatusUpdateRequest;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingSummaryResponse;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingUpdateRequest;
 import com.tennisfolio.Tennisfolio.meeting.service.MeetingAttendanceCommandService;
 import com.tennisfolio.Tennisfolio.meeting.service.MeetingCommandService;
+import com.tennisfolio.Tennisfolio.meeting.service.MeetingCompetitionCreateService;
 import com.tennisfolio.Tennisfolio.meeting.service.MeetingQueryService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -32,15 +34,18 @@ public class MeetingController {
     private final MeetingCommandService meetingCommandService;
     private final MeetingQueryService meetingQueryService;
     private final MeetingAttendanceCommandService attendanceCommandService;
+    private final MeetingCompetitionCreateService competitionCreateService;
 
     public MeetingController(
             MeetingCommandService meetingCommandService,
             MeetingQueryService meetingQueryService,
-            MeetingAttendanceCommandService attendanceCommandService
+            MeetingAttendanceCommandService attendanceCommandService,
+            MeetingCompetitionCreateService competitionCreateService
     ) {
         this.meetingCommandService = meetingCommandService;
         this.meetingQueryService = meetingQueryService;
         this.attendanceCommandService = attendanceCommandService;
+        this.competitionCreateService = competitionCreateService;
     }
 
     @PostMapping("/meetings")
@@ -155,6 +160,27 @@ public class MeetingController {
                 attendanceId,
                 resolveAuthenticatedUserId(authentication)
         );
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/meetings/{publicId}/competition")
+    public ResponseEntity<ResponseDTO<MeetingCompetitionCreateResponse>> createCompetition(
+            Authentication authentication,
+            @PathVariable String publicId
+    ) {
+        MeetingCompetitionCreateResponse response = competitionCreateService.createCompetition(
+                publicId,
+                resolveAuthenticatedUserId(authentication)
+        );
+        return ResponseEntity.ok(ResponseDTO.success(response));
+    }
+
+    @DeleteMapping("/meetings/{publicId}/competition")
+    public ResponseEntity<Void> deleteCompetition(
+            Authentication authentication,
+            @PathVariable String publicId
+    ) {
+        competitionCreateService.deleteCompetition(publicId, resolveAuthenticatedUserId(authentication));
         return ResponseEntity.noContent().build();
     }
 

@@ -6,6 +6,7 @@ import com.tennisfolio.Tennisfolio.meeting.dto.MeetingAttendanceUpsertRequest;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingDetailResponse;
 import com.tennisfolio.Tennisfolio.meeting.service.MeetingAttendanceCommandService;
 import com.tennisfolio.Tennisfolio.meeting.service.MeetingCommandService;
+import com.tennisfolio.Tennisfolio.meeting.service.MeetingCompetitionCreateService;
 import com.tennisfolio.Tennisfolio.meeting.service.MeetingQueryService;
 import com.tennisfolio.Tennisfolio.common.monitoring.query.config.QueryCountInterceptor;
 import com.tennisfolio.Tennisfolio.security.jwt.JwtAuthenticationFilter;
@@ -48,6 +49,9 @@ class MeetingSecurityConfigTest {
 
     @MockitoBean
     MeetingAttendanceCommandService attendanceCommandService;
+
+    @MockitoBean
+    MeetingCompetitionCreateService competitionCreateService;
 
     @MockitoBean
     OAuthLoginSuccessHandler oAuthLoginSuccessHandler;

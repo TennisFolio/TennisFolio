@@ -7,6 +7,7 @@ import com.tennisfolio.Tennisfolio.meeting.entity.MeetingAttendance;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -21,6 +22,11 @@ public interface MeetingAttendanceRepository extends JpaRepository<MeetingAttend
     );
 
     Optional<MeetingAttendance> findByIdAndMeetingAndDeletedAtIsNull(Long id, Meeting meeting);
+
+    List<MeetingAttendance> findByMeetingAndAttendanceStatusAndDeletedAtIsNull(
+            Meeting meeting,
+            AttendanceStatus attendanceStatus
+    );
 
     long countByMeetingAndAttendanceStatusAndDeletedAtIsNull(Meeting meeting, AttendanceStatus attendanceStatus);
 

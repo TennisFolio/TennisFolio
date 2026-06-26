@@ -125,6 +125,35 @@ class CompetitionCommandServiceTest {
     }
 
     @Test
+    void createCompetitionResult_returnsCreatedCompetitionAndAdminToken() {
+        CompetitionCreateRequest request = new CompetitionCreateRequest(
+                "CLUB_SESSION",
+                "Club",
+                4,
+                4,
+                2,
+                1,
+                136L,
+                null,
+                null
+        );
+        Competition competition = clubSessionCompetition(1L, "public-id", null);
+        ScheduleResult scheduleResult = new ScheduleResult();
+        Map<String, CompetitionEntry> entriesByPlayerName = Map.of();
+
+        when(competitionService.createCompetition(request, 1, 136L, 10L)).thenReturn(competition);
+        when(scheduler.generateSchedule(4, 4, 2, 1, 136L)).thenReturn(scheduleResult);
+        when(competitionEntryCommandService.createCompetitionEntries(competition, request)).thenReturn(entriesByPlayerName);
+        when(competitionAdminTokenService.createToken("public-id")).thenReturn("creator-token");
+
+        CompetitionCreationResult result = service.createCompetitionResult(request, 10L);
+
+        assertEquals(competition, result.getCompetition());
+        assertEquals("creator-token", result.getCompetitionAdminToken());
+        verify(competitionService).createCompetition(request, 1, 136L, 10L);
+    }
+
+    @Test
     void createCompetition_derivesRoundsFromTotalGamesForFixedSchedule() {
         CompetitionCreateRequest request = new CompetitionCreateRequest(
                 "FIXED_SCHEDULE",

@@ -196,6 +196,7 @@ POST /api/meetings/{publicId}/competition
 - 로그인 필요
 - owner만 가능
 - ATTENDING 응답으로 Competition 생성 후 Meeting.competitionId 연결
+- 응답은 생성된 Competition의 `publicId`만 반환한다. Meeting 기반 생성은 owner가 이미 확정되어 `competitionAdminToken`을 반환하지 않는다.
 - 기존 Competition 생성 validation을 그대로 사용
 
 DELETE /api/meetings/{publicId}/competition
@@ -335,9 +336,11 @@ node --test src/tennisFolio/src/**/*.test.mjs
 | 2026-06-26 | `.\gradlew.bat test --tests com.tennisfolio.Tennisfolio.meeting.*` | PASS | 참석 응답 생성/수정/삭제, 중복 이름, 마감/Competition 연결, 정원 검증 |
 | 2026-06-26 | `.\gradlew.bat test --tests com.tennisfolio.Tennisfolio.meeting.*` | PASS | 참석 변경 시 Meeting 비관적 락 조회 사용과 기존 Meeting 기능 회귀 확인 |
 | 2026-06-26 | `.\gradlew.bat test --tests com.tennisfolio.Tennisfolio.meeting.*` | PASS | 총 정원/성별 정원 상호 배타 validation과 정원 방식 선택 검증 |
+| 2026-06-27 | 코드 변경: Meeting 기반 Competition 생성/삭제 API와 테스트 추가 | SKIPPED | 프로젝트 규칙상 명시 승인 없이 Gradle 테스트를 실행하지 않음 |
 
 ## 10. Change Log
 
 | Date | Change | Reason |
 |---|---|---|
 | 2026-06-25 | 초기 작성 | Meeting 참석 체크 기능 개발 시작 |
+| 2026-06-27 | Meeting 기반 Competition 생성/삭제 API 구현 | 참석자 확정 후 기존 Competition 경기표 흐름으로 연결 |

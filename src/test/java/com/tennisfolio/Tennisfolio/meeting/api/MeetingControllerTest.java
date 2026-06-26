@@ -3,12 +3,14 @@ package com.tennisfolio.Tennisfolio.meeting.api;
 import com.tennisfolio.Tennisfolio.common.response.ResponseDTO;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingCreateRequest;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingCreateResponse;
+import com.tennisfolio.Tennisfolio.meeting.dto.MeetingCompetitionCreateResponse;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingDetailResponse;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingStatusUpdateRequest;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingSummaryResponse;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingUpdateRequest;
 import com.tennisfolio.Tennisfolio.meeting.service.MeetingAttendanceCommandService;
 import com.tennisfolio.Tennisfolio.meeting.service.MeetingCommandService;
+import com.tennisfolio.Tennisfolio.meeting.service.MeetingCompetitionCreateService;
 import com.tennisfolio.Tennisfolio.meeting.service.MeetingQueryService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -37,6 +39,9 @@ class MeetingControllerTest {
 
     @Mock
     MeetingAttendanceCommandService attendanceCommandService;
+
+    @Mock
+    MeetingCompetitionCreateService competitionCreateService;
 
     @InjectMocks
     MeetingController meetingController;
@@ -126,6 +131,31 @@ class MeetingControllerTest {
                 meetingController.deleteMeeting(authentication, "meeting-public-id");
 
         verify(meetingCommandService).deleteMeeting("meeting-public-id", 10L);
+        assertThat(response.getStatusCode().value()).isEqualTo(204);
+    }
+
+    @Test
+    void createCompetition_passesOwnerUserIdToCompetitionCreateService() {
+        Authentication authentication = new UsernamePasswordAuthenticationToken(10L, null, List.of());
+        when(competitionCreateService.createCompetition("meeting-public-id", 10L))
+                .thenReturn(new MeetingCompetitionCreateResponse("competition-public-id"));
+
+        ResponseEntity<ResponseDTO<MeetingCompetitionCreateResponse>> response =
+                meetingController.createCompetition(authentication, "meeting-public-id");
+
+        verify(competitionCreateService).createCompetition("meeting-public-id", 10L);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getData().getPublicId()).isEqualTo("competition-public-id");
+    }
+
+    @Test
+    void deleteCompetition_passesOwnerUserIdToCompetitionCreateService() {
+        Authentication authentication = new UsernamePasswordAuthenticationToken(10L, null, List.of());
+
+        ResponseEntity<Void> response =
+                meetingController.deleteCompetition(authentication, "meeting-public-id");
+
+        verify(competitionCreateService).deleteCompetition("meeting-public-id", 10L);
         assertThat(response.getStatusCode().value()).isEqualTo(204);
     }
 
