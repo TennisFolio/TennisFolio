@@ -1,6 +1,7 @@
 package com.tennisfolio.Tennisfolio.meeting.repository;
 
 import com.tennisfolio.Tennisfolio.config.QuerydslConfig;
+import com.tennisfolio.Tennisfolio.meeting.domain.MeetingStatus;
 import com.tennisfolio.Tennisfolio.meeting.entity.Meeting;
 import com.tennisfolio.Tennisfolio.meeting.entity.MeetingAttendance;
 import org.junit.jupiter.api.Test;
@@ -43,7 +44,7 @@ class MeetingRepositoryTest {
         assertThat(found.getPublicId()).isNotBlank();
         assertThat(found.getOwnerUserId()).isEqualTo(10L);
         assertThat(found.getCompetitionId()).isNull();
-        assertThat(found.getStatus()).isEqualTo(Meeting.MeetingStatus.OPEN);
+        assertThat(found.getStatus()).isEqualTo(MeetingStatus.OPEN);
         assertThat(found.getDeletedAt()).isNull();
     }
 

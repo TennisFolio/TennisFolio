@@ -1,6 +1,7 @@
 package com.tennisfolio.Tennisfolio.meeting.entity;
 
 import com.tennisfolio.Tennisfolio.common.Entity.BaseTimeEntity;
+import com.tennisfolio.Tennisfolio.meeting.domain.MeetingStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -93,6 +94,48 @@ public class Meeting extends BaseTimeEntity {
         this.totalGames = totalGames;
     }
 
+    public void updateDetails(
+            String title,
+            LocalDateTime startAt,
+            LocalDateTime endAt,
+            String note,
+            Integer maxParticipants,
+            Integer maxMaleParticipants,
+            Integer maxFemaleParticipants,
+            Integer courtCount,
+            Integer totalGames
+    ) {
+        this.title = title;
+        this.startAt = startAt;
+        this.endAt = endAt;
+        this.note = note;
+        this.maxParticipants = maxParticipants;
+        this.maxMaleParticipants = maxMaleParticipants;
+        this.maxFemaleParticipants = maxFemaleParticipants;
+        this.courtCount = courtCount;
+        this.totalGames = totalGames;
+    }
+
+    public void updateStatus(MeetingStatus status) {
+        this.status = status;
+    }
+
+    public void connectCompetition(Long competitionId) {
+        this.competitionId = competitionId;
+    }
+
+    public void clearCompetition() {
+        this.competitionId = null;
+    }
+
+    public boolean hasCompetition() {
+        return competitionId != null;
+    }
+
+    public boolean isOwnedBy(Long userId) {
+        return ownerUserId != null && ownerUserId.equals(userId);
+    }
+
     public void delete(LocalDateTime deletedAt) {
         if (this.deletedAt == null) {
             this.deletedAt = deletedAt;
@@ -103,7 +146,4 @@ public class Meeting extends BaseTimeEntity {
         return deletedAt != null;
     }
 
-    public enum MeetingStatus {
-        OPEN, CLOSED, CANCELLED
-    }
 }

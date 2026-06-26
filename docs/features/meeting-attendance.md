@@ -213,7 +213,7 @@ DELETE /api/meetings/{publicId}/competition
   - 검증 기준:
     - Meeting 엔티티/저장소 단위 테스트가 통과한다.
 
-- [ ] `feat(meeting): add meeting APIs`
+- [x] `feat(meeting): add meeting APIs` - done, verified
   - 구현:
     - `MeetingController`
     - `MeetingCreateRequest/Response`
@@ -326,6 +326,7 @@ node --test src/tennisFolio/src/**/*.test.mjs
 |---|---|---|---|
 | 2026-06-25 | 문서 작성 전 코드 구조 확인 | PASS | `Competition`, `CompetitionEntry`, `CompetitionCommandService`, `CompetitionController` 확인 |
 | 2026-06-26 | `.\gradlew.bat test --tests com.tennisfolio.Tennisfolio.meeting.repository.MeetingRepositoryTest` | PASS | Meeting/MeetingAttendance 저장 동작 확인 |
+| 2026-06-26 | `.\gradlew.bat test --tests com.tennisfolio.Tennisfolio.meeting.*` | PASS | Meeting 생성/조회/수정/삭제/상태 변경 API와 서비스 검증 |
 
 ## 10. Change Log
 

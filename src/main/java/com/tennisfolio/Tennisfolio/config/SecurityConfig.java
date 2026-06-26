@@ -6,6 +6,7 @@ import com.tennisfolio.Tennisfolio.security.oauth.handler.OAuthLoginSuccessHandl
 import com.tennisfolio.Tennisfolio.security.oauth.service.CustomOAuth2UserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -38,8 +39,13 @@ public class SecurityConfig {
                                 "/api/auth/profile",
                                 "/api/auth/me/competitions",
                                 "/api/auth/me/competitions/*",
-                                "/api/auth/me/competitions/*/claim"
+                                "/api/auth/me/competitions/*/claim",
+                                "/api/meetings/*/manage",
+                                "/api/me/meetings"
                         ).authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/meetings").authenticated()
+                        .requestMatchers(HttpMethod.PATCH, "/api/meetings/*", "/api/meetings/*/status").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/api/meetings/*").authenticated()
                         .requestMatchers(
                                 "/api/auth/logout",
                                 "/api/auth/reissue",
