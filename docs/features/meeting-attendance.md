@@ -26,8 +26,11 @@
 - 한 모임에서는 같은 이름의 활성 참석 응답을 중복 생성하지 않는다.
 - 한 모임은 최대 하나의 Competition만 연결한다.
 - 모임 시간은 시작 시간과 종료 시간을 입력한다. 종료 시간은 시작 시간 이후여야 한다.
-- 모임은 총 참석 정원, 남자 참석 정원, 여자 참석 정원을 각각 선택적으로 설정할 수 있다.
-- `ATTENDING`으로 저장하거나 변경할 때 총 정원 또는 해당 성별 정원이 이미 찼으면 선택할 수 없다.
+- 모임은 총 참석 정원 방식 또는 성별 참석 정원 방식 중 하나만 사용할 수 있다.
+- 총 참석 정원을 설정하면 남자/여자 참석 정원은 설정하지 않는다.
+- 남자/여자 참석 정원을 설정하면 총 참석 정원은 설정하지 않는다.
+- `ATTENDING`으로 저장하거나 변경할 때 선택된 정원 방식의 정원이 이미 찼으면 선택할 수 없다.
+- 참석 응답 생성/수정/삭제는 Meeting row 비관적 쓰기 락을 잡고 처리해 같은 모임의 정원 검증과 중복 이름 검사를 직렬화한다.
 - 모임은 Competition 생성을 위해 코트 수와 경기 수를 저장한다.
 - 모임 삭제는 soft delete로 처리한다.
 - 모임 owner는 참석 체크를 마감하거나 다시 열 수 있다. 마감된 모임은 새 참석 응답과 참석 상태 변경을 받지 않는다.
@@ -55,6 +58,7 @@
 - Repository / Persistence:
   - `MeetingRepository`, `MeetingAttendanceRepository`를 추가한다.
   - `tb_meeting.COMPETITION_ID`는 nullable unique FK로 둔다.
+  - 참석 응답 변경 시 `MeetingRepository`의 `PESSIMISTIC_WRITE` 조회로 같은 Meeting의 동시 변경을 직렬화한다.
 - Security / External:
   - `POST /api/meetings`와 경기표 생성은 로그인 필요.
   - 공개 모임 조회와 참석 응답은 비로그인 허용.
@@ -126,8 +130,9 @@ tb_meeting_attendance
 - 한 모임당 하나의 경기표만 허용하므로 `COMPETITION_ID unique` 제약을 둔다.
 - 참석 응답과 경기 참가자를 분리해 `NOT_ATTENDING`, `MAYBE`, 이름 기반 응답이 매칭 도메인을 오염시키지 않게 한다.
 - 참석 응답 단계에서 성별을 필수로 받아 경기표 생성 시 모임장이 별도 보완 작업 없이 바로 Competition을 만들 수 있게 한다.
-- 정원 제한은 모두 optional이지만, 값이 있으면 `ATTENDING` 인원에만 적용한다. `NOT_ATTENDING`, `MAYBE`는 정원에 포함하지 않는다.
-- 총 정원이 찼으면 남녀 정원 잔여 여부와 관계없이 추가 `ATTENDING`을 막고, 성별 정원이 찼으면 총 정원 잔여 여부와 관계없이 해당 성별의 추가 `ATTENDING`을 막는다.
+- 정원 제한은 optional이며 `ATTENDING` 인원에만 적용한다. `NOT_ATTENDING`, `MAYBE`는 정원에 포함하지 않는다.
+- 총 정원 방식과 성별 정원 방식은 상호 배타적이다. 총 정원이 있으면 총 참석 인원만 검증하고, 총 정원이 없을 때만 요청 성별의 정원을 검증한다.
+- 정원 검증은 여러 MeetingAttendance의 count를 기반으로 하므로 Meeting row에 비관적 락을 걸어 같은 모임의 참석 변경 트랜잭션을 순차 처리한다.
 - Meeting 기반 Competition 생성은 Meeting의 `courtCount`, `totalGames`, `title`, 참석자 이름/성별을 사용해 기존 Competition 생성 로직으로 위임한다.
 - 기존 Competition 생성 API와 Competition 도메인 용어는 유지한다.
 
@@ -231,7 +236,7 @@ DELETE /api/meetings/{publicId}/competition
   - 검증 기준:
     - `MeetingControllerTest`, `MeetingCommandServiceTest`, `MeetingQueryServiceTest`의 Meeting CRUD 케이스가 통과한다.
 
-- [ ] `feat(meeting): add attendance APIs`
+- [x] `feat(meeting): add attendance APIs` - done, verified
   - 구현:
     - `MeetingAttendanceUpsertRequest/Response`
     - 공개 참석 응답 생성/수정 API
@@ -246,7 +251,7 @@ DELETE /api/meetings/{publicId}/competition
     - Competition 생성 후에는 공개 참석 수정과 owner 참석자 수정/삭제가 실패한다.
     - 이름 누락, 성별 누락, 중복 이름, 닫힌 모임 참석 체크 실패를 검증한다.
   - 검증 기준:
-    - `MeetingAttendanceControllerTest`, `MeetingAttendanceCommandServiceTest` 관련 케이스가 통과한다.
+    - `MeetingAttendanceCommandServiceTest` 관련 케이스가 통과한다.
 
 - [ ] `feat(meeting): create competition from meeting attendees`
   - 구현:
@@ -327,6 +332,9 @@ node --test src/tennisFolio/src/**/*.test.mjs
 | 2026-06-25 | 문서 작성 전 코드 구조 확인 | PASS | `Competition`, `CompetitionEntry`, `CompetitionCommandService`, `CompetitionController` 확인 |
 | 2026-06-26 | `.\gradlew.bat test --tests com.tennisfolio.Tennisfolio.meeting.repository.MeetingRepositoryTest` | PASS | Meeting/MeetingAttendance 저장 동작 확인 |
 | 2026-06-26 | `.\gradlew.bat test --tests com.tennisfolio.Tennisfolio.meeting.*` | PASS | Meeting 생성/조회/수정/삭제/상태 변경 API와 서비스 검증 |
+| 2026-06-26 | `.\gradlew.bat test --tests com.tennisfolio.Tennisfolio.meeting.*` | PASS | 참석 응답 생성/수정/삭제, 중복 이름, 마감/Competition 연결, 정원 검증 |
+| 2026-06-26 | `.\gradlew.bat test --tests com.tennisfolio.Tennisfolio.meeting.*` | PASS | 참석 변경 시 Meeting 비관적 락 조회 사용과 기존 Meeting 기능 회귀 확인 |
+| 2026-06-26 | `.\gradlew.bat test --tests com.tennisfolio.Tennisfolio.meeting.*` | PASS | 총 정원/성별 정원 상호 배타 validation과 정원 방식 선택 검증 |
 
 ## 10. Change Log
 

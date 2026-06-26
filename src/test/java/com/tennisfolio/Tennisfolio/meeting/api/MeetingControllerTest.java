@@ -7,6 +7,7 @@ import com.tennisfolio.Tennisfolio.meeting.dto.MeetingDetailResponse;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingStatusUpdateRequest;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingSummaryResponse;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingUpdateRequest;
+import com.tennisfolio.Tennisfolio.meeting.service.MeetingAttendanceCommandService;
 import com.tennisfolio.Tennisfolio.meeting.service.MeetingCommandService;
 import com.tennisfolio.Tennisfolio.meeting.service.MeetingQueryService;
 import org.junit.jupiter.api.Test;
@@ -33,6 +34,9 @@ class MeetingControllerTest {
 
     @Mock
     MeetingQueryService meetingQueryService;
+
+    @Mock
+    MeetingAttendanceCommandService attendanceCommandService;
 
     @InjectMocks
     MeetingController meetingController;
@@ -132,8 +136,8 @@ class MeetingControllerTest {
                 LocalDateTime.of(2026, 7, 4, 12, 0),
                 "Indoor court",
                 12,
-                8,
-                4,
+                null,
+                null,
                 2,
                 6
         );

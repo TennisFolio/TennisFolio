@@ -1,6 +1,8 @@
 package com.tennisfolio.Tennisfolio.meeting.repository;
 
 import com.tennisfolio.Tennisfolio.config.QuerydslConfig;
+import com.tennisfolio.Tennisfolio.meeting.domain.AttendanceStatus;
+import com.tennisfolio.Tennisfolio.meeting.domain.Gender;
 import com.tennisfolio.Tennisfolio.meeting.domain.MeetingStatus;
 import com.tennisfolio.Tennisfolio.meeting.entity.Meeting;
 import com.tennisfolio.Tennisfolio.meeting.entity.MeetingAttendance;
@@ -65,8 +67,8 @@ class MeetingRepositoryTest {
         MeetingAttendance attendance = new MeetingAttendance(
                 meeting,
                 "Alex Kim",
-                MeetingAttendance.Gender.MALE,
-                MeetingAttendance.AttendanceStatus.ATTENDING
+                Gender.MALE,
+                AttendanceStatus.ATTENDING
         );
 
         MeetingAttendance saved = meetingAttendanceRepository.saveAndFlush(attendance);
@@ -74,8 +76,8 @@ class MeetingRepositoryTest {
         MeetingAttendance found = meetingAttendanceRepository.findById(saved.getId()).orElseThrow();
         assertThat(found.getMeeting().getId()).isEqualTo(meeting.getId());
         assertThat(found.getParticipantName()).isEqualTo("Alex Kim");
-        assertThat(found.getGender()).isEqualTo(MeetingAttendance.Gender.MALE);
-        assertThat(found.getAttendanceStatus()).isEqualTo(MeetingAttendance.AttendanceStatus.ATTENDING);
+        assertThat(found.getGender()).isEqualTo(Gender.MALE);
+        assertThat(found.getAttendanceStatus()).isEqualTo(AttendanceStatus.ATTENDING);
         assertThat(found.getDeletedAt()).isNull();
     }
 }

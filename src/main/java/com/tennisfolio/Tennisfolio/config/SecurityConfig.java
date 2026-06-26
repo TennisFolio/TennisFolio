@@ -44,8 +44,17 @@ public class SecurityConfig {
                                 "/api/me/meetings"
                         ).authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/meetings").authenticated()
-                        .requestMatchers(HttpMethod.PATCH, "/api/meetings/*", "/api/meetings/*/status").authenticated()
-                        .requestMatchers(HttpMethod.DELETE, "/api/meetings/*").authenticated()
+                        .requestMatchers(
+                                HttpMethod.PATCH,
+                                "/api/meetings/*",
+                                "/api/meetings/*/status",
+                                "/api/meetings/*/attendances/*"
+                        ).authenticated()
+                        .requestMatchers(
+                                HttpMethod.DELETE,
+                                "/api/meetings/*",
+                                "/api/meetings/*/attendances/*"
+                        ).authenticated()
                         .requestMatchers(
                                 "/api/auth/logout",
                                 "/api/auth/reissue",

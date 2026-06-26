@@ -100,6 +100,27 @@ class MeetingCommandServiceTest {
     }
 
     @Test
+    void createMeeting_rejectsMixedTotalAndGenderCapacity() {
+        MeetingCreateRequest request = new MeetingCreateRequest(
+                "Saturday doubles",
+                LocalDateTime.of(2026, 7, 4, 10, 0),
+                LocalDateTime.of(2026, 7, 4, 12, 0),
+                null,
+                12,
+                8,
+                null,
+                2,
+                6
+        );
+
+        assertThatThrownBy(() -> service.createMeeting(request, 10L))
+                .isInstanceOf(ResponseStatusException.class)
+                .extracting("statusCode")
+                .isEqualTo(HttpStatus.BAD_REQUEST);
+        verify(meetingRepository, never()).save(any());
+    }
+
+    @Test
     void updateMeeting_rejectsNonOwner() {
         when(meetingRepository.findByPublicIdAndOwnerUserIdAndDeletedAtIsNull("meeting-public-id", 10L))
                 .thenReturn(Optional.empty());
@@ -119,6 +140,29 @@ class MeetingCommandServiceTest {
         assertThat(response.getTitle()).isEqualTo("Sunday doubles");
         assertThat(response.getCourtCount()).isEqualTo(3);
         assertThat(response.getTotalGames()).isEqualTo(8);
+    }
+
+    @Test
+    void updateMeeting_rejectsMixedTotalAndGenderCapacity() {
+        Meeting meeting = meeting(10L);
+        when(meetingRepository.findByPublicIdAndOwnerUserIdAndDeletedAtIsNull("meeting-public-id", 10L))
+                .thenReturn(Optional.of(meeting));
+        MeetingUpdateRequest request = new MeetingUpdateRequest(
+                "Sunday doubles",
+                LocalDateTime.of(2026, 7, 5, 10, 0),
+                LocalDateTime.of(2026, 7, 5, 12, 0),
+                null,
+                12,
+                null,
+                4,
+                2,
+                6
+        );
+
+        assertThatThrownBy(() -> service.updateMeeting("meeting-public-id", request, 10L))
+                .isInstanceOf(ResponseStatusException.class)
+                .extracting("statusCode")
+                .isEqualTo(HttpStatus.BAD_REQUEST);
     }
 
     @Test
@@ -167,8 +211,8 @@ class MeetingCommandServiceTest {
                 LocalDateTime.of(2026, 7, 4, 12, 0),
                 "Indoor court",
                 12,
-                8,
-                4,
+                null,
+                null,
                 2,
                 6
         );

@@ -1,6 +1,8 @@
 package com.tennisfolio.Tennisfolio.meeting.entity;
 
 import com.tennisfolio.Tennisfolio.common.Entity.BaseTimeEntity;
+import com.tennisfolio.Tennisfolio.meeting.domain.AttendanceStatus;
+import com.tennisfolio.Tennisfolio.meeting.domain.Gender;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -58,6 +60,12 @@ public class MeetingAttendance extends BaseTimeEntity {
         this.attendanceStatus = attendanceStatus;
     }
 
+    public void update(String participantName, Gender gender, AttendanceStatus attendanceStatus) {
+        this.participantName = participantName;
+        this.gender = gender;
+        this.attendanceStatus = attendanceStatus;
+    }
+
     public void delete(LocalDateTime deletedAt) {
         if (this.deletedAt == null) {
             this.deletedAt = deletedAt;
@@ -66,13 +74,5 @@ public class MeetingAttendance extends BaseTimeEntity {
 
     public boolean isDeleted() {
         return deletedAt != null;
-    }
-
-    public enum Gender {
-        MALE, FEMALE
-    }
-
-    public enum AttendanceStatus {
-        ATTENDING, NOT_ATTENDING, MAYBE
     }
 }

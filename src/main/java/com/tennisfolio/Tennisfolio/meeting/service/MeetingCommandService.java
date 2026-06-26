@@ -36,6 +36,11 @@ public class MeetingCommandService {
                 request.getCourtCount(),
                 request.getTotalGames()
         );
+        validateCapacityPolicy(
+                request.getMaxParticipants(),
+                request.getMaxMaleParticipants(),
+                request.getMaxFemaleParticipants()
+        );
         Meeting meeting = meetingRepository.save(new Meeting(
                 ownerUserId,
                 request.getTitle(),
@@ -60,6 +65,11 @@ public class MeetingCommandService {
                 request.getEndAt(),
                 request.getCourtCount(),
                 request.getTotalGames()
+        );
+        validateCapacityPolicy(
+                request.getMaxParticipants(),
+                request.getMaxMaleParticipants(),
+                request.getMaxFemaleParticipants()
         );
         if (meeting.hasCompetition() && scheduleConditionChanged(meeting, request)) {
             throw new ResponseStatusException(
@@ -129,6 +139,19 @@ public class MeetingCommandService {
     private boolean scheduleConditionChanged(Meeting meeting, MeetingUpdateRequest request) {
         return !meeting.getCourtCount().equals(request.getCourtCount())
                 || !meeting.getTotalGames().equals(request.getTotalGames());
+    }
+
+    private void validateCapacityPolicy(
+            Integer maxParticipants,
+            Integer maxMaleParticipants,
+            Integer maxFemaleParticipants
+    ) {
+        if (maxParticipants != null && (maxMaleParticipants != null || maxFemaleParticipants != null)) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Use either maxParticipants or gender capacity, not both"
+            );
+        }
     }
 
     private MeetingStatus parseStatus(String status) {
