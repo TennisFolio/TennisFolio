@@ -35,31 +35,21 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
+                                "/api/auth/logout",
+                                "/api/auth/reissue",
+                                "/api/auth/reIssue"
+                        ).permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/meetings/*").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/meetings/*/attendances").permitAll()
+                        .requestMatchers(
                                 "/api/auth/me",
                                 "/api/auth/profile",
                                 "/api/auth/me/competitions",
                                 "/api/auth/me/competitions/*",
                                 "/api/auth/me/competitions/*/claim",
-                                "/api/meetings/*/manage",
                                 "/api/me/meetings"
                         ).authenticated()
-                        .requestMatchers(HttpMethod.POST, "/api/meetings").authenticated()
-                        .requestMatchers(
-                                HttpMethod.PATCH,
-                                "/api/meetings/*",
-                                "/api/meetings/*/status",
-                                "/api/meetings/*/attendances/*"
-                        ).authenticated()
-                        .requestMatchers(
-                                HttpMethod.DELETE,
-                                "/api/meetings/*",
-                                "/api/meetings/*/attendances/*"
-                        ).authenticated()
-                        .requestMatchers(
-                                "/api/auth/logout",
-                                "/api/auth/reissue",
-                                "/api/auth/reIssue"
-                        ).permitAll()
+                        .requestMatchers("/api/meetings", "/api/meetings/**").authenticated()
                         .anyRequest().permitAll()
                 )
                 .oauth2Login(oauth -> oauth
