@@ -1,0 +1,317 @@
+.meeting-page {
+  width: min(520px, 100%);
+  min-height: 100dvh;
+  margin: 0 auto;
+  padding: 18px 14px 36px;
+}
+
+.meeting-header,
+.meeting-panel,
+.meeting-card,
+.meeting-state {
+  border: 1px solid var(--competition-border);
+  border-radius: 8px;
+  background: var(--competition-surface);
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.05);
+}
+
+.meeting-header {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 14px;
+  padding: 16px;
+}
+
+.meeting-header-row,
+.meeting-action-row,
+.meeting-meta-row,
+.meeting-status-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.meeting-header-row,
+.meeting-status-row {
+  justify-content: space-between;
+}
+
+.meeting-header h1,
+.meeting-panel h2,
+.meeting-card h2 {
+  margin: 0;
+  color: var(--competition-text-strong);
+  font-weight: 900;
+  line-height: 1.18;
+}
+
+.meeting-header h1 {
+  font-size: 25px;
+}
+
+.meeting-panel h2,
+.meeting-card h2 {
+  font-size: 18px;
+}
+
+.meeting-header p,
+.meeting-panel p,
+.meeting-card p,
+.meeting-state {
+  margin: 0;
+  color: var(--competition-text-body);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.meeting-list {
+  display: grid;
+  gap: 10px;
+}
+
+.meeting-card,
+.meeting-panel,
+.meeting-state {
+  padding: 15px;
+}
+
+.meeting-card {
+  display: grid;
+  gap: 11px;
+}
+
+.meeting-card-title-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.meeting-card-title-row h2 {
+  font-size: 17px;
+}
+
+.meeting-card-status {
+  display: inline-flex;
+  margin-top: 6px;
+  color: var(--competition-text-muted);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.meeting-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.meeting-card-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.meeting-panel {
+  display: grid;
+  gap: 13px;
+  margin-bottom: 12px;
+}
+
+.meeting-grid {
+  display: grid;
+  gap: 10px;
+}
+
+.meeting-grid.two {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.meeting-field {
+  display: grid;
+  gap: 6px;
+}
+
+.meeting-field span {
+  color: var(--competition-text-muted);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.meeting-field input,
+.meeting-field select,
+.meeting-field textarea {
+  width: 100%;
+  min-height: 40px;
+  border: 1px solid var(--competition-border-control);
+  border-radius: 7px;
+  background: var(--competition-surface);
+  color: var(--competition-text-strong);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 800;
+  padding: 0 10px;
+}
+
+.meeting-field textarea {
+  min-height: 88px;
+  padding: 10px;
+  resize: vertical;
+}
+
+.meeting-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 38px;
+  padding: 0 12px;
+  border: 1px solid var(--competition-border-strong);
+  border-radius: 7px;
+  background: var(--competition-surface);
+  color: var(--competition-text-body);
+  font-size: 13px;
+  font-weight: 900;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.meeting-button.primary {
+  border-color: var(--competition-primary);
+  background: var(--competition-primary);
+  color: var(--competition-text-inverse);
+}
+
+.meeting-button.danger {
+  border-color: var(--competition-danger-border);
+  background: var(--competition-danger-bg);
+  color: var(--competition-danger);
+}
+
+.meeting-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.62;
+}
+
+.meeting-button.full {
+  width: 100%;
+}
+
+.meeting-button.small {
+  min-height: 28px;
+  padding: 0 9px;
+  border-radius: 6px;
+  font-size: 12px;
+}
+
+.meeting-chip-row,
+.meeting-attendance-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.meeting-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 0 9px;
+  border: 1px solid var(--competition-border-soft);
+  border-radius: 999px;
+  background: var(--competition-surface-soft);
+  color: var(--competition-text-body);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.meeting-chip.ok {
+  border-color: var(--competition-ok-border);
+  background: var(--competition-ok-bg);
+  color: var(--competition-ok);
+}
+
+.meeting-chip.warning {
+  border-color: var(--competition-warning-border);
+  background: var(--competition-warning-bg);
+  color: var(--competition-warning);
+}
+
+.meeting-chip.danger {
+  border-color: var(--competition-danger-border);
+  background: var(--competition-danger-bg);
+  color: var(--competition-danger);
+}
+
+.meeting-chip.male {
+  border-color: var(--competition-male-bg);
+  background: var(--competition-male-bg);
+  color: var(--competition-male);
+}
+
+.meeting-chip.female {
+  border-color: var(--competition-female-bg);
+  background: var(--competition-female-bg);
+  color: var(--competition-female);
+}
+
+.meeting-stepper {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.meeting-step {
+  height: 5px;
+  border-radius: 999px;
+  background: var(--competition-border-strong);
+}
+
+.meeting-step.active {
+  background: var(--competition-primary);
+}
+
+.meeting-toggle {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 5px;
+  padding: 5px;
+  border: 1px solid var(--competition-border);
+  border-radius: 8px;
+  background: var(--competition-surface-soft);
+}
+
+.meeting-toggle .meeting-button {
+  min-height: 34px;
+  padding: 0 6px;
+  font-size: 12px;
+}
+
+.meeting-error {
+  border-color: var(--competition-danger-border);
+  background: var(--competition-danger-bg);
+  color: var(--competition-danger);
+}
+
+.meeting-success {
+  border-color: var(--competition-ok-border);
+  background: var(--competition-ok-bg);
+  color: var(--competition-ok);
+}
+
+@media (max-width: 420px) {
+  .meeting-grid.two,
+  .meeting-toggle {
+    grid-template-columns: 1fr;
+  }
+
+  .meeting-header-row,
+  .meeting-status-row,
+  .meeting-action-row {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .meeting-action-row .meeting-button,
+  .meeting-status-row .meeting-button {
+    width: 100%;
+  }
+}

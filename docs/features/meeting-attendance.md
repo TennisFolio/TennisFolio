@@ -154,7 +154,7 @@ GET /api/meetings/{publicId}/manage
 GET /api/me/meetings
 - 로그인 필요
 - 내가 만든 Meeting 목록 조회
-- title, startAt, endAt, status, 참석 요약, competition 연결 여부 반환
+- title, startAt, endAt, courtCount, totalGames, status, 참석/미정/불참 요약, competition 연결 여부 반환
 
 PATCH /api/meetings/{publicId}
 - 로그인 필요
@@ -273,20 +273,74 @@ DELETE /api/meetings/{publicId}/competition
   - 검증 기준:
     - `MeetingCompetitionCreateServiceTest`와 기존 `CompetitionCommandServiceTest` 관련 케이스가 통과한다.
 
-- [ ] `feat(meeting): add meeting UI flow`
+- [x] `feat(meeting): add meeting UI routes and API client` - done, verified
   - 구현:
-    - `/meetings` 내 모임 목록 화면
-    - `/meetings/new` 모임 만들기 화면
-    - `/meetings/:publicId` 공개 참석 체크 화면
-    - 참석 응답 팝업
-    - 모임장용 참석자 목록과 경기표 생성 액션
-    - `/meetings/:publicId/manage` 모임장 관리 화면
-    - 생성된 Competition으로 이동하는 링크
+    - `App.jsx`에 `/meetings`, `/meetings/new`, `/meetings/:publicId`, `/meetings/:publicId/manage` 라우트를 추가한다.
+    - `utils/meetingApi.js`를 추가해 Meeting API 호출을 한 곳에 모은다.
+    - API 함수는 `getMyMeetings`, `createMeeting`, `getPublicMeeting`, `getManagedMeeting`, `updateMeeting`, `updateMeetingStatus`, `deleteMeeting`, `upsertAttendance`, `updateAttendance`, `deleteAttendance`, `createMeetingCompetition`, `deleteMeetingCompetition`으로 나눈다.
+    - Meeting UI는 `competition-theme.css` 변수를 사용하고 새 hard-coded Competition 색상을 추가하지 않는다.
   - 테스트 설명:
-    - 공개 화면에서 이름과 성별 입력 후 참석 상태를 저장하는 흐름을 검증한다.
-    - 모임장이 참석자를 확인하고 경기표 생성 액션에 도달하는 UI 상태를 검증한다.
+    - API client 함수가 문서화된 endpoint와 HTTP method를 사용하는지 단위 테스트로 검증한다.
+    - 라우트가 의도한 페이지 컴포넌트로 연결되는지 렌더링 가능한 수준에서 확인한다.
   - 검증 기준:
-    - 관련 프론트 단위 테스트 또는 수동 검증 결과를 Verification Log에 기록한다.
+    - `node --test` 기반 관련 테스트가 통과하거나, 프로젝트 규칙상 실행하지 못한 경우 실행 생략 사유를 Verification Log에 기록한다.
+
+- [ ] `feat(meeting): add my meetings list UI`
+  - 구현:
+    - `/meetings`에서 로그인 사용자가 만든 모임 목록을 조회한다.
+    - 각 모임 카드에는 제목, 날짜/시간, 코트 수, 경기 수, 참석/미정/불참 카운트, 경기표 생성 여부를 표시한다.
+    - 목록 상단에는 `모임 만들기` 진입 버튼을 둔다.
+    - 각 모임에서 `관리`, `공유`, `삭제` 액션을 제공한다.
+    - 삭제는 확인 후 owner 삭제 API를 호출하고 목록에서 제거한다.
+  - 테스트 설명:
+    - 목록 응답이 비어 있으면 빈 상태가 보인다.
+    - 목록 응답이 있으면 모임 정보와 관리/공유 액션이 보인다.
+    - 삭제 성공 시 해당 모임이 목록에서 사라지고 성공 메시지가 보인다.
+  - 검증 기준:
+    - 내 모임 목록을 열고 관리 화면으로 이동할 수 있다.
+
+- [ ] `feat(meeting): add meeting create wizard UI`
+  - 구현:
+    - `/meetings/new`에 목업 기준 2단계 생성 폼을 만든다.
+    - 1단계는 제목, 날짜, 시작/종료 시간, note를 입력한다.
+    - 2단계는 정원 방식 없음/총 정원/성별 정원, 코트 수, 총 경기 수를 입력한다.
+    - 총 정원과 성별 정원 입력은 선택한 정원 방식에 맞는 필드만 노출한다.
+    - 생성 성공 시 `/meetings/{publicId}/manage`로 이동한다.
+  - 테스트 설명:
+    - 필수값 누락, 종료 시간이 시작 시간보다 빠르거나 같은 경우 생성 버튼을 막거나 오류를 표시한다.
+    - 정원 방식 변경 시 상호 배타 필드가 올바르게 표시된다.
+    - 생성 성공 후 관리 화면 경로로 이동한다.
+  - 검증 기준:
+    - 로그인 사용자가 목업의 2단계 흐름으로 모임을 만들 수 있다.
+
+- [ ] `feat(meeting): add public attendance UI`
+  - 구현:
+    - `/meetings/:publicId`에서 비로그인 사용자가 공개 모임 정보를 볼 수 있게 한다.
+    - 참석/미정/불참 카운트와 성별별 참석 명단을 표시한다.
+    - 이름, 성별, 참석 상태를 입력해 참석 응답을 생성하거나 기존 응답을 수정할 수 있는 폼 또는 팝업을 제공한다.
+    - 마감, 삭제, 경기표 생성 완료, 정원 초과 실패 메시지를 사용자가 다음 행동을 알 수 있게 표시한다.
+    - 공유 링크 복사 액션을 제공한다.
+  - 테스트 설명:
+    - 공개 조회 성공 시 모임 정보와 참석 현황이 보인다.
+    - 이름/성별/참석 상태 저장 성공 후 최신 참석 현황이 반영된다.
+    - 정원 초과나 마감 상태에서는 API 오류 메시지가 표시된다.
+  - 검증 기준:
+    - 비로그인 사용자가 공개 링크에서 참석 상태를 남기고 수정할 수 있다.
+
+- [ ] `feat(meeting): add meeting owner manage UI`
+  - 구현:
+    - `/meetings/:publicId/manage`에서 owner 전용 상세 정보를 조회한다.
+    - 모임 정보 수정, 참석 마감/재오픈, 공유 링크 복사, 모임 삭제를 제공한다.
+    - owner는 참석자의 이름, 성별, 참석 상태를 수정하거나 삭제할 수 있다.
+    - `ATTENDING` 참석자로 경기표 생성 액션을 제공하고, 성공 시 생성된 Competition 상세로 이동하는 링크를 보여준다.
+    - 연결된 Competition 삭제 액션을 제공하고 삭제 후 참석 응답 수정이 다시 가능하도록 화면 상태를 갱신한다.
+  - 테스트 설명:
+    - owner 상세 조회 성공 시 참석자 목록과 owner 액션이 보인다.
+    - 참석자 수정/삭제 성공 시 목록과 카운트가 갱신된다.
+    - 경기표 생성 성공 시 Competition 링크가 보인다.
+    - 경기표 삭제 성공 시 Meeting의 competition 연결 상태가 해제되어 보인다.
+  - 검증 기준:
+    - 모임장이 참석자를 확정하고 경기표 생성/삭제 흐름까지 관리할 수 있다.
 
 ## 6. Development Validation
 
@@ -337,6 +391,7 @@ node --test src/tennisFolio/src/**/*.test.mjs
 | 2026-06-26 | `.\gradlew.bat test --tests com.tennisfolio.Tennisfolio.meeting.*` | PASS | 참석 변경 시 Meeting 비관적 락 조회 사용과 기존 Meeting 기능 회귀 확인 |
 | 2026-06-26 | `.\gradlew.bat test --tests com.tennisfolio.Tennisfolio.meeting.*` | PASS | 총 정원/성별 정원 상호 배타 validation과 정원 방식 선택 검증 |
 | 2026-06-27 | 코드 변경: Meeting 기반 Competition 생성/삭제 API와 테스트 추가 | SKIPPED | 프로젝트 규칙상 명시 승인 없이 Gradle 테스트를 실행하지 않음 |
+| 2026-06-29 | `node --test src\tennisFolio\src\utils\meetingApi.test.mjs` | PASS | Meeting UI 라우트와 Meeting API client endpoint 계약 검증 |
 
 ## 10. Change Log
 

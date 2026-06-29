@@ -84,6 +84,11 @@ class MeetingControllerTest {
                         "Saturday doubles",
                         LocalDateTime.of(2026, 7, 4, 10, 0),
                         LocalDateTime.of(2026, 7, 4, 12, 0),
+                        2,
+                        6,
+                        10L,
+                        3L,
+                        2L,
                         "OPEN",
                         false
                 )));

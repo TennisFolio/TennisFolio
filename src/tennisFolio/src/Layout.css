@@ -109,7 +109,8 @@ body {
   line-height: 1;
 }
 
-.header-my-competitions-button {
+.header-my-competitions-button,
+.header-my-meetings-button {
   flex: 0 0 auto;
   background: #ffffff;
   border-color: #ffffff;

@@ -111,6 +111,13 @@ function Layout({ children, currentUser, onLogout }) {
                 </button>
                 <button
                   type="button"
+                  className="auth-button header-my-meetings-button"
+                  onClick={() => navigate('/meetings')}
+                >
+                  내 모임
+                </button>
+                <button
+                  type="button"
                   className="auth-button auth-button-account"
                   aria-label="프로필"
                   onClick={() => setSheetMode('account')}
