@@ -208,7 +208,8 @@ class MeetingControllerTest {
                 6,
                 "OPEN",
                 ownedByCurrentUser,
-                false
+                false,
+                List.of()
         );
     }
 }

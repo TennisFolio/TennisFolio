@@ -99,8 +99,11 @@ class MeetingAttendanceCommandServiceTest {
                 new MeetingAttendanceUpsertRequest(null, "Alex Kim", "MALE", "ATTENDING")
         ))
                 .isInstanceOf(ResponseStatusException.class)
-                .extracting("statusCode")
-                .isEqualTo(HttpStatus.CONFLICT);
+                .satisfies(error -> {
+                    ResponseStatusException exception = (ResponseStatusException) error;
+                    assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+                    assertThat(exception.getReason()).isEqualTo("이미 같은 이름으로 참석 응답이 등록되었습니다.");
+                });
         verify(attendanceRepository, never()).save(any());
     }
 
@@ -116,8 +119,11 @@ class MeetingAttendanceCommandServiceTest {
                 new MeetingAttendanceUpsertRequest(null, "Alex Kim", "MALE", "ATTENDING")
         ))
                 .isInstanceOf(ResponseStatusException.class)
-                .extracting("statusCode")
-                .isEqualTo(HttpStatus.CONFLICT);
+                .satisfies(error -> {
+                    ResponseStatusException exception = (ResponseStatusException) error;
+                    assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+                    assertThat(exception.getReason()).isEqualTo("참석 체크가 마감되었습니다.");
+                });
     }
 
     @Test
@@ -131,8 +137,11 @@ class MeetingAttendanceCommandServiceTest {
                 new MeetingAttendanceUpsertRequest(null, "Alex Kim", "MALE", "ATTENDING")
         ))
                 .isInstanceOf(ResponseStatusException.class)
-                .extracting("statusCode")
-                .isEqualTo(HttpStatus.CONFLICT);
+                .satisfies(error -> {
+                    ResponseStatusException exception = (ResponseStatusException) error;
+                    assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+                    assertThat(exception.getReason()).isEqualTo("이미 경기표가 생성된 모임입니다.");
+                });
     }
 
     @Test
@@ -167,8 +176,11 @@ class MeetingAttendanceCommandServiceTest {
                 new MeetingAttendanceUpsertRequest(null, "Alex Kim", "MALE", "ATTENDING")
         ))
                 .isInstanceOf(ResponseStatusException.class)
-                .extracting("statusCode")
-                .isEqualTo(HttpStatus.CONFLICT);
+                .satisfies(error -> {
+                    ResponseStatusException exception = (ResponseStatusException) error;
+                    assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+                    assertThat(exception.getReason()).isEqualTo("참석 가능 인원이 모두 찼습니다.");
+                });
     }
 
     @Test
@@ -189,8 +201,11 @@ class MeetingAttendanceCommandServiceTest {
                 new MeetingAttendanceUpsertRequest(null, "Alex Kim", "MALE", "ATTENDING")
         ))
                 .isInstanceOf(ResponseStatusException.class)
-                .extracting("statusCode")
-                .isEqualTo(HttpStatus.CONFLICT);
+                .satisfies(error -> {
+                    ResponseStatusException exception = (ResponseStatusException) error;
+                    assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+                    assertThat(exception.getReason()).isEqualTo("해당 성별의 참석 가능 인원이 모두 찼습니다.");
+                });
     }
 
     @Test

@@ -25,4 +25,13 @@ class GlobalExceptionHandlerTest {
         assertEquals("FORBIDDEN", response.getBody().getCode());
         assertEquals("관리자 비밀번호가 올바르지 않습니다.", response.getBody().getMessage());
     }
+
+    @Test
+    void handleException_returnsKoreanFallbackMessage() {
+        ResponseEntity<ResponseDTO<Void>> response = handler.handleException(new RuntimeException("boom"));
+
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+        assertEquals("INTERNAL_SERVER_ERROR", response.getBody().getCode());
+        assertEquals("요청을 처리하지 못했습니다. 잠시 후 다시 시도해주세요.", response.getBody().getMessage());
+    }
 }

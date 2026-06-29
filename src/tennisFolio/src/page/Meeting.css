@@ -37,12 +37,17 @@
 }
 
 .meeting-header h1,
+.meeting-panel h1,
 .meeting-panel h2,
 .meeting-card h2 {
   margin: 0;
   color: var(--competition-text-strong);
   font-weight: 900;
   line-height: 1.18;
+}
+
+.meeting-panel h1 {
+  font-size: 22px;
 }
 
 .meeting-header h1 {
@@ -118,6 +123,18 @@
   margin-bottom: 12px;
 }
 
+.meeting-manage-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.meeting-feedback-stack {
+  display: grid;
+  gap: 8px;
+  margin-top: 10px;
+}
+
 .meeting-grid {
   display: grid;
   gap: 10px;
@@ -157,6 +174,25 @@
   min-height: 88px;
   padding: 10px;
   resize: vertical;
+}
+
+.meeting-muted {
+  margin: 0;
+  color: var(--competition-text-muted);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.meeting-note-box,
+.meeting-state-note {
+  border: 1px solid var(--competition-border);
+  border-radius: 7px;
+  background: var(--competition-surface-soft);
+  color: var(--competition-text-body);
+  padding: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.45;
 }
 
 .meeting-button {
@@ -210,6 +246,21 @@
   gap: 7px;
 }
 
+.meeting-status-options {
+  display: inline-grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+}
+
+.meeting-button.status-option {
+  min-height: 30px;
+  border-radius: 999px;
+  padding: 0 8px;
+  font-size: 12px;
+}
+
 .meeting-chip {
   display: inline-flex;
   align-items: center;
@@ -251,6 +302,67 @@
   border-color: var(--competition-female-bg);
   background: var(--competition-female-bg);
   color: var(--competition-female);
+}
+
+.meeting-roster-panel {
+  align-content: start;
+}
+
+.meeting-roster-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.meeting-attendee-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 15px;
+  height: 15px;
+  margin-left: 6px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.1);
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 1;
+  padding: 0;
+}
+
+.meeting-confirm-panel {
+  margin-top: 10px;
+  border: 1px solid var(--competition-border-strong);
+  border-radius: 8px;
+  background: var(--competition-surface);
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.1);
+  padding: 14px;
+}
+
+.meeting-confirm-panel strong {
+  display: block;
+  color: var(--competition-text-strong);
+  font-size: 15px;
+  margin-bottom: 4px;
+}
+
+.meeting-confirm-panel p {
+  margin: 0;
+  color: var(--competition-text-body);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.meeting-confirm-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 10px;
 }
 
 .meeting-stepper {
@@ -297,7 +409,7 @@
   color: var(--competition-ok);
 }
 
-@media (max-width: 420px) {
+@media (max-width: 640px) {
   .meeting-grid.two,
   .meeting-toggle {
     grid-template-columns: 1fr;

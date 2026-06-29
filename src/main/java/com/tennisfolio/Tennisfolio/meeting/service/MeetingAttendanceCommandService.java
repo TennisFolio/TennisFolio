@@ -107,16 +107,16 @@ public class MeetingAttendanceCommandService {
 
     private void ensureAttendanceEditable(Meeting meeting) {
         if (meeting.getStatus() != MeetingStatus.OPEN) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Meeting is not open");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "참석 체크가 마감되었습니다.");
         }
         if (meeting.hasCompetition()) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Meeting already has competition");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "이미 경기표가 생성된 모임입니다.");
         }
     }
 
     private String requireParticipantName(String participantName) {
         if (participantName == null || participantName.isBlank()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "participantName is required");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "이름을 입력해주세요.");
         }
         return participantName.trim();
     }
@@ -125,7 +125,7 @@ public class MeetingAttendanceCommandService {
         try {
             return Gender.valueOf(gender);
         } catch (RuntimeException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid gender");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "성별 값이 올바르지 않습니다.");
         }
     }
 
@@ -133,13 +133,13 @@ public class MeetingAttendanceCommandService {
         try {
             return AttendanceStatus.valueOf(status);
         } catch (RuntimeException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid attendanceStatus");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "참석 상태 값이 올바르지 않습니다.");
         }
     }
 
     private void rejectDuplicateName(Meeting meeting, String participantName) {
         if (attendanceRepository.existsByMeetingAndParticipantNameAndDeletedAtIsNull(meeting, participantName)) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Participant name already exists");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "이미 같은 이름으로 참석 응답이 등록되었습니다.");
         }
     }
 
@@ -149,7 +149,7 @@ public class MeetingAttendanceCommandService {
                 participantName,
                 attendanceId
         )) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Participant name already exists");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "이미 같은 이름으로 참석 응답이 등록되었습니다.");
         }
     }
 
@@ -172,7 +172,7 @@ public class MeetingAttendanceCommandService {
     private void ensureTotalCapacityAvailable(Meeting meeting, MeetingAttendance currentAttendance) {
         long otherAttendingCount = countTotalAttendingExcludingCurrent(meeting, currentAttendance);
         if (otherAttendingCount >= meeting.getMaxParticipants()) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Meeting attendance capacity exceeded");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "참석 가능 인원이 모두 찼습니다.");
         }
     }
 
@@ -200,7 +200,7 @@ public class MeetingAttendanceCommandService {
         long otherGenderAttendingCount =
                 countGenderAttendingExcludingCurrent(meeting, currentAttendance, requestedGender);
         if (otherGenderAttendingCount >= genderCapacity) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Meeting gender capacity exceeded");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "해당 성별의 참석 가능 인원이 모두 찼습니다.");
         }
     }
 
@@ -230,7 +230,7 @@ public class MeetingAttendanceCommandService {
 
     private void requireAuthenticated(Long userId) {
         if (userId == null) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authentication is required");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "로그인이 필요합니다.");
         }
     }
 }

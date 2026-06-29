@@ -48,7 +48,7 @@ public class MeetingCompetitionCreateService {
     public MeetingCompetitionCreateResponse createCompetition(String publicId, Long ownerUserId) {
         Meeting meeting = findOwnedMeetingForUpdate(publicId, ownerUserId);
         if (meeting.hasCompetition()) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Meeting already has competition");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "이미 경기표가 생성된 모임입니다.");
         }
 
         CompetitionCreateRequest request = toCompetitionCreateRequest(meeting, findAttendingParticipants(meeting));
@@ -62,7 +62,7 @@ public class MeetingCompetitionCreateService {
     public void deleteCompetition(String publicId, Long ownerUserId) {
         Meeting meeting = findOwnedMeetingForUpdate(publicId, ownerUserId);
         if (!meeting.hasCompetition()) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Meeting has no competition");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "삭제할 경기표가 없습니다.");
         }
 
         Competition competition = competitionRepository
@@ -113,7 +113,7 @@ public class MeetingCompetitionCreateService {
 
     private void requireAuthenticated(Long userId) {
         if (userId == null) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authentication is required");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "로그인이 필요합니다.");
         }
     }
 }

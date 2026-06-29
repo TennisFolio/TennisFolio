@@ -31,13 +31,22 @@ public class MeetingQueryService {
 
     @Transactional(readOnly = true)
     public MeetingDetailResponse getMeeting(String publicId, Long currentUserId) {
-        return MeetingDetailResponse.from(findActiveMeeting(publicId), currentUserId);
+        Meeting meeting = findActiveMeeting(publicId);
+        return MeetingDetailResponse.from(
+                meeting,
+                currentUserId,
+                attendanceRepository.findByMeetingAndDeletedAtIsNullOrderByIdAsc(meeting)
+        );
     }
 
     @Transactional(readOnly = true)
     public MeetingDetailResponse getManagedMeeting(String publicId, Long ownerUserId) {
         Meeting meeting = findOwnedMeeting(publicId, ownerUserId);
-        return MeetingDetailResponse.from(meeting, ownerUserId);
+        return MeetingDetailResponse.from(
+                meeting,
+                ownerUserId,
+                attendanceRepository.findByMeetingAndDeletedAtIsNullOrderByIdAsc(meeting)
+        );
     }
 
     @Transactional(readOnly = true)
@@ -80,7 +89,7 @@ public class MeetingQueryService {
 
     private void requireAuthenticated(Long userId) {
         if (userId == null) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authentication is required");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "로그인이 필요합니다.");
         }
     }
 }

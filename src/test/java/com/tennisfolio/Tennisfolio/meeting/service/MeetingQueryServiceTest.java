@@ -43,12 +43,15 @@ class MeetingQueryServiceTest {
         Meeting meeting = meeting(10L);
         when(meetingRepository.findByPublicIdAndDeletedAtIsNull("meeting-public-id"))
                 .thenReturn(Optional.of(meeting));
+        when(attendanceRepository.findByMeetingAndDeletedAtIsNullOrderByIdAsc(meeting))
+                .thenReturn(List.of());
 
         MeetingDetailResponse response = service.getMeeting("meeting-public-id", 10L);
 
         assertThat(response.getPublicId()).isEqualTo("meeting-public-id");
         assertThat(response.getOwnedByCurrentUser()).isTrue();
         assertThat(response.getCompetitionCreated()).isFalse();
+        assertThat(response.getAttendances()).isEmpty();
     }
 
     @Test

@@ -24,6 +24,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -138,7 +139,8 @@ class MeetingSecurityConfigTest {
                 6,
                 "OPEN",
                 false,
-                false
+                false,
+                List.of()
         );
     }
 }

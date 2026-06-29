@@ -28,6 +28,8 @@ public interface MeetingAttendanceRepository extends JpaRepository<MeetingAttend
             AttendanceStatus attendanceStatus
     );
 
+    List<MeetingAttendance> findByMeetingAndDeletedAtIsNullOrderByIdAsc(Meeting meeting);
+
     long countByMeetingAndAttendanceStatusAndDeletedAtIsNull(Meeting meeting, AttendanceStatus attendanceStatus);
 
     long countByMeetingAndGenderAndAttendanceStatusAndDeletedAtIsNull(

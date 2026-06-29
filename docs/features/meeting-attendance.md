@@ -392,6 +392,11 @@ node --test src/tennisFolio/src/**/*.test.mjs
 | 2026-06-26 | `.\gradlew.bat test --tests com.tennisfolio.Tennisfolio.meeting.*` | PASS | 총 정원/성별 정원 상호 배타 validation과 정원 방식 선택 검증 |
 | 2026-06-27 | 코드 변경: Meeting 기반 Competition 생성/삭제 API와 테스트 추가 | SKIPPED | 프로젝트 규칙상 명시 승인 없이 Gradle 테스트를 실행하지 않음 |
 | 2026-06-29 | `node --test src\tennisFolio\src\utils\meetingApi.test.mjs` | PASS | Meeting UI 라우트와 Meeting API client endpoint 계약 검증 |
+| 2026-06-29 | `node --test src\tennisFolio\src\page\MeetingManage.test.mjs` | PASS | `/meetings/{publicId}/manage` mockup 대시보드 패널, roster, 삭제 확인 UI 계약 검증 |
+| 2026-06-29 | `node --test src\tennisFolio\src\page\MeetingManage.test.mjs src\tennisFolio\src\page\Meetings.test.mjs src\tennisFolio\src\utils\meetingApi.test.mjs` | PASS | 관리 화면 내 정보 nickname 표시와 상태 클릭 즉시 저장 계약 검증 |
+| 2026-06-29 | `node --test src\tennisFolio\src\page\MeetingManage.test.mjs src\tennisFolio\src\page\Meetings.test.mjs src\tennisFolio\src\utils\meetingApi.test.mjs` | PASS | 관리 화면 note prefix, 수정 안내 문구, 운영 메모 제거 검증 |
+| 2026-06-29 | `node --test src\tennisFolio\src\page\MeetingManage.test.mjs src\tennisFolio\src\page\Meetings.test.mjs src\tennisFolio\src\utils\meetingApi.test.mjs` | PASS | 관리 화면 desktop/mobile 공통 1열 레이아웃 검증 |
+| 2026-06-29 | `node --test src\tennisFolio\src\page\MeetingManage.test.mjs src\tennisFolio\src\page\Meetings.test.mjs src\tennisFolio\src\utils\meetingApi.test.mjs` | PASS | 관리 화면 desktop/mobile 공통 520px 폭 검증 |
 
 ## 10. Change Log
 

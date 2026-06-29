@@ -74,7 +74,7 @@ public class MeetingCommandService {
         if (meeting.hasCompetition() && scheduleConditionChanged(meeting, request)) {
             throw new ResponseStatusException(
                     HttpStatus.CONFLICT,
-                    "Cannot change courtCount or totalGames after competition creation"
+                    "경기표가 생성된 뒤에는 코트 수와 경기 수를 변경할 수 없습니다."
             );
         }
         meeting.updateDetails(
@@ -123,16 +123,16 @@ public class MeetingCommandService {
             Integer totalGames
     ) {
         if (title == null || title.isBlank()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "title is required");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "모임 이름을 입력해주세요.");
         }
         if (startAt == null || endAt == null || !endAt.isAfter(startAt)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "endAt must be after startAt");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "종료 시간은 시작 시간보다 늦어야 합니다.");
         }
         if (courtCount == null || courtCount < 1) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "courtCount must be positive");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "코트 수는 1개 이상이어야 합니다.");
         }
         if (totalGames == null || totalGames < 1) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "totalGames must be positive");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "경기 수는 1개 이상이어야 합니다.");
         }
     }
 
@@ -149,7 +149,7 @@ public class MeetingCommandService {
         if (maxParticipants != null && (maxMaleParticipants != null || maxFemaleParticipants != null)) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
-                    "Use either maxParticipants or gender capacity, not both"
+                    "전체 정원과 성별 정원은 함께 설정할 수 없습니다."
             );
         }
     }
@@ -158,13 +158,13 @@ public class MeetingCommandService {
         try {
             return MeetingStatus.valueOf(status);
         } catch (RuntimeException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid meeting status");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "모임 상태 값이 올바르지 않습니다.");
         }
     }
 
     private void requireAuthenticated(Long userId) {
         if (userId == null) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authentication is required");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "로그인이 필요합니다.");
         }
     }
 }

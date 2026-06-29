@@ -2,10 +2,12 @@ package com.tennisfolio.Tennisfolio.meeting.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.tennisfolio.Tennisfolio.meeting.entity.Meeting;
+import com.tennisfolio.Tennisfolio.meeting.entity.MeetingAttendance;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @AllArgsConstructor
@@ -27,8 +29,17 @@ public class MeetingDetailResponse {
     private String status;
     private Boolean ownedByCurrentUser;
     private Boolean competitionCreated;
+    private List<MeetingAttendanceResponse> attendances;
 
     public static MeetingDetailResponse from(Meeting meeting, Long currentUserId) {
+        return from(meeting, currentUserId, List.of());
+    }
+
+    public static MeetingDetailResponse from(
+            Meeting meeting,
+            Long currentUserId,
+            List<MeetingAttendance> attendances
+    ) {
         return new MeetingDetailResponse(
                 meeting.getPublicId(),
                 meeting.getOwnerUserId(),
@@ -44,7 +55,10 @@ public class MeetingDetailResponse {
                 meeting.getTotalGames(),
                 meeting.getStatus().name(),
                 meeting.isOwnedBy(currentUserId),
-                meeting.hasCompetition()
+                meeting.hasCompetition(),
+                attendances.stream()
+                        .map(MeetingAttendanceResponse::from)
+                        .toList()
         );
     }
 }
