@@ -142,6 +142,36 @@ class MeetingCompetitionCreateServiceTest {
     }
 
     @Test
+    void createCompetition_rejectsWhenAttendingParticipantsAreLessThanCourtCapacity() {
+        Meeting meeting = meeting(null);
+        when(meetingRepository.findByPublicIdAndOwnerUserIdAndDeletedAtIsNullForUpdate("meeting-public-id", 10L))
+                .thenReturn(Optional.of(meeting));
+        when(attendanceRepository.findByMeetingAndAttendanceStatusAndDeletedAtIsNull(
+                meeting,
+                AttendanceStatus.ATTENDING
+        )).thenReturn(List.of(
+                attendance(meeting, "Alex Kim", Gender.MALE, AttendanceStatus.ATTENDING),
+                attendance(meeting, "Ben Park", Gender.MALE, AttendanceStatus.ATTENDING),
+                attendance(meeting, "Chris Lee", Gender.MALE, AttendanceStatus.ATTENDING),
+                attendance(meeting, "Dana Choi", Gender.MALE, AttendanceStatus.ATTENDING),
+                attendance(meeting, "Eun Seo", Gender.FEMALE, AttendanceStatus.ATTENDING)
+        ));
+
+        assertThatThrownBy(() -> service.createCompetition("meeting-public-id", 10L))
+                .isInstanceOf(ResponseStatusException.class)
+                .satisfies(exception -> {
+                    ResponseStatusException responseStatusException = (ResponseStatusException) exception;
+                    assertThat(responseStatusException.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+                    assertThat(responseStatusException.getReason())
+                            .isEqualTo("코트 수에 비해 참석자가 적습니다. 참석자를 늘리거나 코트 수를 줄여주세요.");
+                });
+        verify(competitionCommandService, never()).createCompetitionResult(
+                any(CompetitionCreateRequest.class),
+                anyLong()
+        );
+    }
+
+    @Test
     void deleteCompetition_softDeletesConnectedCompetitionAndClearsMeetingConnection() {
         Meeting meeting = meeting(200L);
         Competition competition = competition(200L, "competition-public-id", 10L);

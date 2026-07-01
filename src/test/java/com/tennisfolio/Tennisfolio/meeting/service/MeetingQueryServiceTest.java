@@ -1,6 +1,8 @@
 package com.tennisfolio.Tennisfolio.meeting.service;
 
 import com.tennisfolio.Tennisfolio.exception.NotFoundException;
+import com.tennisfolio.Tennisfolio.matching.entity.Competition;
+import com.tennisfolio.Tennisfolio.matching.repository.CompetitionRepository;
 import com.tennisfolio.Tennisfolio.meeting.domain.AttendanceStatus;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingDetailResponse;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingSummaryResponse;
@@ -31,11 +33,18 @@ class MeetingQueryServiceTest {
     @Mock
     MeetingAttendanceRepository attendanceRepository;
 
+    @Mock
+    CompetitionRepository competitionRepository;
+
     MeetingQueryService service;
 
     @BeforeEach
     void setUp() {
-        service = new MeetingQueryService(meetingRepository, attendanceRepository);
+        service = new MeetingQueryService(
+                meetingRepository,
+                attendanceRepository,
+                competitionRepository
+        );
     }
 
     @Test
@@ -52,6 +61,24 @@ class MeetingQueryServiceTest {
         assertThat(response.getOwnedByCurrentUser()).isTrue();
         assertThat(response.getCompetitionCreated()).isFalse();
         assertThat(response.getAttendances()).isEmpty();
+    }
+
+    @Test
+    void getMeeting_returnsCompetitionPublicIdWhenMeetingHasCompetition() {
+        Meeting meeting = meeting(10L);
+        meeting.connectCompetition(100L);
+        Competition competition = competition("competition-public-id");
+        when(meetingRepository.findByPublicIdAndDeletedAtIsNull("meeting-public-id"))
+                .thenReturn(Optional.of(meeting));
+        when(competitionRepository.findByIdAndDeletedAtIsNull(100L))
+                .thenReturn(Optional.of(competition));
+        when(attendanceRepository.findByMeetingAndDeletedAtIsNullOrderByIdAsc(meeting))
+                .thenReturn(List.of());
+
+        MeetingDetailResponse response = service.getMeeting("meeting-public-id", 10L);
+
+        assertThat(response.getCompetitionCreated()).isTrue();
+        assertThat(response.getCompetitionPublicId()).isEqualTo("competition-public-id");
     }
 
     @Test
@@ -116,5 +143,20 @@ class MeetingQueryServiceTest {
         );
         ReflectionTestUtils.setField(meeting, "publicId", "meeting-public-id");
         return meeting;
+    }
+
+    private static Competition competition(String publicId) {
+        Competition competition = new Competition(
+                "Saturday doubles",
+                2,
+                2,
+                2,
+                6,
+                1L,
+                Competition.CompetitionMode.FIXED_SCHEDULE,
+                10L
+        );
+        ReflectionTestUtils.setField(competition, "publicId", publicId);
+        return competition;
     }
 }

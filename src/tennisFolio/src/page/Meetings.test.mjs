@@ -25,3 +25,12 @@ test('meeting card styles support compact mockup buttons and meta chips', () => 
   assert.match(pageCss, /\.meeting-card-actions\s*\{/);
   assert.match(pageCss, /\.meeting-button\.small\s*\{/);
 });
+
+test('meetings list uses a single auto-dismiss toast for action feedback', () => {
+  assert.match(pageSource, /MeetingToast/);
+  assert.match(pageSource, /const \[notice, setNotice\]/);
+  assert.match(pageSource, /showNotice\('success', '공유 링크를 복사했습니다\.'\)/);
+  assert.match(pageSource, /showNotice\('success', '모임을 삭제했습니다\.'\)/);
+  assert.match(pageSource, /<MeetingToast notice=\{notice\} onClose=\{\(\) => setNotice\(null\)\} \/>/);
+  assert.doesNotMatch(pageSource, /meeting-success/);
+});

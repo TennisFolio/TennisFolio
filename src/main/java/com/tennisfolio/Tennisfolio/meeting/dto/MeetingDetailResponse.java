@@ -15,6 +15,7 @@ public class MeetingDetailResponse {
     private String publicId;
     private Long ownerUserId;
     private Long competitionId;
+    private String competitionPublicId;
     private String title;
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime startAt;
@@ -31,6 +32,45 @@ public class MeetingDetailResponse {
     private Boolean competitionCreated;
     private List<MeetingAttendanceResponse> attendances;
 
+    public MeetingDetailResponse(
+            String publicId,
+            Long ownerUserId,
+            Long competitionId,
+            String title,
+            LocalDateTime startAt,
+            LocalDateTime endAt,
+            String note,
+            Integer maxParticipants,
+            Integer maxMaleParticipants,
+            Integer maxFemaleParticipants,
+            Integer courtCount,
+            Integer totalGames,
+            String status,
+            Boolean ownedByCurrentUser,
+            Boolean competitionCreated,
+            List<MeetingAttendanceResponse> attendances
+    ) {
+        this(
+                publicId,
+                ownerUserId,
+                competitionId,
+                null,
+                title,
+                startAt,
+                endAt,
+                note,
+                maxParticipants,
+                maxMaleParticipants,
+                maxFemaleParticipants,
+                courtCount,
+                totalGames,
+                status,
+                ownedByCurrentUser,
+                competitionCreated,
+                attendances
+        );
+    }
+
     public static MeetingDetailResponse from(Meeting meeting, Long currentUserId) {
         return from(meeting, currentUserId, List.of());
     }
@@ -44,6 +84,35 @@ public class MeetingDetailResponse {
                 meeting.getPublicId(),
                 meeting.getOwnerUserId(),
                 meeting.getCompetitionId(),
+                meeting.getTitle(),
+                meeting.getStartAt(),
+                meeting.getEndAt(),
+                meeting.getNote(),
+                meeting.getMaxParticipants(),
+                meeting.getMaxMaleParticipants(),
+                meeting.getMaxFemaleParticipants(),
+                meeting.getCourtCount(),
+                meeting.getTotalGames(),
+                meeting.getStatus().name(),
+                meeting.isOwnedBy(currentUserId),
+                meeting.hasCompetition(),
+                attendances.stream()
+                        .map(MeetingAttendanceResponse::from)
+                        .toList()
+        );
+    }
+
+    public static MeetingDetailResponse from(
+            Meeting meeting,
+            Long currentUserId,
+            String competitionPublicId,
+            List<MeetingAttendance> attendances
+    ) {
+        return new MeetingDetailResponse(
+                meeting.getPublicId(),
+                meeting.getOwnerUserId(),
+                meeting.getCompetitionId(),
+                competitionPublicId,
                 meeting.getTitle(),
                 meeting.getStartAt(),
                 meeting.getEndAt(),

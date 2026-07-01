@@ -2,6 +2,7 @@ package com.tennisfolio.Tennisfolio.meeting.service;
 
 import com.tennisfolio.Tennisfolio.common.ExceptionCode;
 import com.tennisfolio.Tennisfolio.exception.NotFoundException;
+import com.tennisfolio.Tennisfolio.matching.repository.CompetitionRepository;
 import com.tennisfolio.Tennisfolio.meeting.domain.AttendanceStatus;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingDetailResponse;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingSummaryResponse;
@@ -20,13 +21,16 @@ public class MeetingQueryService {
 
     private final MeetingRepository meetingRepository;
     private final MeetingAttendanceRepository attendanceRepository;
+    private final CompetitionRepository competitionRepository;
 
     public MeetingQueryService(
             MeetingRepository meetingRepository,
-            MeetingAttendanceRepository attendanceRepository
+            MeetingAttendanceRepository attendanceRepository,
+            CompetitionRepository competitionRepository
     ) {
         this.meetingRepository = meetingRepository;
         this.attendanceRepository = attendanceRepository;
+        this.competitionRepository = competitionRepository;
     }
 
     @Transactional(readOnly = true)
@@ -35,6 +39,7 @@ public class MeetingQueryService {
         return MeetingDetailResponse.from(
                 meeting,
                 currentUserId,
+                findCompetitionPublicId(meeting),
                 attendanceRepository.findByMeetingAndDeletedAtIsNullOrderByIdAsc(meeting)
         );
     }
@@ -45,8 +50,19 @@ public class MeetingQueryService {
         return MeetingDetailResponse.from(
                 meeting,
                 ownerUserId,
+                findCompetitionPublicId(meeting),
                 attendanceRepository.findByMeetingAndDeletedAtIsNullOrderByIdAsc(meeting)
         );
+    }
+
+    private String findCompetitionPublicId(Meeting meeting) {
+        if (!meeting.hasCompetition()) {
+            return null;
+        }
+
+        return competitionRepository.findByIdAndDeletedAtIsNull(meeting.getCompetitionId())
+                .map(competition -> competition.getPublicId())
+                .orElse(null);
     }
 
     @Transactional(readOnly = true)

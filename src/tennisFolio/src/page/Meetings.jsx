@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { deleteMeeting, getMyMeetings } from '../utils/meetingApi';
 import './Meeting.css';
+import MeetingToast from './MeetingToast';
 
 function formatDateTime(value) {
   return value ? value.replace('T', ' ').slice(0, 16) : '';
@@ -22,7 +23,7 @@ function Meetings() {
   const navigate = useNavigate();
   const [meetings, setMeetings] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [message, setMessage] = useState('');
+  const [notice, setNotice] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
@@ -55,9 +56,13 @@ function Meetings() {
     };
   }, []);
 
+  const showNotice = (type, message) => {
+    setNotice({ type, message });
+  };
+
   const handleShare = async (publicId) => {
     await copyText(`${window.location.origin}/meetings/${publicId}`);
-    setMessage('공유 링크를 복사했습니다.');
+    showNotice('success', '공유 링크를 복사했습니다.');
   };
 
   const handleDelete = async (meeting) => {
@@ -70,7 +75,7 @@ function Meetings() {
     setMeetings((current) =>
       current.filter((item) => item.publicId !== meeting.publicId),
     );
-    setMessage('모임을 삭제했습니다.');
+    showNotice('success', '모임을 삭제했습니다.');
   };
 
   return (
@@ -94,9 +99,6 @@ function Meetings() {
       {isLoading && <p className="meeting-state">불러오는 중입니다.</p>}
       {!isLoading && errorMessage && (
         <p className="meeting-state meeting-error">{errorMessage}</p>
-      )}
-      {!isLoading && message && (
-        <p className="meeting-state meeting-success">{message}</p>
       )}
       {!isLoading && !errorMessage && meetings.length === 0 && (
         <section className="meeting-state">
@@ -167,6 +169,7 @@ function Meetings() {
           ))}
         </section>
       )}
+      <MeetingToast notice={notice} onClose={() => setNotice(null)} />
     </main>
   );
 }

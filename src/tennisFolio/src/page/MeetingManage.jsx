@@ -11,6 +11,7 @@ import {
   updateMeetingStatus,
 } from '../utils/meetingApi';
 import './Meeting.css';
+import MeetingToast from './MeetingToast';
 
 const statusLabels = {
   ATTENDING: '참석',
@@ -85,7 +86,7 @@ function RosterPanel({ title, tone, attendees, onAskDelete }) {
         <span className={`meeting-chip ${tone}`}>{attendees.length}명</span>
       </div>
       {attendees.length === 0 ? (
-        <p>아직 표시할 참석자가 없습니다.</p>
+        null
       ) : (
         <div className="meeting-attendance-list">
           {attendees.map((attendance) => (
@@ -112,6 +113,33 @@ function RosterPanel({ title, tone, attendees, onAskDelete }) {
   );
 }
 
+function ConfirmModal({ title, description, confirmLabel, onCancel, onConfirm }) {
+  return (
+    <div className="meeting-confirm-backdrop">
+      <div className="meeting-confirm-panel" role="alertdialog" aria-modal="true">
+        <strong>{title}</strong>
+        <p>{description}</p>
+        <div className="meeting-confirm-actions">
+          <button
+            type="button"
+            className="meeting-button"
+            onClick={onCancel}
+          >
+            취소
+          </button>
+          <button
+            type="button"
+            className="meeting-button danger"
+            onClick={onConfirm}
+          >
+            {confirmLabel}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function MeetingManage() {
   const { publicId } = useParams();
   const navigate = useNavigate();
@@ -120,7 +148,9 @@ function MeetingManage() {
   const [ownerStatus, setOwnerStatus] = useState('ATTENDING');
   const [isLoading, setIsLoading] = useState(true);
   const [attendeeToDelete, setAttendeeToDelete] = useState(null);
-  const [message, setMessage] = useState('');
+  const [competitionDeleteRequested, setCompetitionDeleteRequested] =
+    useState(false);
+  const [notice, setNotice] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
 
   const attendances = useMemo(() => normalizeAttendances(meeting), [meeting]);
@@ -179,15 +209,19 @@ function MeetingManage() {
     }
   }, [ownerAttendance]);
 
+  const showNotice = (type, message) => {
+    setNotice({ type, message });
+  };
+
   const handleStatus = async (status) => {
     await updateMeetingStatus(publicId, status);
     await loadMeeting();
-    setMessage(status === 'OPEN' ? '참석 체크를 다시 열었습니다.' : '참석 체크를 마감했습니다.');
+    showNotice('success', status === 'OPEN' ? '참석 체크를 다시 열었습니다.' : '참석 체크를 마감했습니다.');
   };
 
   const handleOwnerAttendance = async (status) => {
     if (!ownerName) {
-      setErrorMessage('프로필 nickname을 먼저 설정해주세요.');
+      showNotice('error', '프로필 nickname을 먼저 설정해주세요.');
       return;
     }
 
@@ -200,11 +234,11 @@ function MeetingManage() {
         attendanceStatus: status,
       });
       await loadMeeting();
-      setMessage('내 참석 상태를 저장했습니다.');
-      setErrorMessage('');
+      showNotice('success', '내 참석 상태를 저장했습니다.');
     } catch (error) {
       setOwnerStatus(ownerAttendance?.attendanceStatus || 'ATTENDING');
-      setErrorMessage(
+      showNotice(
+        'error',
         error.response?.data?.message || '내 참석 상태를 저장하지 못했습니다.',
       );
     }
@@ -213,30 +247,30 @@ function MeetingManage() {
   const handleCreateCompetition = async () => {
     try {
       const response = await createMeetingCompetition(publicId);
-      setMessage('경기표를 생성했습니다.');
+      showNotice('success', '대진표를 생성했습니다.');
       await loadMeeting();
       if (response.data.data?.publicId) {
         navigate(`/competitions/${response.data.data.publicId}`);
       }
     } catch (error) {
-      setErrorMessage(error.response?.data?.message || '경기표를 생성하지 못했습니다.');
+      showNotice('error', error.response?.data?.message || '대진표를 생성하지 못했습니다.');
     }
   };
 
   const handleDeleteCompetition = async () => {
     await deleteMeetingCompetition(publicId);
     await loadMeeting();
-    setMessage('연결된 경기표를 삭제했습니다.');
+    showNotice('success', '연결된 대진표를 삭제했습니다.');
+    setCompetitionDeleteRequested(false);
   };
 
   const handleCopyShareLink = async () => {
     const shareUrl = `${window.location.origin}/meetings/${publicId}`;
     try {
       await navigator.clipboard.writeText(shareUrl);
-      setMessage('공유 링크를 복사했습니다.');
-      setErrorMessage('');
+      showNotice('success', '공유 링크를 복사했습니다.');
     } catch {
-      setErrorMessage(`공유 링크를 복사하지 못했습니다. ${shareUrl}`);
+      showNotice('error', `공유 링크를 복사하지 못했습니다. ${shareUrl}`);
     }
   };
 
@@ -248,11 +282,11 @@ function MeetingManage() {
     try {
       await deleteAttendance(publicId, attendeeToDelete.id);
       await loadMeeting();
-      setMessage(`${attendeeToDelete.participantName} 참석 응답을 삭제했습니다.`);
+      showNotice('success', `${attendeeToDelete.participantName} 참석 응답을 삭제했습니다.`);
       setAttendeeToDelete(null);
-      setErrorMessage('');
     } catch (error) {
-      setErrorMessage(
+      showNotice(
+        'error',
         error.response?.data?.message || '참석 응답을 삭제하지 못했습니다.',
       );
     }
@@ -289,16 +323,8 @@ function MeetingManage() {
         <section className="meeting-panel">
           <div className="meeting-card-title-row">
             <div>
-              <p className="meeting-muted">관리자 대시보드</p>
               <h1>{meeting.title}</h1>
             </div>
-            <button
-              type="button"
-              className="meeting-button danger small"
-              onClick={handleDeleteMeeting}
-            >
-              삭제
-            </button>
           </div>
           <div className="meeting-card-meta">
             <span className="meeting-chip">{formatDate(meeting.startAt)}</span>
@@ -351,24 +377,48 @@ function MeetingManage() {
 
         <section className="meeting-panel">
           <p className="meeting-muted">운영 관리</p>
-          <div className="meeting-grid">
+          <div className="meeting-operation-primary">
+            <div className="meeting-operation-head">
+              <div>
+                <h2>대진표 생성</h2>
+                <p>
+                  참석자 기준으로 대진표를 만들거나 생성된 대진표를 확인합니다.
+                </p>
+              </div>
+              <span className="meeting-chip ok compact">
+                참석 {countByStatus(attendances, 'ATTENDING')}
+              </span>
+            </div>
             {meeting.competitionCreated ? (
-              <button
-                type="button"
-                className="meeting-button danger full"
-                onClick={handleDeleteCompetition}
-              >
-                경기표 삭제
-              </button>
+              <>
+                {meeting.competitionPublicId && (
+                  <button
+                    type="button"
+                    className="meeting-button primary full"
+                    onClick={() => navigate(`/competitions/${meeting.competitionPublicId}`)}
+                  >
+                    대진표 보기
+                  </button>
+                )}
+                <button
+                  type="button"
+                  className="meeting-button danger full"
+                  onClick={() => setCompetitionDeleteRequested(true)}
+                >
+                  대진표 삭제
+                </button>
+              </>
             ) : (
               <button
                 type="button"
                 className="meeting-button primary full"
                 onClick={handleCreateCompetition}
               >
-                참석자로 경기 생성
+                참석자로 대진표 생성
               </button>
             )}
+          </div>
+          <div className="meeting-operation-tools">
             <button
               type="button"
               className="meeting-button full"
@@ -383,6 +433,12 @@ function MeetingManage() {
             >
               모임 수정
             </button>
+          </div>
+          <div className="meeting-operation-status">
+            <div>
+              <strong>참석 체크</strong>
+              <p>{meeting.status === 'OPEN' ? '현재 열림' : '현재 마감'}</p>
+            </div>
             {meeting.status === 'OPEN' ? (
               <button
                 type="button"
@@ -400,10 +456,6 @@ function MeetingManage() {
                 다시 열기
               </button>
             )}
-          </div>
-          <div className="meeting-feedback-stack">
-            {message && <p className="meeting-state meeting-success">{message}</p>}
-            {errorMessage && <p className="meeting-state meeting-error">{errorMessage}</p>}
           </div>
         </section>
 
@@ -431,30 +483,39 @@ function MeetingManage() {
           attendees={groupedAttendances.notAttending}
           onAskDelete={setAttendeeToDelete}
         />
+        <section className="meeting-panel meeting-danger-zone">
+          <div>
+            <h2>모임 삭제</h2>
+          </div>
+          <button
+            type="button"
+            className="meeting-button danger"
+            onClick={handleDeleteMeeting}
+          >
+            삭제
+          </button>
+        </section>
       </div>
 
       {attendeeToDelete && (
-        <div className="meeting-confirm-panel" role="alertdialog">
-          <strong>{attendeeToDelete.participantName} 선수를 삭제하시겠습니까?</strong>
-          <p>삭제하면 이 모임의 참석 응답에서 제거됩니다.</p>
-          <div className="meeting-confirm-actions">
-            <button
-              type="button"
-              className="meeting-button"
-              onClick={() => setAttendeeToDelete(null)}
-            >
-              취소
-            </button>
-            <button
-              type="button"
-              className="meeting-button danger"
-              onClick={handleDeleteAttendance}
-            >
-              삭제
-            </button>
-          </div>
-        </div>
+        <ConfirmModal
+          title={`${attendeeToDelete.participantName} 선수를 삭제하시겠습니까?`}
+          description="삭제하면 이 모임의 참석 응답에서 제거됩니다."
+          confirmLabel="삭제"
+          onCancel={() => setAttendeeToDelete(null)}
+          onConfirm={handleDeleteAttendance}
+        />
       )}
+      {competitionDeleteRequested && (
+        <ConfirmModal
+          title="생성된 대진표를 삭제하시겠습니까?"
+          description="삭제하면 참석자 명단은 유지되고 대진표 연결만 해제됩니다."
+          confirmLabel="대진표 삭제"
+          onCancel={() => setCompetitionDeleteRequested(false)}
+          onConfirm={handleDeleteCompetition}
+        />
+      )}
+      <MeetingToast notice={notice} onClose={() => setNotice(null)} />
     </main>
   );
 }

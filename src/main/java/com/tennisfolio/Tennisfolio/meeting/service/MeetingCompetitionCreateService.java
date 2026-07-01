@@ -51,7 +51,10 @@ public class MeetingCompetitionCreateService {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "이미 경기표가 생성된 모임입니다.");
         }
 
-        CompetitionCreateRequest request = toCompetitionCreateRequest(meeting, findAttendingParticipants(meeting));
+        List<MeetingAttendance> attendingParticipants = findAttendingParticipants(meeting);
+        validateEnoughAttendingParticipants(meeting, attendingParticipants);
+
+        CompetitionCreateRequest request = toCompetitionCreateRequest(meeting, attendingParticipants);
         CompetitionCreationResult result = competitionCommandService.createCompetitionResult(request, ownerUserId);
         Competition competition = result.getCompetition();
         meeting.connectCompetition(competition.getId());
@@ -83,6 +86,15 @@ public class MeetingCompetitionCreateService {
                 meeting,
                 AttendanceStatus.ATTENDING
         );
+    }
+
+    private void validateEnoughAttendingParticipants(Meeting meeting, List<MeetingAttendance> attendances) {
+        if (attendances.size() < meeting.getCourtCount() * 4) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "코트 수에 비해 참석자가 적습니다. 참석자를 늘리거나 코트 수를 줄여주세요."
+            );
+        }
     }
 
     private CompetitionCreateRequest toCompetitionCreateRequest(

@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { getPublicMeeting, upsertAttendance } from '../utils/meetingApi';
 import './Meeting.css';
+import MeetingToast from './MeetingToast';
 
 const emptyAttendance = {
   attendanceId: '',
@@ -20,8 +21,94 @@ function normalizeAttendances(meeting) {
   return meeting?.attendances || meeting?.attendanceResponses || [];
 }
 
+function getRememberedAttendanceKey(publicId) {
+  return `meetingPublic:${publicId}:attendance`;
+}
+
+function getAttendanceForm(attendance) {
+  return {
+    attendanceId: attendance.id || '',
+    participantName: attendance.participantName,
+    gender: attendance.gender,
+    attendanceStatus: attendance.attendanceStatus,
+  };
+}
+
+function forgetRememberedAttendance(publicId) {
+  localStorage.removeItem(getRememberedAttendanceKey(publicId));
+}
+
+function rememberAttendance(publicId, attendance) {
+  const attendanceId = attendance?.id || attendance?.attendanceId;
+
+  if (!attendanceId) {
+    return;
+  }
+
+  localStorage.setItem(
+    getRememberedAttendanceKey(publicId),
+    JSON.stringify({
+      attendanceId,
+      participantName: attendance.participantName,
+    }),
+  );
+}
+
+function findRememberedAttendance(publicId, attendances) {
+  const rememberedValue = localStorage.getItem(getRememberedAttendanceKey(publicId));
+
+  if (!rememberedValue) {
+    return null;
+  }
+
+  try {
+    const remembered = JSON.parse(rememberedValue);
+    const attendance = attendances.find(
+      (attendance) => attendance.id === remembered.attendanceId,
+    );
+
+    if (attendance) {
+      return attendance;
+    }
+  } catch {
+    // Invalid localStorage values are treated the same as stale attendance ids.
+  }
+
+  forgetRememberedAttendance(publicId);
+  return null;
+}
+
 function countByStatus(attendances, status) {
   return attendances.filter((attendance) => attendance.attendanceStatus === status).length;
+}
+
+function countByStatusAndGender(attendances, status, gender) {
+  return attendances.filter(
+    (attendance) =>
+      attendance.attendanceStatus === status && attendance.gender === gender,
+  ).length;
+}
+
+function getCapacityChips(meeting, attendances) {
+  const attendingCount = countByStatus(attendances, 'ATTENDING');
+  const maleCount = countByStatusAndGender(attendances, 'ATTENDING', 'MALE');
+  const femaleCount = countByStatusAndGender(attendances, 'ATTENDING', 'FEMALE');
+
+  if (meeting.maxParticipants) {
+    return [`정원 ${attendingCount}/${meeting.maxParticipants}`];
+  }
+
+  const capacityChips = [];
+
+  if (meeting.maxMaleParticipants) {
+    capacityChips.push(`남성 ${maleCount}/${meeting.maxMaleParticipants}`);
+  }
+
+  if (meeting.maxFemaleParticipants) {
+    capacityChips.push(`여성 ${femaleCount}/${meeting.maxFemaleParticipants}`);
+  }
+
+  return capacityChips.length > 0 ? capacityChips : ['정원 제한 없음'];
 }
 
 function formatDate(startAt) {
@@ -91,15 +178,28 @@ function RosterPanel({ title, tone, attendees }) {
   );
 }
 
+function CapacityChips({ meeting, attendances }) {
+  return (
+    <div className="meeting-capacity-row" aria-label="정원">
+      {getCapacityChips(meeting, attendances).map((label) => (
+        <span className="meeting-chip" key={label}>
+          {label}
+        </span>
+      ))}
+    </div>
+  );
+}
+
 function MeetingPublic() {
   const { publicId } = useParams();
+  const navigate = useNavigate();
   const [meeting, setMeeting] = useState(null);
   const [form, setForm] = useState(emptyAttendance);
   const [hasEntered, setHasEntered] = useState(() =>
     new URLSearchParams(window.location.search).has('entry'),
   );
   const [isLoading, setIsLoading] = useState(true);
-  const [message, setMessage] = useState('');
+  const [notice, setNotice] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
 
   const attendances = useMemo(() => normalizeAttendances(meeting), [meeting]);
@@ -111,7 +211,18 @@ function MeetingPublic() {
   const loadMeeting = useCallback(
     () =>
       getPublicMeeting(publicId).then((response) => {
-        setMeeting(response.data.data);
+        const nextMeeting = response.data.data;
+        const rememberedAttendance = findRememberedAttendance(
+          publicId,
+          normalizeAttendances(nextMeeting),
+        );
+
+        setMeeting(nextMeeting);
+
+        if (rememberedAttendance) {
+          setForm(getAttendanceForm(rememberedAttendance));
+          setHasEntered(true);
+        }
       }),
     [publicId],
   );
@@ -138,25 +249,23 @@ function MeetingPublic() {
 
   const updateField = (field, value) => {
     setForm((current) => ({ ...current, [field]: value }));
-    setErrorMessage('');
-    setMessage('');
+    setNotice(null);
+  };
+
+  const showNotice = (type, message) => {
+    setNotice({ type, message });
   };
 
   const selectAttendance = (attendance) => {
-    setForm({
-      attendanceId: attendance.id || '',
-      participantName: attendance.participantName,
-      gender: attendance.gender,
-      attendanceStatus: attendance.attendanceStatus,
-    });
+    setForm(getAttendanceForm(attendance));
+    rememberAttendance(publicId, attendance);
     setHasEntered(true);
-    setMessage('선택한 응답을 아래에서 수정할 수 있습니다.');
-    setErrorMessage('');
+    showNotice('success', '선택한 응답을 아래에서 수정할 수 있습니다.');
   };
 
   const saveAttendance = async (nextForm) => {
     if (!nextForm.participantName.trim()) {
-      setErrorMessage('이름을 입력해주세요.');
+      showNotice('error', '이름을 입력해주세요.');
       return false;
     }
 
@@ -168,6 +277,7 @@ function MeetingPublic() {
         attendanceStatus: nextForm.attendanceStatus,
       });
       const savedAttendance = response.data.data;
+      rememberAttendance(publicId, savedAttendance || nextForm);
       await loadMeeting();
       setForm({
         attendanceId: savedAttendance?.id ?? nextForm.attendanceId,
@@ -176,15 +286,22 @@ function MeetingPublic() {
         attendanceStatus: savedAttendance?.attendanceStatus ?? nextForm.attendanceStatus,
       });
       setHasEntered(true);
-      setMessage('참석 상태를 저장했습니다.');
-      setErrorMessage('');
+      showNotice('success', '참석 상태를 저장했습니다.');
       return true;
     } catch (error) {
-      setErrorMessage(
+      showNotice(
+        'error',
         error.response?.data?.message || '참석 상태를 저장하지 못했습니다.',
       );
       return false;
     }
+  };
+
+  const handleEnterAsDifferentParticipant = () => {
+    forgetRememberedAttendance(publicId);
+    setForm(emptyAttendance);
+    setHasEntered(false);
+    setNotice(null);
   };
 
   const handleSaveProfile = async () => {
@@ -219,6 +336,7 @@ function MeetingPublic() {
               {formatTimeRange(meeting.startAt, meeting.endAt)}
             </span>
           </div>
+          <CapacityChips meeting={meeting} attendances={attendances} />
           {meeting.note && <p className="meeting-note-box">{meeting.note}</p>}
           <p className="meeting-state-note">
             이미 응답했다면 아래 이름을 눌러 다시 입장하세요.
@@ -297,10 +415,7 @@ function MeetingPublic() {
           </p>
         </section>
 
-        <div className="meeting-feedback-stack">
-          {message && <p className="meeting-state meeting-success">{message}</p>}
-          {errorMessage && <p className="meeting-state meeting-error">{errorMessage}</p>}
-        </div>
+        <MeetingToast notice={notice} onClose={() => setNotice(null)} />
       </main>
     );
   };
@@ -309,10 +424,9 @@ function MeetingPublic() {
     const shareUrl = `${window.location.origin}/meetings/${publicId}`;
     try {
       await navigator.clipboard.writeText(shareUrl);
-      setMessage('공유 링크를 복사했습니다.');
-      setErrorMessage('');
+      showNotice('success', '공유 링크를 복사했습니다.');
     } catch {
-      setErrorMessage(`공유 링크를 복사하지 못했습니다. ${shareUrl}`);
+      showNotice('error', `공유 링크를 복사하지 못했습니다. ${shareUrl}`);
     }
   };
 
@@ -353,6 +467,7 @@ function MeetingPublic() {
           <span className="meeting-chip">{meeting.courtCount}코트</span>
           <span className="meeting-chip">{meeting.totalGames}경기</span>
         </div>
+        <CapacityChips meeting={meeting} attendances={attendances} />
         {meeting.note && <p className="meeting-note-box">{meeting.note}</p>}
         <div className="meeting-chip-row">
           <span className="meeting-chip ok">
@@ -371,6 +486,15 @@ function MeetingPublic() {
         <button type="button" className="meeting-button full" onClick={handleCopyShareLink}>
           공유 링크 복사
         </button>
+        {meeting.competitionPublicId && (
+          <button
+            type="button"
+            className="meeting-button primary full"
+            onClick={() => navigate(`/competitions/${meeting.competitionPublicId}`)}
+          >
+            경기표 보기
+          </button>
+        )}
       </section>
 
       <section className="meeting-panel" aria-label="내 정보">
@@ -397,6 +521,13 @@ function MeetingPublic() {
         <button type="button" className="meeting-button full" onClick={handleSaveProfile}>
           정보 저장
         </button>
+        <button
+          type="button"
+          className="meeting-button full"
+          onClick={handleEnterAsDifferentParticipant}
+        >
+          다른 이름으로 입장
+        </button>
         <div className="meeting-status-row">
           <span className="meeting-muted">상태</span>
           <div className="meeting-status-options">
@@ -416,10 +547,7 @@ function MeetingPublic() {
         </div>
       </section>
 
-      <div className="meeting-feedback-stack">
-        {message && <p className="meeting-state meeting-success">{message}</p>}
-        {errorMessage && <p className="meeting-state meeting-error">{errorMessage}</p>}
-      </div>
+      <MeetingToast notice={notice} onClose={() => setNotice(null)} />
 
       <RosterPanel
         title="남자 참석자"
