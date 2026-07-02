@@ -13,6 +13,12 @@ test('meeting public page follows mockup detail layout', () => {
   assert.match(pageSource, /handleCopyShareLink/);
 });
 
+test('meeting public detail omits generic public check and my info subtitles', () => {
+  assert.doesNotMatch(pageSource, /<p className="meeting-muted">공개 참석 체크<\/p>/);
+  assert.doesNotMatch(pageSource, /<p className="meeting-muted">내 정보<\/p>/);
+  assert.doesNotMatch(pageSource, /aria-label="내 정보"/);
+});
+
 test('meeting public detail links to generated competition when available', () => {
   assert.match(pageSource, /useNavigate/);
   assert.match(pageSource, /meeting\.competitionPublicId/);
@@ -33,7 +39,8 @@ test('meeting public page shows entry screen before a participant enters', () =>
   assert.match(pageSource, /hasEntered/);
   assert.match(pageSource, /renderEntryScreen/);
   assert.match(pageSource, /처음 입장/);
-  assert.match(pageSource, /이미 응답했다면 아래 이름을 눌러 다시 입장하세요/);
+  assert.match(pageSource, /이미 응답했다면 이름을 선택해 모임에 입장하세요/);
+  assert.doesNotMatch(pageSource, /이미 응답했다면 아래 이름을 눌러 다시 입장하세요/);
   assert.match(pageSource, /참석 여부를 선택하면 참석 현황과 명단을 볼 수 있습니다/);
   assert.doesNotMatch(pageSource, /같은 공개 URL/);
 });

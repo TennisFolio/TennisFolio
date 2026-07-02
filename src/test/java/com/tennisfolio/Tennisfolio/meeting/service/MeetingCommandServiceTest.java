@@ -166,13 +166,13 @@ class MeetingCommandServiceTest {
     }
 
     @Test
-    void updateMeeting_rejectsScheduleConditionChangeAfterCompetitionCreated() {
+    void updateMeeting_rejectsAnyDetailChangeAfterCompetitionCreated() {
         Meeting meeting = meeting(10L);
         meeting.connectCompetition(100L);
         when(meetingRepository.findByPublicIdAndOwnerUserIdAndDeletedAtIsNull("meeting-public-id", 10L))
                 .thenReturn(Optional.of(meeting));
 
-        assertThatThrownBy(() -> service.updateMeeting("meeting-public-id", updateRequest(), 10L))
+        assertThatThrownBy(() -> service.updateMeeting("meeting-public-id", updateRequestWithExistingSchedule(), 10L))
                 .isInstanceOf(ResponseStatusException.class)
                 .extracting("statusCode")
                 .isEqualTo(HttpStatus.CONFLICT);
@@ -229,6 +229,20 @@ class MeetingCommandServiceTest {
                 null,
                 3,
                 8
+        );
+    }
+
+    private static MeetingUpdateRequest updateRequestWithExistingSchedule() {
+        return new MeetingUpdateRequest(
+                "Sunday doubles",
+                LocalDateTime.of(2026, 7, 5, 10, 0),
+                LocalDateTime.of(2026, 7, 5, 12, 0),
+                null,
+                null,
+                null,
+                null,
+                2,
+                6
         );
     }
 

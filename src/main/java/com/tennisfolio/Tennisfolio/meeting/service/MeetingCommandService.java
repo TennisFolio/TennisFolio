@@ -71,10 +71,10 @@ public class MeetingCommandService {
                 request.getMaxMaleParticipants(),
                 request.getMaxFemaleParticipants()
         );
-        if (meeting.hasCompetition() && scheduleConditionChanged(meeting, request)) {
+        if (meeting.hasCompetition()) {
             throw new ResponseStatusException(
                     HttpStatus.CONFLICT,
-                    "경기표가 생성된 뒤에는 코트 수와 경기 수를 변경할 수 없습니다."
+                    "대진표가 생성된 모임은 수정할 수 없습니다. 수정하려면 대진표를 먼저 삭제해 주세요."
             );
         }
         meeting.updateDetails(
@@ -134,11 +134,6 @@ public class MeetingCommandService {
         if (totalGames == null || totalGames < 1) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "경기 수는 1개 이상이어야 합니다.");
         }
-    }
-
-    private boolean scheduleConditionChanged(Meeting meeting, MeetingUpdateRequest request) {
-        return !meeting.getCourtCount().equals(request.getCourtCount())
-                || !meeting.getTotalGames().equals(request.getTotalGames());
     }
 
     private void validateCapacityPolicy(

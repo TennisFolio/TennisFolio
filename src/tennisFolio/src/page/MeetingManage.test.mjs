@@ -5,11 +5,11 @@ import test from 'node:test';
 const pageSource = readFileSync(new URL('./MeetingManage.jsx', import.meta.url), 'utf8');
 const pageCss = readFileSync(new URL('./Meeting.css', import.meta.url), 'utf8');
 
-test('meeting manage page follows mockup dashboard panels', () => {
+test('meeting manage page follows mockup dashboard panels without generic section subtitles', () => {
   assert.match(pageSource, /meeting-manage-grid/);
   assert.match(pageSource, /meeting-note-box/);
-  assert.match(pageSource, /내 정보/);
-  assert.match(pageSource, /운영 관리/);
+  assert.doesNotMatch(pageSource, /내 정보/);
+  assert.doesNotMatch(pageSource, /운영 관리/);
   assert.match(pageSource, /참석자로 대진표 생성/);
   assert.match(pageSource, /공유 링크 복사/);
 });
@@ -73,13 +73,21 @@ test('meeting manage page keeps the same width as mobile meeting pages', () => {
 
 test('meeting manage actions use a natural title and one auto-dismiss toast', () => {
   assert.doesNotMatch(pageSource, /운영 액션/);
-  assert.match(pageSource, /운영 관리/);
   assert.match(pageSource, /MeetingToast/);
   assert.match(pageSource, /const \[notice, setNotice\]/);
   assert.match(pageSource, /showNotice\('success', '공유 링크를 복사했습니다\.'\)/);
   assert.match(pageSource, /showNotice\('success', status === 'OPEN'/);
   assert.match(pageSource, /<MeetingToast notice=\{notice\} onClose=\{\(\) => setNotice\(null\)\} \/>/);
   assert.doesNotMatch(pageSource, /meeting-feedback-stack/);
+});
+
+test('meeting manage shows operation controls before owner attendance controls without generic subtitles', () => {
+  assert.match(
+    pageSource,
+    /meeting-operation-primary[\s\S]*<label className="meeting-field">[\s\S]*<span>이름<\/span>/,
+  );
+  assert.doesNotMatch(pageSource, /<p className="meeting-muted">내 정보<\/p>/);
+  assert.doesNotMatch(pageSource, /<p className="meeting-muted">운영 관리<\/p>/);
 });
 
 test('meeting manage operations separate primary schedule actions from dangerous meeting deletion', () => {
@@ -122,6 +130,20 @@ test('meeting manage operation attendance summary uses a compact chip', () => {
   );
 });
 
+test('meeting manage summary shows participant capacity limits', () => {
+  assert.match(pageSource, /function getCapacityChips\(meeting, attendances\)/);
+  assert.match(pageSource, /meeting\.maxParticipants/);
+  assert.match(pageSource, /meeting\.maxMaleParticipants/);
+  assert.match(pageSource, /meeting\.maxFemaleParticipants/);
+  assert.match(pageSource, /정원 제한 없음/);
+  assert.match(pageSource, /정원 \$\{attendingCount\}\/\$\{meeting\.maxParticipants\}/);
+  assert.match(pageSource, /남성 \$\{maleCount\}\/\$\{meeting\.maxMaleParticipants\}/);
+  assert.match(pageSource, /여성 \$\{femaleCount\}\/\$\{meeting\.maxFemaleParticipants\}/);
+  assert.match(pageSource, /function CapacityChips/);
+  assert.match(pageSource, /<CapacityChips meeting=\{meeting\} attendances=\{attendances\} \/>/);
+  assert.match(pageCss, /\.meeting-capacity-row\s*\{/);
+});
+
 test('meeting manage delete meeting panel keeps a white surface with only the button dangerous', () => {
   assert.match(pageSource, /className="meeting-panel meeting-danger-zone"/);
   assert.doesNotMatch(
@@ -149,6 +171,14 @@ test('meeting manage links to generated competition when available', () => {
   assert.match(pageSource, /meeting\.competitionPublicId/);
   assert.match(pageSource, /navigate\(`\/competitions\/\$\{meeting\.competitionPublicId\}`\)/);
   assert.match(pageSource, /대진표 보기/);
+});
+
+test('meeting manage disables meeting edit when a competition exists', () => {
+  assert.match(pageSource, /const meetingEditDisabled = Boolean\(meeting\?\.competitionCreated\)/);
+  assert.match(pageSource, /disabled=\{meetingEditDisabled\}/);
+  assert.match(pageSource, /aria-describedby=\{meetingEditDisabled \? 'meeting-edit-lock-message' : undefined\}/);
+  assert.match(pageSource, /id="meeting-edit-lock-message"/);
+  assert.match(pageSource, /대진표가 생성된 모임은 수정할 수 없습니다/);
 });
 
 test('meeting manage destructive actions use a centered modal confirmation', () => {

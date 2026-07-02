@@ -339,7 +339,7 @@ function MeetingPublic() {
           <CapacityChips meeting={meeting} attendances={attendances} />
           {meeting.note && <p className="meeting-note-box">{meeting.note}</p>}
           <p className="meeting-state-note">
-            이미 응답했다면 아래 이름을 눌러 다시 입장하세요.
+            이미 응답했다면 이름을 선택해 모임에 입장하세요.
           </p>
 
           <div className="meeting-entry-name-groups">
@@ -455,7 +455,6 @@ function MeetingPublic() {
       <section className="meeting-panel">
         <div className="meeting-card-title-row">
           <div>
-            <p className="meeting-muted">공개 참석 체크</p>
             <h1>{meeting.title}</h1>
           </div>
         </div>
@@ -497,8 +496,7 @@ function MeetingPublic() {
         )}
       </section>
 
-      <section className="meeting-panel" aria-label="내 정보">
-        <p className="meeting-muted">내 정보</p>
+      <section className="meeting-panel">
         <div className="meeting-grid two">
           <label className="meeting-field">
             <span>이름</span>

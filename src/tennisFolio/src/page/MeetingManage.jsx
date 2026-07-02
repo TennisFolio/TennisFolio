@@ -27,6 +27,35 @@ function countByStatus(attendances, status) {
   return attendances.filter((attendance) => attendance.attendanceStatus === status).length;
 }
 
+function countByStatusAndGender(attendances, status, gender) {
+  return attendances.filter(
+    (attendance) =>
+      attendance.attendanceStatus === status && attendance.gender === gender,
+  ).length;
+}
+
+function getCapacityChips(meeting, attendances) {
+  const attendingCount = countByStatus(attendances, 'ATTENDING');
+  const maleCount = countByStatusAndGender(attendances, 'ATTENDING', 'MALE');
+  const femaleCount = countByStatusAndGender(attendances, 'ATTENDING', 'FEMALE');
+
+  if (meeting.maxParticipants) {
+    return [`정원 ${attendingCount}/${meeting.maxParticipants}`];
+  }
+
+  const capacityChips = [];
+
+  if (meeting.maxMaleParticipants) {
+    capacityChips.push(`남성 ${maleCount}/${meeting.maxMaleParticipants}`);
+  }
+
+  if (meeting.maxFemaleParticipants) {
+    capacityChips.push(`여성 ${femaleCount}/${meeting.maxFemaleParticipants}`);
+  }
+
+  return capacityChips.length > 0 ? capacityChips : ['정원 제한 없음'];
+}
+
 function formatDate(startAt) {
   if (!startAt) {
     return '-';
@@ -140,6 +169,18 @@ function ConfirmModal({ title, description, confirmLabel, onCancel, onConfirm })
   );
 }
 
+function CapacityChips({ meeting, attendances }) {
+  return (
+    <div className="meeting-capacity-row" aria-label="정원">
+      {getCapacityChips(meeting, attendances).map((label) => (
+        <span className="meeting-chip" key={label}>
+          {label}
+        </span>
+      ))}
+    </div>
+  );
+}
+
 function MeetingManage() {
   const { publicId } = useParams();
   const navigate = useNavigate();
@@ -163,6 +204,7 @@ function MeetingManage() {
     [attendances],
   );
   const ownerName = currentUser?.nickName?.trim() || '';
+  const meetingEditDisabled = Boolean(meeting?.competitionCreated);
 
   const loadMeeting = useCallback(
     () =>
@@ -334,6 +376,7 @@ function MeetingManage() {
             <span className="meeting-chip">{meeting.courtCount}코트</span>
             <span className="meeting-chip">{meeting.totalGames}경기</span>
           </div>
+          <CapacityChips meeting={meeting} attendances={attendances} />
           {meeting.note && (
             <p className="meeting-note-box">{meeting.note}</p>
           )}
@@ -351,32 +394,6 @@ function MeetingManage() {
         </section>
 
         <section className="meeting-panel">
-          <p className="meeting-muted">내 정보</p>
-          <label className="meeting-field">
-            <span>이름</span>
-            <input value={ownerName} readOnly />
-          </label>
-          <div className="meeting-status-row">
-            <span className="meeting-muted">상태</span>
-            <div className="meeting-status-options">
-              {Object.entries(statusLabels).map(([status, label]) => (
-                <button
-                  type="button"
-                  className={`meeting-button status-option ${
-                    ownerStatus === status ? 'primary' : ''
-                  }`}
-                  key={status}
-                  onClick={() => handleOwnerAttendance(status)}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section className="meeting-panel">
-          <p className="meeting-muted">운영 관리</p>
           <div className="meeting-operation-primary">
             <div className="meeting-operation-head">
               <div>
@@ -429,11 +446,18 @@ function MeetingManage() {
             <button
               type="button"
               className="meeting-button full"
+              disabled={meetingEditDisabled}
+              aria-describedby={meetingEditDisabled ? 'meeting-edit-lock-message' : undefined}
               onClick={() => navigate(`/meetings/${publicId}/edit`)}
             >
               모임 수정
             </button>
           </div>
+          {meetingEditDisabled && (
+            <p className="meeting-muted" id="meeting-edit-lock-message">
+              대진표가 생성된 모임은 수정할 수 없습니다. 수정하려면 대진표를 먼저 삭제해 주세요.
+            </p>
+          )}
           <div className="meeting-operation-status">
             <div>
               <strong>참석 체크</strong>
@@ -456,6 +480,30 @@ function MeetingManage() {
                 다시 열기
               </button>
             )}
+          </div>
+        </section>
+
+        <section className="meeting-panel">
+          <label className="meeting-field">
+            <span>이름</span>
+            <input value={ownerName} readOnly />
+          </label>
+          <div className="meeting-status-row">
+            <span className="meeting-muted">상태</span>
+            <div className="meeting-status-options">
+              {Object.entries(statusLabels).map(([status, label]) => (
+                <button
+                  type="button"
+                  className={`meeting-button status-option ${
+                    ownerStatus === status ? 'primary' : ''
+                  }`}
+                  key={status}
+                  onClick={() => handleOwnerAttendance(status)}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
           </div>
         </section>
 
