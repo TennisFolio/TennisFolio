@@ -271,6 +271,7 @@ function MeetingPublic() {
   const initialNotice = location.state?.meetingNotice || null;
   const [meeting, setMeeting] = useState(null);
   const [form, setForm] = useState(emptyAttendance);
+  const [currentUser, setCurrentUser] = useState(null);
   const [hasEntered, setHasEntered] = useState(() =>
     new URLSearchParams(window.location.search).has('entry'),
   );
@@ -298,6 +299,7 @@ function MeetingPublic() {
             currentUserResult.status === 'fulfilled'
               ? currentUserResult.value.data.data
               : null;
+          setCurrentUser(currentUser);
           const rememberedAttendance = findRememberedAttendance(
             publicId,
             nextAttendances,
@@ -309,12 +311,6 @@ function MeetingPublic() {
           const currentUserForm = getCurrentUserForm(currentUser);
 
           setMeeting(nextMeeting);
-
-          if (rememberedAttendance) {
-            setForm(getAttendanceForm(rememberedAttendance));
-            setHasEntered(true);
-            return;
-          }
 
           if (currentUserAttendance) {
             setForm(getAttendanceForm(currentUserAttendance));
@@ -328,6 +324,12 @@ function MeetingPublic() {
               ...currentUserForm,
               attendanceStatus: current.attendanceStatus,
             }));
+            return;
+          }
+
+          if (rememberedAttendance) {
+            setForm(getAttendanceForm(rememberedAttendance));
+            setHasEntered(true);
           }
         },
       ),
@@ -369,6 +371,9 @@ function MeetingPublic() {
     setNotice({ type, message });
   };
 
+  const currentUserName = currentUser?.nickName?.trim() || '';
+  const isCurrentUserNameLocked = Boolean(currentUserName);
+
   const selectAttendance = (attendance) => {
     setForm(getAttendanceForm(attendance));
     rememberAttendance(publicId, attendance);
@@ -377,7 +382,9 @@ function MeetingPublic() {
   };
 
   const saveAttendance = async (nextForm) => {
-    const participantName = nextForm.participantName.trim();
+    const participantName = (
+      isCurrentUserNameLocked ? currentUserName : nextForm.participantName
+    ).trim();
     const ownerNickName = meeting?.ownerNickName?.trim();
 
     if (!participantName) {
@@ -420,7 +427,11 @@ function MeetingPublic() {
 
   const handleEnterAsDifferentParticipant = () => {
     forgetRememberedAttendance(publicId);
-    setForm(emptyAttendance);
+    setForm({
+      ...emptyAttendance,
+      participantName: isCurrentUserNameLocked ? currentUserName : '',
+      gender: currentUser?.gender || emptyAttendance.gender,
+    });
     setHasEntered(false);
     setNotice(null);
   };
@@ -481,6 +492,7 @@ function MeetingPublic() {
                 <span>이름</span>
                 <input
                   value={form.participantName}
+                  readOnly={isCurrentUserNameLocked}
                   onChange={(event) =>
                     updateField('participantName', event.target.value)
                   }
@@ -535,7 +547,7 @@ function MeetingPublic() {
                         attendance={attendance}
                         key={attendance.id}
                         meeting={meeting}
-                        asButton
+                        asButton={!isCurrentUserNameLocked}
                         onSelect={selectAttendance}
                       />
                     ))}
@@ -641,6 +653,7 @@ function MeetingPublic() {
             <span>이름</span>
             <input
               value={form.participantName}
+              readOnly={isCurrentUserNameLocked}
               onChange={(event) => updateField('participantName', event.target.value)}
             />
           </label>
