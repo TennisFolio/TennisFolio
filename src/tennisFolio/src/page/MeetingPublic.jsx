@@ -1,6 +1,7 @@
-﻿import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { getPublicMeeting, upsertAttendance } from '../utils/meetingApi';
+import { getCurrentUser } from '../utils/authApi';
 import './Meeting.css';
 import MeetingManage from './MeetingManage';
 import MeetingToast from './MeetingToast';
@@ -77,6 +78,33 @@ function findRememberedAttendance(publicId, attendances) {
 
   forgetRememberedAttendance(publicId);
   return null;
+}
+
+function findCurrentUserAttendance(currentUser, attendances) {
+  const nickName = currentUser?.nickName?.trim();
+
+  if (!nickName) {
+    return null;
+  }
+
+  return (
+    attendances.find((attendance) => attendance.participantName === nickName) ||
+    null
+  );
+}
+
+function getCurrentUserForm(currentUser) {
+  const nickName = currentUser?.nickName?.trim();
+
+  if (!nickName) {
+    return null;
+  }
+
+  return {
+    ...emptyAttendance,
+    participantName: nickName,
+    gender: currentUser.gender || emptyAttendance.gender,
+  };
 }
 
 function countByStatus(attendances, status) {
@@ -258,20 +286,51 @@ function MeetingPublic() {
 
   const loadMeeting = useCallback(
     () =>
-      getPublicMeeting(publicId).then((response) => {
-        const nextMeeting = response.data.data;
-        const rememberedAttendance = findRememberedAttendance(
-          publicId,
-          normalizeAttendances(nextMeeting),
-        );
+      Promise.allSettled([getPublicMeeting(publicId), getCurrentUser()]).then(
+        ([meetingResult, currentUserResult]) => {
+          if (meetingResult.status === 'rejected') {
+            throw meetingResult.reason;
+          }
 
-        setMeeting(nextMeeting);
+          const nextMeeting = meetingResult.value.data.data;
+          const nextAttendances = normalizeAttendances(nextMeeting);
+          const currentUser =
+            currentUserResult.status === 'fulfilled'
+              ? currentUserResult.value.data.data
+              : null;
+          const rememberedAttendance = findRememberedAttendance(
+            publicId,
+            nextAttendances,
+          );
+          const currentUserAttendance = findCurrentUserAttendance(
+            currentUser,
+            nextAttendances,
+          );
+          const currentUserForm = getCurrentUserForm(currentUser);
 
-        if (rememberedAttendance) {
-          setForm(getAttendanceForm(rememberedAttendance));
-          setHasEntered(true);
-        }
-      }),
+          setMeeting(nextMeeting);
+
+          if (rememberedAttendance) {
+            setForm(getAttendanceForm(rememberedAttendance));
+            setHasEntered(true);
+            return;
+          }
+
+          if (currentUserAttendance) {
+            setForm(getAttendanceForm(currentUserAttendance));
+            rememberAttendance(publicId, currentUserAttendance);
+            setHasEntered(true);
+            return;
+          }
+
+          if (currentUserForm) {
+            setForm((current) => ({
+              ...currentUserForm,
+              attendanceStatus: current.attendanceStatus,
+            }));
+          }
+        },
+      ),
     [publicId],
   );
 

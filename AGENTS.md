@@ -57,6 +57,7 @@ Keep `Matching` names inside algorithm/domain internals only when they describe 
 - Write documents under `docs/superpowers/specs` and `docs/superpowers/plans` in Korean unless the user explicitly asks for another language.
 - When editing Competition UI styles, follow `docs/competition-design-system.md` and use CSS variables from `src/tennisFolio/src/styles/competition-theme.css`. Do not introduce new hard-coded Competition colors unless the design system document and theme variables are updated in the same change.
 - When doing frontend development, do not create or update frontend test code by default. Only write frontend tests when the user explicitly asks for test code.
+- When doing screen/frontend development, do not run frontend tests after implementation by default. Only run frontend tests when the user explicitly asks for testing or grants permission for that specific test command.
 - Do not run Java/Gradle builds or npm builds by default. This includes `.\gradlew.bat compileJava`, `.\gradlew.bat compileTestJava`, `.\gradlew.bat build`, `npm run build`, and similar build commands.
 - Only run Java/Gradle or npm build commands when the user explicitly asks for verification, asks to run a build/test, or grants permission for that specific command.
 - When build verification is skipped because of this rule, state that it was skipped in the final response.

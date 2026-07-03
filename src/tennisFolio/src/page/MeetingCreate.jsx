@@ -20,7 +20,7 @@ const initialForm = {
   maxMaleParticipants: '',
   maxFemaleParticipants: '',
   courtCount: '2',
-  totalGames: '12',
+  totalGames: '8',
 };
 
 function toNumberOrNull(value) {
