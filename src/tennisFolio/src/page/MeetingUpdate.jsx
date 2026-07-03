@@ -1,8 +1,14 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { getPublicMeeting, updateMeeting } from '../utils/meetingApi';
+import MeetingBasicInfoStep from '../components/meeting/shared/MeetingBasicInfoStep';
+import MeetingSettingsStep from '../components/meeting/shared/MeetingSettingsStep';
+import {
+  buildDateTime,
+  toMeetingForm,
+  toNumberOrNull,
+} from '../components/meeting/shared/meetingFormUtils';
 import './Meeting.css';
-import MeetingSettingsStep from './MeetingSettingsStep';
 
 const initialForm = {
   title: '',
@@ -17,48 +23,6 @@ const initialForm = {
   courtCount: '1',
   totalGames: '1',
 };
-
-function toNumberOrNull(value) {
-  return value === '' ? null : Number(value);
-}
-
-function buildDateTime(date, time) {
-  return `${date}T${time}:00`;
-}
-
-function toDateInputValue(value) {
-  return value ? value.slice(0, 10) : '';
-}
-
-function toTimeInputValue(value) {
-  return value ? value.slice(11, 16) : '';
-}
-
-function getQuotaMode(meeting) {
-  if (meeting.maxParticipants != null) {
-    return 'TOTAL';
-  }
-  if (meeting.maxMaleParticipants != null || meeting.maxFemaleParticipants != null) {
-    return 'GENDER';
-  }
-  return 'NONE';
-}
-
-function toForm(meeting) {
-  return {
-    title: meeting.title || '',
-    date: toDateInputValue(meeting.startAt),
-    startTime: toTimeInputValue(meeting.startAt),
-    endTime: toTimeInputValue(meeting.endAt),
-    note: meeting.note || '',
-    quotaMode: getQuotaMode(meeting),
-    maxParticipants: meeting.maxParticipants?.toString() || '',
-    maxMaleParticipants: meeting.maxMaleParticipants?.toString() || '',
-    maxFemaleParticipants: meeting.maxFemaleParticipants?.toString() || '',
-    courtCount: meeting.courtCount?.toString() || '1',
-    totalGames: meeting.totalGames?.toString() || '1',
-  };
-}
 
 function MeetingUpdate() {
   const { publicId } = useParams();
@@ -91,7 +55,7 @@ function MeetingUpdate() {
             setErrorMessage('모임을 수정할 권한이 없습니다.');
             return;
           }
-          setForm(toForm(meeting));
+          setForm(toMeetingForm(meeting));
         }
       })
       .catch((error) => {
@@ -231,62 +195,12 @@ function MeetingUpdate() {
       {errorMessage && <p className="meeting-state meeting-error">{errorMessage}</p>}
 
       {step === 1 ? (
-        <section className="meeting-panel" aria-label="모임 기본 정보">
-          <h2>1 / 2 기본 정보</h2>
-          <label className="meeting-field">
-            <span>모임 이름</span>
-            <input
-              value={form.title}
-              onChange={(event) => updateField('title', event.target.value)}
-            />
-          </label>
-          <label className="meeting-field">
-            <span>모임 날짜</span>
-            <input
-              type="date"
-              value={form.date}
-              onChange={(event) => updateField('date', event.target.value)}
-            />
-          </label>
-          <div className="meeting-grid two">
-            <label className="meeting-field">
-              <span>시작 시간</span>
-              <input
-                type="time"
-                value={form.startTime}
-                onChange={(event) => updateField('startTime', event.target.value)}
-              />
-            </label>
-            <label className="meeting-field">
-              <span>종료 시간</span>
-              <input
-                type="time"
-                value={form.endTime}
-                onChange={(event) => updateField('endTime', event.target.value)}
-              />
-            </label>
-          </div>
-          <label className="meeting-field">
-            <span>안내사항</span>
-            <textarea
-              value={form.note}
-              placeholder="장소, 준비물, 진행 방식 등 참가자에게 알려줄 내용을 적어주세요."
-              onChange={(event) => updateField('note', event.target.value)}
-            />
-          </label>
-          <div className="meeting-action-row meeting-form-action-row">
-            <button
-              type="button"
-              className="meeting-button"
-              onClick={() => navigate(`/meetings/${publicId}`)}
-            >
-              이전
-            </button>
-            <button type="button" className="meeting-button primary" onClick={handleNext}>
-              다음
-            </button>
-          </div>
-        </section>
+        <MeetingBasicInfoStep
+          form={form}
+          onFieldChange={updateField}
+          onPrevious={() => navigate(`/meetings/${publicId}`)}
+          onNext={handleNext}
+        />
       ) : (
         <MeetingSettingsStep
           form={form}
