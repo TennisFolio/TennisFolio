@@ -95,7 +95,8 @@ class MeetingSecurityConfigTest {
     void publicAttendanceUpsertIsPermitAll() throws Exception {
         when(attendanceCommandService.upsertAttendance(
                 eq("meeting-public-id"),
-                any(MeetingAttendanceUpsertRequest.class)
+                any(MeetingAttendanceUpsertRequest.class),
+                eq(null)
         )).thenReturn(new MeetingAttendanceResponse(100L, "Alex Kim", "MALE", "ATTENDING"));
 
         mockMvc.perform(post("/api/meetings/meeting-public-id/attendances")
@@ -154,6 +155,7 @@ class MeetingSecurityConfigTest {
                 6,
                 "OPEN",
                 false,
+                null,
                 false,
                 List.of()
         );

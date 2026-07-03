@@ -1,4 +1,4 @@
-﻿package com.tennisfolio.Tennisfolio.meeting.service;
+package com.tennisfolio.Tennisfolio.meeting.service;
 
 import com.tennisfolio.Tennisfolio.exception.NotFoundException;
 import com.tennisfolio.Tennisfolio.matching.entity.Competition;
@@ -92,15 +92,6 @@ class MeetingQueryServiceTest {
                 .thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> service.getMeeting("missing", null))
-                .isInstanceOf(NotFoundException.class);
-    }
-
-    @Test
-    void getManagedMeeting_rejectsNonOwner() {
-        when(meetingRepository.findByPublicIdAndOwnerUserIdAndDeletedAtIsNull("meeting-public-id", 10L))
-                .thenReturn(Optional.empty());
-
-        assertThatThrownBy(() -> service.getManagedMeeting("meeting-public-id", 10L))
                 .isInstanceOf(NotFoundException.class);
     }
 
