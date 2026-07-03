@@ -128,6 +128,20 @@
   line-height: 1.5;
 }
 
+.my-competitions-login-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 40px;
+  border: 1px solid var(--competition-primary);
+  border-radius: 8px;
+  background: var(--competition-primary);
+  color: var(--competition-text-inverse);
+  font-size: 13px;
+  font-weight: 900;
+}
+
 .my-competitions-list {
   display: grid;
   gap: 10px;

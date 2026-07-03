@@ -61,15 +61,22 @@ public class CompetitionCommandService {
 
     @Transactional
     public CompetitionCreateResponse createCompetition(CompetitionCreateRequest request) {
-        return createCompetition(request, null, false);
+        CompetitionCreationResult result = createCompetitionResult(request, null, false);
+        return CompetitionCreateResponse.from(result.getCompetition(), result.getCompetitionAdminToken());
     }
 
     @Transactional
     public CompetitionCreateResponse createCompetition(CompetitionCreateRequest request, Long ownerUserId) {
-        return createCompetition(request, ownerUserId, true);
+        CompetitionCreationResult result = createCompetitionResult(request, ownerUserId, true);
+        return CompetitionCreateResponse.from(result.getCompetition(), result.getCompetitionAdminToken());
     }
 
-    private CompetitionCreateResponse createCompetition(
+    @Transactional
+    public CompetitionCreationResult createCompetitionResult(CompetitionCreateRequest request, Long ownerUserId) {
+        return createCompetitionResult(request, ownerUserId, true);
+    }
+
+    private CompetitionCreationResult createCompetitionResult(
             CompetitionCreateRequest request,
             Long ownerUserId,
             boolean ownerResolved
@@ -96,7 +103,7 @@ public class CompetitionCommandService {
         competitionStatService.createCompetitionStat(competition, result, entriesByPlayerName);
 
         String competitionAdminToken = competitionAdminTokenService.createToken(competition.getPublicId());
-        return CompetitionCreateResponse.from(competition, competitionAdminToken);
+        return new CompetitionCreationResult(competition, competitionAdminToken);
     }
 
     private ScheduleResult generateSchedule(

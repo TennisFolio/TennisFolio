@@ -1,0 +1,2050 @@
+﻿<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Meeting UI Mockup</title>
+    <style>
+      :root {
+        --bg: #f5f7fa;
+        --surface: #ffffff;
+        --surface-soft: #f8fafc;
+        --primary: #0f172a;
+        --body: #475569;
+        --muted: #64748b;
+        --border: #e3e8ef;
+        --border-strong: #cbd5e1;
+        --ok: #047857;
+        --ok-bg: #ecfdf5;
+        --ok-border: #bbf7d0;
+        --danger: #be123c;
+        --danger-bg: #fff1f2;
+        --danger-border: #fecdd3;
+        --warning: #9a3412;
+        --warning-bg: #fff7ed;
+        --warning-border: #fed7aa;
+        --competition-male: #2563eb;
+        --competition-male-bg: #eff6ff;
+        --competition-female: #db2777;
+        --competition-female-bg: #fdf2f8;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family:
+          Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: var(--bg);
+        color: var(--primary);
+      }
+
+      main {
+        width: min(1180px, calc(100% - 32px));
+        margin: 0 auto;
+        padding: 40px 0 64px;
+      }
+
+      h1,
+      h2,
+      h3,
+      p {
+        margin: 0;
+      }
+
+      .header {
+        display: flex;
+        justify-content: space-between;
+        gap: 24px;
+        align-items: flex-end;
+        margin-bottom: 24px;
+      }
+
+      .header h1 {
+        font-size: clamp(28px, 4vw, 44px);
+        line-height: 1.08;
+        letter-spacing: 0;
+      }
+
+      .header p {
+        margin-top: 10px;
+        color: var(--body);
+        line-height: 1.6;
+        max-width: 720px;
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        background: var(--surface);
+        color: var(--body);
+        padding: 8px 12px;
+        white-space: nowrap;
+      }
+
+      .section {
+        margin-top: 28px;
+      }
+
+      .section > h2 {
+        font-size: 24px;
+        margin-bottom: 8px;
+      }
+
+      .section > p {
+        color: var(--body);
+        line-height: 1.6;
+        margin-bottom: 16px;
+      }
+
+      .cards,
+      .wizard-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 18px;
+      }
+
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+      }
+
+      .card-preview {
+        min-height: 340px;
+        padding: 16px;
+        background: var(--surface-soft);
+        border-bottom: 1px solid var(--border);
+      }
+
+      .card-body {
+        padding: 18px;
+      }
+
+      .card-body h2 {
+        font-size: 18px;
+        margin-bottom: 8px;
+      }
+
+      .card-body p {
+        color: var(--body);
+        line-height: 1.55;
+        font-size: 14px;
+      }
+
+      .mock-shell {
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 14px;
+        min-height: 306px;
+      }
+
+      .row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .grid {
+        display: grid;
+        gap: 10px;
+      }
+
+      .grid-2 {
+        grid-template-columns: 1.1fr 0.9fr;
+      }
+
+      .grid-3 {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .quota-toggle {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 4px;
+        padding: 4px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--surface-soft);
+      }
+
+      .quota-option {
+        min-height: 34px;
+        border-color: transparent;
+        padding: 6px 5px;
+        font-size: 12px;
+        font-weight: 800;
+        white-space: nowrap;
+      }
+
+      .panel {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 14px;
+      }
+
+      .roster-panel {
+        padding: 10px;
+      }
+
+      .roster-panel .row {
+        gap: 8px;
+      }
+
+      .roster-panel strong {
+        font-size: 13px;
+        line-height: 1.2;
+      }
+
+      .roster-panel .pill {
+        padding: 4px 7px;
+        font-size: 11px;
+      }
+
+      .url-label {
+        display: inline-flex;
+        align-items: center;
+        max-width: 100%;
+        min-height: 24px;
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        background: var(--surface);
+        color: var(--muted);
+        padding: 4px 9px;
+        font-size: 11px;
+        font-weight: 800;
+        line-height: 1.35;
+        margin-bottom: 10px;
+        overflow-wrap: anywhere;
+      }
+
+      .button {
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 38px;
+        border-radius: 7px;
+        border: 1px solid var(--border-strong);
+        background: var(--surface);
+        color: var(--body);
+        padding: 0 12px;
+        font-weight: 700;
+      }
+
+      .button.primary {
+        background: var(--primary);
+        color: white;
+        border-color: var(--primary);
+      }
+
+      .button.danger {
+        background: var(--danger-bg);
+        color: var(--danger);
+        border-color: var(--danger-border);
+      }
+
+      .button.full {
+        width: 100%;
+      }
+
+      .pill-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 14px;
+      }
+
+      .pill {
+        border-radius: 999px;
+        padding: 6px 9px;
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .attendee-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 7px;
+        margin-top: 10px;
+      }
+
+      .roster-panel .attendee-list {
+        gap: 5px;
+        margin-top: 7px;
+      }
+
+      .attendee-chip {
+        display: inline-flex;
+        align-items: center;
+        min-height: 30px;
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        background: var(--surface-soft);
+        color: var(--primary);
+        padding: 4px 10px;
+        font-size: 12px;
+        font-weight: 700;
+        line-height: 1;
+        white-space: nowrap;
+      }
+
+      .roster-panel .attendee-chip {
+        min-height: 24px;
+        padding: 3px 8px;
+        font-size: 11px;
+      }
+
+      .attendee-remove {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 14px;
+        height: 14px;
+        margin-left: 5px;
+        border: 0;
+        border-radius: 999px;
+        background: rgba(15, 23, 42, 0.08);
+        color: inherit;
+        padding: 0;
+        font-size: 10px;
+        font-weight: 900;
+        line-height: 1;
+      }
+
+      button.attendee-chip {
+        cursor: pointer;
+        font-family: inherit;
+      }
+
+      .attendee-chip.male {
+        background: var(--competition-male-bg);
+        border-color: var(--competition-male-bg);
+        color: var(--competition-male);
+      }
+
+      .attendee-chip.female {
+        background: var(--competition-female-bg);
+        border-color: var(--competition-female-bg);
+        color: var(--competition-female);
+      }
+
+      .entry-name-groups {
+        display: grid;
+        gap: 9px;
+        margin-top: 10px;
+      }
+
+      .entry-name-group {
+        padding: 9px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--surface-soft);
+      }
+
+      .entry-name-group .attendee-list {
+        margin-top: 7px;
+      }
+
+      .meeting-list {
+        display: grid;
+        gap: 9px;
+        margin-top: 12px;
+      }
+
+      .meeting-overview {
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--surface);
+        padding: 12px;
+      }
+
+      .meeting-overview-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .meeting-item {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 10px;
+        align-items: center;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--surface);
+        padding: 12px;
+      }
+
+      .meeting-item-title {
+        font-size: 15px;
+        font-weight: 800;
+      }
+
+      .meeting-item-title-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+      }
+
+      .button.small {
+        min-height: 26px;
+        padding: 0 8px;
+        border-radius: 6px;
+        font-size: 11px;
+        font-weight: 800;
+      }
+
+      .meeting-item-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 8px;
+      }
+
+      .event-meta {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 7px;
+      }
+
+      .meta-chip {
+        display: inline-flex;
+        align-items: center;
+        min-height: 30px;
+        border: 1px solid var(--border);
+        border-radius: 7px;
+        background: var(--surface-soft);
+        color: var(--body);
+        padding: 5px 8px;
+        font-size: 13px;
+        font-weight: 700;
+        line-height: 1.45;
+      }
+
+      .meeting-item-actions {
+        display: grid;
+        gap: 7px;
+        min-width: 104px;
+      }
+
+      .status-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+        margin-top: 10px;
+        padding-top: 10px;
+        border-top: 1px solid var(--border);
+      }
+
+      .status-options {
+        display: inline-grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 4px;
+        flex: 1;
+        min-width: 0;
+      }
+
+      .status-option {
+        min-height: 30px;
+        border-radius: 999px;
+        padding: 0 8px;
+        font-size: 12px;
+      }
+
+      .ok {
+        background: var(--ok-bg);
+        color: var(--ok);
+        border: 1px solid var(--ok-border);
+      }
+
+      .warning {
+        background: var(--warning-bg);
+        color: var(--warning);
+        border: 1px solid var(--warning-border);
+      }
+
+      .danger {
+        background: var(--danger-bg);
+        color: var(--danger);
+        border: 1px solid var(--danger-border);
+      }
+
+      .muted {
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .title {
+        font-size: 18px;
+        font-weight: 800;
+      }
+
+      input,
+      select,
+      textarea {
+        width: 100%;
+        min-height: 38px;
+        border: 1px solid #dce4ef;
+        border-radius: 7px;
+        padding: 0 10px;
+        color: var(--primary);
+        background: white;
+        font: inherit;
+      }
+
+      textarea {
+        min-height: 86px;
+        padding: 10px;
+        resize: vertical;
+      }
+
+      .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 8px;
+        margin-top: 10px;
+      }
+
+      .summary-box {
+        border-radius: 8px;
+        padding: 10px;
+        font-size: 12px;
+        line-height: 1.45;
+      }
+
+      .state-note {
+        margin-top: 10px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--surface-soft);
+        color: var(--body);
+        padding: 10px;
+        font-size: 12px;
+        line-height: 1.5;
+      }
+
+      .confirm-panel {
+        margin-top: 10px;
+        border: 1px solid var(--border-strong);
+        border-radius: 8px;
+        background: var(--surface);
+        padding: 12px;
+      }
+
+      .confirm-panel strong {
+        display: block;
+        font-size: 14px;
+        margin-bottom: 4px;
+      }
+
+      .confirm-actions {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+        margin-top: 10px;
+      }
+
+      .steps {
+        display: flex;
+        gap: 6px;
+        margin-bottom: 14px;
+      }
+
+      .step {
+        height: 5px;
+        flex: 1;
+        background: var(--border-strong);
+        border-radius: 999px;
+      }
+
+      .step.active {
+        background: var(--primary);
+      }
+
+      .field-label {
+        display: block;
+        margin-bottom: 6px;
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .date-picker {
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--surface-soft);
+        padding: 10px;
+      }
+
+      .date-input-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        border: 1px solid var(--border-strong);
+        border-radius: 7px;
+        background: var(--surface);
+        padding: 9px 10px;
+        font-size: 13px;
+        font-weight: 700;
+      }
+
+      .calendar-grid {
+        display: grid;
+        grid-template-columns: repeat(7, minmax(0, 1fr));
+        gap: 4px;
+        margin-top: 9px;
+      }
+
+      .calendar-day {
+        min-height: 26px;
+        border: 1px solid transparent;
+        border-radius: 6px;
+        background: transparent;
+        color: var(--body);
+        font-size: 11px;
+        font-weight: 700;
+      }
+
+      .calendar-day.muted-day {
+        color: var(--muted);
+        opacity: 0.55;
+      }
+
+      .calendar-day.selected {
+        background: var(--primary);
+        border-color: var(--primary);
+        color: white;
+      }
+
+      .time-range {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+        gap: 8px;
+        align-items: end;
+      }
+
+      .time-pair {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+        gap: 5px;
+        align-items: center;
+      }
+
+      .time-pair select {
+        padding: 0 6px;
+      }
+
+      .time-separator {
+        color: var(--muted);
+        font-size: 13px;
+        font-weight: 800;
+        line-height: 38px;
+      }
+
+      .choice-row {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+      }
+
+      .copy-box {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        padding: 10px;
+        border: 1px solid var(--border);
+        border-radius: 7px;
+        background: var(--surface-soft);
+        color: var(--body);
+        font-size: 13px;
+      }
+
+      .recommendation {
+        margin-top: 24px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 20px;
+      }
+
+      .recommendation h2 {
+        font-size: 20px;
+        margin-bottom: 8px;
+      }
+
+      .recommendation p {
+        color: var(--body);
+        line-height: 1.6;
+      }
+
+      .action-layout-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 18px;
+      }
+
+      .action-panel {
+        display: grid;
+        gap: 10px;
+      }
+
+      .action-primary-block {
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--surface-soft);
+        padding: 12px;
+      }
+
+      .action-primary-block .button {
+        margin-top: 10px;
+      }
+
+      .action-tool-row {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+      }
+
+      .action-setting-row {
+        display: grid;
+        gap: 10px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: linear-gradient(180deg, var(--surface), var(--surface-soft));
+        padding: 12px;
+      }
+
+      .action-setting-row.closed {
+        border-color: var(--danger-border);
+        background: linear-gradient(180deg, var(--danger-bg), var(--surface));
+      }
+
+      .attendance-control-head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 10px;
+      }
+
+      .attendance-control-title {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        font-weight: 900;
+      }
+
+      .attendance-control-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 999px;
+        background: var(--ok);
+        box-shadow: 0 0 0 4px var(--ok-bg);
+      }
+
+      .attendance-control-dot.closed {
+        background: var(--danger);
+        box-shadow: 0 0 0 4px var(--danger-bg);
+      }
+
+      .attendance-control-copy {
+        margin-top: 4px;
+        color: var(--body);
+        font-size: 12px;
+        line-height: 1.5;
+      }
+
+      .attendance-control-actions {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+      }
+
+      .attendance-control-actions .button {
+        min-height: 36px;
+      }
+
+      .attendance-control-actions .button[aria-pressed="true"] {
+        border-color: var(--primary);
+        background: var(--primary);
+        color: white;
+      }
+
+      .action-setting-row.closed .attendance-control-actions .button[aria-pressed="true"] {
+        border-color: var(--danger);
+        background: var(--danger);
+        color: white;
+      }
+
+      .attendance-status-pill {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 24px;
+        border-radius: 999px;
+        padding: 0 9px;
+        font-size: 12px;
+        font-weight: 900;
+        white-space: nowrap;
+      }
+
+      .action-danger-row {
+        border-top: 1px solid var(--border);
+        padding-top: 10px;
+      }
+
+      .more-menu {
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--surface);
+        overflow: hidden;
+      }
+
+      .more-menu-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 10px 12px;
+        border-top: 1px solid var(--border);
+        color: var(--body);
+        font-size: 13px;
+        font-weight: 700;
+      }
+
+      .more-menu-row:first-child {
+        border-top: 0;
+      }
+
+      .more-menu-row.danger-text {
+        color: var(--danger);
+      }
+
+      @media (max-width: 980px) {
+        .cards,
+        .wizard-grid,
+        .action-layout-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .card-preview {
+          min-height: auto;
+        }
+      }
+
+      @media (max-width: 640px) {
+        main {
+          width: min(100% - 20px, 1180px);
+          padding-top: 24px;
+        }
+
+        .header {
+          display: block;
+        }
+
+        .badge {
+          margin-top: 14px;
+        }
+
+        .grid-2,
+        .grid-3,
+        .summary-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .meeting-item {
+          grid-template-columns: 1fr;
+        }
+
+        .meeting-item-actions {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <section class="header">
+        <div>
+          <h1>Meeting UI Mockup</h1>
+          <p>
+            모임 참석 체크 기능의 화면 방향입니다. 공개 참석 체크 화면을 중심에 두고,
+            owner 관리 화면에서 경기 생성까지 이어지는 흐름을 비교합니다.
+          </p>
+        </div>
+        <span class="badge">feat(meeting): add meeting UI flow</span>
+      </section>
+
+      <section class="cards" aria-label="Meeting UI layout options">
+        <article class="card">
+          <div class="card-preview">
+            <div class="mock-shell">
+              <span class="url-label">URL /meetings</span>
+              <div class="meeting-overview">
+                <div class="meeting-overview-head">
+                  <div>
+                    <div class="muted">내 경기처럼 모아보기</div>
+                    <strong style="font-size: 18px">내 모임</strong>
+                    <div class="muted" style="margin-top: 4px">
+                      내가 만든 모임을 다시 확인합니다.
+                    </div>
+                  </div>
+                  <button class="button primary">+ 만들기</button>
+                </div>
+              </div>
+              <div class="meeting-list">
+                <div class="meeting-item">
+                  <div>
+                    <div class="meeting-item-title-row">
+                      <div class="meeting-item-title">토요 복식 정모</div>
+                      <button class="button danger small">삭제</button>
+                    </div>
+                    <div class="meeting-item-meta">
+                      <span class="meta-chip">6월 29일</span>
+                      <span class="meta-chip">14:00-18:00</span>
+                      <span class="meta-chip">2코트</span>
+                      <span class="meta-chip">12경기</span>
+                    </div>
+                    <div class="pill-row" style="margin-top: 9px">
+                      <span class="pill ok">참석 10</span>
+                      <span class="pill warning">대기 3</span>
+                      <span class="pill danger">불참 2</span>
+                    </div>
+                  </div>
+                  <div class="meeting-item-actions">
+                    <button class="button primary">관리</button>
+                    <button class="button">공유</button>
+                  </div>
+                </div>
+                <div class="meeting-item">
+                  <div>
+                    <div class="meeting-item-title-row">
+                      <div class="meeting-item-title">평일 저녁 랠리</div>
+                      <button class="button danger small">삭제</button>
+                    </div>
+                    <div class="meeting-item-meta">
+                      <span class="meta-chip">7월 2일</span>
+                      <span class="meta-chip">19:00-21:00</span>
+                      <span class="meta-chip">1코트</span>
+                      <span class="meta-chip">4경기</span>
+                    </div>
+                    <div class="pill-row" style="margin-top: 9px">
+                      <span class="pill ok">참석 5</span>
+                      <span class="pill warning">대기 1</span>
+                    </div>
+                  </div>
+                  <div class="meeting-item-actions">
+                    <button class="button primary">관리</button>
+                    <button class="button">공유</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="card-body">
+            <h2>A. 내 모임 리스트</h2>
+            <p>
+              내가 만든 모임을 다시 찾는 진입 화면입니다. 내 경기처럼 상단 박스로
+              진입 영역을 보여주고, 각 행에서 관리 화면으로 들어가거나 공개 참석
+              링크를 바로 복사합니다.
+            </p>
+          </div>
+        </article>
+
+        <article class="card">
+          <div class="card-preview">
+            <div class="mock-shell">
+              <span class="url-label">URL /meetings/{publicId}/manage</span>
+              <div class="grid grid-2">
+                <div class="panel">
+                  <div class="meeting-item-title-row">
+                    <div class="title">토요 복식 정모</div>
+                  </div>
+                <div class="event-meta">
+                  <span class="meta-chip">6월 29일</span>
+                  <span class="meta-chip">14:00-18:00</span>
+                  <span class="meta-chip">2코트</span>
+                  <span class="meta-chip">12경기</span>
+                </div>
+                <div class="pill-row" style="margin-top: 9px">
+                  <span class="pill ok">정원 10/16</span>
+                </div>
+                <div
+                  style="
+                    margin-top: 10px;
+                      padding: 10px;
+                      border-radius: 7px;
+                      background: var(--surface-soft);
+                      color: var(--body);
+                      font-size: 13px;
+                      line-height: 1.45;
+                    "
+                  >
+                    note: 늦게 오는 분은 참석으로 체크하고 도착 시간을 단톡방에 남겨주세요.
+                  </div>
+                  <div class="pill-row">
+                    <span class="pill ok">참석 10</span>
+                    <span class="pill warning">대기 3</span>
+                    <span class="pill danger">불참 2</span>
+                  </div>
+                </div>
+                <div class="panel">
+                  <div class="muted">내 정보</div>
+                  <div class="grid" style="margin-top: 9px">
+                    <input value="홍길동" aria-label="이름" />
+                    <button class="button full">이름 저장</button>
+                  </div>
+                  <div class="status-row">
+                    <span class="muted">상태</span>
+                    <div class="status-options">
+                      <button class="button primary status-option">참석</button>
+                      <button class="button status-option">대기</button>
+                      <button class="button status-option">불참</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="grid grid-2" style="margin-top: 10px">
+                <div class="panel">
+                  <div class="muted">운영 관리</div>
+                  <div class="action-primary-block" style="margin-top: 9px">
+                    <div class="row">
+                      <div>
+                        <strong>대진표 생성</strong>
+                        <div class="muted" style="margin-top: 4px">
+                          참석자 기준으로 경기 대진표를 만듭니다.
+                        </div>
+                      </div>
+                      <span class="pill ok">참석 10</span>
+                    </div>
+                    <button class="button primary full">참석자로 대진표 생성</button>
+                  </div>
+                  <div class="action-tool-row" style="margin-top: 9px">
+                    <button class="button full">공유 링크 복사</button>
+                    <button class="button full">모임 수정</button>
+                  </div>
+                  <div class="action-setting-row" style="margin-top: 9px">
+                    <div class="attendance-control-head">
+                      <div>
+                        <div class="attendance-control-title">
+                          <span class="attendance-control-dot"></span>
+                          참석 체크
+                        </div>
+                        <div class="attendance-control-copy">
+                          참가자가 응답할 수 있는 상태입니다. 마감하면 새 응답을 잠시 막습니다.
+                        </div>
+                      </div>
+                      <span class="attendance-status-pill ok">열림</span>
+                    </div>
+                    <div class="attendance-control-actions">
+                      <button class="button" aria-pressed="true">열어두기</button>
+                      <button class="button">마감하기</button>
+                    </div>
+                  </div>
+                  <div class="state-note">
+                    수정은 `/meetings/{publicId}/edit` 화면에서 기본 정보와 설정을 함께 관리합니다.
+                  </div>
+                </div>
+                <div class="panel roster-panel">
+                  <div class="row">
+                    <strong>남자 참석자</strong>
+                    <span class="pill ok">6명</span>
+                  </div>
+                  <div class="attendee-list">
+                    <span class="attendee-chip male">김민준<button class="attendee-remove" aria-label="김민준 제거">x</button></span>
+                    <span class="attendee-chip male">박지훈<button class="attendee-remove" aria-label="박지훈 제거">x</button></span>
+                    <span class="attendee-chip male">정우성<button class="attendee-remove" aria-label="정우성 제거">x</button></span>
+                    <span class="attendee-chip male">최도윤<button class="attendee-remove" aria-label="최도윤 제거">x</button></span>
+                    <span class="attendee-chip male">한지호<button class="attendee-remove" aria-label="한지호 제거">x</button></span>
+                    <span class="attendee-chip male">오세훈<button class="attendee-remove" aria-label="오세훈 제거">x</button></span>
+                  </div>
+                  <div class="confirm-panel">
+                    <strong>김민준 선수를 삭제하시겠습니까?</strong>
+                    <div class="muted">삭제하면 이 모임의 참석 응답에서 제거됩니다.</div>
+                    <div class="confirm-actions">
+                      <button class="button">취소</button>
+                      <button class="button danger">삭제</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="grid grid-2" style="margin-top: 10px">
+                <div class="panel roster-panel">
+                  <div class="row">
+                    <strong>여자 참석자</strong>
+                    <span class="pill ok">4명</span>
+                  </div>
+                  <div class="attendee-list">
+                    <span class="attendee-chip female">이서연<button class="attendee-remove" aria-label="이서연 제거">x</button></span>
+                    <span class="attendee-chip female">김하린<button class="attendee-remove" aria-label="김하린 제거">x</button></span>
+                    <span class="attendee-chip female">박소윤<button class="attendee-remove" aria-label="박소윤 제거">x</button></span>
+                    <span class="attendee-chip female">최유진<button class="attendee-remove" aria-label="최유진 제거">x</button></span>
+                  </div>
+                </div>
+                <div class="panel roster-panel">
+                  <div class="row">
+                    <strong>대기</strong>
+                    <span class="pill warning">3명</span>
+                  </div>
+                  <div class="attendee-list">
+                    <span class="attendee-chip male">윤태준<button class="attendee-remove" aria-label="윤태준 제거">x</button></span>
+                    <span class="attendee-chip female">강수민<button class="attendee-remove" aria-label="강수민 제거">x</button></span>
+                    <span class="attendee-chip female">오나래<button class="attendee-remove" aria-label="오나래 제거">x</button></span>
+                  </div>
+                </div>
+              </div>
+              <div class="grid grid-2" style="margin-top: 10px">
+                <div class="panel roster-panel">
+                  <div class="row">
+                    <strong>불참</strong>
+                    <span class="pill danger">2명</span>
+                  </div>
+                  <div class="attendee-list">
+                    <span class="attendee-chip female">문지아<button class="attendee-remove" aria-label="문지아 제거">x</button></span>
+                    <span class="attendee-chip male">서도현<button class="attendee-remove" aria-label="서도현 제거">x</button></span>
+                  </div>
+                </div>
+              </div>
+              <div class="panel action-danger-row" style="margin-top: 10px">
+                <div class="row">
+                  <div>
+                    <strong>모임 삭제</strong>
+                    <div class="muted" style="margin-top: 3px">
+                      참석 명단 확인 영역 아래에 별도로 둡니다.
+                    </div>
+                  </div>
+                  <button class="button danger">삭제</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="card-body">
+            <h2>B. 관리자 대시보드 중심</h2>
+            <p>
+              owner 전용 화면입니다. 본인의 이름과 참석 상태를 한 블록에서 관리하고,
+              전체 참석자를 확인한 뒤 경기 생성과 모임 수정 같은 owner 전용 액션으로 이어집니다.
+            </p>
+          </div>
+        </article>
+
+        <article class="card">
+          <div class="card-preview">
+            <div class="mock-shell">
+              <span class="url-label">URL /meetings/{publicId}/edit</span>
+              <div class="panel">
+                <div class="muted">관리자 수정</div>
+                <div class="title" style="font-size: 21px; margin: 5px 0 12px">
+                  모임 수정
+                </div>
+                <div class="quota-toggle" style="margin-bottom: 12px">
+                  <button class="button primary quota-option">기본 정보</button>
+                  <button class="button quota-option">모임 설정</button>
+                </div>
+                <div class="grid">
+                  <div class="panel" style="padding: 10px">
+                    <div class="muted">모임 기본 정보</div>
+                    <div class="grid" style="margin-top: 9px">
+                      <label>
+                        <span class="field-label">모임 이름</span>
+                        <input value="토요 복식 정모" />
+                      </label>
+                      <label>
+                        <span class="field-label">모임 날짜</span>
+                        <div class="date-input-row">
+                          <span>2026-06-29</span>
+                          <span aria-hidden="true">▾</span>
+                        </div>
+                      </label>
+                      <div>
+                        <span class="field-label">경기 시간</span>
+                        <div class="time-range">
+                          <div class="time-pair">
+                            <select aria-label="수정 시작 시">
+                              <option selected>14</option>
+                              <option>15</option>
+                            </select>
+                            <span class="time-separator">:</span>
+                            <select aria-label="수정 시작 분">
+                              <option selected>00</option>
+                              <option>30</option>
+                            </select>
+                          </div>
+                          <span class="time-separator">~</span>
+                          <div class="time-pair">
+                            <select aria-label="수정 종료 시">
+                              <option selected>18</option>
+                              <option>19</option>
+                            </select>
+                            <span class="time-separator">:</span>
+                            <select aria-label="수정 종료 분">
+                              <option selected>00</option>
+                              <option>30</option>
+                            </select>
+                          </div>
+                        </div>
+                      </div>
+                      <label>
+                        <span class="field-label">note</span>
+                        <textarea>늦게 오는 분은 참석으로 체크하고 도착 시간을 단톡방에 남겨주세요.</textarea>
+                      </label>
+                    </div>
+                  </div>
+                  <div class="panel" style="padding: 10px">
+                    <div class="muted">모임 설정</div>
+                    <div class="grid" style="margin-top: 9px">
+                      <div>
+                        <span class="field-label">정원 방식</span>
+                        <div class="quota-toggle">
+                          <button class="button primary quota-option">제한 없음</button>
+                          <button class="button quota-option">전체 정원</button>
+                          <button class="button quota-option">성별 정원</button>
+                        </div>
+                      </div>
+                      <div class="grid grid-2">
+                        <label>
+                          <span class="field-label">코트 수</span>
+                          <input value="2" />
+                        </label>
+                        <label>
+                          <span class="field-label">총 경기 수</span>
+                          <input value="12" />
+                        </label>
+                      </div>
+                      <button class="button primary full">변경사항 저장</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="card-body">
+            <h2>C. 관리자 수정 화면</h2>
+            <p>
+              `/manage`에서 진입하는 owner 전용 수정 화면입니다. 생성 때 입력한
+              모임 기본 정보와 모임 설정을 같은 구조로 다시 수정합니다.
+            </p>
+          </div>
+        </article>
+
+        <article class="card">
+          <div class="card-preview">
+            <div class="mock-shell">
+              <span class="url-label">URL /meetings/{publicId}</span>
+              <div class="panel">
+                <div class="muted">처음 입장</div>
+                <div class="title" style="font-size: 22px">토요 복식 정모</div>
+                <div class="event-meta">
+                  <span class="meta-chip">6월 29일</span>
+                  <span class="meta-chip">14:00-18:00</span>
+                </div>
+                <div
+                  style="
+                    margin-top: 12px;
+                    padding: 10px;
+                    border-radius: 7px;
+                    background: var(--surface-soft);
+                    color: var(--body);
+                    font-size: 13px;
+                    line-height: 1.45;
+                  "
+                >
+                  늦게 오는 분은 참석으로 체크하고 도착 시간을 단톡방에 남겨주세요.
+                </div>
+                <div class="state-note">
+                  이미 응답했다면 아래 이름을 눌러 다시 입장하세요.
+                </div>
+                <div class="entry-name-groups">
+                  <div class="entry-name-group">
+                    <div class="muted">남자</div>
+                    <div class="attendee-list">
+                      <button class="attendee-chip male">김민준</button>
+                      <button class="attendee-chip male">박지훈</button>
+                      <button class="attendee-chip male">정우성</button>
+                      <button class="attendee-chip male">최도윤</button>
+                      <button class="attendee-chip male">한지호</button>
+                      <button class="attendee-chip male">오세훈</button>
+                      <button class="attendee-chip male">윤태준</button>
+                    </div>
+                  </div>
+                  <div class="entry-name-group">
+                    <div class="muted">여자</div>
+                    <div class="attendee-list">
+                      <button class="attendee-chip female">이서연</button>
+                      <button class="attendee-chip female">김하린</button>
+                      <button class="attendee-chip female">박소윤</button>
+                      <button class="attendee-chip female">최유진</button>
+                      <button class="attendee-chip female">강수민</button>
+                      <button class="attendee-chip female">문지아</button>
+                    </div>
+                  </div>
+                </div>
+                <div class="confirm-panel">
+                  <strong>김민준님 맞으십니까?</strong>
+                  <div class="muted">
+                    맞다면 기존 응답으로 입장해서 상태를 확인하거나 변경할 수 있습니다.
+                  </div>
+                  <div class="confirm-actions">
+                    <button class="button">아니요</button>
+                    <button class="button primary">네, 맞습니다</button>
+                  </div>
+                </div>
+                <button class="button full" style="margin-top: 10px">공유 링크 복사</button>
+              </div>
+              <div class="panel" style="margin-top: 10px">
+                <div class="muted">처음 오셨나요?</div>
+                <div class="grid grid-2" style="margin: 16px 0 10px">
+                  <input value="홍길동" aria-label="이름" />
+                  <select aria-label="성별">
+                    <option>남성</option>
+                    <option>여성</option>
+                  </select>
+                </div>
+                <div class="grid grid-3">
+                  <button class="button primary full">참석</button>
+                  <button class="button full">대기</button>
+                  <button class="button full">불참</button>
+                </div>
+                <div class="state-note">
+                  참석 여부를 선택하면 참석 현황과 명단을 볼 수 있습니다.
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="card-body">
+            <h2>D. 공개 화면 - 입장 전</h2>
+            <p>
+              공유 링크를 처음 연 사람이 기존 응답자 이름을 눌러 재입장하거나,
+              새 이름으로 참석 상태를 저장하는 화면입니다. 재입장 목록은 상태 대신
+              성별 색상만 보여줍니다.
+            </p>
+          </div>
+        </article>
+
+        <article class="card">
+          <div class="card-preview">
+            <div class="mock-shell">
+              <span class="url-label">URL /meetings/{publicId}?entry=e_8x3k2p</span>
+              <div class="panel">
+                <div class="row">
+                  <div>
+                    <div class="muted">참석 저장 후 · 공개 상세</div>
+                    <div class="title" style="font-size: 22px">토요 복식 정모</div>
+                    <div class="event-meta">
+                      <span class="meta-chip">6월 29일</span>
+                      <span class="meta-chip">14:00-18:00</span>
+                      <span class="meta-chip">2코트</span>
+                      <span class="meta-chip">12경기</span>
+                    </div>
+                    <div class="pill-row" style="margin-top: 9px">
+                      <span class="pill ok">정원 10/16</span>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  style="
+                    margin-top: 10px;
+                    padding: 10px;
+                    border-radius: 7px;
+                    background: var(--surface-soft);
+                    color: var(--body);
+                    font-size: 13px;
+                    line-height: 1.45;
+                  "
+                >
+                  note: 늦게 오는 분은 참석으로 체크하고 도착 시간을 단톡방에 남겨주세요.
+                </div>
+                <div class="pill-row">
+                  <span class="pill ok">참석 10</span>
+                  <span class="pill warning">대기 3</span>
+                  <span class="pill danger">불참 2</span>
+                </div>
+                <div class="state-note">
+                  이름이나 상태가 바뀌었다면 아래에서 수정할 수 있습니다.
+                </div>
+                <button class="button full" style="margin-top: 10px">공유 링크 복사</button>
+              </div>
+              <div class="grid" style="margin-top: 10px">
+                <div class="panel">
+                  <div class="muted">내 정보</div>
+                  <div class="grid grid-2" style="margin-top: 9px">
+                    <input value="김민준" aria-label="이름" />
+                    <select aria-label="성별">
+                      <option>남성</option>
+                      <option>여성</option>
+                    </select>
+                  </div>
+                  <button class="button full" style="margin-top: 9px">정보 저장</button>
+                  <div class="status-row">
+                    <span class="muted">상태</span>
+                    <div class="status-options">
+                      <button class="button primary status-option">참석</button>
+                      <button class="button status-option">대기</button>
+                      <button class="button status-option">불참</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="grid grid-2" style="margin-top: 10px">
+                <div class="panel roster-panel">
+                  <div class="row">
+                    <strong>남자 참석자</strong>
+                    <span class="pill ok">6명</span>
+                  </div>
+                  <div class="attendee-list">
+                    <span class="attendee-chip male">김민준</span>
+                    <span class="attendee-chip male">박지훈</span>
+                    <span class="attendee-chip male">정우성</span>
+                    <span class="attendee-chip male">최도윤</span>
+                    <span class="attendee-chip male">한지호</span>
+                    <span class="attendee-chip male">오세훈</span>
+                  </div>
+                </div>
+                <div class="panel roster-panel">
+                  <div class="row">
+                    <strong>여자 참석자</strong>
+                    <span class="pill ok">4명</span>
+                  </div>
+                  <div class="attendee-list">
+                    <span class="attendee-chip female">이서연</span>
+                    <span class="attendee-chip female">김하린</span>
+                    <span class="attendee-chip female">박소윤</span>
+                    <span class="attendee-chip female">최유진</span>
+                  </div>
+                </div>
+              </div>
+              <div class="grid grid-2" style="margin-top: 10px">
+                <div class="panel roster-panel">
+                  <div class="row">
+                    <strong>대기</strong>
+                    <span class="pill warning">3명</span>
+                  </div>
+                  <div class="attendee-list">
+                    <span class="attendee-chip male">윤태준</span>
+                    <span class="attendee-chip female">강수민</span>
+                    <span class="attendee-chip female">오나래</span>
+                  </div>
+                </div>
+                <div class="panel roster-panel">
+                  <div class="row">
+                    <strong>불참</strong>
+                    <span class="pill danger">2명</span>
+                  </div>
+                  <div class="attendee-list">
+                    <span class="attendee-chip female">문지아</span>
+                    <span class="attendee-chip male">서도현</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="card-body">
+            <h2>E. 공개 화면 - 상세</h2>
+            <p>
+              새로 저장하거나 기존 이름 확인을 통과한 뒤 보이는 상세 화면입니다.
+              정보 저장과 참석 상태 선택은 한 블록에 모으고, `/manage`와 같은 현황을
+              보여주되 경기 생성 같은 owner 액션은 제외합니다.
+            </p>
+          </div>
+        </article>
+
+      </section>
+
+      <section class="section">
+        <h2>운영 관리 버튼 배치 비교</h2>
+        <p>
+          `/meetings/{publicId}/manage`의 운영 관리는 5개 액션을 같은 크기로
+          쌓기보다, 실제 사용 빈도와 위험도를 기준으로 나누는 편이 깔끔합니다.
+          경기표 액션은 주요 행동, 공유/수정은 보조 도구, 마감은 상태 제어,
+          삭제는 위험 행동으로 분리합니다.
+        </p>
+
+        <div class="action-layout-grid">
+          <article class="card">
+            <div class="card-preview">
+              <div class="mock-shell">
+                <span class="url-label">추천안 · 우선순위 분리</span>
+                <div class="panel action-panel">
+                  <div>
+                    <div class="muted">운영 관리</div>
+                    <div class="title" style="font-size: 20px">다음 진행</div>
+                  </div>
+
+                  <div class="action-primary-block">
+                    <div class="row">
+                      <div>
+                        <strong>대진표 생성</strong>
+                        <div class="muted" style="margin-top: 4px">
+                          참석자로 대진표를 만들거나 생성된 대진표를 확인합니다.
+                        </div>
+                      </div>
+                      <span class="pill ok">참석 10</span>
+                    </div>
+                    <button class="button primary full">참석자로 대진표 생성</button>
+                  </div>
+
+                  <div class="action-tool-row">
+                    <button class="button full">공유 링크 복사</button>
+                    <button class="button full">모임 수정</button>
+                  </div>
+
+                  <div class="action-setting-row closed">
+                    <div class="attendance-control-head">
+                      <div>
+                        <div class="attendance-control-title">
+                          <span class="attendance-control-dot closed"></span>
+                          참석 체크
+                        </div>
+                        <div class="attendance-control-copy">
+                          참석 체크가 마감되어 새 응답은 받지 않습니다. 필요하면 다시 열 수 있습니다.
+                        </div>
+                      </div>
+                      <span class="attendance-status-pill danger">마감</span>
+                    </div>
+                    <div class="attendance-control-actions">
+                      <button class="button">다시 열기</button>
+                      <button class="button" aria-pressed="true">마감 유지</button>
+                    </div>
+                  </div>
+
+                  <div class="panel roster-panel" style="padding: 10px">
+                    <div class="row">
+                      <strong>불참</strong>
+                      <span class="pill danger">2명</span>
+                    </div>
+                    <div class="attendee-list">
+                      <span class="attendee-chip female">문지아</span>
+                      <span class="attendee-chip male">서도현</span>
+                    </div>
+                  </div>
+
+                  <div class="action-danger-row">
+                    <div class="row">
+                      <div>
+                        <strong>모임 삭제</strong>
+                        <div class="muted" style="margin-top: 3px">
+                          불참 명단보다 아래에 분리합니다.
+                        </div>
+                      </div>
+                      <button class="button danger">삭제</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="card-body">
+              <h2>1. 우선순위 분리</h2>
+              <p>
+                가장 추천합니다. 사용자가 다음에 해야 할 행동은 대진표 생성/보기이고,
+                공유와 수정은 보조 도구입니다. 마감은 상태 제어로 별도 행에 두고,
+                모임 삭제는 참석 명단의 불참 영역보다 아래 위험 영역으로 내려 실수를 줄입니다.
+              </p>
+            </div>
+          </article>
+
+          <article class="card">
+            <div class="card-preview">
+              <div class="mock-shell">
+                <span class="url-label">대안 · 섹션 카드 분리</span>
+                <div class="grid">
+                  <div class="panel action-panel">
+                    <div class="muted">경기표</div>
+                    <button class="button primary full">경기표 보기</button>
+                    <button class="button danger full">경기표 삭제</button>
+                  </div>
+
+                  <div class="panel action-panel">
+                    <div class="muted">모임 운영</div>
+                    <div class="action-tool-row">
+                      <button class="button full">공유</button>
+                      <button class="button full">수정</button>
+                    </div>
+                    <div class="action-setting-row">
+                      <div class="attendance-control-head">
+                        <div>
+                          <div class="attendance-control-title">
+                            <span class="attendance-control-dot"></span>
+                            참석 체크
+                          </div>
+                          <div class="attendance-control-copy">
+                            필요할 때만 닫는 운영 상태입니다.
+                          </div>
+                        </div>
+                        <span class="attendance-status-pill ok">열림</span>
+                      </div>
+                      <div class="attendance-control-actions">
+                        <button class="button" aria-pressed="true">열림</button>
+                        <button class="button">마감</button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="panel action-panel">
+                    <div class="muted">위험 작업</div>
+                    <button class="button danger full">모임 삭제</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="card-body">
+              <h2>2. 기능별 카드</h2>
+              <p>
+                기능 구분이 가장 명확합니다. 다만 작은 화면에서는 카드가 많아져
+                관리 화면이 길어집니다. 경기표가 이미 생성된 상태처럼 액션 수가
+                많을 때는 이 방식도 안정적입니다.
+              </p>
+            </div>
+          </article>
+
+          <article class="card">
+            <div class="card-preview">
+              <div class="mock-shell">
+                <span class="url-label">대안 · 주요 버튼 + 더보기</span>
+                <div class="panel action-panel">
+                  <div>
+                    <div class="muted">운영 관리</div>
+                    <div class="title" style="font-size: 20px">경기표</div>
+                  </div>
+                  <button class="button primary full">경기표 보기</button>
+                  <button class="button full">공유 링크 복사</button>
+
+                  <div class="more-menu">
+                    <div class="more-menu-row">
+                      <span>모임 수정</span>
+                      <span>›</span>
+                    </div>
+                    <div class="more-menu-row">
+                      <span>참석 체크 마감</span>
+                      <span>›</span>
+                    </div>
+                    <div class="more-menu-row danger-text">
+                      <span>경기표 삭제</span>
+                      <span>›</span>
+                    </div>
+                    <div class="more-menu-row danger-text">
+                      <span>모임 삭제</span>
+                      <span>›</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="card-body">
+              <h2>3. 더보기 메뉴</h2>
+              <p>
+                가장 간결하지만 숨겨진 액션이 생깁니다. 수정이나 마감처럼 자주 쓰는
+                기능을 사용자가 찾기 어려울 수 있어, 현재 단계에서는 추천도가 낮습니다.
+              </p>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="recommendation">
+        <h2>추천 방향</h2>
+        <p>
+          A를 내가 만든 모임의 재진입 화면으로 두고, B와 C를 owner 관리/수정
+          화면으로 잡으며, D와 E를 공개 참석 화면의 입장 전/저장 후 상태로 적용하는
+          조합을 추천합니다.
+          모임 등록은 `/meetings/new` 한 화면 안의 2단계 form으로 만들고,
+          2단계의 `모임 만들기` 버튼에서 저장한 뒤 `/meetings/{publicId}/manage`로
+          이동하는 흐름이 명확합니다.
+        </p>
+      </section>
+
+      <section class="section">
+        <h2>모임 등록 2단계 화면</h2>
+        <p>
+          `/meetings/new` 한 URL에서 1단계 기본 정보와 2단계 모임 설정을
+          모두 입력합니다. 단계는 URL query가 아니라 화면 내부 상태로만 전환되고,
+          생성이 완료되면 관리 화면으로 이동합니다.
+        </p>
+
+        <div class="wizard-grid">
+          <article class="card">
+            <div class="card-preview">
+              <div class="mock-shell">
+                <span class="url-label">URL /meetings/new</span>
+                <div class="steps" aria-hidden="true">
+                  <span class="step active"></span>
+                  <span class="step"></span>
+                </div>
+                <div class="panel">
+                  <div class="muted">1 / 2</div>
+                  <div class="title" style="font-size: 21px; margin: 5px 0 14px">
+                    모임 기본 정보
+                  </div>
+                  <div class="grid">
+                    <label>
+                      <span class="field-label">모임 이름</span>
+                      <input value="토요 복식 정모" />
+                    </label>
+                    <label>
+                      <span class="field-label">모임 날짜</span>
+                      <div class="date-picker">
+                        <div class="date-input-row">
+                          <span>2026-06-29</span>
+                          <span aria-hidden="true">▾</span>
+                        </div>
+                        <div class="calendar-grid" aria-label="날짜 선택 달력">
+                          <span class="calendar-day muted-day">일</span>
+                          <span class="calendar-day muted-day">월</span>
+                          <span class="calendar-day muted-day">화</span>
+                          <span class="calendar-day muted-day">수</span>
+                          <span class="calendar-day muted-day">목</span>
+                          <span class="calendar-day muted-day">금</span>
+                          <span class="calendar-day muted-day">토</span>
+                          <button class="calendar-day muted-day">21</button>
+                          <button class="calendar-day muted-day">22</button>
+                          <button class="calendar-day muted-day">23</button>
+                          <button class="calendar-day muted-day">24</button>
+                          <button class="calendar-day muted-day">25</button>
+                          <button class="calendar-day muted-day">26</button>
+                          <button class="calendar-day muted-day">27</button>
+                          <button class="calendar-day">28</button>
+                          <button class="calendar-day selected">29</button>
+                          <button class="calendar-day">30</button>
+                          <button class="calendar-day">1</button>
+                          <button class="calendar-day">2</button>
+                          <button class="calendar-day">3</button>
+                          <button class="calendar-day">4</button>
+                        </div>
+                      </div>
+                    </label>
+                    <div>
+                      <span class="field-label">경기 시간</span>
+                      <div class="time-range">
+                        <div class="time-pair">
+                          <select aria-label="시작 시 00-23">
+                            <option>00</option>
+                            <option>09</option>
+                            <option selected>14</option>
+                            <option>23</option>
+                          </select>
+                          <span class="time-separator">:</span>
+                          <select aria-label="시작 분 00-59">
+                            <option selected>00</option>
+                            <option>15</option>
+                            <option>30</option>
+                            <option>59</option>
+                          </select>
+                        </div>
+                        <span class="time-separator">~</span>
+                        <div class="time-pair">
+                          <select aria-label="종료 시 00-23">
+                            <option>00</option>
+                            <option>14</option>
+                            <option selected>18</option>
+                            <option>23</option>
+                          </select>
+                          <span class="time-separator">:</span>
+                          <select aria-label="종료 분 00-59">
+                            <option selected>00</option>
+                            <option>15</option>
+                            <option>30</option>
+                            <option>59</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                    <label>
+                      <span class="field-label">note</span>
+                      <textarea>늦게 오는 분은 참석으로 체크하고 도착 시간을 단톡방에 남겨주세요.</textarea>
+                    </label>
+                    <button class="button primary full">다음</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="card-body">
+              <h2>1단계. 기본 정보</h2>
+              <p>
+                참석자가 먼저 확인해야 하는 제목, 날짜, 경기 시간, note를 한 번에
+                입력합니다. 날짜는 달력으로 고르고, 경기 시간은 시/분 dropdown으로
+                입력합니다.
+              </p>
+            </div>
+          </article>
+
+          <article class="card">
+            <div class="card-preview">
+              <div class="mock-shell">
+                <span class="url-label">URL /meetings/new</span>
+                <div class="steps" aria-hidden="true">
+                  <span class="step active"></span>
+                  <span class="step active"></span>
+                </div>
+                <div class="panel">
+                  <div class="muted">2 / 2</div>
+                  <div class="title" style="font-size: 21px; margin: 5px 0 14px">
+                    모임 설정
+                  </div>
+                  <div class="grid">
+                    <div>
+                      <span class="field-label">정원 방식</span>
+                      <div class="quota-toggle">
+                        <button class="button primary quota-option">제한 없음</button>
+                        <button class="button quota-option">전체 정원</button>
+                        <button class="button quota-option">성별 정원</button>
+                      </div>
+                    </div>
+                    <div class="state-note">
+                      정원을 제한하지 않으면 참석자는 인원 제한 없이 응답할 수 있습니다.
+                    </div>
+                    <div class="grid grid-2">
+                      <label>
+                        <span class="field-label">코트 수</span>
+                        <input value="2" />
+                      </label>
+                      <label>
+                        <span class="field-label">총 경기 수</span>
+                        <input value="12" />
+                      </label>
+                    </div>
+                    <div class="row">
+                      <button class="button">이전</button>
+                      <button class="button primary">모임 만들기</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="card-body">
+              <h2>2단계. 모임 설정</h2>
+              <p>
+                정원 제한이 없을 수도 있으므로 기본은 제한 없음입니다. 필요한 경우에만
+                전체 정원 또는 성별 정원을 고르고, 코트 수와 총 경기 수를 입력합니다.
+                모임 만들기를 누르면 저장한 뒤 `/meetings/{publicId}/manage`로 이동합니다.
+              </p>
+            </div>
+          </article>
+
+          <article class="card">
+            <div class="card-preview">
+              <div class="mock-shell">
+                <span class="url-label">URL /meetings/new</span>
+                <div class="steps" aria-hidden="true">
+                  <span class="step active"></span>
+                  <span class="step active"></span>
+                </div>
+                <div class="panel">
+                  <div class="muted">2 / 2 · 전체 정원 선택 시</div>
+                  <div class="title" style="font-size: 21px; margin: 5px 0 14px">
+                    모임 설정
+                  </div>
+                  <div class="grid">
+                    <div>
+                      <span class="field-label">정원 방식</span>
+                      <div class="quota-toggle">
+                        <button class="button quota-option">제한 없음</button>
+                        <button class="button primary quota-option">전체 정원</button>
+                        <button class="button quota-option">성별 정원</button>
+                      </div>
+                    </div>
+                    <label>
+                      <span class="field-label">전체 참석 정원</span>
+                      <input value="16명" />
+                    </label>
+                    <div class="grid grid-2">
+                      <label>
+                        <span class="field-label">코트 수</span>
+                        <input value="2" />
+                      </label>
+                      <label>
+                        <span class="field-label">총 경기 수</span>
+                        <input value="12" />
+                      </label>
+                    </div>
+                    <div class="row">
+                      <button class="button">이전</button>
+                      <button class="button primary">모임 만들기</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="card-body">
+              <h2>2단계. 전체 정원</h2>
+              <p>
+                전체 정원을 고른 경우에만 전체 참석 정원 입력을 보여줍니다. 정원이
+                필요 없는 모임에서는 이 입력 자체가 나타나지 않습니다.
+              </p>
+            </div>
+          </article>
+
+          <article class="card">
+            <div class="card-preview">
+              <div class="mock-shell">
+                <span class="url-label">URL /meetings/new</span>
+                <div class="steps" aria-hidden="true">
+                  <span class="step active"></span>
+                  <span class="step active"></span>
+                </div>
+                <div class="panel">
+                  <div class="muted">2 / 2 · 성별 정원 선택 시</div>
+                  <div class="title" style="font-size: 21px; margin: 5px 0 14px">
+                    모임 설정
+                  </div>
+                  <div class="grid">
+                    <div>
+                      <span class="field-label">정원 방식</span>
+                      <div class="quota-toggle">
+                        <button class="button quota-option">제한 없음</button>
+                        <button class="button quota-option">전체 정원</button>
+                        <button class="button primary quota-option">성별 정원</button>
+                      </div>
+                    </div>
+                    <div class="grid grid-2">
+                      <label>
+                        <span class="field-label">남성 정원</span>
+                        <input value="10명" />
+                      </label>
+                      <label>
+                        <span class="field-label">여성 정원</span>
+                        <input value="6명" />
+                      </label>
+                    </div>
+                    <div class="grid grid-2">
+                      <label>
+                        <span class="field-label">코트 수</span>
+                        <input value="2" />
+                      </label>
+                      <label>
+                        <span class="field-label">총 경기 수</span>
+                        <input value="12" />
+                      </label>
+                    </div>
+                    <div class="row">
+                      <button class="button">이전</button>
+                      <button class="button primary">모임 만들기</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="card-body">
+              <h2>2단계. 성별 정원</h2>
+              <p>
+                성별 정원을 고르면 전체 참석 정원 대신 남성 정원과 여성 정원을 나눠
+                입력합니다. 저장 후 흐름은 동일하게 관리 화면으로 이동합니다.
+              </p>
+            </div>
+          </article>
+        </div>
+      </section>
+      <section>
+        <div class="section-heading">
+          <span>Navigation alternatives</span>
+          <h2>비로그인 상태에서도 보이는 관리 진입점 3안</h2>
+          <p>
+            루트의 별도 `meeting-ui-mockup.html`에 있던 내용을 이 문서에 합쳤습니다.
+            경기 관리와 모임 관리는 로그인 전에도 진입점이 보이되, 클릭하면 로그인 안내로
+            이어지는 방향을 비교합니다.
+          </p>
+        </div>
+
+        <div class="cards three">
+          <article class="card">
+            <div class="card-preview">
+              <div class="mock-shell">
+                <span class="url-label">A안 · 헤더 직접 노출</span>
+                <div class="panel">
+                  <div class="row">
+                    <strong>TennisFolio</strong>
+                    <div class="action-tool-row" style="max-width: 190px">
+                      <button class="button">경기</button>
+                      <button class="button">모임</button>
+                    </div>
+                  </div>
+                  <div class="state-note">
+                    경기 관리와 모임 관리를 로그인 버튼 옆에 항상 보여줍니다.
+                  </div>
+                  <button class="button primary full">대진표 생성하기</button>
+                </div>
+              </div>
+            </div>
+            <div class="card-body">
+              <h2>A. 가장 직관적인 현재형 개선</h2>
+              <p>
+                발견성은 가장 좋지만 모바일 헤더가 복잡해질 수 있습니다. 관리 진입을 꼭
+                노출해야 할 때 적합합니다.
+              </p>
+            </div>
+          </article>
+
+          <article class="card">
+            <div class="card-preview">
+              <div class="mock-shell">
+                <span class="url-label">B안 · 헤더 아래 관리 탭</span>
+                <div class="panel">
+                  <div class="row">
+                    <strong>TennisFolio</strong>
+                    <button class="button small">로그인</button>
+                  </div>
+                  <div class="action-tool-row" style="margin-top: 10px">
+                    <button class="button primary full">경기 관리</button>
+                    <button class="button full">모임 관리</button>
+                  </div>
+                  <div class="state-note">
+                    메인 기능과 관리 메뉴가 시각적으로 분리되어 가장 안정적입니다.
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="card-body">
+              <h2>B. 메인 기능과 메뉴를 시각적으로 분리</h2>
+              <p>
+                추천안입니다. 보이기는 하되 본문 흐름을 방해하지 않고, 로그인 전/후 동작도
+                자연스럽게 이어집니다.
+              </p>
+            </div>
+          </article>
+
+          <article class="card">
+            <div class="card-preview">
+              <div class="mock-shell">
+                <span class="url-label">C안 · 메뉴 버튼</span>
+                <div class="panel">
+                  <div class="row">
+                    <strong>TennisFolio</strong>
+                    <button class="button small">메뉴</button>
+                  </div>
+                  <div class="more-menu" style="margin-top: 10px">
+                    <div class="more-menu-row">
+                      <span>경기 관리</span>
+                      <span>›</span>
+                    </div>
+                    <div class="more-menu-row">
+                      <span>모임 관리</span>
+                      <span>›</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="card-body">
+              <h2>C. 헤더는 가볍게, 메인은 대진표에 집중</h2>
+              <p>
+                가장 깔끔하지만 관리 메뉴를 찾기 어렵습니다. 현재 단계에서는 B안보다
+                우선순위가 낮습니다.
+              </p>
+            </div>
+          </article>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

@@ -18,7 +18,11 @@ public interface CompetitionRepository extends JpaRepository<Competition, Long> 
 
     Optional<Competition> findByPublicIdAndDeletedAtIsNull(String publicId);
 
+    Optional<Competition> findByIdAndDeletedAtIsNull(Long id);
+
     Optional<Competition> findByPublicIdAndOwnerUserId(String publicId, Long ownerUserId);
+
+    Optional<Competition> findByIdAndOwnerUserIdAndDeletedAtIsNull(Long id, Long ownerUserId);
 
     List<Competition> findByStatus(Competition.CompetitionStatus status);
 

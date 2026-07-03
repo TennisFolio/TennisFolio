@@ -33,7 +33,10 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ResponseDTO<Void>> handleException(Exception e){
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ResponseDTO.error(e.getMessage(), "ERROR"));
+                .body(ResponseDTO.error(
+                        HttpStatus.INTERNAL_SERVER_ERROR.name(),
+                        "요청을 처리하지 못했습니다. 잠시 후 다시 시도해주세요."
+                ));
     }
 
     @ExceptionHandler(ResponseStatusException.class)

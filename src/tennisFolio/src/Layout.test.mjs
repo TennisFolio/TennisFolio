@@ -10,10 +10,16 @@ test('logged-in header exposes a direct my competitions link', () => {
   assert.match(layoutSource, /navigate\('\/me\/competitions'\)/);
 });
 
-test('my competitions header button uses a high-contrast surface style', () => {
+test('logged-in header exposes a direct my meetings link', () => {
+  assert.match(layoutSource, /className="[^"]*header-my-meetings-button/);
+  assert.match(layoutSource, /navigate\('\/meetings'\)/);
+  assert.match(layoutSource, />\s*내 모임\s*</);
+});
+
+test('my logged-in header navigation buttons use a high-contrast surface style', () => {
   assert.match(
     layoutCss,
-    /\.header-my-competitions-button\s*\{[^}]*background:\s*#ffffff;[^}]*color:\s*#101828;/s,
+    /\.header-my-competitions-button,[\s\S]*?\.header-my-meetings-button\s*\{[^}]*background:\s*#ffffff;[^}]*color:\s*#101828;/,
   );
 });
 

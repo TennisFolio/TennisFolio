@@ -51,4 +51,12 @@ Keep `Matching` names inside algorithm/domain internals only when they describe 
 - Prefer existing package structure and coding style.
 - Keep refactors scoped to the requested domain boundary.
 - Do not rename generated or unrelated legacy modules unless the task requires it.
-- After code changes, run at least `.\gradlew.bat compileJava`; run `compileTestJava` when tests or method signatures used by tests changed.
+- Do not create git commits by default. Only commit changes when the user explicitly asks for a commit.
+- Even when the user has asked for a commit, show the staged file list, test/verification result, and commit message first, then ask for confirmation before running `git commit`.
+- When the user asks to develop a feature or proceed with a phase, read `docs/workflows/development-workflow.md` first and follow that workflow before making implementation changes.
+- Write documents under `docs/superpowers/specs` and `docs/superpowers/plans` in Korean unless the user explicitly asks for another language.
+- When editing Competition UI styles, follow `docs/competition-design-system.md` and use CSS variables from `src/tennisFolio/src/styles/competition-theme.css`. Do not introduce new hard-coded Competition colors unless the design system document and theme variables are updated in the same change.
+- When doing frontend development, do not create or update frontend test code by default. Only write frontend tests when the user explicitly asks for test code.
+- Do not run Java/Gradle builds or npm builds by default. This includes `.\gradlew.bat compileJava`, `.\gradlew.bat compileTestJava`, `.\gradlew.bat build`, `npm run build`, and similar build commands.
+- Only run Java/Gradle or npm build commands when the user explicitly asks for verification, asks to run a build/test, or grants permission for that specific command.
+- When build verification is skipped because of this rule, state that it was skipped in the final response.

@@ -21,6 +21,10 @@ import Competition from './page/Competition.jsx';
 import CompetitionDetail from './page/CompetitionDetail.jsx';
 import CompetitionResult from './page/CompetitionResult.jsx';
 import MyCompetitions from './page/MyCompetitions.jsx';
+import Meetings from './page/Meetings.jsx';
+import MeetingCreate from './page/MeetingCreate.jsx';
+import MeetingUpdate from './page/MeetingUpdate.jsx';
+import MeetingPublic from './page/MeetingPublic.jsx';
 import Schedule from './page/Schedule.jsx';
 import NotFound from './page/NotFound.jsx';
 import { trackPageView } from './utils/analytics';
@@ -92,6 +96,10 @@ function App() {
         <Routes>
           <Route path="/" element={<Competition />} />
           <Route path="/me/competitions" element={<MyCompetitions />} />
+          <Route path="/meetings" element={<Meetings />} />
+          <Route path="/meetings/new" element={<MeetingCreate />} />
+          <Route path="/meetings/:publicId" element={<MeetingPublic />} />
+          <Route path="/meetings/:publicId/edit" element={<MeetingUpdate />} />
           <Route path="/competitions/:publicId" element={<CompetitionDetail />} />
           <Route
             path="/competitions/:publicId/manage"
