@@ -33,6 +33,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(MeetingController.class)
@@ -112,7 +113,9 @@ class MeetingSecurityConfigTest {
     @Test
     void meetingNestedCommandsRequireAuthenticationByDefault() throws Exception {
         mockMvc.perform(post("/api/meetings/meeting-public-id/competition"))
-                .andExpect(status().is3xxRedirection());
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("UNAUTHORIZED"))
+                .andExpect(jsonPath("$.message").value("로그인이 필요합니다."));
     }
 
     @Test
@@ -120,7 +123,19 @@ class MeetingSecurityConfigTest {
         mockMvc.perform(patch("/api/meetings/meeting-public-id")
                         .contentType("application/json")
                         .content("{}"))
-                .andExpect(status().is3xxRedirection());
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("UNAUTHORIZED"))
+                .andExpect(jsonPath("$.message").value("로그인이 필요합니다."));
+    }
+
+    @Test
+    void meetingCreateRequiresAuthenticationWithJsonError() throws Exception {
+        mockMvc.perform(post("/api/meetings")
+                        .contentType("application/json")
+                        .content("{}"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("UNAUTHORIZED"))
+                .andExpect(jsonPath("$.message").value("로그인이 필요합니다."));
     }
 
     private static MeetingDetailResponse detailResponse() {

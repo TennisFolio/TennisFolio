@@ -1,8 +1,17 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { deleteMeeting, getMyMeetings } from '../utils/meetingApi';
+import { default_oauth_provider } from '@/constants';
+import { loginWithProvider } from '../utils/authApi';
+import {
+  deleteMeeting,
+  getMyMeetings,
+  isAuthenticationRequiredError,
+} from '../utils/meetingApi';
 import './Meeting.css';
 import MeetingToast from './MeetingToast';
+
+const INITIAL_VISIBLE_COUNT = 5;
+const LOAD_MORE_COUNT = 5;
 
 function formatDateTime(value) {
   return value ? value.replace('T', ' ').slice(0, 16) : '';
@@ -25,6 +34,8 @@ function Meetings() {
   const [isLoading, setIsLoading] = useState(true);
   const [notice, setNotice] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
+  const [authRequired, setAuthRequired] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE_COUNT);
 
   useEffect(() => {
     let cancelled = false;
@@ -33,15 +44,17 @@ function Meetings() {
       .then((response) => {
         if (!cancelled) {
           setMeetings(response.data.data || []);
+          setVisibleCount(INITIAL_VISIBLE_COUNT);
           setErrorMessage('');
+          setAuthRequired(false);
         }
       })
       .catch((error) => {
         if (!cancelled) {
+          const requiresLogin = isAuthenticationRequiredError(error);
+          setAuthRequired(requiresLogin);
           setErrorMessage(
-            error.response?.status === 401
-              ? '로그인이 필요합니다.'
-              : '모임 목록을 불러오지 못했습니다.',
+            requiresLogin ? '' : '모임 관리 목록을 불러오지 못했습니다.'
           );
         }
       })
@@ -73,17 +86,50 @@ function Meetings() {
 
     await deleteMeeting(meeting.publicId);
     setMeetings((current) =>
-      current.filter((item) => item.publicId !== meeting.publicId),
+      current.filter((item) => item.publicId !== meeting.publicId)
     );
     showNotice('success', '모임을 삭제했습니다.');
   };
+
+  const visibleMeetings = meetings.slice(0, visibleCount);
+  const hasMoreMeetings = visibleCount < meetings.length;
+
+  if (!isLoading && authRequired) {
+    return (
+      <main className="meeting-page">
+        <section className="meeting-header">
+          <div className="meeting-title-block">
+            <div className="meeting-title-row">
+              <h1>모임 관리</h1>
+            </div>
+            <p>
+              로그인하면 만든 모임을 확인하고 참석 링크와 경기표를 관리할 수
+              있습니다.
+            </p>
+          </div>
+          <button
+            type="button"
+            className="meeting-button primary"
+            onClick={() => loginWithProvider(default_oauth_provider)}
+          >
+            로그인하기
+          </button>
+        </section>
+      </main>
+    );
+  }
 
   return (
     <main className="meeting-page">
       <header className="meeting-header">
         <div className="meeting-header-row">
-          <div>
-            <h1>내 모임</h1>
+          <div className="meeting-title-block">
+            <div className="meeting-title-row">
+              <h1>모임 관리</h1>
+              {!isLoading && !errorMessage && !authRequired && (
+                <span>{meetings.length}개</span>
+              )}
+            </div>
             <p>참석 체크 링크를 만들고 경기표 생성까지 이어갑니다.</p>
           </div>
           <button
@@ -107,8 +153,8 @@ function Meetings() {
       )}
 
       {!isLoading && !errorMessage && meetings.length > 0 && (
-        <section className="meeting-list" aria-label="내 모임 목록">
-          {meetings.map((meeting) => (
+        <section className="meeting-list" aria-label="모임 관리 목록">
+          {visibleMeetings.map((meeting) => (
             <article className="meeting-card" key={meeting.publicId}>
               <div className="meeting-card-title-row">
                 <div>
@@ -127,8 +173,12 @@ function Meetings() {
               </div>
 
               <div className="meeting-card-meta">
-                <span className="meeting-chip">{formatDateTime(meeting.startAt)}</span>
-                <span className="meeting-chip">{formatDateTime(meeting.endAt)}</span>
+                <span className="meeting-chip">
+                  {formatDateTime(meeting.startAt)}
+                </span>
+                <span className="meeting-chip">
+                  {formatDateTime(meeting.endAt)}
+                </span>
                 <span className="meeting-chip">
                   {formatCount(meeting.courtCount)}코트
                 </span>
@@ -142,7 +192,7 @@ function Meetings() {
                   참석 {formatCount(meeting.attendingCount)}
                 </span>
                 <span className="meeting-chip warning">
-                  미정 {formatCount(meeting.maybeCount)}
+                  대기 {formatCount(meeting.waitingCount)}
                 </span>
                 <span className="meeting-chip danger">
                   불참 {formatCount(meeting.notAttendingCount)}
@@ -153,7 +203,7 @@ function Meetings() {
                 <button
                   type="button"
                   className="meeting-button primary"
-                  onClick={() => navigate(`/meetings/${meeting.publicId}/manage`)}
+                  onClick={() => navigate(`/meetings/${meeting.publicId}`)}
                 >
                   관리
                 </button>
@@ -167,6 +217,17 @@ function Meetings() {
               </div>
             </article>
           ))}
+          {hasMoreMeetings && (
+            <button
+              type="button"
+              className="meeting-load-more-button"
+              onClick={() =>
+                setVisibleCount((current) => current + LOAD_MORE_COUNT)
+              }
+            >
+              더 보기
+            </button>
+          )}
         </section>
       )}
       <MeetingToast notice={notice} onClose={() => setNotice(null)} />

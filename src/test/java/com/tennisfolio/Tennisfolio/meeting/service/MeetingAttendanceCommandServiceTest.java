@@ -1,4 +1,4 @@
-package com.tennisfolio.Tennisfolio.meeting.service;
+﻿package com.tennisfolio.Tennisfolio.meeting.service;
 
 import com.tennisfolio.Tennisfolio.exception.NotFoundException;
 import com.tennisfolio.Tennisfolio.meeting.domain.AttendanceStatus;
@@ -10,6 +10,7 @@ import com.tennisfolio.Tennisfolio.meeting.entity.Meeting;
 import com.tennisfolio.Tennisfolio.meeting.entity.MeetingAttendance;
 import com.tennisfolio.Tennisfolio.meeting.repository.MeetingAttendanceRepository;
 import com.tennisfolio.Tennisfolio.meeting.repository.MeetingRepository;
+import com.tennisfolio.Tennisfolio.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -38,11 +39,14 @@ class MeetingAttendanceCommandServiceTest {
     @Mock
     MeetingAttendanceRepository attendanceRepository;
 
+    @Mock
+    UserRepository userRepository;
+
     MeetingAttendanceCommandService service;
 
     @BeforeEach
     void setUp() {
-        service = new MeetingAttendanceCommandService(meetingRepository, attendanceRepository);
+        service = new MeetingAttendanceCommandService(meetingRepository, attendanceRepository, userRepository);
     }
 
     @Test
@@ -57,7 +61,8 @@ class MeetingAttendanceCommandServiceTest {
 
         MeetingAttendanceResponse response = service.upsertAttendance(
                 "meeting-public-id",
-                new MeetingAttendanceUpsertRequest(null, "Alex Kim", "MALE", "ATTENDING")
+                new MeetingAttendanceUpsertRequest(null, "Alex Kim", "MALE", "ATTENDING"),
+                null
         );
 
         verify(attendanceRepository).save(any(MeetingAttendance.class));
@@ -68,9 +73,28 @@ class MeetingAttendanceCommandServiceTest {
     }
 
     @Test
+    void upsertAttendance_treatsLegacyMaybeStatusAsWaiting() {
+        Meeting meeting = meeting(null, null);
+        when(meetingRepository.findByPublicIdAndDeletedAtIsNullForUpdate("meeting-public-id"))
+                .thenReturn(Optional.of(meeting));
+        when(attendanceRepository.existsByMeetingAndParticipantNameAndDeletedAtIsNull(meeting, "Alex Kim"))
+                .thenReturn(false);
+        when(attendanceRepository.save(any(MeetingAttendance.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        MeetingAttendanceResponse response = service.upsertAttendance(
+                "meeting-public-id",
+                new MeetingAttendanceUpsertRequest(null, "Alex Kim", "MALE", "MAYBE"),
+                null
+        );
+
+        assertThat(response.getAttendanceStatus()).isEqualTo("WAITING");
+    }
+
+    @Test
     void upsertAttendance_updatesExistingPublicAttendance() {
         Meeting meeting = meeting(null, null);
-        MeetingAttendance attendance = attendance(meeting, 100L, "Alex Kim", Gender.MALE, AttendanceStatus.MAYBE);
+        MeetingAttendance attendance = attendance(meeting, 100L, "Alex Kim", Gender.MALE, AttendanceStatus.WAITING);
         when(meetingRepository.findByPublicIdAndDeletedAtIsNullForUpdate("meeting-public-id"))
                 .thenReturn(Optional.of(meeting));
         when(attendanceRepository.findByIdAndMeetingAndDeletedAtIsNull(100L, meeting))
@@ -78,7 +102,8 @@ class MeetingAttendanceCommandServiceTest {
 
         MeetingAttendanceResponse response = service.upsertAttendance(
                 "meeting-public-id",
-                new MeetingAttendanceUpsertRequest(100L, "Alex Kim", "FEMALE", "NOT_ATTENDING")
+                new MeetingAttendanceUpsertRequest(100L, "Alex Kim", "FEMALE", "NOT_ATTENDING"),
+                null
         );
 
         assertThat(response.getParticipantName()).isEqualTo("Alex Kim");
@@ -96,7 +121,8 @@ class MeetingAttendanceCommandServiceTest {
 
         assertThatThrownBy(() -> service.upsertAttendance(
                 "meeting-public-id",
-                new MeetingAttendanceUpsertRequest(null, "Alex Kim", "MALE", "ATTENDING")
+                new MeetingAttendanceUpsertRequest(null, "Alex Kim", "MALE", "ATTENDING"),
+                null
         ))
                 .isInstanceOf(ResponseStatusException.class)
                 .satisfies(error -> {
@@ -116,7 +142,8 @@ class MeetingAttendanceCommandServiceTest {
 
         assertThatThrownBy(() -> service.upsertAttendance(
                 "meeting-public-id",
-                new MeetingAttendanceUpsertRequest(null, "Alex Kim", "MALE", "ATTENDING")
+                new MeetingAttendanceUpsertRequest(null, "Alex Kim", "MALE", "ATTENDING"),
+                null
         ))
                 .isInstanceOf(ResponseStatusException.class)
                 .satisfies(error -> {
@@ -134,7 +161,8 @@ class MeetingAttendanceCommandServiceTest {
 
         assertThatThrownBy(() -> service.upsertAttendance(
                 "meeting-public-id",
-                new MeetingAttendanceUpsertRequest(null, "Alex Kim", "MALE", "ATTENDING")
+                new MeetingAttendanceUpsertRequest(null, "Alex Kim", "MALE", "ATTENDING"),
+                null
         ))
                 .isInstanceOf(ResponseStatusException.class)
                 .satisfies(error -> {
@@ -152,7 +180,8 @@ class MeetingAttendanceCommandServiceTest {
 
         assertThatThrownBy(() -> service.upsertAttendance(
                 "meeting-public-id",
-                new MeetingAttendanceUpsertRequest(null, " ", null, "ATTENDING")
+                new MeetingAttendanceUpsertRequest(null, " ", null, "ATTENDING"),
+                null
         ))
                 .isInstanceOf(ResponseStatusException.class)
                 .extracting("statusCode")
@@ -173,7 +202,8 @@ class MeetingAttendanceCommandServiceTest {
 
         assertThatThrownBy(() -> service.upsertAttendance(
                 "meeting-public-id",
-                new MeetingAttendanceUpsertRequest(null, "Alex Kim", "MALE", "ATTENDING")
+                new MeetingAttendanceUpsertRequest(null, "Alex Kim", "MALE", "ATTENDING"),
+                null
         ))
                 .isInstanceOf(ResponseStatusException.class)
                 .satisfies(error -> {
@@ -198,7 +228,8 @@ class MeetingAttendanceCommandServiceTest {
 
         assertThatThrownBy(() -> service.upsertAttendance(
                 "meeting-public-id",
-                new MeetingAttendanceUpsertRequest(null, "Alex Kim", "MALE", "ATTENDING")
+                new MeetingAttendanceUpsertRequest(null, "Alex Kim", "MALE", "ATTENDING"),
+                null
         ))
                 .isInstanceOf(ResponseStatusException.class)
                 .satisfies(error -> {
@@ -224,7 +255,8 @@ class MeetingAttendanceCommandServiceTest {
 
         MeetingAttendanceResponse response = service.upsertAttendance(
                 "meeting-public-id",
-                new MeetingAttendanceUpsertRequest(null, "Alex Kim", "MALE", "ATTENDING")
+                new MeetingAttendanceUpsertRequest(null, "Alex Kim", "MALE", "ATTENDING"),
+                null
         );
 
         assertThat(response.getAttendanceStatus()).isEqualTo("ATTENDING");
@@ -233,7 +265,7 @@ class MeetingAttendanceCommandServiceTest {
     @Test
     void updateAttendance_allowsOwnerToEditAttendance() {
         Meeting meeting = meeting(null, null);
-        MeetingAttendance attendance = attendance(meeting, 100L, "Alex Kim", Gender.MALE, AttendanceStatus.MAYBE);
+        MeetingAttendance attendance = attendance(meeting, 100L, "Alex Kim", Gender.MALE, AttendanceStatus.WAITING);
         when(meetingRepository.findByPublicIdAndOwnerUserIdAndDeletedAtIsNullForUpdate("meeting-public-id", 10L))
                 .thenReturn(Optional.of(meeting));
         when(attendanceRepository.findByIdAndMeetingAndDeletedAtIsNull(100L, meeting))
@@ -254,7 +286,7 @@ class MeetingAttendanceCommandServiceTest {
     @Test
     void updateAttendance_rejectsCapacityExceededForOwnerEdit() {
         Meeting meeting = meeting(1, null);
-        MeetingAttendance attendance = attendance(meeting, 100L, "Alex Kim", Gender.MALE, AttendanceStatus.MAYBE);
+        MeetingAttendance attendance = attendance(meeting, 100L, "Alex Kim", Gender.MALE, AttendanceStatus.WAITING);
         when(meetingRepository.findByPublicIdAndOwnerUserIdAndDeletedAtIsNullForUpdate("meeting-public-id", 10L))
                 .thenReturn(Optional.of(meeting));
         when(attendanceRepository.findByIdAndMeetingAndDeletedAtIsNull(100L, meeting))
@@ -292,7 +324,7 @@ class MeetingAttendanceCommandServiceTest {
     @Test
     void deleteAttendance_softDeletesOwnerAttendance() {
         Meeting meeting = meeting(null, null);
-        MeetingAttendance attendance = attendance(meeting, 100L, "Alex Kim", Gender.MALE, AttendanceStatus.MAYBE);
+        MeetingAttendance attendance = attendance(meeting, 100L, "Alex Kim", Gender.MALE, AttendanceStatus.WAITING);
         when(meetingRepository.findByPublicIdAndOwnerUserIdAndDeletedAtIsNullForUpdate("meeting-public-id", 10L))
                 .thenReturn(Optional.of(meeting));
         when(attendanceRepository.findByIdAndMeetingAndDeletedAtIsNull(100L, meeting))

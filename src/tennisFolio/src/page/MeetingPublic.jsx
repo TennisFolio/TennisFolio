@@ -1,7 +1,8 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+﻿import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { getPublicMeeting, upsertAttendance } from '../utils/meetingApi';
 import './Meeting.css';
+import MeetingManage from './MeetingManage';
 import MeetingToast from './MeetingToast';
 
 const emptyAttendance = {
@@ -13,7 +14,7 @@ const emptyAttendance = {
 
 const statusLabels = {
   ATTENDING: '참석',
-  MAYBE: '미정',
+  WAITING: '대기',
   NOT_ATTENDING: '불참',
 };
 
@@ -142,8 +143,8 @@ function groupAttendances(attendances) {
       (attendance) =>
         attendance.attendanceStatus === 'ATTENDING' && attendance.gender === 'FEMALE',
     ),
-    maybe: attendances.filter(
-      (attendance) => attendance.attendanceStatus === 'MAYBE',
+    waiting: attendances.filter(
+      (attendance) => attendance.attendanceStatus === 'WAITING',
     ),
     notAttending: attendances.filter(
       (attendance) => attendance.attendanceStatus === 'NOT_ATTENDING',
@@ -151,7 +152,55 @@ function groupAttendances(attendances) {
   };
 }
 
-function RosterPanel({ title, tone, attendees }) {
+function isOwnerAttendance(attendance, meeting) {
+  const ownerNickName = meeting?.ownerNickName?.trim();
+  return Boolean(ownerNickName) && attendance.participantName === ownerNickName;
+}
+
+function OwnerTag() {
+  return (
+    <span className="meeting-owner-icon" role="img" aria-label="모임장" title="모임장">
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="M5 17h14l1-10-5 4-3-6-3 6-5-4 1 10Z" />
+        <path d="M5 20h14" />
+      </svg>
+    </span>
+  );
+}
+
+function AttendanceChip({ attendance, meeting, asButton = false, onSelect }) {
+  const isOwner = isOwnerAttendance(attendance, meeting);
+  const className = `meeting-chip ${
+    attendance.gender === 'FEMALE' ? 'female' : 'male'
+  }${isOwner ? ' owner' : ''}`;
+  const content = (
+    <>
+      {attendance.participantName}
+      {isOwner && <OwnerTag />}
+    </>
+  );
+
+  if (!asButton || isOwner) {
+    return (
+      <span className={className} key={attendance.id}>
+        {content}
+      </span>
+    );
+  }
+
+  return (
+    <button
+      type="button"
+      className={className}
+      key={attendance.id}
+      onClick={() => onSelect(attendance)}
+    >
+      {content}
+    </button>
+  );
+}
+
+function RosterPanel({ title, tone, attendees, meeting }) {
   return (
     <section className="meeting-panel meeting-roster-panel" aria-label={title}>
       <div className="meeting-roster-head">
@@ -163,14 +212,11 @@ function RosterPanel({ title, tone, attendees }) {
       ) : (
         <div className="meeting-attendance-list">
           {attendees.map((attendance) => (
-            <span
-              className={`meeting-chip ${
-                attendance.gender === 'FEMALE' ? 'female' : 'male'
-              }`}
+            <AttendanceChip
+              attendance={attendance}
               key={attendance.id}
-            >
-              {attendance.participantName}
-            </span>
+              meeting={meeting}
+            />
           ))}
         </div>
       )}
@@ -192,14 +238,16 @@ function CapacityChips({ meeting, attendances }) {
 
 function MeetingPublic() {
   const { publicId } = useParams();
+  const location = useLocation();
   const navigate = useNavigate();
+  const initialNotice = location.state?.meetingNotice || null;
   const [meeting, setMeeting] = useState(null);
   const [form, setForm] = useState(emptyAttendance);
   const [hasEntered, setHasEntered] = useState(() =>
     new URLSearchParams(window.location.search).has('entry'),
   );
   const [isLoading, setIsLoading] = useState(true);
-  const [notice, setNotice] = useState(null);
+  const [notice, setNotice] = useState(initialNotice);
   const [errorMessage, setErrorMessage] = useState('');
 
   const attendances = useMemo(() => normalizeAttendances(meeting), [meeting]);
@@ -247,6 +295,12 @@ function MeetingPublic() {
     };
   }, [loadMeeting]);
 
+  useEffect(() => {
+    if (initialNotice) {
+      navigate(`/meetings/${publicId}`, { replace: true, state: null });
+    }
+  }, [initialNotice, navigate, publicId]);
+
   const updateField = (field, value) => {
     setForm((current) => ({ ...current, [field]: value }));
     setNotice(null);
@@ -264,15 +318,23 @@ function MeetingPublic() {
   };
 
   const saveAttendance = async (nextForm) => {
-    if (!nextForm.participantName.trim()) {
+    const participantName = nextForm.participantName.trim();
+    const ownerNickName = meeting?.ownerNickName?.trim();
+
+    if (!participantName) {
       showNotice('error', '이름을 입력해주세요.');
+      return false;
+    }
+
+    if (ownerNickName && participantName === ownerNickName) {
+      showNotice('error', '모임장은 참석자로 선택할 수 없습니다.');
       return false;
     }
 
     try {
       const response = await upsertAttendance(publicId, {
         attendanceId: nextForm.attendanceId || null,
-        participantName: nextForm.participantName.trim(),
+        participantName,
         gender: nextForm.gender,
         attendanceStatus: nextForm.attendanceStatus,
       });
@@ -281,7 +343,7 @@ function MeetingPublic() {
       await loadMeeting();
       setForm({
         attendanceId: savedAttendance?.id ?? nextForm.attendanceId,
-        participantName: savedAttendance?.participantName ?? nextForm.participantName.trim(),
+        participantName: savedAttendance?.participantName ?? participantName,
         gender: savedAttendance?.gender ?? nextForm.gender,
         attendanceStatus: savedAttendance?.attendanceStatus ?? nextForm.attendanceStatus,
       });
@@ -318,100 +380,114 @@ function MeetingPublic() {
   };
 
   const renderEntryScreen = () => {
-    const maleAttendances = attendances.filter(
-      (attendance) => attendance.gender === 'MALE',
-    );
-    const femaleAttendances = attendances.filter(
-      (attendance) => attendance.gender === 'FEMALE',
-    );
+    const entryGroups = [
+      {
+        title: '참석',
+        attendances: attendances.filter(
+          (attendance) => attendance.attendanceStatus === 'ATTENDING',
+        ),
+      },
+      {
+        title: '대기',
+        attendances: attendances.filter(
+          (attendance) => attendance.attendanceStatus === 'WAITING',
+        ),
+      },
+      {
+        title: '불참',
+        attendances: attendances.filter(
+          (attendance) => attendance.attendanceStatus === 'NOT_ATTENDING',
+        ),
+      },
+    ];
 
     return (
       <main className="meeting-page">
         <section className="meeting-panel">
-          <p className="meeting-muted">처음 입장</p>
           <h1>{meeting.title}</h1>
           <div className="meeting-card-meta">
             <span className="meeting-chip">{formatDate(meeting.startAt)}</span>
             <span className="meeting-chip">
               {formatTimeRange(meeting.startAt, meeting.endAt)}
             </span>
+            <span className="meeting-chip">{meeting.courtCount}코트</span>
+            <span className="meeting-chip">{meeting.totalGames}경기</span>
           </div>
           <CapacityChips meeting={meeting} attendances={attendances} />
           {meeting.note && <p className="meeting-note-box">{meeting.note}</p>}
-          <p className="meeting-state-note">
-            이미 응답했다면 이름을 선택해 모임에 입장하세요.
-          </p>
 
-          <div className="meeting-entry-name-groups">
-            <section className="meeting-entry-name-group" aria-label="남자">
-              <p className="meeting-muted">남자</p>
-              <div className="meeting-attendance-list">
-                {maleAttendances.map((attendance) => (
-                  <button
-                    type="button"
-                    className="meeting-chip male"
-                    key={attendance.id}
-                    onClick={() => selectAttendance(attendance)}
-                  >
-                    {attendance.participantName}
-                  </button>
-                ))}
-              </div>
-            </section>
-            <section className="meeting-entry-name-group" aria-label="여자">
-              <p className="meeting-muted">여자</p>
-              <div className="meeting-attendance-list">
-                {femaleAttendances.map((attendance) => (
-                  <button
-                    type="button"
-                    className="meeting-chip female"
-                    key={attendance.id}
-                    onClick={() => selectAttendance(attendance)}
-                  >
-                    {attendance.participantName}
-                  </button>
-                ))}
-              </div>
-            </section>
-          </div>
+          <div className="meeting-entry-form">
+            <div className="meeting-grid two">
+              <label className="meeting-field">
+                <span>이름</span>
+                <input
+                  value={form.participantName}
+                  onChange={(event) =>
+                    updateField('participantName', event.target.value)
+                  }
+                />
+              </label>
+              <label className="meeting-field">
+                <span>성별</span>
+                <select
+                  value={form.gender}
+                  onChange={(event) => updateField('gender', event.target.value)}
+                >
+                  <option value="MALE">남성</option>
+                  <option value="FEMALE">여성</option>
+                </select>
+              </label>
+            </div>
 
-          <div className="meeting-grid two">
-            <label className="meeting-field">
-              <span>이름</span>
-              <input
-                value={form.participantName}
-                onChange={(event) => updateField('participantName', event.target.value)}
-              />
-            </label>
-            <label className="meeting-field">
-              <span>성별</span>
-              <select
-                value={form.gender}
-                onChange={(event) => updateField('gender', event.target.value)}
-              >
-                <option value="MALE">남성</option>
-                <option value="FEMALE">여성</option>
-              </select>
-            </label>
-          </div>
-
-          <div className="meeting-status-options">
-            {Object.entries(statusLabels).map(([status, label]) => (
-              <button
-                type="button"
-                className={`meeting-button full ${
-                  form.attendanceStatus === status ? 'primary' : ''
-                }`}
-                key={status}
-                onClick={() => handleStatusClick(status)}
-              >
-                {label}
-              </button>
-            ))}
+            <div className="meeting-status-options">
+              {Object.entries(statusLabels).map(([status, label]) => (
+                <button
+                  type="button"
+                  className={`meeting-button full ${
+                    form.attendanceStatus === status ? 'primary' : ''
+                  }`}
+                  key={status}
+                  onClick={() => handleStatusClick(status)}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
           </div>
 
           <p className="meeting-state-note">
             참석 여부를 선택하면 참석 현황과 명단을 볼 수 있습니다.
+          </p>
+
+          <div className="meeting-entry-name-groups">
+            {entryGroups.map((group) => (
+              <section
+                className="meeting-entry-name-group"
+                aria-label={group.title}
+                key={group.title}
+              >
+                <p className="meeting-muted">{group.title}</p>
+                {group.attendances.length === 0 ? (
+                  <p className="meeting-entry-empty">아직 없습니다.</p>
+                ) : (
+                  <div className="meeting-attendance-list">
+                    {group.attendances.map((attendance) => (
+                      <AttendanceChip
+                        attendance={attendance}
+                        key={attendance.id}
+                        meeting={meeting}
+                        asButton
+                        onSelect={selectAttendance}
+                      />
+                    ))}
+                  </div>
+                )}
+              </section>
+            ))}
+          </div>
+
+          <p className="meeting-state-note">
+            이미 응답했다면 아래 명단에서 이름을 선택해 모임에 입장하세요.
           </p>
         </section>
 
@@ -446,6 +522,10 @@ function MeetingPublic() {
     );
   }
 
+  if (meeting.ownedByCurrentUser === true) {
+    return <MeetingManage initialMeeting={meeting} initialNotice={notice} />;
+  }
+
   if (!hasEntered) {
     return renderEntryScreen();
   }
@@ -473,7 +553,7 @@ function MeetingPublic() {
             참석 {countByStatus(attendances, 'ATTENDING')}
           </span>
           <span className="meeting-chip warning">
-            미정 {countByStatus(attendances, 'MAYBE')}
+            대기 {countByStatus(attendances, 'WAITING')}
           </span>
           <span className="meeting-chip danger">
             불참 {countByStatus(attendances, 'NOT_ATTENDING')}
@@ -551,21 +631,25 @@ function MeetingPublic() {
         title="남자 참석자"
         tone="ok"
         attendees={groupedAttendances.attendingMale}
+        meeting={meeting}
       />
       <RosterPanel
         title="여자 참석자"
         tone="ok"
         attendees={groupedAttendances.attendingFemale}
+        meeting={meeting}
       />
       <RosterPanel
-        title="미정"
+        title="대기"
         tone="warning"
-        attendees={groupedAttendances.maybe}
+        attendees={groupedAttendances.waiting}
+        meeting={meeting}
       />
       <RosterPanel
         title="불참"
         tone="danger"
         attendees={groupedAttendances.notAttending}
+        meeting={meeting}
       />
     </main>
   );

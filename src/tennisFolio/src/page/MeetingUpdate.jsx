@@ -1,13 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { getManagedMeeting, updateMeeting } from '../utils/meetingApi';
+import { getPublicMeeting, updateMeeting } from '../utils/meetingApi';
 import './Meeting.css';
-
-const quotaModes = [
-  { value: 'NONE', label: '제한 없음' },
-  { value: 'TOTAL', label: '전체 정원' },
-  { value: 'GENDER', label: '성별 정원' },
-];
+import MeetingSettingsStep from './MeetingSettingsStep';
 
 const initialForm = {
   title: '',
@@ -71,6 +66,7 @@ function MeetingUpdate() {
   const [step, setStep] = useState(1);
   const [form, setForm] = useState(initialForm);
   const [errorMessage, setErrorMessage] = useState('');
+  const [accessDenied, setAccessDenied] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -86,10 +82,16 @@ function MeetingUpdate() {
   useEffect(() => {
     let cancelled = false;
 
-    getManagedMeeting(publicId)
+    getPublicMeeting(publicId)
       .then((response) => {
         if (!cancelled) {
-          setForm(toForm(response.data.data));
+          const meeting = response.data.data;
+          if (meeting?.ownedByCurrentUser !== true) {
+            setAccessDenied(true);
+            setErrorMessage('모임을 수정할 권한이 없습니다.');
+            return;
+          }
+          setForm(toForm(meeting));
         }
       })
       .catch((error) => {
@@ -97,6 +99,7 @@ function MeetingUpdate() {
           setErrorMessage(
             error.response?.data?.message || '모임 정보를 불러오지 못했습니다.',
           );
+          setAccessDenied(true);
         }
       })
       .finally(() => {
@@ -183,7 +186,14 @@ function MeetingUpdate() {
     try {
       setIsSubmitting(true);
       await updateMeeting(publicId, payload);
-      navigate(`/meetings/${publicId}/manage`);
+      navigate(`/meetings/${publicId}`, {
+        state: {
+          meetingNotice: {
+            type: 'success',
+            message: '모임을 수정했습니다.',
+          },
+        },
+      });
     } catch (error) {
       setErrorMessage(error.response?.data?.message || '모임을 수정하지 못했습니다.');
     } finally {
@@ -195,6 +205,14 @@ function MeetingUpdate() {
     return (
       <main className="meeting-page">
         <p className="meeting-state">불러오는 중입니다.</p>
+      </main>
+    );
+  }
+
+  if (accessDenied) {
+    return (
+      <main className="meeting-page">
+        <p className="meeting-state meeting-error">{errorMessage}</p>
       </main>
     );
   }
@@ -249,108 +267,36 @@ function MeetingUpdate() {
             </label>
           </div>
           <label className="meeting-field">
-            <span>메모</span>
+            <span>안내사항</span>
             <textarea
               value={form.note}
+              placeholder="장소, 준비물, 진행 방식 등 참가자에게 알려줄 내용을 적어주세요."
               onChange={(event) => updateField('note', event.target.value)}
             />
           </label>
-          <button type="button" className="meeting-button primary full" onClick={handleNext}>
-            다음
-          </button>
-        </section>
-      ) : (
-        <section className="meeting-panel" aria-label="모임 설정">
-          <h2>2 / 2 모임 설정</h2>
-          <div>
-            <div className="meeting-toggle" role="group" aria-label="정원 방식">
-              {quotaModes.map((mode) => (
-                <button
-                  type="button"
-                  key={mode.value}
-                  className={`meeting-button ${
-                    form.quotaMode === mode.value ? 'primary' : ''
-                  }`}
-                  onClick={() => updateField('quotaMode', mode.value)}
-                >
-                  {mode.label}
-                </button>
-              ))}
-            </div>
-          </div>
-          {form.quotaMode === 'TOTAL' && (
-            <label className="meeting-field">
-              <span>전체 참석 정원</span>
-              <input
-                type="number"
-                min="1"
-                value={form.maxParticipants}
-                onChange={(event) =>
-                  updateField('maxParticipants', event.target.value)
-                }
-              />
-            </label>
-          )}
-          {form.quotaMode === 'GENDER' && (
-            <div className="meeting-grid two">
-              <label className="meeting-field">
-                <span>남성 정원</span>
-                <input
-                  type="number"
-                  min="1"
-                  value={form.maxMaleParticipants}
-                  onChange={(event) =>
-                    updateField('maxMaleParticipants', event.target.value)
-                  }
-                />
-              </label>
-              <label className="meeting-field">
-                <span>여성 정원</span>
-                <input
-                  type="number"
-                  min="1"
-                  value={form.maxFemaleParticipants}
-                  onChange={(event) =>
-                    updateField('maxFemaleParticipants', event.target.value)
-                  }
-                />
-              </label>
-            </div>
-          )}
-          <div className="meeting-grid two">
-            <label className="meeting-field">
-              <span>코트 수</span>
-              <input
-                type="number"
-                min="1"
-                value={form.courtCount}
-                onChange={(event) => updateField('courtCount', event.target.value)}
-              />
-            </label>
-            <label className="meeting-field">
-              <span>총 경기 수</span>
-              <input
-                type="number"
-                min="1"
-                value={form.totalGames}
-                onChange={(event) => updateField('totalGames', event.target.value)}
-              />
-            </label>
-          </div>
-          <div className="meeting-action-row">
-            <button type="button" className="meeting-button" onClick={() => setStep(1)}>
-              이전
-            </button>
+          <div className="meeting-action-row meeting-form-action-row">
             <button
               type="button"
-              className="meeting-button primary"
-              disabled={isSubmitting}
-              onClick={handleSubmit}
+              className="meeting-button"
+              onClick={() => navigate(`/meetings/${publicId}`)}
             >
-              {isSubmitting ? '수정 중' : '모임 수정'}
+              이전
+            </button>
+            <button type="button" className="meeting-button primary" onClick={handleNext}>
+              다음
             </button>
           </div>
         </section>
+      ) : (
+        <MeetingSettingsStep
+          form={form}
+          isSubmitting={isSubmitting}
+          submitLabel="모임 수정"
+          submittingLabel="수정 중"
+          onFieldChange={updateField}
+          onPrevious={() => setStep(1)}
+          onSubmit={handleSubmit}
+        />
       )}
     </main>
   );

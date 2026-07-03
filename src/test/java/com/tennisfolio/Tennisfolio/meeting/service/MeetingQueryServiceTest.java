@@ -1,4 +1,4 @@
-package com.tennisfolio.Tennisfolio.meeting.service;
+﻿package com.tennisfolio.Tennisfolio.meeting.service;
 
 import com.tennisfolio.Tennisfolio.exception.NotFoundException;
 import com.tennisfolio.Tennisfolio.matching.entity.Competition;
@@ -9,6 +9,7 @@ import com.tennisfolio.Tennisfolio.meeting.dto.MeetingSummaryResponse;
 import com.tennisfolio.Tennisfolio.meeting.entity.Meeting;
 import com.tennisfolio.Tennisfolio.meeting.repository.MeetingAttendanceRepository;
 import com.tennisfolio.Tennisfolio.meeting.repository.MeetingRepository;
+import com.tennisfolio.Tennisfolio.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,6 +37,9 @@ class MeetingQueryServiceTest {
     @Mock
     CompetitionRepository competitionRepository;
 
+    @Mock
+    UserRepository userRepository;
+
     MeetingQueryService service;
 
     @BeforeEach
@@ -43,7 +47,8 @@ class MeetingQueryServiceTest {
         service = new MeetingQueryService(
                 meetingRepository,
                 attendanceRepository,
-                competitionRepository
+                competitionRepository,
+                userRepository
         );
     }
 
@@ -109,7 +114,7 @@ class MeetingQueryServiceTest {
         )).thenReturn(10L);
         when(attendanceRepository.countByMeetingAndAttendanceStatusAndDeletedAtIsNull(
                 org.mockito.ArgumentMatchers.any(Meeting.class),
-                org.mockito.ArgumentMatchers.eq(AttendanceStatus.MAYBE)
+                org.mockito.ArgumentMatchers.eq(AttendanceStatus.WAITING)
         )).thenReturn(3L);
         when(attendanceRepository.countByMeetingAndAttendanceStatusAndDeletedAtIsNull(
                 org.mockito.ArgumentMatchers.any(Meeting.class),
@@ -124,7 +129,7 @@ class MeetingQueryServiceTest {
         assertThat(response.get(0).getCourtCount()).isEqualTo(2);
         assertThat(response.get(0).getTotalGames()).isEqualTo(6);
         assertThat(response.get(0).getAttendingCount()).isEqualTo(10L);
-        assertThat(response.get(0).getMaybeCount()).isEqualTo(3L);
+        assertThat(response.get(0).getWaitingCount()).isEqualTo(3L);
         assertThat(response.get(0).getNotAttendingCount()).isEqualTo(2L);
     }
 

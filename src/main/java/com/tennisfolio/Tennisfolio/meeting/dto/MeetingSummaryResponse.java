@@ -19,7 +19,7 @@ public class MeetingSummaryResponse {
     private Integer courtCount;
     private Integer totalGames;
     private Long attendingCount;
-    private Long maybeCount;
+    private Long waitingCount;
     private Long notAttendingCount;
     private String status;
     private Boolean competitionCreated;
@@ -27,7 +27,7 @@ public class MeetingSummaryResponse {
     public static MeetingSummaryResponse from(
             Meeting meeting,
             long attendingCount,
-            long maybeCount,
+            long waitingCount,
             long notAttendingCount
     ) {
         return new MeetingSummaryResponse(
@@ -38,7 +38,7 @@ public class MeetingSummaryResponse {
                 meeting.getCourtCount(),
                 meeting.getTotalGames(),
                 attendingCount,
-                maybeCount,
+                waitingCount,
                 notAttendingCount,
                 meeting.getStatus().name(),
                 meeting.hasCompetition()

@@ -1,4 +1,4 @@
-# Feature: 모임 참석 체크
+﻿# Feature: 모임 참석 체크
 
 ## 1. Goal
 
@@ -9,7 +9,7 @@
 
 ```text
 로그인 사용자 -> 모임 만들기 -> 공유 링크 확인
-링크 방문자 -> 이름과 성별 입력 -> 참석/불참/미정 선택 -> 응답 저장
+링크 방문자 -> 이름과 성별 입력 -> 참석/불참/대기 선택 -> 응답 저장
 모임장 -> 참석자 목록 확인 -> 경기표 생성
 시스템 -> Competition 생성 -> Meeting.competitionId 연결 -> 경기표 보기 제공
 ```
@@ -26,7 +26,7 @@
 - 저장된 참석 응답이 삭제됐거나 현재 모임 명단에 없으면 기억 값을 무시하고 최초 입장 화면을 보여준다.
 - 공개 참석 화면 상세에는 다른 참석자로 다시 입장할 수 있는 액션을 제공하고, 이 액션은 해당 모임의 브라우저 기억 값을 삭제한다.
 - 참석 체크는 로그인 없이 가능하며, 이름과 성별은 필수이다.
-- 참석 상태는 `ATTENDING`, `NOT_ATTENDING`, `MAYBE`를 지원한다.
+- 참석 상태는 `ATTENDING`, `NOT_ATTENDING`, `WAITING`를 지원한다.
 - 한 모임에서는 같은 이름의 활성 참석 응답을 중복 생성하지 않는다.
 - 한 모임은 최대 하나의 Competition만 연결한다.
 - Meeting은 `competitionId`만 저장하고, Competition은 Meeting id를 저장하지 않는다.
@@ -97,7 +97,7 @@
 /meetings/:publicId
 - 공개 모임 상세와 참석 체크 화면
 - 비로그인 접근 가능
-- 모임 정보, 참석/미정/불참 명단, 남/녀/총 참석 카운트, 정원 상태 표시
+- 모임 정보, 참석/대기/불참 명단, 남/녀/총 참석 카운트, 정원 상태 표시
 - 최초 입장 화면과 상세 화면 모두 제한 인원수와 현재 참석 인원을 표시
 - 참석 응답 팝업에서 이름, 성별, 참석 여부 입력 또는 기존 응답 수정
 
@@ -132,7 +132,7 @@ tb_meeting_attendance
 - MEETING_ATTENDANCE_ID PK
 - MEETING_ID not null FK
 - PARTICIPANT_NAME not null
-- ATTENDANCE_STATUS not null: ATTENDING, NOT_ATTENDING, MAYBE
+- ATTENDANCE_STATUS not null: ATTENDING, NOT_ATTENDING, WAITING
 - GENDER not null: MALE, FEMALE
 - DEL_DT nullable
 - CREATE_DT / UPDATE_DT
@@ -143,9 +143,9 @@ tb_meeting_attendance
 - Meeting과 Competition의 owner는 각각의 리소스 소유자이므로 중복이 아니라 독립 권한 기준이다.
 - Meeting은 Competition보다 먼저 생성되므로 `Meeting.competitionId`가 생성 흐름에 맞다.
 - 한 모임당 하나의 경기표만 허용하므로 `COMPETITION_ID unique` 제약을 둔다.
-- 참석 응답과 경기 참가자를 분리해 `NOT_ATTENDING`, `MAYBE`, 이름 기반 응답이 매칭 도메인을 오염시키지 않게 한다.
+- 참석 응답과 경기 참가자를 분리해 `NOT_ATTENDING`, `WAITING`, 이름 기반 응답이 매칭 도메인을 오염시키지 않게 한다.
 - 참석 응답 단계에서 성별을 필수로 받아 경기표 생성 시 모임장이 별도 보완 작업 없이 바로 Competition을 만들 수 있게 한다.
-- 정원 제한은 optional이며 `ATTENDING` 인원에만 적용한다. `NOT_ATTENDING`, `MAYBE`는 정원에 포함하지 않는다.
+- 정원 제한은 optional이며 `ATTENDING` 인원에만 적용한다. `NOT_ATTENDING`, `WAITING`는 정원에 포함하지 않는다.
 - 총 정원 방식과 성별 정원 방식은 상호 배타적이다. 총 정원이 있으면 총 참석 인원만 검증하고, 총 정원이 없을 때만 요청 성별의 정원을 검증한다.
 - 정원 검증은 여러 MeetingAttendance의 count를 기반으로 하므로 Meeting row에 비관적 락을 걸어 같은 모임의 참석 변경 트랜잭션을 순차 처리한다.
 - Meeting 기반 Competition 생성은 Meeting의 `courtCount`, `totalGames`, `title`, 참석자 이름/성별을 사용해 기존 Competition 생성 로직으로 위임한다.
@@ -171,7 +171,7 @@ GET /api/meetings/{publicId}/manage
 GET /api/me/meetings
 - 로그인 필요
 - 내가 만든 Meeting 목록 조회
-- title, startAt, endAt, courtCount, totalGames, status, 참석/미정/불참 요약, competition 연결 여부 반환
+- title, startAt, endAt, courtCount, totalGames, status, 참석/대기/불참 요약, competition 연결 여부 반환
 
 PATCH /api/meetings/{publicId}
 - 로그인 필요
@@ -305,7 +305,7 @@ DELETE /api/meetings/{publicId}/competition
 - [ ] `feat(meeting): add my meetings list UI`
   - 구현:
     - `/meetings`에서 로그인 사용자가 만든 모임 목록을 조회한다.
-    - 각 모임 카드에는 제목, 날짜/시간, 코트 수, 경기 수, 참석/미정/불참 카운트, 경기표 생성 여부를 표시한다.
+    - 각 모임 카드에는 제목, 날짜/시간, 코트 수, 경기 수, 참석/대기/불참 카운트, 경기표 생성 여부를 표시한다.
     - 목록 상단에는 `모임 만들기` 진입 버튼을 둔다.
     - 각 모임에서 `관리`, `공유`, `삭제` 액션을 제공한다.
     - 삭제는 확인 후 owner 삭제 API를 호출하고 목록에서 제거한다.
@@ -333,7 +333,7 @@ DELETE /api/meetings/{publicId}/competition
 - [ ] `feat(meeting): add public attendance UI`
   - 구현:
     - `/meetings/:publicId`에서 비로그인 사용자가 공개 모임 정보를 볼 수 있게 한다.
-    - 참석/미정/불참 카운트와 성별별 참석 명단을 표시한다.
+    - 참석/대기/불참 카운트와 성별별 참석 명단을 표시한다.
     - 최초 입장 화면과 상세 화면 모두 제한 인원수와 현재 참석 인원을 표시한다.
     - 이름, 성별, 참석 상태를 입력해 참석 응답을 생성하거나 기존 응답을 수정할 수 있는 폼 또는 팝업을 제공한다.
     - 참석 응답 저장 성공 또는 기존 이름 선택 시 `meetingPublic:{publicId}:attendance` localStorage key에 `attendanceId`와 `participantName`을 저장한다.

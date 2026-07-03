@@ -1,5 +1,8 @@
 import { apiRequestSilent } from './apiClient';
 
+export const isAuthenticationRequiredError = (error) =>
+  error.response?.status === 401 || error.response?.data?.code === 'UNAUTHORIZED';
+
 export const getMyMeetings = () => apiRequestSilent.get('/api/me/meetings');
 
 export const createMeeting = (meeting) =>
@@ -7,9 +10,6 @@ export const createMeeting = (meeting) =>
 
 export const getPublicMeeting = (publicId) =>
   apiRequestSilent.get(`/api/meetings/${publicId}`);
-
-export const getManagedMeeting = (publicId) =>
-  apiRequestSilent.get(`/api/meetings/${publicId}/manage`);
 
 export const updateMeeting = (publicId, meeting) =>
   apiRequestSilent.patch(`/api/meetings/${publicId}`, meeting);

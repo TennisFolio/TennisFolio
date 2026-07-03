@@ -13,7 +13,6 @@ import java.util.List;
 @AllArgsConstructor
 public class MeetingDetailResponse {
     private String publicId;
-    private Long ownerUserId;
     private Long competitionId;
     private String competitionPublicId;
     private String title;
@@ -29,12 +28,12 @@ public class MeetingDetailResponse {
     private Integer totalGames;
     private String status;
     private Boolean ownedByCurrentUser;
+    private String ownerNickName;
     private Boolean competitionCreated;
     private List<MeetingAttendanceResponse> attendances;
 
     public MeetingDetailResponse(
             String publicId,
-            Long ownerUserId,
             Long competitionId,
             String title,
             LocalDateTime startAt,
@@ -47,12 +46,12 @@ public class MeetingDetailResponse {
             Integer totalGames,
             String status,
             Boolean ownedByCurrentUser,
+            String ownerNickName,
             Boolean competitionCreated,
             List<MeetingAttendanceResponse> attendances
     ) {
         this(
                 publicId,
-                ownerUserId,
                 competitionId,
                 null,
                 title,
@@ -66,13 +65,14 @@ public class MeetingDetailResponse {
                 totalGames,
                 status,
                 ownedByCurrentUser,
+                ownerNickName,
                 competitionCreated,
                 attendances
         );
     }
 
     public static MeetingDetailResponse from(Meeting meeting, Long currentUserId) {
-        return from(meeting, currentUserId, List.of());
+        return from(meeting, currentUserId, null, List.of());
     }
 
     public static MeetingDetailResponse from(
@@ -80,26 +80,7 @@ public class MeetingDetailResponse {
             Long currentUserId,
             List<MeetingAttendance> attendances
     ) {
-        return new MeetingDetailResponse(
-                meeting.getPublicId(),
-                meeting.getOwnerUserId(),
-                meeting.getCompetitionId(),
-                meeting.getTitle(),
-                meeting.getStartAt(),
-                meeting.getEndAt(),
-                meeting.getNote(),
-                meeting.getMaxParticipants(),
-                meeting.getMaxMaleParticipants(),
-                meeting.getMaxFemaleParticipants(),
-                meeting.getCourtCount(),
-                meeting.getTotalGames(),
-                meeting.getStatus().name(),
-                meeting.isOwnedBy(currentUserId),
-                meeting.hasCompetition(),
-                attendances.stream()
-                        .map(MeetingAttendanceResponse::from)
-                        .toList()
-        );
+        return from(meeting, currentUserId, null, attendances);
     }
 
     public static MeetingDetailResponse from(
@@ -108,9 +89,18 @@ public class MeetingDetailResponse {
             String competitionPublicId,
             List<MeetingAttendance> attendances
     ) {
+        return from(meeting, currentUserId, competitionPublicId, null, attendances);
+    }
+
+    public static MeetingDetailResponse from(
+            Meeting meeting,
+            Long currentUserId,
+            String competitionPublicId,
+            String ownerNickName,
+            List<MeetingAttendance> attendances
+    ) {
         return new MeetingDetailResponse(
                 meeting.getPublicId(),
-                meeting.getOwnerUserId(),
                 meeting.getCompetitionId(),
                 competitionPublicId,
                 meeting.getTitle(),
@@ -124,6 +114,7 @@ public class MeetingDetailResponse {
                 meeting.getTotalGames(),
                 meeting.getStatus().name(),
                 meeting.isOwnedBy(currentUserId),
+                ownerNickName,
                 meeting.hasCompetition(),
                 attendances.stream()
                         .map(MeetingAttendanceResponse::from)

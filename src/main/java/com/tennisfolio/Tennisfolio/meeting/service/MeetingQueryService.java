@@ -1,6 +1,7 @@
 package com.tennisfolio.Tennisfolio.meeting.service;
 
 import com.tennisfolio.Tennisfolio.common.ExceptionCode;
+import com.tennisfolio.Tennisfolio.common.UserStatus;
 import com.tennisfolio.Tennisfolio.exception.NotFoundException;
 import com.tennisfolio.Tennisfolio.matching.repository.CompetitionRepository;
 import com.tennisfolio.Tennisfolio.meeting.domain.AttendanceStatus;
@@ -9,6 +10,7 @@ import com.tennisfolio.Tennisfolio.meeting.dto.MeetingSummaryResponse;
 import com.tennisfolio.Tennisfolio.meeting.entity.Meeting;
 import com.tennisfolio.Tennisfolio.meeting.repository.MeetingAttendanceRepository;
 import com.tennisfolio.Tennisfolio.meeting.repository.MeetingRepository;
+import com.tennisfolio.Tennisfolio.user.repository.UserRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,15 +24,18 @@ public class MeetingQueryService {
     private final MeetingRepository meetingRepository;
     private final MeetingAttendanceRepository attendanceRepository;
     private final CompetitionRepository competitionRepository;
+    private final UserRepository userRepository;
 
     public MeetingQueryService(
             MeetingRepository meetingRepository,
             MeetingAttendanceRepository attendanceRepository,
-            CompetitionRepository competitionRepository
+            CompetitionRepository competitionRepository,
+            UserRepository userRepository
     ) {
         this.meetingRepository = meetingRepository;
         this.attendanceRepository = attendanceRepository;
         this.competitionRepository = competitionRepository;
+        this.userRepository = userRepository;
     }
 
     @Transactional(readOnly = true)
@@ -40,17 +45,7 @@ public class MeetingQueryService {
                 meeting,
                 currentUserId,
                 findCompetitionPublicId(meeting),
-                attendanceRepository.findByMeetingAndDeletedAtIsNullOrderByIdAsc(meeting)
-        );
-    }
-
-    @Transactional(readOnly = true)
-    public MeetingDetailResponse getManagedMeeting(String publicId, Long ownerUserId) {
-        Meeting meeting = findOwnedMeeting(publicId, ownerUserId);
-        return MeetingDetailResponse.from(
-                meeting,
-                ownerUserId,
-                findCompetitionPublicId(meeting),
+                findOwnerNickName(meeting),
                 attendanceRepository.findByMeetingAndDeletedAtIsNullOrderByIdAsc(meeting)
         );
     }
@@ -62,6 +57,12 @@ public class MeetingQueryService {
 
         return competitionRepository.findByIdAndDeletedAtIsNull(meeting.getCompetitionId())
                 .map(competition -> competition.getPublicId())
+                .orElse(null);
+    }
+
+    private String findOwnerNickName(Meeting meeting) {
+        return userRepository.findByIdAndStatus(meeting.getOwnerUserId(), UserStatus.ACTIVE)
+                .map(user -> user.getNickName())
                 .orElse(null);
     }
 
@@ -83,19 +84,13 @@ public class MeetingQueryService {
                 ),
                 attendanceRepository.countByMeetingAndAttendanceStatusAndDeletedAtIsNull(
                         meeting,
-                        AttendanceStatus.MAYBE
+                        AttendanceStatus.WAITING
                 ),
                 attendanceRepository.countByMeetingAndAttendanceStatusAndDeletedAtIsNull(
                         meeting,
                         AttendanceStatus.NOT_ATTENDING
                 )
         );
-    }
-
-    private Meeting findOwnedMeeting(String publicId, Long ownerUserId) {
-        requireAuthenticated(ownerUserId);
-        return meetingRepository.findByPublicIdAndOwnerUserIdAndDeletedAtIsNull(publicId, ownerUserId)
-                .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND));
     }
 
     private Meeting findActiveMeeting(String publicId) {

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+﻿import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { getCurrentUser } from '../utils/authApi';
 import {
@@ -6,7 +6,7 @@ import {
   deleteAttendance,
   deleteMeeting,
   deleteMeetingCompetition,
-  getManagedMeeting,
+  getPublicMeeting,
   upsertAttendance,
   updateMeetingStatus,
 } from '../utils/meetingApi';
@@ -15,7 +15,7 @@ import MeetingToast from './MeetingToast';
 
 const statusLabels = {
   ATTENDING: '참석',
-  MAYBE: '미정',
+  WAITING: '대기',
   NOT_ATTENDING: '불참',
 };
 
@@ -98,8 +98,8 @@ function groupAttendances(attendances) {
       (attendance) =>
         attendance.attendanceStatus === 'ATTENDING' && attendance.gender === 'FEMALE',
     ),
-    maybe: attendances.filter(
-      (attendance) => attendance.attendanceStatus === 'MAYBE',
+    waiting: attendances.filter(
+      (attendance) => attendance.attendanceStatus === 'WAITING',
     ),
     notAttending: attendances.filter(
       (attendance) => attendance.attendanceStatus === 'NOT_ATTENDING',
@@ -107,7 +107,23 @@ function groupAttendances(attendances) {
   };
 }
 
-function RosterPanel({ title, tone, attendees, onAskDelete }) {
+function isOwnerAttendance(attendance, meeting) {
+  const ownerNickName = meeting?.ownerNickName?.trim();
+  return Boolean(ownerNickName) && attendance.participantName === ownerNickName;
+}
+
+function OwnerTag() {
+  return (
+    <span className="meeting-owner-icon" role="img" aria-label="모임장" title="모임장">
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="M5 17h14l1-10-5 4-3-6-3 6-5-4 1 10Z" />
+        <path d="M5 20h14" />
+      </svg>
+    </span>
+  );
+}
+
+function RosterPanel({ title, tone, attendees, meeting, onAskDelete }) {
   return (
     <section className="meeting-panel meeting-roster-panel" aria-label={title}>
       <div className="meeting-roster-head">
@@ -118,24 +134,31 @@ function RosterPanel({ title, tone, attendees, onAskDelete }) {
         null
       ) : (
         <div className="meeting-attendance-list">
-          {attendees.map((attendance) => (
-            <span
-              className={`meeting-chip ${
-                attendance.gender === 'FEMALE' ? 'female' : 'male'
-              }`}
-              key={attendance.id}
-            >
-              {attendance.participantName}
-              <button
-                type="button"
-                className="meeting-attendee-remove"
-                aria-label={`${attendance.participantName} 제거`}
-                onClick={() => onAskDelete(attendance)}
+          {attendees.map((attendance) => {
+            const isOwner = isOwnerAttendance(attendance, meeting);
+
+            return (
+              <span
+                className={`meeting-chip ${
+                  attendance.gender === 'FEMALE' ? 'female' : 'male'
+                }${isOwner ? ' owner' : ''}`}
+                key={attendance.id}
               >
-                x
-              </button>
-            </span>
-          ))}
+                {attendance.participantName}
+                {isOwner && <OwnerTag />}
+                {!isOwner && (
+                  <button
+                    type="button"
+                    className="meeting-attendee-remove"
+                    aria-label={`${attendance.participantName} 제거`}
+                    onClick={() => onAskDelete(attendance)}
+                  >
+                    x
+                  </button>
+                )}
+              </span>
+            );
+          })}
         </div>
       )}
     </section>
@@ -181,17 +204,17 @@ function CapacityChips({ meeting, attendances }) {
   );
 }
 
-function MeetingManage() {
+function MeetingManage({ initialMeeting = null, initialNotice = null }) {
   const { publicId } = useParams();
   const navigate = useNavigate();
-  const [meeting, setMeeting] = useState(null);
+  const [meeting, setMeeting] = useState(initialMeeting);
   const [currentUser, setCurrentUser] = useState(null);
   const [ownerStatus, setOwnerStatus] = useState('ATTENDING');
   const [isLoading, setIsLoading] = useState(true);
   const [attendeeToDelete, setAttendeeToDelete] = useState(null);
   const [competitionDeleteRequested, setCompetitionDeleteRequested] =
     useState(false);
-  const [notice, setNotice] = useState(null);
+  const [notice, setNotice] = useState(initialNotice);
   const [errorMessage, setErrorMessage] = useState('');
 
   const attendances = useMemo(() => normalizeAttendances(meeting), [meeting]);
@@ -208,8 +231,12 @@ function MeetingManage() {
 
   const loadMeeting = useCallback(
     () =>
-      getManagedMeeting(publicId).then((response) => {
-        setMeeting(response.data.data);
+      getPublicMeeting(publicId).then((response) => {
+        const nextMeeting = response.data.data;
+        if (nextMeeting?.ownedByCurrentUser !== true) {
+          throw new Error('FORBIDDEN_MEETING_OWNER');
+        }
+        setMeeting(nextMeeting);
       }),
     [publicId],
   );
@@ -217,12 +244,18 @@ function MeetingManage() {
   useEffect(() => {
     let cancelled = false;
 
-    Promise.all([getManagedMeeting(publicId), getCurrentUser()])
+    Promise.all([getPublicMeeting(publicId), getCurrentUser()])
       .then(([meetingResponse, userResponse]) => {
         if (cancelled) {
           return;
         }
-        setMeeting(meetingResponse.data.data);
+        const nextMeeting = meetingResponse.data.data;
+        if (nextMeeting?.ownedByCurrentUser !== true) {
+          setMeeting(null);
+          setErrorMessage('모임을 관리할 권한이 없습니다.');
+          return;
+        }
+        setMeeting(nextMeeting);
         setCurrentUser(userResponse.data.data);
       })
       .catch((error) => {
@@ -385,12 +418,35 @@ function MeetingManage() {
               참석 {countByStatus(attendances, 'ATTENDING')}
             </span>
             <span className="meeting-chip warning">
-              미정 {countByStatus(attendances, 'MAYBE')}
+              대기 {countByStatus(attendances, 'WAITING')}
             </span>
             <span className="meeting-chip danger">
               불참 {countByStatus(attendances, 'NOT_ATTENDING')}
             </span>
           </div>
+          <div className="meeting-manage-actions">
+            <button
+              type="button"
+              className="meeting-button full"
+              onClick={handleCopyShareLink}
+            >
+              공유 링크 복사
+            </button>
+            <button
+              type="button"
+              className="meeting-button full"
+              disabled={meetingEditDisabled}
+              aria-describedby={meetingEditDisabled ? 'meeting-edit-lock-message' : undefined}
+              onClick={() => navigate(`/meetings/${publicId}/edit`)}
+            >
+              모임 수정
+            </button>
+          </div>
+          {meetingEditDisabled && (
+            <p className="meeting-muted" id="meeting-edit-lock-message">
+              대진표가 생성된 모임은 수정할 수 없습니다. 수정하려면 대진표를 먼저 삭제해 주세요.
+            </p>
+          )}
         </section>
 
         <section className="meeting-panel">
@@ -402,9 +458,6 @@ function MeetingManage() {
                   참석자 기준으로 대진표를 만들거나 생성된 대진표를 확인합니다.
                 </p>
               </div>
-              <span className="meeting-chip ok compact">
-                참석 {countByStatus(attendances, 'ATTENDING')}
-              </span>
             </div>
             {meeting.competitionCreated ? (
               <>
@@ -435,51 +488,72 @@ function MeetingManage() {
               </button>
             )}
           </div>
-          <div className="meeting-operation-tools">
-            <button
-              type="button"
-              className="meeting-button full"
-              onClick={handleCopyShareLink}
-            >
-              공유 링크 복사
-            </button>
-            <button
-              type="button"
-              className="meeting-button full"
-              disabled={meetingEditDisabled}
-              aria-describedby={meetingEditDisabled ? 'meeting-edit-lock-message' : undefined}
-              onClick={() => navigate(`/meetings/${publicId}/edit`)}
-            >
-              모임 수정
-            </button>
-          </div>
-          {meetingEditDisabled && (
-            <p className="meeting-muted" id="meeting-edit-lock-message">
-              대진표가 생성된 모임은 수정할 수 없습니다. 수정하려면 대진표를 먼저 삭제해 주세요.
-            </p>
-          )}
-          <div className="meeting-operation-status">
-            <div>
-              <strong>참석 체크</strong>
-              <p>{meeting.status === 'OPEN' ? '현재 열림' : '현재 마감'}</p>
+          <div
+            className={`meeting-operation-status ${
+              meeting.status === 'CLOSED' ? 'closed' : ''
+            }`}
+          >
+            <div className="meeting-attendance-control-head">
+              <div>
+                <div className="meeting-attendance-control-title">
+                  <span
+                    className={`meeting-attendance-control-dot ${
+                      meeting.status === 'CLOSED' ? 'closed' : ''
+                    }`}
+                  />
+                  참석 체크
+                </div>
+                <p>
+                  {meeting.status === 'OPEN'
+                    ? '참가자가 응답할 수 있습니다. 마감하면 새 응답을 잠시 막습니다.'
+                    : '참석 체크가 마감되어 새 응답은 받지 않습니다. 필요하면 다시 열 수 있습니다.'}
+                </p>
+              </div>
+              <span
+                className={`meeting-attendance-status-pill ${
+                  meeting.status === 'OPEN' ? 'ok' : 'danger'
+                }`}
+              >
+                {meeting.status === 'OPEN' ? '열림' : '마감'}
+              </span>
             </div>
-            {meeting.status === 'OPEN' ? (
-              <button
-                type="button"
-                className="meeting-button full"
-                onClick={() => handleStatus('CLOSED')}
-              >
-                참석 마감
-              </button>
-            ) : (
-              <button
-                type="button"
-                className="meeting-button full"
-                onClick={() => handleStatus('OPEN')}
-              >
-                다시 열기
-              </button>
-            )}
+            <div className="meeting-attendance-control-actions">
+              {meeting.status === 'OPEN' ? (
+                <>
+                  <button
+                    type="button"
+                    className="meeting-button primary"
+                    aria-pressed="true"
+                  >
+                    열어두기
+                  </button>
+                  <button
+                    type="button"
+                    className="meeting-button"
+                    onClick={() => handleStatus('CLOSED')}
+                  >
+                    마감하기
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    className="meeting-button"
+                    onClick={() => handleStatus('OPEN')}
+                  >
+                    다시 열기
+                  </button>
+                  <button
+                    type="button"
+                    className="meeting-button danger"
+                    aria-pressed="true"
+                  >
+                    마감 유지
+                  </button>
+                </>
+              )}
+            </div>
           </div>
         </section>
 
@@ -511,24 +585,28 @@ function MeetingManage() {
           title="남자 참석자"
           tone="ok"
           attendees={groupedAttendances.attendingMale}
+          meeting={meeting}
           onAskDelete={setAttendeeToDelete}
         />
         <RosterPanel
           title="여자 참석자"
           tone="ok"
           attendees={groupedAttendances.attendingFemale}
+          meeting={meeting}
           onAskDelete={setAttendeeToDelete}
         />
         <RosterPanel
-          title="미정"
+          title="대기"
           tone="warning"
-          attendees={groupedAttendances.maybe}
+          attendees={groupedAttendances.waiting}
+          meeting={meeting}
           onAskDelete={setAttendeeToDelete}
         />
         <RosterPanel
           title="불참"
           tone="danger"
           attendees={groupedAttendances.notAttending}
+          meeting={meeting}
           onAskDelete={setAttendeeToDelete}
         />
         <section className="meeting-panel meeting-danger-zone">

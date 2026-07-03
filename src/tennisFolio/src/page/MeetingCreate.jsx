@@ -1,13 +1,13 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { createMeeting } from '../utils/meetingApi';
+import { default_oauth_provider } from '@/constants';
+import { getCurrentUser, loginWithProvider } from '../utils/authApi';
+import {
+  createMeeting,
+  isAuthenticationRequiredError,
+} from '../utils/meetingApi';
 import './Meeting.css';
-
-const quotaModes = [
-  { value: 'NONE', label: '제한 없음' },
-  { value: 'TOTAL', label: '전체 정원' },
-  { value: 'GENDER', label: '성별 정원' },
-];
+import MeetingSettingsStep from './MeetingSettingsStep';
 
 const initialForm = {
   title: '',
@@ -36,6 +36,8 @@ function MeetingCreate() {
   const [step, setStep] = useState(1);
   const [form, setForm] = useState(initialForm);
   const [errorMessage, setErrorMessage] = useState('');
+  const [authRequired, setAuthRequired] = useState(false);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const startAt = useMemo(
@@ -51,6 +53,37 @@ function MeetingCreate() {
     setForm((current) => ({ ...current, [field]: value }));
     setErrorMessage('');
   };
+
+  useEffect(() => {
+    let cancelled = false;
+
+    getCurrentUser()
+      .then(() => {
+        if (!cancelled) {
+          setAuthRequired(false);
+          setErrorMessage('');
+        }
+      })
+      .catch((error) => {
+        if (!cancelled) {
+          if (isAuthenticationRequiredError(error)) {
+            setAuthRequired(true);
+            setErrorMessage('로그인 후 모임을 만들 수 있습니다.');
+          } else {
+            setErrorMessage('로그인 상태를 확인하지 못했습니다.');
+          }
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setIsCheckingAuth(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const validateStepOne = () => {
     if (!form.title.trim()) {
@@ -117,9 +150,14 @@ function MeetingCreate() {
     try {
       setIsSubmitting(true);
       const response = await createMeeting(payload);
-      navigate(`/meetings/${response.data.data.publicId}/manage`);
+      navigate(`/meetings/${response.data.data.publicId}`);
     } catch (error) {
-      setErrorMessage(error.response?.data?.message || '모임을 만들지 못했습니다.');
+      if (isAuthenticationRequiredError(error)) {
+        setAuthRequired(true);
+        setErrorMessage('로그인 후 모임을 만들 수 있습니다.');
+      } else {
+        setErrorMessage(error.response?.data?.message || '모임을 만들지 못했습니다.');
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -136,9 +174,26 @@ function MeetingCreate() {
         </div>
       </header>
 
-      {errorMessage && <p className="meeting-state meeting-error">{errorMessage}</p>}
+      {errorMessage && !authRequired && (
+        <p className="meeting-state meeting-error">{errorMessage}</p>
+      )}
 
-      {step === 1 ? (
+      {isCheckingAuth && <p className="meeting-state">로그인 상태를 확인하는 중입니다.</p>}
+
+      {!isCheckingAuth && authRequired && (
+        <section className="meeting-state meeting-error">
+          <p>로그인 후 모임을 만들 수 있습니다.</p>
+          <button
+            type="button"
+            className="meeting-button primary"
+            onClick={() => loginWithProvider(default_oauth_provider)}
+          >
+            로그인하기
+          </button>
+        </section>
+      )}
+
+      {!isCheckingAuth && !authRequired && step === 1 ? (
         <section className="meeting-panel" aria-label="모임 기본 정보">
           <h2>1 / 2 기본 정보</h2>
           <label className="meeting-field">
@@ -175,109 +230,39 @@ function MeetingCreate() {
             </label>
           </div>
           <label className="meeting-field">
-            <span>note</span>
+            <span>안내사항</span>
             <textarea
               value={form.note}
+              placeholder="장소, 준비물, 진행 방식 등 참가자에게 알려줄 내용을 적어주세요."
               onChange={(event) => updateField('note', event.target.value)}
             />
           </label>
-          <button type="button" className="meeting-button primary full" onClick={handleNext}>
-            다음
-          </button>
-        </section>
-      ) : (
-        <section className="meeting-panel" aria-label="모임 설정">
-          <h2>2 / 2 모임 설정</h2>
-          <div>
-            <div className="meeting-toggle" role="group" aria-label="정원 방식">
-              {quotaModes.map((mode) => (
-                <button
-                  type="button"
-                  key={mode.value}
-                  className={`meeting-button ${
-                    form.quotaMode === mode.value ? 'primary' : ''
-                  }`}
-                  onClick={() => updateField('quotaMode', mode.value)}
-                >
-                  {mode.label}
-                </button>
-              ))}
-            </div>
-          </div>
-          {form.quotaMode === 'TOTAL' && (
-            <label className="meeting-field">
-              <span>전체 참석 정원</span>
-              <input
-                type="number"
-                min="1"
-                value={form.maxParticipants}
-                onChange={(event) =>
-                  updateField('maxParticipants', event.target.value)
-                }
-              />
-            </label>
-          )}
-          {form.quotaMode === 'GENDER' && (
-            <div className="meeting-grid two">
-              <label className="meeting-field">
-                <span>남성 정원</span>
-                <input
-                  type="number"
-                  min="1"
-                  value={form.maxMaleParticipants}
-                  onChange={(event) =>
-                    updateField('maxMaleParticipants', event.target.value)
-                  }
-                />
-              </label>
-              <label className="meeting-field">
-                <span>여성 정원</span>
-                <input
-                  type="number"
-                  min="1"
-                  value={form.maxFemaleParticipants}
-                  onChange={(event) =>
-                    updateField('maxFemaleParticipants', event.target.value)
-                  }
-                />
-              </label>
-            </div>
-          )}
-          <div className="meeting-grid two">
-            <label className="meeting-field">
-              <span>코트 수</span>
-              <input
-                type="number"
-                min="1"
-                value={form.courtCount}
-                onChange={(event) => updateField('courtCount', event.target.value)}
-              />
-            </label>
-            <label className="meeting-field">
-              <span>총 경기 수</span>
-              <input
-                type="number"
-                min="1"
-                value={form.totalGames}
-                onChange={(event) => updateField('totalGames', event.target.value)}
-              />
-            </label>
-          </div>
-          <div className="meeting-action-row">
-            <button type="button" className="meeting-button" onClick={() => setStep(1)}>
-              이전
-            </button>
+          <div className="meeting-action-row meeting-form-action-row">
             <button
               type="button"
-              className="meeting-button primary"
-              disabled={isSubmitting}
-              onClick={handleSubmit}
+              className="meeting-button"
+              onClick={() => navigate('/meetings')}
             >
-              {isSubmitting ? '생성 중' : '모임 만들기'}
+              이전
+            </button>
+            <button type="button" className="meeting-button primary" onClick={handleNext}>
+              다음
             </button>
           </div>
         </section>
-      )}
+      ) : null}
+
+      {!isCheckingAuth && !authRequired && step === 2 ? (
+        <MeetingSettingsStep
+          form={form}
+          isSubmitting={isSubmitting}
+          submitLabel="모임 만들기"
+          submittingLabel="생성 중"
+          onFieldChange={updateField}
+          onPrevious={() => setStep(1)}
+          onSubmit={handleSubmit}
+        />
+      ) : null}
     </main>
   );
 }

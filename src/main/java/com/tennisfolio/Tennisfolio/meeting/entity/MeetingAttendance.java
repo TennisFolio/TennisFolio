@@ -4,6 +4,7 @@ import com.tennisfolio.Tennisfolio.common.Entity.BaseTimeEntity;
 import com.tennisfolio.Tennisfolio.meeting.domain.AttendanceStatus;
 import com.tennisfolio.Tennisfolio.meeting.domain.Gender;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -41,7 +42,7 @@ public class MeetingAttendance extends BaseTimeEntity {
     @Column(name = "GENDER", nullable = false)
     private Gender gender;
 
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = AttendanceStatusConverter.class)
     @Column(name = "ATTENDANCE_STATUS", nullable = false)
     private AttendanceStatus attendanceStatus;
 

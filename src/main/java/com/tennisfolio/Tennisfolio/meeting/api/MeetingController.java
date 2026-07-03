@@ -68,16 +68,6 @@ public class MeetingController {
         return ResponseEntity.ok(ResponseDTO.success(response));
     }
 
-    @GetMapping("/meetings/{publicId}/manage")
-    public ResponseEntity<ResponseDTO<MeetingDetailResponse>> getManagedMeeting(
-            Authentication authentication,
-            @PathVariable String publicId
-    ) {
-        MeetingDetailResponse response =
-                meetingQueryService.getManagedMeeting(publicId, resolveAuthenticatedUserId(authentication));
-        return ResponseEntity.ok(ResponseDTO.success(response));
-    }
-
     @GetMapping("/me/meetings")
     public ResponseEntity<ResponseDTO<List<MeetingSummaryResponse>>> getMyMeetings(
             Authentication authentication
@@ -126,10 +116,15 @@ public class MeetingController {
 
     @PostMapping("/meetings/{publicId}/attendances")
     public ResponseEntity<ResponseDTO<MeetingAttendanceResponse>> upsertAttendance(
+            Authentication authentication,
             @PathVariable String publicId,
             @RequestBody MeetingAttendanceUpsertRequest request
     ) {
-        MeetingAttendanceResponse response = attendanceCommandService.upsertAttendance(publicId, request);
+        MeetingAttendanceResponse response = attendanceCommandService.upsertAttendance(
+                publicId,
+                request,
+                resolveAuthenticatedUserId(authentication)
+        );
         return ResponseEntity.ok(ResponseDTO.success(response));
     }
 

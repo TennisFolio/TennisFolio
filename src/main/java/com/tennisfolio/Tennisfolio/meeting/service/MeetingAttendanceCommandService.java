@@ -1,6 +1,7 @@
 package com.tennisfolio.Tennisfolio.meeting.service;
 
 import com.tennisfolio.Tennisfolio.common.ExceptionCode;
+import com.tennisfolio.Tennisfolio.common.UserStatus;
 import com.tennisfolio.Tennisfolio.exception.NotFoundException;
 import com.tennisfolio.Tennisfolio.meeting.domain.AttendanceStatus;
 import com.tennisfolio.Tennisfolio.meeting.domain.Gender;
@@ -11,6 +12,7 @@ import com.tennisfolio.Tennisfolio.meeting.entity.Meeting;
 import com.tennisfolio.Tennisfolio.meeting.entity.MeetingAttendance;
 import com.tennisfolio.Tennisfolio.meeting.repository.MeetingAttendanceRepository;
 import com.tennisfolio.Tennisfolio.meeting.repository.MeetingRepository;
+import com.tennisfolio.Tennisfolio.user.repository.UserRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,20 +25,28 @@ public class MeetingAttendanceCommandService {
 
     private final MeetingRepository meetingRepository;
     private final MeetingAttendanceRepository attendanceRepository;
+    private final UserRepository userRepository;
 
     public MeetingAttendanceCommandService(
             MeetingRepository meetingRepository,
-            MeetingAttendanceRepository attendanceRepository
+            MeetingAttendanceRepository attendanceRepository,
+            UserRepository userRepository
     ) {
         this.meetingRepository = meetingRepository;
         this.attendanceRepository = attendanceRepository;
+        this.userRepository = userRepository;
     }
 
     @Transactional
-    public MeetingAttendanceResponse upsertAttendance(String publicId, MeetingAttendanceUpsertRequest request) {
+    public MeetingAttendanceResponse upsertAttendance(
+            String publicId,
+            MeetingAttendanceUpsertRequest request,
+            Long currentUserId
+    ) {
         Meeting meeting = findActiveMeetingForAttendanceUpdate(publicId);
         ensureAttendanceEditable(meeting);
         String participantName = requireParticipantName(request.getParticipantName());
+        ensureOwnerNameAvailableOnlyToOwner(meeting, participantName, currentUserId);
         Gender gender = parseGender(request.getGender());
         AttendanceStatus status = parseAttendanceStatus(request.getAttendanceStatus());
 
@@ -68,6 +78,8 @@ public class MeetingAttendanceCommandService {
         MeetingAttendance attendance = findAttendance(attendanceId, meeting);
 
         String participantName = requireParticipantName(request.getParticipantName());
+
+        ensureOwnerNameAvailableOnlyToOwner(meeting, participantName, ownerUserId);
 
         Gender gender = parseGender(request.getGender());
 
@@ -121,6 +133,24 @@ public class MeetingAttendanceCommandService {
         return participantName.trim();
     }
 
+    private void ensureOwnerNameAvailableOnlyToOwner(
+            Meeting meeting,
+            String participantName,
+            Long currentUserId
+    ) {
+        String ownerNickName = userRepository.findByIdAndStatus(meeting.getOwnerUserId(), UserStatus.ACTIVE)
+                .map(user -> user.getNickName())
+                .orElse(null);
+
+        if (ownerNickName == null || !ownerNickName.equals(participantName)) {
+            return;
+        }
+
+        if (!meeting.isOwnedBy(currentUserId)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "모임장은 참석자로 선택할 수 없습니다.");
+        }
+    }
+
     private Gender parseGender(String gender) {
         try {
             return Gender.valueOf(gender);
@@ -131,7 +161,7 @@ public class MeetingAttendanceCommandService {
 
     private AttendanceStatus parseAttendanceStatus(String status) {
         try {
-            return AttendanceStatus.valueOf(status);
+            return AttendanceStatus.fromValue(status);
         } catch (RuntimeException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "참석 상태 값이 올바르지 않습니다.");
         }
