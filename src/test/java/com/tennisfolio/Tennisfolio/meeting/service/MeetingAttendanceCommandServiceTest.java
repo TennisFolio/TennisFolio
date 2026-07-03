@@ -1,4 +1,4 @@
-﻿package com.tennisfolio.Tennisfolio.meeting.service;
+package com.tennisfolio.Tennisfolio.meeting.service;
 
 import com.tennisfolio.Tennisfolio.exception.NotFoundException;
 import com.tennisfolio.Tennisfolio.meeting.domain.AttendanceStatus;
