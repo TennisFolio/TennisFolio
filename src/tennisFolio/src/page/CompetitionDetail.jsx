@@ -382,8 +382,8 @@ function CompetitionDetail() {
     ? '이 경기를 내 계정에 저장할 수 있어요.'
     : '로그인하면 이 경기를 저장할 수 있어요.';
   const accountClaimDescription = isAccountLoggedIn
-    ? '저장하면 내 경기에서 다시 찾고 관리할 수 있습니다.'
-    : '로그인 후 내 경기에서 다시 찾고 관리할 수 있습니다.';
+    ? '저장하면 경기 관리에서 다시 찾고 관리할 수 있습니다.'
+    : '로그인 후 경기 관리에서 다시 찾고 관리할 수 있습니다.';
   const accountClaimButtonLabel = !isAccountChecked
     ? '확인 중'
     : isAccountLoggedIn

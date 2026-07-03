@@ -1,6 +1,12 @@
 ﻿import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { deleteMyCompetition, getMyCompetitions } from '../utils/authApi';
+import { default_oauth_provider } from '@/constants';
+import {
+  deleteMyCompetition,
+  getMyCompetitions,
+  isAuthenticationRequiredError,
+  loginWithProvider,
+} from '../utils/authApi';
 import './MyCompetitions.css';
 
 const INITIAL_VISIBLE_COUNT = 5;
@@ -30,6 +36,7 @@ function MyCompetitions() {
   const [actionMessage, setActionMessage] = useState('');
   const [deletingPublicId, setDeletingPublicId] = useState('');
   const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE_COUNT);
+  const [authRequired, setAuthRequired] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -43,15 +50,18 @@ function MyCompetitions() {
         setVisibleCount(INITIAL_VISIBLE_COUNT);
         setErrorMessage('');
         setActionMessage('');
+        setAuthRequired(false);
       })
       .catch((error) => {
         if (cancelled) {
           return;
         }
-        if (error.response?.status === 401) {
-          setErrorMessage('로그인이 필요합니다.');
+        if (isAuthenticationRequiredError(error)) {
+          setAuthRequired(true);
+          setErrorMessage('');
         } else {
-          setErrorMessage('내 경기 목록을 불러오지 못했습니다.');
+          setAuthRequired(false);
+          setErrorMessage('경기 관리 목록을 불러오지 못했습니다.');
         }
       })
       .finally(() => {
@@ -108,17 +118,39 @@ function MyCompetitions() {
   const visibleCompetitions = competitions.slice(0, visibleCount);
   const hasMoreCompetitions = visibleCount < competitions.length;
 
+  if (!isLoading && authRequired) {
+    return (
+      <main className="my-competitions-page">
+        <section className="my-competitions-header">
+          <div className="my-competitions-title-block">
+            <div className="my-competitions-title-row">
+              <h1>경기 관리</h1>
+            </div>
+            <p>로그인하면 만든 경기와 저장한 경기를 한곳에서 다시 열 수 있습니다.</p>
+          </div>
+          <button
+            type="button"
+            className="my-competitions-login-button"
+            onClick={() => loginWithProvider(default_oauth_provider)}
+          >
+            로그인하기
+          </button>
+        </section>
+      </main>
+    );
+  }
+
   return (
     <main className="my-competitions-page">
       <header className="my-competitions-header">
         <div className="my-competitions-title-block">
           <div className="my-competitions-title-row">
-            <h1>내 경기</h1>
-            {!isLoading && !errorMessage && (
+            <h1>경기 관리</h1>
+            {!isLoading && !errorMessage && !authRequired && (
               <span>{competitions.length}개</span>
             )}
           </div>
-          <p>로그인한 상태에서 만든 경기만 모아봅니다.</p>
+          <p>로그인하면 만든 경기와 저장한 경기를 한곳에서 다시 열 수 있습니다.</p>
         </div>
         <button
           type="button"
@@ -142,14 +174,20 @@ function MyCompetitions() {
         <p className="my-competitions-state success">{actionMessage}</p>
       )}
 
-      {!isLoading && !errorMessage && competitions.length === 0 && (
+      {!isLoading &&
+        !authRequired &&
+        !errorMessage &&
+        competitions.length === 0 && (
         <section className="my-competitions-empty">
           <h2>아직 연결된 경기가 없습니다.</h2>
           <p>로그인한 상태에서 경기를 만들면 여기에 표시됩니다.</p>
         </section>
       )}
 
-      {!isLoading && !errorMessage && competitions.length > 0 && (
+      {!isLoading &&
+        !authRequired &&
+        !errorMessage &&
+        competitions.length > 0 && (
         <div className="my-competitions-list">
           {visibleCompetitions.map((competition) => (
             <article

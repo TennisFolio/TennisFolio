@@ -88,8 +88,8 @@ apiClient.interceptors.response.use(
       try {
         await apiClient.post('/api/auth/reissue', {}, { showLoading: false });
         return apiClient(originalRequest);
-      } catch (reissueError) {
-        return Promise.reject(reissueError);
+      } catch {
+        return Promise.reject(error);
       }
     }
     return Promise.reject(error);

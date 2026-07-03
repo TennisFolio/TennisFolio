@@ -12,6 +12,10 @@ export const loginWithProvider = (provider) => {
 
 export const getCurrentUser = () => apiRequestSilent.get('/api/auth/me');
 
+export const isAuthenticationRequiredError = (error) =>
+  error.response?.status === 401 ||
+  error.response?.data?.code === 'UNAUTHORIZED';
+
 export const getMyCompetitions = () =>
   apiRequestSilent.get('/api/auth/me/competitions');
 

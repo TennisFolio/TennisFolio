@@ -28,23 +28,33 @@ function Layout({ children, currentUser, onLogout }) {
   const navigate = useNavigate();
   const location = useLocation();
   const [sheetMode, setSheetMode] = useState(null);
+  const [isManageMenuOpen, setIsManageMenuOpen] = useState(false);
   const sheetRef = useRef(null);
+  const manageMenuRef = useRef(null);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
+      if (
+        isManageMenuOpen &&
+        manageMenuRef.current &&
+        !manageMenuRef.current.contains(event.target)
+      ) {
+        setIsManageMenuOpen(false);
+      }
+
       if (sheetRef.current && !sheetRef.current.contains(event.target)) {
         setSheetMode(null);
       }
     };
 
-    if (sheetMode) {
+    if (sheetMode || isManageMenuOpen) {
       document.addEventListener('mousedown', handleClickOutside);
     }
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [sheetMode]);
+  }, [sheetMode, isManageMenuOpen]);
 
   useEffect(() => {
     if (!currentUser) {
@@ -68,23 +78,44 @@ function Layout({ children, currentUser, onLogout }) {
   }, [currentUser, navigate]);
 
   const handleLogout = async () => {
-    await logout();
     const currentCompetitionPublicId = getCurrentCompetitionPublicId(
       location.pathname
     );
-    if (currentCompetitionPublicId) {
-      clearCompetitionAdminToken(currentCompetitionPublicId);
-      window.dispatchEvent(
-        new CustomEvent('competition-admin-token-cleared', {
-          detail: { publicId: currentCompetitionPublicId },
-        })
-      );
+
+    try {
+      await logout();
+    } finally {
+      if (currentCompetitionPublicId) {
+        clearCompetitionAdminToken(currentCompetitionPublicId);
+        window.dispatchEvent(
+          new CustomEvent('competition-admin-token-cleared', {
+            detail: { publicId: currentCompetitionPublicId },
+          })
+        );
+      }
+      setIsManageMenuOpen(false);
+      setSheetMode(null);
+      onLogout?.();
+      navigate('/', { replace: true });
     }
-    setSheetMode(null);
-    onLogout?.();
   };
 
   const closeSheet = () => setSheetMode(null);
+
+  const closeManageSurfaces = () => {
+    setIsManageMenuOpen(false);
+    setSheetMode(null);
+  };
+
+  const navigateToMyCompetitions = () => {
+    closeManageSurfaces();
+    navigate('/me/competitions');
+  };
+
+  const navigateToMeetings = () => {
+    closeManageSurfaces();
+    navigate('/meetings');
+  };
 
   return (
     <div className="layout">
@@ -100,38 +131,70 @@ function Layout({ children, currentUser, onLogout }) {
           </button>
 
           <div className="header-actions">
+            <div className="header-manage-menu" ref={manageMenuRef}>
+              <button
+                type="button"
+                className={`auth-button header-manage-menu-button${
+                  isManageMenuOpen ? ' is-open' : ''
+                }`}
+                aria-label="관리 메뉴"
+                aria-haspopup="menu"
+                aria-expanded={isManageMenuOpen}
+                onClick={() => setIsManageMenuOpen((isOpen) => !isOpen)}
+              >
+                <span className="header-manage-menu-icon" aria-hidden="true">
+                  ≡
+                </span>
+              </button>
+
+              {isManageMenuOpen && (
+                <div
+                  className="header-manage-popover"
+                  role="menu"
+                  aria-label="관리 메뉴"
+                >
+                  <button
+                    type="button"
+                    className="header-manage-popover-item header-my-competitions-button is-primary"
+                    role="menuitem"
+                    onClick={navigateToMyCompetitions}
+                  >
+                    경기 관리
+                  </button>
+                  <button
+                    type="button"
+                    className="header-manage-popover-item header-my-meetings-button"
+                    role="menuitem"
+                    onClick={navigateToMeetings}
+                  >
+                    모임 관리
+                  </button>
+                </div>
+              )}
+            </div>
+
             {currentUser ? (
-              <>
-                <button
-                  type="button"
-                  className="auth-button header-my-competitions-button"
-                  onClick={() => navigate('/me/competitions')}
-                >
-                  내 경기
-                </button>
-                <button
-                  type="button"
-                  className="auth-button header-my-meetings-button"
-                  onClick={() => navigate('/meetings')}
-                >
-                  내 모임
-                </button>
-                <button
-                  type="button"
-                  className="auth-button auth-button-account"
-                  aria-label="프로필"
-                  onClick={() => setSheetMode('account')}
-                >
-                  <span className="header-profile-avatar" aria-hidden="true">
-                    {getProfileInitial(currentUser)}
-                  </span>
-                </button>
-              </>
+              <button
+                type="button"
+                className="auth-button auth-button-account"
+                aria-label="프로필"
+                onClick={() => {
+                  setIsManageMenuOpen(false);
+                  setSheetMode('account');
+                }}
+              >
+                <span className="header-profile-avatar" aria-hidden="true">
+                  {getProfileInitial(currentUser)}
+                </span>
+              </button>
             ) : (
               <button
                 type="button"
                 className="auth-button auth-button-login"
-                onClick={() => loginWithProvider(default_oauth_provider)}
+                onClick={() => {
+                  setIsManageMenuOpen(false);
+                  loginWithProvider(default_oauth_provider);
+                }}
               >
                 로그인
               </button>
@@ -178,12 +241,16 @@ function Layout({ children, currentUser, onLogout }) {
               <button
                 type="button"
                 className="account-my-competitions-button"
-                onClick={() => {
-                  setSheetMode(null);
-                  navigate('/me/competitions');
-                }}
+                onClick={navigateToMyCompetitions}
               >
-                내 경기 보기
+                경기 관리
+              </button>
+              <button
+                type="button"
+                className="account-my-competitions-button"
+                onClick={navigateToMeetings}
+              >
+                모임 관리
               </button>
               <button
                 type="button"

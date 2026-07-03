@@ -1,12 +1,13 @@
 package com.tennisfolio.Tennisfolio.config;
 
 import com.tennisfolio.Tennisfolio.security.jwt.JwtAuthenticationFilter;
-import com.tennisfolio.Tennisfolio.security.jwt.JwtAuthenticationToken;
 import com.tennisfolio.Tennisfolio.security.oauth.handler.OAuthLoginSuccessHandler;
 import com.tennisfolio.Tennisfolio.security.oauth.service.CustomOAuth2UserService;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -52,6 +53,12 @@ public class SecurityConfig {
                         .requestMatchers("/api/meetings", "/api/meetings/**").authenticated()
                         .anyRequest().permitAll()
                 )
+                .exceptionHandling(exception -> exception
+                        .defaultAuthenticationEntryPointFor(
+                                (request, response, authException) -> writeApiUnauthorized(response),
+                                request -> request.getRequestURI().startsWith("/api/")
+                        )
+                )
                 .oauth2Login(oauth -> oauth
                         .userInfoEndpoint(userInfo ->
                                 userInfo.userService(customOAuth2UserService)
@@ -64,6 +71,15 @@ public class SecurityConfig {
                 );
 
         return http.build();
+    }
+
+    private void writeApiUnauthorized(HttpServletResponse response) throws java.io.IOException {
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.setCharacterEncoding("UTF-8");
+        response.getWriter().write("""
+                {"code":"UNAUTHORIZED","message":"로그인이 필요합니다.","data":null}
+                """);
     }
 
     @Bean

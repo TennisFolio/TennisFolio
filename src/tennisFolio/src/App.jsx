@@ -25,7 +25,6 @@ import Meetings from './page/Meetings.jsx';
 import MeetingCreate from './page/MeetingCreate.jsx';
 import MeetingUpdate from './page/MeetingUpdate.jsx';
 import MeetingPublic from './page/MeetingPublic.jsx';
-import MeetingManage from './page/MeetingManage.jsx';
 import Schedule from './page/Schedule.jsx';
 import NotFound from './page/NotFound.jsx';
 import { trackPageView } from './utils/analytics';
@@ -101,7 +100,6 @@ function App() {
           <Route path="/meetings/new" element={<MeetingCreate />} />
           <Route path="/meetings/:publicId" element={<MeetingPublic />} />
           <Route path="/meetings/:publicId/edit" element={<MeetingUpdate />} />
-          <Route path="/meetings/:publicId/manage" element={<MeetingManage />} />
           <Route path="/competitions/:publicId" element={<CompetitionDetail />} />
           <Route
             path="/competitions/:publicId/manage"
