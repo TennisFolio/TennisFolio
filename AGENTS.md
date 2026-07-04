@@ -61,3 +61,18 @@ Keep `Matching` names inside algorithm/domain internals only when they describe 
 - Do not run Java/Gradle builds or npm builds by default. This includes `.\gradlew.bat compileJava`, `.\gradlew.bat compileTestJava`, `.\gradlew.bat build`, `npm run build`, and similar build commands.
 - Only run Java/Gradle or npm build commands when the user explicitly asks for verification, asks to run a build/test, or grants permission for that specific command.
 - When build verification is skipped because of this rule, state that it was skipped in the final response.
+
+## Frontend Component Refactoring
+
+When a frontend page grows large, split components by responsibility instead of leaving all JSX in the page file.
+
+- Keep page files focused on data loading, state, event handlers, navigation, and high-level composition.
+- Extract UI that is shared by multiple pages into `components/<domain>/shared`.
+- Extract page-specific sections into `components/<domain>/<page-role>` folders, for example `components/meeting/public` and `components/meeting/manage`.
+- Prefer section-sized components such as `OverviewPanel`, `AttendancePanel`, `OperationsPanel`, and `EntryScreen` before splitting into tiny input/button components.
+- Extract repeated UI primitives only when they are reused or clarify intent, for example status option buttons, participant fields, roster panels, summary chips, and confirm modals.
+- Move pure formatting, grouping, counting, and normalization helpers into a colocated utility module such as `components/<domain>/shared/<domain>Utils.js`.
+- Move browser-only persistence helpers into the page-role folder that owns the behavior, for example public attendance `localStorage` helpers under `components/meeting/public`.
+- Use props to express page-specific behavior on shared components rather than duplicating markup. For example, a shared roster chip can accept optional select/remove handlers.
+- Avoid over-splitting into one-off wrappers when the extracted component would only pass through many props and hide simple JSX.
+- After moving files, update imports and verify there are no stale imports from the old component root.

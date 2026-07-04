@@ -120,6 +120,13 @@ plan은 commit unit당 3줄을 기본으로 한다.
 
 테스트는 개발 중에 한다. 최종 QA는 테스트를 대체하지 않는다.
 
+테스트는 사용자 기능 흐름에서 실제로 깨질 수 있는 계약을 검증한다.
+
+- 핵심 비즈니스 규칙과 상태 변경은 service/domain 테스트로 검증한다.
+- repository query와 entity mapping은 persistence 테스트로 검증한다.
+- controller 테스트는 route, JSON binding, HTTP status, security/auth 계약을 Spring MVC 또는 통합 테스트로 검증할 때 작성한다.
+- controller가 request를 service에 그대로 전달하는 얇은 Mockito 테스트는 기본으로 작성하지 않는다.
+
 권장 순서:
 
 ```text
