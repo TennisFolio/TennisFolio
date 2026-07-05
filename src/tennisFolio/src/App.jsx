@@ -27,7 +27,7 @@ import MeetingUpdate from './page/MeetingUpdate.jsx';
 import MeetingPublic from './page/MeetingPublic.jsx';
 import Schedule from './page/Schedule.jsx';
 import NotFound from './page/NotFound.jsx';
-import { trackPageView } from './utils/analytics';
+import { initializeAnalytics, trackPageView } from './utils/analytics';
 import { getCurrentUser, updateProfile } from './utils/authApi';
 import ProfileSetupSheet from './components/auth/ProfileSetupSheet.jsx';
 import { shouldShowProfileSetup } from './utils/profileSetup.js';
@@ -63,6 +63,10 @@ function AnalyticsRouteTracker() {
 
 function App() {
   const [currentUser, setCurrentUser] = useState(null);
+
+  useEffect(() => {
+    initializeAnalytics();
+  }, []);
 
   useEffect(() => {
     let cancelled = false;

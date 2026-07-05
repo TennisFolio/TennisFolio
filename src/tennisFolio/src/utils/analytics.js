@@ -1,4 +1,35 @@
 const ANALYTICS_DEBUG = import.meta.env.DEV;
+const GA_MEASUREMENT_ID = 'G-BVKP7NB8Z6';
+const ANALYTICS_HOSTS = new Set(['tennisfolio.net', 'www.tennisfolio.net']);
+let isAnalyticsInitialized = false;
+
+function isAnalyticsEnabled() {
+  return (
+    import.meta.env.PROD &&
+    typeof window !== 'undefined' &&
+    ANALYTICS_HOSTS.has(window.location.hostname)
+  );
+}
+
+export function initializeAnalytics() {
+  if (!isAnalyticsEnabled() || isAnalyticsInitialized) {
+    return;
+  }
+
+  window.dataLayer = window.dataLayer || [];
+  window.gtag = function gtag() {
+    window.dataLayer.push(arguments);
+  };
+
+  window.gtag('js', new Date());
+  window.gtag('config', GA_MEASUREMENT_ID, { send_page_view: false });
+
+  const script = document.createElement('script');
+  script.async = true;
+  script.src = `https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`;
+  document.head.appendChild(script);
+  isAnalyticsInitialized = true;
+}
 
 function getSearchParam(name) {
   return new URLSearchParams(window.location.search).get(name) || undefined;
@@ -36,6 +67,14 @@ function cleanParams(params = {}) {
 }
 
 export function trackEvent(eventName, params = {}) {
+  if (!isAnalyticsEnabled()) {
+    if (ANALYTICS_DEBUG) {
+      console.debug('[analytics:disabled]', eventName, params);
+    }
+    return;
+  }
+  initializeAnalytics();
+
   const eventParams = cleanParams({
     ...getTrafficParams(),
     page_path: `${window.location.pathname}${window.location.search}`,
@@ -52,6 +91,11 @@ export function trackEvent(eventName, params = {}) {
 }
 
 export function trackPageView(path) {
+  if (!isAnalyticsEnabled()) {
+    return;
+  }
+  initializeAnalytics();
+
   if (typeof window.gtag !== 'function') {
     return;
   }

@@ -2,7 +2,7 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { getCurrentUser } from '../utils/authApi';
 import {
-  createMeetingCompetition,
+  createMeetingCompetitionWithOptions,
   deleteAttendance,
   deleteMeeting,
   deleteMeetingCompetition,
@@ -21,6 +21,7 @@ import {
   groupAttendances,
   normalizeAttendances,
 } from '../components/meeting/shared/meetingAttendanceUtils';
+import { getSameGenderDoublesOnlyUnavailableReason } from '../hooks/competitionCreateFormConfig';
 import './Meeting.css';
 import MeetingToast from './MeetingToast';
 
@@ -34,6 +35,7 @@ function MeetingManage({ initialMeeting = null, initialNotice = null }) {
   const [attendeeToDelete, setAttendeeToDelete] = useState(null);
   const [competitionDeleteRequested, setCompetitionDeleteRequested] =
     useState(false);
+  const [sameGenderDoublesOnly, setSameGenderDoublesOnly] = useState(false);
   const [notice, setNotice] = useState(initialNotice);
   const [errorMessage, setErrorMessage] = useState('');
 
@@ -48,6 +50,36 @@ function MeetingManage({ initialMeeting = null, initialNotice = null }) {
   );
   const ownerName = currentUser?.nickName?.trim() || '';
   const meetingEditDisabled = Boolean(meeting?.competitionCreated);
+  const attendingGenderCounts = useMemo(
+    () =>
+      attendances.reduce(
+        (counts, attendance) => {
+          if (attendance.attendanceStatus !== 'ATTENDING') {
+            return counts;
+          }
+          if (attendance.gender === 'MALE') {
+            return { ...counts, maleCount: counts.maleCount + 1 };
+          }
+          if (attendance.gender === 'FEMALE') {
+            return { ...counts, femaleCount: counts.femaleCount + 1 };
+          }
+          return counts;
+        },
+        { maleCount: 0, femaleCount: 0 },
+      ),
+    [attendances],
+  );
+  const sameGenderDoublesOnlyUnavailableReason = useMemo(
+    () =>
+      getSameGenderDoublesOnlyUnavailableReason({
+        maleCount: attendingGenderCounts.maleCount,
+        femaleCount: attendingGenderCounts.femaleCount,
+        totalGames: meeting?.totalGames ?? 0,
+      }),
+    [attendingGenderCounts, meeting?.totalGames],
+  );
+  const sameGenderDoublesOnlyUnavailable =
+    sameGenderDoublesOnly && Boolean(sameGenderDoublesOnlyUnavailableReason);
 
   const loadMeeting = useCallback(
     () =>
@@ -140,8 +172,15 @@ function MeetingManage({ initialMeeting = null, initialNotice = null }) {
   };
 
   const handleCreateCompetition = async () => {
+    if (sameGenderDoublesOnlyUnavailable) {
+      showNotice('error', sameGenderDoublesOnlyUnavailableReason);
+      return;
+    }
+
     try {
-      const response = await createMeetingCompetition(publicId);
+      const response = await createMeetingCompetitionWithOptions(publicId, {
+        sameGenderDoublesOnly,
+      });
       showNotice('success', '대진표를 생성했습니다.');
       await loadMeeting();
       if (response.data.data?.publicId) {
@@ -229,6 +268,10 @@ function MeetingManage({ initialMeeting = null, initialNotice = null }) {
           onCreateCompetition={handleCreateCompetition}
           onAskDeleteCompetition={() => setCompetitionDeleteRequested(true)}
           onChangeStatus={handleStatus}
+          sameGenderDoublesOnly={sameGenderDoublesOnly}
+          onSameGenderDoublesOnlyChange={setSameGenderDoublesOnly}
+          sameGenderDoublesOnlyUnavailable={sameGenderDoublesOnlyUnavailable}
+          sameGenderDoublesOnlyUnavailableReason={sameGenderDoublesOnlyUnavailableReason}
         />
 
         <MeetingOwnerAttendancePanel

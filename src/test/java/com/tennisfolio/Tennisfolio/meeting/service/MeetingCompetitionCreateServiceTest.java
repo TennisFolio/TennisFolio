@@ -8,6 +8,7 @@ import com.tennisfolio.Tennisfolio.matching.service.CompetitionCommandService;
 import com.tennisfolio.Tennisfolio.matching.service.CompetitionCreationResult;
 import com.tennisfolio.Tennisfolio.meeting.domain.AttendanceStatus;
 import com.tennisfolio.Tennisfolio.meeting.domain.Gender;
+import com.tennisfolio.Tennisfolio.meeting.dto.MeetingCompetitionCreateRequest;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingCompetitionCreateResponse;
 import com.tennisfolio.Tennisfolio.meeting.entity.Meeting;
 import com.tennisfolio.Tennisfolio.meeting.entity.MeetingAttendance;
@@ -102,6 +103,40 @@ class MeetingCompetitionCreateServiceTest {
         assertThat(response.getPublicId()).isEqualTo("competition-public-id");
         assertThat(meeting.getCompetitionId()).isEqualTo(200L);
         verify(competitionRepository, never()).findByPublicIdAndDeletedAtIsNull("competition-public-id");
+    }
+
+    @Test
+    void createCompetition_passesSameGenderDoublesOnlyChoiceToCompetitionRequest() {
+        Meeting meeting = meeting(null);
+        Competition competition = competition(200L, "competition-public-id", 10L);
+        when(meetingRepository.findByPublicIdAndOwnerUserIdAndDeletedAtIsNullForUpdate("meeting-public-id", 10L))
+                .thenReturn(Optional.of(meeting));
+        when(attendanceRepository.findByMeetingAndAttendanceStatusAndDeletedAtIsNull(
+                meeting,
+                AttendanceStatus.ATTENDING
+        )).thenReturn(List.of(
+                attendance(meeting, "Alex Kim", Gender.MALE, AttendanceStatus.ATTENDING),
+                attendance(meeting, "Ben Park", Gender.MALE, AttendanceStatus.ATTENDING),
+                attendance(meeting, "Chris Lee", Gender.MALE, AttendanceStatus.ATTENDING),
+                attendance(meeting, "Dana Choi", Gender.MALE, AttendanceStatus.ATTENDING),
+                attendance(meeting, "Eun Seo", Gender.FEMALE, AttendanceStatus.ATTENDING),
+                attendance(meeting, "Fay Shin", Gender.FEMALE, AttendanceStatus.ATTENDING),
+                attendance(meeting, "Gina Han", Gender.FEMALE, AttendanceStatus.ATTENDING),
+                attendance(meeting, "Hana Jung", Gender.FEMALE, AttendanceStatus.ATTENDING)
+        ));
+        when(competitionCommandService.createCompetitionResult(any(CompetitionCreateRequest.class), eq(10L)))
+                .thenReturn(new CompetitionCreationResult(competition, "competition-token"));
+
+        service.createCompetition(
+                "meeting-public-id",
+                10L,
+                new MeetingCompetitionCreateRequest(true)
+        );
+
+        ArgumentCaptor<CompetitionCreateRequest> requestCaptor =
+                ArgumentCaptor.forClass(CompetitionCreateRequest.class);
+        verify(competitionCommandService).createCompetitionResult(requestCaptor.capture(), eq(10L));
+        assertThat(requestCaptor.getValue().isSameGenderDoublesOnly()).isTrue();
     }
 
     @Test

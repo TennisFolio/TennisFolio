@@ -9,6 +9,7 @@ import com.tennisfolio.Tennisfolio.matching.service.CompetitionCommandService;
 import com.tennisfolio.Tennisfolio.matching.service.CompetitionCreationResult;
 import com.tennisfolio.Tennisfolio.meeting.domain.AttendanceStatus;
 import com.tennisfolio.Tennisfolio.meeting.domain.Gender;
+import com.tennisfolio.Tennisfolio.meeting.dto.MeetingCompetitionCreateRequest;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingCompetitionCreateResponse;
 import com.tennisfolio.Tennisfolio.meeting.entity.Meeting;
 import com.tennisfolio.Tennisfolio.meeting.entity.MeetingAttendance;
@@ -46,6 +47,15 @@ public class MeetingCompetitionCreateService {
 
     @Transactional
     public MeetingCompetitionCreateResponse createCompetition(String publicId, Long ownerUserId) {
+        return createCompetition(publicId, ownerUserId, MeetingCompetitionCreateRequest.defaults());
+    }
+
+    @Transactional
+    public MeetingCompetitionCreateResponse createCompetition(
+            String publicId,
+            Long ownerUserId,
+            MeetingCompetitionCreateRequest request
+    ) {
         Meeting meeting = findOwnedMeetingForUpdate(publicId, ownerUserId);
         if (meeting.hasCompetition()) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "이미 경기표가 생성된 모임입니다.");
@@ -54,8 +64,13 @@ public class MeetingCompetitionCreateService {
         List<MeetingAttendance> attendingParticipants = findAttendingParticipants(meeting);
         validateEnoughAttendingParticipants(meeting, attendingParticipants);
 
-        CompetitionCreateRequest request = toCompetitionCreateRequest(meeting, attendingParticipants);
-        CompetitionCreationResult result = competitionCommandService.createCompetitionResult(request, ownerUserId);
+        CompetitionCreateRequest competitionRequest = toCompetitionCreateRequest(
+                meeting,
+                attendingParticipants,
+                request.isSameGenderDoublesOnly()
+        );
+        CompetitionCreationResult result =
+                competitionCommandService.createCompetitionResult(competitionRequest, ownerUserId);
         Competition competition = result.getCompetition();
         meeting.connectCompetition(competition.getId());
         return new MeetingCompetitionCreateResponse(competition.getPublicId());
@@ -99,7 +114,8 @@ public class MeetingCompetitionCreateService {
 
     private CompetitionCreateRequest toCompetitionCreateRequest(
             Meeting meeting,
-            List<MeetingAttendance> attendances
+            List<MeetingAttendance> attendances,
+            boolean sameGenderDoublesOnly
     ) {
         List<String> malePlayerNames = playerNamesByGender(attendances, Gender.MALE);
         List<String> femalePlayerNames = playerNamesByGender(attendances, Gender.FEMALE);
@@ -112,7 +128,8 @@ public class MeetingCompetitionCreateService {
                 meeting.getTotalGames(),
                 null,
                 malePlayerNames,
-                femalePlayerNames
+                femalePlayerNames,
+                sameGenderDoublesOnly
         );
     }
 

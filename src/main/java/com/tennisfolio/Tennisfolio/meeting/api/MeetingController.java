@@ -5,6 +5,7 @@ import com.tennisfolio.Tennisfolio.meeting.dto.MeetingAttendanceResponse;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingAttendanceUpsertRequest;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingCreateRequest;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingCreateResponse;
+import com.tennisfolio.Tennisfolio.meeting.dto.MeetingCompetitionCreateRequest;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingCompetitionCreateResponse;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingDetailResponse;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingStatusUpdateRequest;
@@ -161,11 +162,13 @@ public class MeetingController {
     @PostMapping("/meetings/{publicId}/competition")
     public ResponseEntity<ResponseDTO<MeetingCompetitionCreateResponse>> createCompetition(
             Authentication authentication,
-            @PathVariable String publicId
+            @PathVariable String publicId,
+            @RequestBody(required = false) MeetingCompetitionCreateRequest request
     ) {
         MeetingCompetitionCreateResponse response = competitionCreateService.createCompetition(
                 publicId,
-                resolveAuthenticatedUserId(authentication)
+                resolveAuthenticatedUserId(authentication),
+                request == null ? MeetingCompetitionCreateRequest.defaults() : request
         );
         return ResponseEntity.ok(ResponseDTO.success(response));
     }
