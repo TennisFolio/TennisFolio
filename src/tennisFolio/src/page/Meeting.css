@@ -501,6 +501,77 @@
   padding: 12px;
 }
 
+.meeting-same-gender-option {
+  display: grid;
+  gap: 6px;
+  border: 1px solid var(--competition-border);
+  border-radius: 8px;
+  background: var(--competition-surface);
+  padding: 10px;
+}
+
+.meeting-same-gender-option.disabled {
+  border-color: var(--competition-danger-border);
+  background: var(--competition-danger-bg);
+}
+
+.meeting-same-gender-switch {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: var(--competition-text-strong);
+  cursor: pointer;
+  padding: 0;
+  text-align: left;
+}
+
+.meeting-same-gender-switch-track {
+  position: relative;
+  width: 42px;
+  height: 24px;
+  flex: 0 0 auto;
+  border-radius: 999px;
+  background: var(--competition-border-strong);
+  transition: background 0.18s ease;
+}
+
+.meeting-same-gender-switch-thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  background: var(--competition-surface);
+  box-shadow: 0 2px 6px var(--competition-shadow);
+  transition: transform 0.18s ease;
+}
+
+.meeting-same-gender-switch.active .meeting-same-gender-switch-track {
+  background: var(--competition-primary);
+}
+
+.meeting-same-gender-switch.active .meeting-same-gender-switch-thumb {
+  transform: translateX(18px);
+}
+
+.meeting-same-gender-switch-copy strong {
+  display: block;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.meeting-same-gender-option-warning {
+  margin: 0;
+  color: var(--competition-danger);
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.45;
+}
+
 .meeting-operation-head,
 .meeting-operation-status {
   display: flex;

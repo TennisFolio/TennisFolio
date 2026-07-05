@@ -7,6 +7,10 @@ function MeetingManageOperationsPanel({
   onCreateCompetition,
   onAskDeleteCompetition,
   onChangeStatus,
+  sameGenderDoublesOnly,
+  onSameGenderDoublesOnlyChange,
+  sameGenderDoublesOnlyUnavailable,
+  sameGenderDoublesOnlyUnavailableReason,
 }) {
   return (
     <section className="meeting-panel">
@@ -15,6 +19,10 @@ function MeetingManageOperationsPanel({
         onOpenCompetition={onOpenCompetition}
         onCreateCompetition={onCreateCompetition}
         onAskDeleteCompetition={onAskDeleteCompetition}
+        sameGenderDoublesOnly={sameGenderDoublesOnly}
+        onSameGenderDoublesOnlyChange={onSameGenderDoublesOnlyChange}
+        sameGenderDoublesOnlyUnavailable={sameGenderDoublesOnlyUnavailable}
+        sameGenderDoublesOnlyUnavailableReason={sameGenderDoublesOnlyUnavailableReason}
       />
       <MeetingAttendanceControlPanel
         status={meeting.status}

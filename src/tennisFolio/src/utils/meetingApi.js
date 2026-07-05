@@ -37,5 +37,10 @@ export const deleteAttendance = (publicId, attendanceId) =>
 export const createMeetingCompetition = (publicId) =>
   apiRequestSilent.post(`/api/meetings/${publicId}/competition`);
 
+export const createMeetingCompetitionWithOptions = (publicId, options = {}) =>
+  apiRequestSilent.post(`/api/meetings/${publicId}/competition`, {
+    sameGenderDoublesOnly: options.sameGenderDoublesOnly === true,
+  });
+
 export const deleteMeetingCompetition = (publicId) =>
   apiRequestSilent.delete(`/api/meetings/${publicId}/competition`);

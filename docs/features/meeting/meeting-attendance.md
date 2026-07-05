@@ -362,13 +362,15 @@ DELETE /api/meetings/{publicId}/competition
     - `/meetings/:publicId/manage`에서 owner 전용 상세 정보를 조회한다.
     - 모임 정보 수정, 참석 마감/재오픈, 공유 링크 복사, 모임 삭제를 제공한다.
     - owner는 참석자의 이름, 성별, 참석 상태를 수정하거나 삭제할 수 있다.
-    - `ATTENDING` 참석자로 대진표 생성 액션을 제공하고, 성공 시 생성된 Competition 상세로 이동하는 링크를 보여준다.
+    - `ATTENDING` 참석자로 대진표 생성 액션을 제공하고, 혼복 제외 여부를 선택해 생성할 수 있다.
+    - 대진표 생성 성공 시 생성된 Competition 상세로 이동하는 링크를 보여준다.
     - 연결된 Competition 삭제 액션을 제공하고 삭제 후 참석 응답 수정이 다시 가능하도록 화면 상태를 갱신한다.
     - 연결된 Competition이 있으면 `대진표 보기` 액션을 제공한다.
     - 모임 삭제 액션은 불참 명단 아래 위험 작업 영역에 둔다.
   - 테스트 설명:
     - owner 상세 조회 성공 시 참석자 목록과 owner 액션이 보인다.
     - 참석자 수정/삭제 성공 시 목록과 카운트가 갱신된다.
+    - 혼복 제외를 켠 대진표 생성 요청은 Competition 생성 요청의 `sameGenderDoublesOnly`로 전달된다.
     - 대진표 생성 성공 시 Competition 링크가 보인다.
     - 관리 화면의 `대진표 보기` 액션이 `/competitions/{competitionPublicId}`로 이동한다.
     - 대진표 삭제 성공 시 Meeting의 competition 연결 상태가 해제되어 보인다.
@@ -377,7 +379,7 @@ DELETE /api/meetings/{publicId}/competition
 
 ## 6. Development Validation
 
-- [ ] 성공 흐름: 로그인 사용자 모임 생성 -> 비로그인 이름/성별 참석 체크 -> 경기표 생성 -> Competition 상세 이동
+- [ ] 성공 흐름: 로그인 사용자 모임 생성 -> 비로그인 이름/성별 참석 체크 -> 혼복 제외 여부 선택 -> 경기표 생성 -> Competition 상세 이동
 - [ ] 성공 흐름: 로그인 사용자 내 모임 목록 조회
 - [ ] 성공 흐름: 공개 참석 화면에서 기존 응답의 이름/성별/참석 상태 수정
 - [ ] 성공 흐름: 같은 브라우저에서 공개 참석 링크 재방문 시 이전에 선택한 참석자로 상세 화면 자동 진입

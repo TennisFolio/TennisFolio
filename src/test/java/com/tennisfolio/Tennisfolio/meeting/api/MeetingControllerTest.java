@@ -3,6 +3,7 @@ package com.tennisfolio.Tennisfolio.meeting.api;
 import com.tennisfolio.Tennisfolio.common.response.ResponseDTO;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingCreateRequest;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingCreateResponse;
+import com.tennisfolio.Tennisfolio.meeting.dto.MeetingCompetitionCreateRequest;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingCompetitionCreateResponse;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingDetailResponse;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingStatusUpdateRequest;
@@ -142,13 +143,14 @@ class MeetingControllerTest {
     @Test
     void createCompetition_passesOwnerUserIdToCompetitionCreateService() {
         Authentication authentication = new UsernamePasswordAuthenticationToken(10L, null, List.of());
-        when(competitionCreateService.createCompetition("meeting-public-id", 10L))
+        MeetingCompetitionCreateRequest request = new MeetingCompetitionCreateRequest(true);
+        when(competitionCreateService.createCompetition("meeting-public-id", 10L, request))
                 .thenReturn(new MeetingCompetitionCreateResponse("competition-public-id"));
 
         ResponseEntity<ResponseDTO<MeetingCompetitionCreateResponse>> response =
-                meetingController.createCompetition(authentication, "meeting-public-id");
+                meetingController.createCompetition(authentication, "meeting-public-id", request);
 
-        verify(competitionCreateService).createCompetition("meeting-public-id", 10L);
+        verify(competitionCreateService).createCompetition("meeting-public-id", 10L, request);
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().getData().getPublicId()).isEqualTo("competition-public-id");
     }

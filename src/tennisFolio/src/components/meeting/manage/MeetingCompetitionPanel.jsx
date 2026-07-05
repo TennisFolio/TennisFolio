@@ -3,6 +3,10 @@ function MeetingCompetitionPanel({
   onOpenCompetition,
   onCreateCompetition,
   onAskDeleteCompetition,
+  sameGenderDoublesOnly,
+  onSameGenderDoublesOnlyChange,
+  sameGenderDoublesOnlyUnavailable,
+  sameGenderDoublesOnlyUnavailableReason,
 }) {
   return (
     <div className="meeting-operation-primary">
@@ -34,13 +38,45 @@ function MeetingCompetitionPanel({
           </button>
         </>
       ) : (
+        <>
+          <div
+            className={`meeting-same-gender-option ${
+              sameGenderDoublesOnlyUnavailable ? 'disabled' : ''
+            }`}
+          >
+            <button
+              type="button"
+              className={`meeting-same-gender-switch ${
+                sameGenderDoublesOnly ? 'active' : ''
+              }`}
+              role="switch"
+              aria-checked={sameGenderDoublesOnly}
+              onClick={() =>
+                onSameGenderDoublesOnlyChange(!sameGenderDoublesOnly)
+              }
+            >
+              <span className="meeting-same-gender-switch-track">
+                <span className="meeting-same-gender-switch-thumb" />
+              </span>
+              <span className="meeting-same-gender-switch-copy">
+                <strong>혼복 제외</strong>
+              </span>
+            </button>
+            {sameGenderDoublesOnlyUnavailable && (
+              <p className="meeting-same-gender-option-warning">
+                {sameGenderDoublesOnlyUnavailableReason}
+              </p>
+            )}
+          </div>
         <button
           type="button"
           className="meeting-button primary full"
           onClick={onCreateCompetition}
+          disabled={sameGenderDoublesOnlyUnavailable}
         >
           참석자로 대진표 생성
         </button>
+        </>
       )}
     </div>
   );
