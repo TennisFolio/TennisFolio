@@ -44,12 +44,12 @@
 
 ## 5. Plan / Commit Units
 
-- [x] `feat: add club domain model` - done, verified, commit pending
+- [x] `feat: add club domain model` - done, verified, committed
   - 구현: `club/entity`에 `Club`, `ClubMember`, `ClubMemberRole` 추가, `club/repository`에 JPA repository 추가
   - 테스트 설명: repository 테스트로 Club 저장, ADMIN 클럽원 저장, 활성 클럽원 이름 조회를 검증
   - 검증 기준: `.\gradlew.bat test --tests com.tennisfolio.Tennisfolio.club.repository.ClubRepositoryTest`
 
-- [ ] `feat: add club command services`
+- [x] `feat: add club command services` - done, verified
   - 구현: `ClubCommandService`, `ClubMemberCommandService`, `ClubAccessService`에서 생성/수정/삭제/권한/중복/마지막 ADMIN 규칙 구현
   - 테스트 설명: 생성자 ADMIN 자동 등록, 비로그인 거부, 중복 이름 거부, 마지막 ADMIN 삭제/강등 거부, 일반 멤버의 관리자 작업 거부를 service 테스트로 검증
   - 검증 기준: `.\gradlew.bat test --tests com.tennisfolio.Tennisfolio.club.service.*`

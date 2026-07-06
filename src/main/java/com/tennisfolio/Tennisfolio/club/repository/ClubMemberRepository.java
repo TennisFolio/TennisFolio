@@ -13,7 +13,13 @@ public interface ClubMemberRepository extends JpaRepository<ClubMember, Long> {
 
     boolean existsByClubAndNameAndActiveTrue(Club club, String name);
 
+    boolean existsByClubAndNameAndActiveTrueAndIdNot(Club club, String name, Long id);
+
     List<ClubMember> findByClubAndActiveTrueOrderByIdAsc(Club club);
 
     Optional<ClubMember> findByClubAndUserIdAndActiveTrue(Club club, Long userId);
+
+    Optional<ClubMember> findByClubAndIdAndActiveTrue(Club club, Long id);
+
+    long countByClubAndRoleAndActiveTrue(Club club, com.tennisfolio.Tennisfolio.club.entity.ClubMemberRole role);
 }
