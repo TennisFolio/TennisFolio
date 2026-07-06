@@ -28,12 +28,17 @@ public class ClubAccessService {
     public Club requireAdmin(String clubPublicId, Long currentUserId) {
         requireAuthenticated(currentUserId);
         Club club = findActiveClub(clubPublicId);
-        ClubMember member = clubMemberRepository.findByClubAndUserIdAndActiveTrue(club, currentUserId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN, "클럽 관리자만 사용할 수 있습니다."));
+        ClubMember member = findActiveMember(club, currentUserId);
         if (member.getRole() != ClubMemberRole.ADMIN) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "클럽 관리자만 사용할 수 있습니다.");
         }
         return club;
+    }
+
+    public ClubMember requireActiveMember(String clubPublicId, Long currentUserId) {
+        requireAuthenticated(currentUserId);
+        Club club = findActiveClub(clubPublicId);
+        return findActiveMember(club, currentUserId);
     }
 
     public Club findActiveClub(String clubPublicId) {
@@ -45,5 +50,10 @@ public class ClubAccessService {
         if (currentUserId == null) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "로그인이 필요합니다.");
         }
+    }
+
+    private ClubMember findActiveMember(Club club, Long currentUserId) {
+        return clubMemberRepository.findByClubAndUserIdAndActiveTrue(club, currentUserId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN, "클럽 멤버만 사용할 수 있습니다."));
     }
 }

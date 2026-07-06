@@ -54,7 +54,7 @@
   - 테스트 설명: 생성자 ADMIN 자동 등록, 비로그인 거부, 중복 이름 거부, 마지막 ADMIN 삭제/강등 거부, 일반 멤버의 관리자 작업 거부를 service 테스트로 검증
   - 검증 기준: `.\gradlew.bat test --tests com.tennisfolio.Tennisfolio.club.service.*`
 
-- [ ] `feat: add club query services`
+- [x] `feat: add club query services` - done, verified
   - 구현: `ClubQueryService`에서 내 클럽 목록, 클럽 상세, 클럽원 목록과 keyword 검색 구현
   - 테스트 설명: 로그인 사용자에게 연결된 활성 클럽만 반환, 클럽 멤버가 아닌 사용자의 상세 조회 거부, keyword 검색 결과 필터링을 검증
   - 검증 기준: `.\gradlew.bat test --tests com.tennisfolio.Tennisfolio.club.service.ClubQueryServiceTest`

@@ -17,9 +17,17 @@ public interface ClubMemberRepository extends JpaRepository<ClubMember, Long> {
 
     List<ClubMember> findByClubAndActiveTrueOrderByIdAsc(Club club);
 
+    List<ClubMember> findByClubAndActiveTrueOrderByNameAscIdAsc(Club club);
+
+    List<ClubMember> findByClubAndNameContainingIgnoreCaseAndActiveTrueOrderByNameAscIdAsc(Club club, String name);
+
+    List<ClubMember> findByUserIdAndActiveTrueOrderByIdAsc(Long userId);
+
     Optional<ClubMember> findByClubAndUserIdAndActiveTrue(Club club, Long userId);
 
     Optional<ClubMember> findByClubAndIdAndActiveTrue(Club club, Long id);
 
     long countByClubAndRoleAndActiveTrue(Club club, com.tennisfolio.Tennisfolio.club.entity.ClubMemberRole role);
+
+    long countByClubAndActiveTrue(Club club);
 }
