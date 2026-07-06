@@ -119,6 +119,11 @@ function Layout({ children, currentUser, onLogout }) {
     navigate('/meetings');
   };
 
+  const navigateToClubs = () => {
+    closeManageSurfaces();
+    navigate('/clubs');
+  };
+
   return (
     <div className="layout">
       <header className="header">
@@ -170,6 +175,14 @@ function Layout({ children, currentUser, onLogout }) {
                     onClick={navigateToMeetings}
                   >
                     모임 관리
+                  </button>
+                  <button
+                    type="button"
+                    className="header-manage-popover-item"
+                    role="menuitem"
+                    onClick={navigateToClubs}
+                  >
+                    클럽 관리
                   </button>
                 </div>
               )}
@@ -253,6 +266,13 @@ function Layout({ children, currentUser, onLogout }) {
                 onClick={navigateToMeetings}
               >
                 모임 관리
+              </button>
+              <button
+                type="button"
+                className="account-my-competitions-button"
+                onClick={navigateToClubs}
+              >
+                클럽 관리
               </button>
               <button
                 type="button"

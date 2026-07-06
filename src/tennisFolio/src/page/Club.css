@@ -1,0 +1,330 @@
+.club-mobile-page {
+  width: min(100%, 460px);
+  min-height: 100dvh;
+  margin: 0 auto;
+  padding: 14px 12px 42px;
+  background: var(--competition-page-bg);
+}
+
+.club-page-head {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.club-page-head h1,
+.club-page-head h2,
+.club-section h2,
+.club-state h1,
+.club-card-title,
+.club-row-title {
+  margin: 0;
+  color: var(--competition-text-strong);
+  font-weight: 900;
+  line-height: 1.16;
+}
+
+.club-page-head h1,
+.club-state h1 {
+  font-size: 28px;
+}
+
+.club-section h2 {
+  font-size: 17px;
+}
+
+.club-page-head p,
+.club-state p,
+.club-card-copy,
+.club-row-sub {
+  margin: 0;
+  color: var(--competition-text-body);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.club-eyebrow {
+  color: var(--competition-text-muted);
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0;
+}
+
+.club-section,
+.club-stack,
+.club-state {
+  display: grid;
+  gap: 10px;
+}
+
+.club-section {
+  margin-top: 14px;
+}
+
+.club-state {
+  border: 1px solid var(--competition-border);
+  border-radius: 8px;
+  background: var(--competition-surface);
+  padding: 15px;
+}
+
+.club-section-title,
+.club-card-head,
+.club-row-main {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.club-section-title span {
+  color: var(--competition-text-muted);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.club-card,
+.club-row {
+  display: grid;
+  gap: 11px;
+  border: 1px solid var(--competition-border);
+  border-radius: 8px;
+  background: var(--competition-surface);
+  padding: 13px;
+}
+
+.club-card-title {
+  font-size: 17px;
+}
+
+.club-card-copy {
+  margin-top: 5px;
+  font-size: 13px;
+}
+
+.club-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.club-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  border: 1px solid var(--competition-border);
+  border-radius: 999px;
+  background: var(--competition-surface-soft);
+  color: var(--competition-text-body);
+  padding: 0 9px;
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 1.25;
+  white-space: nowrap;
+}
+
+.club-chip.admin {
+  border-color: var(--competition-warning-border);
+  background: var(--competition-warning-bg);
+  color: var(--competition-warning);
+}
+
+.club-chip.male {
+  border-color: var(--competition-male-bg);
+  background: var(--competition-male-bg);
+  color: var(--competition-male);
+}
+
+.club-chip.female {
+  border-color: var(--competition-female-bg);
+  background: var(--competition-female-bg);
+  color: var(--competition-female);
+}
+
+.club-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  border: 1px solid var(--competition-border-strong);
+  border-radius: 8px;
+  background: var(--competition-surface);
+  color: var(--competition-text-body);
+  cursor: pointer;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 900;
+  padding: 0 14px;
+  text-decoration: none;
+}
+
+.club-button.primary,
+.club-button.accent {
+  border-color: var(--competition-primary);
+  background: var(--competition-primary);
+  color: var(--competition-text-inverse);
+}
+
+.club-button.danger {
+  border-color: var(--competition-danger-border);
+  background: var(--competition-danger-bg);
+  color: var(--competition-danger);
+}
+
+.club-button.full {
+  width: 100%;
+}
+
+.club-button.small {
+  min-height: 34px;
+  border-radius: 7px;
+  padding: 0 10px;
+  font-size: 12px;
+}
+
+.club-tabs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.club-page-actions {
+  display: grid;
+  gap: 8px;
+}
+
+.club-field {
+  display: grid;
+  gap: 6px;
+}
+
+.club-field span {
+  color: var(--competition-text-muted);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.club-field input,
+.club-field textarea,
+.club-search {
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid var(--competition-border-control);
+  border-radius: 8px;
+  background: var(--competition-surface);
+  color: var(--competition-text-strong);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 800;
+  padding: 0 11px;
+}
+
+.club-field textarea {
+  min-height: 96px;
+  padding: 11px;
+  resize: vertical;
+}
+
+.club-notice {
+  border: 1px solid var(--competition-ok-border);
+  border-radius: 8px;
+  background: var(--competition-ok-bg);
+  color: var(--competition-ok);
+  padding: 11px;
+  font-size: 13px;
+  font-weight: 900;
+  line-height: 1.45;
+}
+
+.club-notice.static {
+  margin: 0;
+}
+
+.club-row-main {
+  align-items: center;
+}
+
+.club-row-title {
+  font-size: 15px;
+}
+
+.club-row-sub {
+  margin-top: 4px;
+  color: var(--competition-text-muted);
+  font-size: 12px;
+}
+
+.club-row-actions {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 6px;
+}
+
+.club-member-compact-list {
+  overflow: hidden;
+  border: 1px solid var(--competition-border);
+  border-radius: 8px;
+  background: var(--competition-surface);
+}
+
+.club-member-compact-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto auto;
+  align-items: center;
+  gap: 8px;
+  min-height: 54px;
+  border-top: 1px solid var(--competition-border);
+  padding: 9px 11px;
+}
+
+.club-member-compact-row:first-child {
+  border-top: 0;
+}
+
+.club-member-compact-main {
+  min-width: 0;
+}
+
+.club-member-compact-name,
+.club-member-compact-sub {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.club-member-compact-name {
+  color: var(--competition-text-strong);
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.club-member-compact-sub {
+  margin-top: 3px;
+  color: var(--competition-text-muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+@media (max-width: 420px) {
+  .club-member-compact-row {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+  }
+
+  .club-member-compact-row .club-button {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+
+  .club-row-main {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .club-row-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

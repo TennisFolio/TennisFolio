@@ -16,7 +16,7 @@
 ## 3. Spec
 
 - 기준 설계: `docs/superpowers/specs/2026-07-06-club-api-design.md`
-- 포함 API: `GET/POST /api/clubs`, `GET/PATCH /api/clubs/{clubPublicId}`, `GET/POST /api/clubs/{clubPublicId}/members`, `PATCH/DELETE /api/clubs/{clubPublicId}/members/{memberId}`
+- 포함 API: `GET/POST /api/clubs`, `GET/PATCH/DELETE /api/clubs/{clubPublicId}`, `GET/POST /api/clubs/{clubPublicId}/members`, `PATCH/DELETE /api/clubs/{clubPublicId}/members/{memberId}`
 - 신규 도메인: `Club`, `ClubMember`, `ClubMemberRole`
 - 생성자는 `ClubMember.userId`를 현재 인증 사용자 ID로 저장하고, `role=ADMIN`, `active=true`로 자동 등록한다.
 - 운영자가 추가하는 클럽원은 1차에서 `userId=null`로 저장한다.
@@ -33,7 +33,7 @@
 - Domain: `Club`, `ClubMember`, `ClubMemberRole`
 - Repository / Persistence: `ClubRepository`, `ClubMemberRepository`
 - Security / External: `Authentication.getPrincipal()`의 `Long userId` 사용
-- Frontend / UI: 1차 API 구현 계획에는 포함하지 않음
+- Frontend / UI: `docs/features/club/club-ui-mockup.html` 기준으로 클럽 목록/상세/멤버 관리 화면을 만들고, 1차 Club API와 연동한다.
 
 ### Review Questions
 
@@ -64,10 +64,20 @@
   - 테스트 설명: controller 또는 MVC 테스트로 인증 사용자 ID 전달, JSON 응답 shape, 비로그인 401, 권한 실패 403/409 전달을 검증
   - 검증 기준: `.\gradlew.bat test --tests com.tennisfolio.Tennisfolio.club.api.ClubControllerTest --tests com.tennisfolio.Tennisfolio.config.ClubSecurityConfigTest`
 
-- [ ] `docs: align club mvp spec`
-  - 구현: 구현 중 바뀐 API 필드명이나 정책이 있으면 `docs/superpowers/specs/2026-07-06-club-api-design.md`와 이 문서를 함께 갱신
+- [x] `docs: align club mvp spec` - done, verified
+  - 구현: 실제 Controller/DTO 기준으로 `docs/superpowers/specs/2026-07-06-club-api-design.md`와 이 문서의 API 필드명, 응답 형태, 삭제 정책을 갱신
   - 테스트 설명: 문서와 controller DTO 필드명이 일치하는지 수동 검토
-  - 검증 기준: `git diff -- docs/features/club-mvp.md docs/superpowers/specs/2026-07-06-club-api-design.md`
+  - 검증 기준: `git diff -- docs/features/club/club-mvp.md docs/superpowers/specs/2026-07-06-club-api-design.md`
+
+- [x] `feat: create club screens` - done, verified
+  - 구현: `src/tennisFolio`의 기존 라우팅/컴포넌트 구조에 맞춰 로그인 사용자용 클럽 목록, 클럽 생성, 클럽 상세, 클럽원 관리 화면을 추가한다.
+  - 테스트 설명: 프론트엔드 테스트 코드는 기본 작성하지 않고, 화면에서 빈 목록, 생성 폼, 상세, 멤버 추가/수정/삭제 상태가 깨지지 않는지 수동 검증한다.
+  - 검증 기준: `/clubs` 라우트와 화면 상태 정적 확인. 프론트엔드 테스트/빌드는 사용자 허가가 있을 때만 실행한다.
+
+- [ ] `feat: integrate club api`
+  - 구현: Club 화면에서 `GET/POST /api/clubs`, `GET/PATCH/DELETE /api/clubs/{clubPublicId}`, `GET/POST /api/clubs/{clubPublicId}/members`, `PATCH/DELETE /api/clubs/{clubPublicId}/members/{memberId}`를 호출한다.
+  - 테스트 설명: 로그인 상태에서 내 클럽 목록 조회, 클럽 생성 후 상세 이동, ADMIN 전용 변경 작업, 401/403/409 실패 메시지를 수동 검증한다.
+  - 검증 기준: 로컬 화면과 백엔드 API 연동 수동 확인. 프론트엔드 테스트/빌드는 사용자 허가가 있을 때만 실행한다.
 
 ## 6. Development Validation
 
@@ -91,3 +101,6 @@
 | Date | Change | Reason |
 |---|---|---|
 | 2026-07-06 | Club MVP 1차 구현 계획 작성 | Club 전체 범위를 단계화하고 1차 API 개발 범위 확정 |
+| 2026-07-06 | Club MVP 1차 API 문서 정합성 갱신 | 실제 구현된 Controller/DTO 응답 형태와 삭제 정책 반영 |
+| 2026-07-06 | Club frontend commit unit 추가 | 최초 Club 화면 개발 요청과 API 구현 이후 연동 작업을 MVP 계획에 반영 |
+| 2026-07-06 | Club 화면 생성 완료 | `/clubs`에서 목록, 생성, 상세, 클럽원 관리 화면을 볼 수 있게 함 |

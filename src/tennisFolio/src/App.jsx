@@ -25,6 +25,7 @@ import Meetings from './page/Meetings.jsx';
 import MeetingCreate from './page/MeetingCreate.jsx';
 import MeetingUpdate from './page/MeetingUpdate.jsx';
 import MeetingPublic from './page/MeetingPublic.jsx';
+import Club from './page/Club.jsx';
 import Schedule from './page/Schedule.jsx';
 import NotFound from './page/NotFound.jsx';
 import { initializeAnalytics, trackPageView } from './utils/analytics';
@@ -101,6 +102,9 @@ function App() {
           <Route path="/" element={<Competition />} />
           <Route path="/me/competitions" element={<MyCompetitions />} />
           <Route path="/meetings" element={<Meetings />} />
+          <Route path="/clubs" element={<Club currentUser={currentUser} />} />
+          <Route path="/clubs/new" element={<Club currentUser={currentUser} />} />
+          <Route path="/clubs/:publicId" element={<Club currentUser={currentUser} />} />
           <Route path="/meetings/new" element={<MeetingCreate />} />
           <Route path="/meetings/:publicId" element={<MeetingPublic />} />
           <Route path="/meetings/:publicId/edit" element={<MeetingUpdate />} />
