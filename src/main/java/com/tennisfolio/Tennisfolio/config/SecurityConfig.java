@@ -50,6 +50,7 @@ public class SecurityConfig {
                                 "/api/auth/me/competitions/*/claim",
                                 "/api/me/meetings"
                         ).authenticated()
+                        .requestMatchers("/api/clubs", "/api/clubs/**").authenticated()
                         .requestMatchers("/api/meetings", "/api/meetings/**").authenticated()
                         .anyRequest().permitAll()
                 )

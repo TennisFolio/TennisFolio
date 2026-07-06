@@ -59,7 +59,7 @@
   - 테스트 설명: 로그인 사용자에게 연결된 활성 클럽만 반환, 클럽 멤버가 아닌 사용자의 상세 조회 거부, keyword 검색 결과 필터링을 검증
   - 검증 기준: `.\gradlew.bat test --tests com.tennisfolio.Tennisfolio.club.service.ClubQueryServiceTest`
 
-- [ ] `feat: expose club api`
+- [x] `feat: expose club api` - done, verified
   - 구현: `ClubController`와 request/response DTO 추가, `SecurityConfig`에 `/api/clubs/**` 인증 요구 추가
   - 테스트 설명: controller 또는 MVC 테스트로 인증 사용자 ID 전달, JSON 응답 shape, 비로그인 401, 권한 실패 403/409 전달을 검증
   - 검증 기준: `.\gradlew.bat test --tests com.tennisfolio.Tennisfolio.club.api.ClubControllerTest --tests com.tennisfolio.Tennisfolio.config.ClubSecurityConfigTest`
