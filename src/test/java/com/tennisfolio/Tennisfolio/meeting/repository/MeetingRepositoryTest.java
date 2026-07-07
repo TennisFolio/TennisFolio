@@ -12,6 +12,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -45,9 +46,33 @@ class MeetingRepositoryTest {
         Meeting found = meetingRepository.findById(saved.getId()).orElseThrow();
         assertThat(found.getPublicId()).isNotBlank();
         assertThat(found.getOwnerUserId()).isEqualTo(10L);
+        assertThat(found.getClubId()).isNull();
         assertThat(found.getCompetitionId()).isNull();
         assertThat(found.getStatus()).isEqualTo(MeetingStatus.OPEN);
         assertThat(found.getDeletedAt()).isNull();
+    }
+
+    @Test
+    void findByClubId_returnsOnlyActiveClubMeetingsInLatestOrder() {
+        Meeting olderClubMeeting = clubMeeting(100L, LocalDateTime.of(2026, 7, 4, 10, 0), "older");
+        Meeting newerClubMeeting = clubMeeting(100L, LocalDateTime.of(2026, 7, 5, 10, 0), "newer");
+        Meeting otherClubMeeting = clubMeeting(200L, LocalDateTime.of(2026, 7, 6, 10, 0), "other");
+        Meeting independentMeeting = meeting("independent", LocalDateTime.of(2026, 7, 7, 10, 0));
+        Meeting deletedClubMeeting = clubMeeting(100L, LocalDateTime.of(2026, 7, 8, 10, 0), "deleted");
+        deletedClubMeeting.delete(LocalDateTime.of(2026, 7, 1, 0, 0));
+        meetingRepository.saveAllAndFlush(List.of(
+                olderClubMeeting,
+                newerClubMeeting,
+                otherClubMeeting,
+                independentMeeting,
+                deletedClubMeeting
+        ));
+
+        List<Meeting> found = meetingRepository.findByClubIdAndDeletedAtIsNullOrderByStartAtDescIdDesc(100L);
+
+        assertThat(found)
+                .extracting(Meeting::getTitle)
+                .containsExactly("newer", "older");
     }
 
     @Test
@@ -79,5 +104,26 @@ class MeetingRepositoryTest {
         assertThat(found.getGender()).isEqualTo(Gender.MALE);
         assertThat(found.getAttendanceStatus()).isEqualTo(AttendanceStatus.ATTENDING);
         assertThat(found.getDeletedAt()).isNull();
+    }
+
+    private static Meeting clubMeeting(Long clubId, LocalDateTime startAt, String title) {
+        Meeting meeting = meeting(title, startAt);
+        meeting.connectClub(clubId);
+        return meeting;
+    }
+
+    private static Meeting meeting(String title, LocalDateTime startAt) {
+        return new Meeting(
+                10L,
+                title,
+                startAt,
+                startAt.plusHours(2),
+                null,
+                null,
+                null,
+                null,
+                2,
+                6
+        );
     }
 }

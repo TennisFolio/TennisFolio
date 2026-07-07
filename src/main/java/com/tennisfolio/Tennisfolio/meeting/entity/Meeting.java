@@ -33,6 +33,9 @@ public class Meeting extends BaseTimeEntity {
     @Column(name = "OWNER_USER_ID", nullable = false)
     private Long ownerUserId;
 
+    @Column(name = "CLUB_ID")
+    private Long clubId;
+
     @Column(name = "COMPETITION_ID", unique = true)
     private Long competitionId;
 
@@ -118,6 +121,18 @@ public class Meeting extends BaseTimeEntity {
 
     public void updateStatus(MeetingStatus status) {
         this.status = status;
+    }
+
+    public void connectClub(Long clubId) {
+        this.clubId = clubId;
+    }
+
+    public boolean isClubMeeting() {
+        return clubId != null;
+    }
+
+    public boolean belongsToClub(Long clubId) {
+        return this.clubId != null && this.clubId.equals(clubId);
     }
 
     public void connectCompetition(Long competitionId) {

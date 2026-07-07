@@ -124,6 +124,35 @@ class MeetingQueryServiceTest {
         assertThat(response.get(0).getNotAttendingCount()).isEqualTo(2L);
     }
 
+    @Test
+    void getClubMeetings_returnsClubMeetingSummaries() {
+        Meeting meeting = meeting(10L);
+        meeting.connectClub(100L);
+        when(meetingRepository.findByClubIdAndDeletedAtIsNullOrderByStartAtDescIdDesc(100L))
+                .thenReturn(List.of(meeting));
+        when(attendanceRepository.countByMeetingAndAttendanceStatusAndDeletedAtIsNull(
+                org.mockito.ArgumentMatchers.any(Meeting.class),
+                org.mockito.ArgumentMatchers.eq(AttendanceStatus.ATTENDING)
+        )).thenReturn(4L);
+        when(attendanceRepository.countByMeetingAndAttendanceStatusAndDeletedAtIsNull(
+                org.mockito.ArgumentMatchers.any(Meeting.class),
+                org.mockito.ArgumentMatchers.eq(AttendanceStatus.WAITING)
+        )).thenReturn(1L);
+        when(attendanceRepository.countByMeetingAndAttendanceStatusAndDeletedAtIsNull(
+                org.mockito.ArgumentMatchers.any(Meeting.class),
+                org.mockito.ArgumentMatchers.eq(AttendanceStatus.NOT_ATTENDING)
+        )).thenReturn(0L);
+
+        List<MeetingSummaryResponse> response = service.getClubMeetings(100L);
+
+        assertThat(response)
+                .extracting(MeetingSummaryResponse::getPublicId)
+                .containsExactly("meeting-public-id");
+        assertThat(response.get(0).getAttendingCount()).isEqualTo(4L);
+        assertThat(response.get(0).getWaitingCount()).isEqualTo(1L);
+        assertThat(response.get(0).getNotAttendingCount()).isZero();
+    }
+
     private static Meeting meeting(Long ownerUserId) {
         Meeting meeting = new Meeting(
                 ownerUserId,

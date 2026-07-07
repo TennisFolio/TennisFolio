@@ -75,6 +75,17 @@ public class MeetingQueryService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
+    public List<MeetingSummaryResponse> getClubMeetings(Long clubId) {
+        if (clubId == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "클럽 ID가 필요합니다.");
+        }
+        return meetingRepository.findByClubIdAndDeletedAtIsNullOrderByStartAtDescIdDesc(clubId)
+                .stream()
+                .map(this::toSummaryResponse)
+                .toList();
+    }
+
     private MeetingSummaryResponse toSummaryResponse(Meeting meeting) {
         return MeetingSummaryResponse.from(
                 meeting,

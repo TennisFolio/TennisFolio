@@ -51,6 +51,29 @@ class MeetingCommandServiceTest {
     }
 
     @Test
+    void createClubMeeting_savesMeetingConnectedToClub() {
+        Meeting saved = meeting(10L);
+        saved.connectClub(100L);
+        when(meetingRepository.save(any(Meeting.class))).thenReturn(saved);
+
+        MeetingCreateResponse response = service.createClubMeeting(createRequest(), 10L, 100L);
+
+        verify(meetingRepository).save(org.mockito.ArgumentMatchers.argThat(meeting ->
+                meeting.isClubMeeting() && meeting.belongsToClub(100L)
+        ));
+        assertThat(response.getPublicId()).isEqualTo(saved.getPublicId());
+    }
+
+    @Test
+    void createClubMeeting_rejectsMissingClubId() {
+        assertThatThrownBy(() -> service.createClubMeeting(createRequest(), 10L, null))
+                .isInstanceOf(ResponseStatusException.class)
+                .extracting("statusCode")
+                .isEqualTo(HttpStatus.BAD_REQUEST);
+        verify(meetingRepository, never()).save(any());
+    }
+
+    @Test
     void createMeeting_rejectsAnonymousUser() {
         assertThatThrownBy(() -> service.createMeeting(createRequest(), null))
                 .isInstanceOf(ResponseStatusException.class)

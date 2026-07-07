@@ -28,6 +28,18 @@ public class MeetingCommandService {
 
     @Transactional
     public MeetingCreateResponse createMeeting(MeetingCreateRequest request, Long ownerUserId) {
+        return createMeeting(request, ownerUserId, null);
+    }
+
+    @Transactional
+    public MeetingCreateResponse createClubMeeting(MeetingCreateRequest request, Long ownerUserId, Long clubId) {
+        if (clubId == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "클럽 ID가 필요합니다.");
+        }
+        return createMeeting(request, ownerUserId, clubId);
+    }
+
+    private MeetingCreateResponse createMeeting(MeetingCreateRequest request, Long ownerUserId, Long clubId) {
         requireAuthenticated(ownerUserId);
         validateRequiredDetails(
                 request.getTitle(),
@@ -41,7 +53,7 @@ public class MeetingCommandService {
                 request.getMaxMaleParticipants(),
                 request.getMaxFemaleParticipants()
         );
-        Meeting meeting = meetingRepository.save(new Meeting(
+        Meeting meeting = new Meeting(
                 ownerUserId,
                 request.getTitle(),
                 request.getStartAt(),
@@ -52,7 +64,11 @@ public class MeetingCommandService {
                 request.getMaxFemaleParticipants(),
                 request.getCourtCount(),
                 request.getTotalGames()
-        ));
+        );
+        if (clubId != null) {
+            meeting.connectClub(clubId);
+        }
+        meeting = meetingRepository.save(meeting);
         return new MeetingCreateResponse(meeting.getPublicId());
     }
 
