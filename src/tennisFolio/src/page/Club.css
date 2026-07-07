@@ -12,6 +12,14 @@
   margin-bottom: 14px;
 }
 
+.club-list-head,
+.club-detail-head {
+  border: 1px solid var(--competition-border);
+  border-radius: 8px;
+  background: var(--competition-surface);
+  padding: 15px;
+}
+
 .club-page-head h1,
 .club-page-head h2,
 .club-section h2,
@@ -103,6 +111,10 @@
   font-size: 13px;
 }
 
+.club-description {
+  white-space: pre-line;
+}
+
 .club-chips {
   display: flex;
   flex-wrap: wrap;
@@ -176,6 +188,23 @@
   width: 100%;
 }
 
+.club-tabs ~ .club-button.full {
+  min-height: 34px;
+  width: fit-content;
+  margin-top: 22px;
+  border-radius: 7px;
+  border-color: transparent;
+  background: transparent;
+  color: var(--competition-text-muted);
+  padding: 0 10px;
+  font-size: 12px;
+}
+
+.club-tabs ~ .club-button.full::before {
+  content: "<";
+  margin-right: 5px;
+}
+
 .club-button.small {
   min-height: 34px;
   border-radius: 7px;
@@ -208,6 +237,7 @@
 
 .club-field input,
 .club-field textarea,
+.club-field select,
 .club-search {
   width: 100%;
   min-height: 44px;
@@ -221,9 +251,14 @@
   padding: 0 11px;
 }
 
+.club-field select {
+  appearance: none;
+}
+
 .club-field textarea {
   min-height: 96px;
-  padding: 11px;
+  padding: 14px 15px;
+  line-height: 1.55;
   resize: vertical;
 }
 
@@ -240,6 +275,37 @@
 
 .club-notice.static {
   margin: 0;
+}
+
+.club-notice.danger {
+  border-color: var(--competition-danger-border);
+  background: var(--competition-danger-bg);
+  color: var(--competition-danger);
+}
+
+.club-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.58;
+}
+
+.club-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.club-danger-zone {
+  display: grid;
+  margin-top: 4px;
+  border-top: 1px solid var(--competition-border);
+  padding-top: 10px;
+}
+
+.club-member-form {
+  border: 1px solid var(--competition-border);
+  border-radius: 8px;
+  background: var(--competition-surface-soft);
+  padding: 10px;
 }
 
 .club-row-main {
@@ -262,21 +328,55 @@
   gap: 6px;
 }
 
+.club-scroll-list {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  box-shadow: inset 0 -12px 14px -16px var(--competition-text-muted);
+}
+
+.club-meeting-list {
+  --club-meeting-row-height: 64px;
+  display: grid;
+  gap: 10px;
+  max-height: calc((var(--club-meeting-row-height) * 5) + (10px * 4));
+}
+
+.club-meeting-list .club-row {
+  box-sizing: border-box;
+  min-height: var(--club-meeting-row-height);
+}
+
 .club-member-compact-list {
-  overflow: hidden;
+  --club-member-row-height: 54px;
+  max-height: calc((var(--club-member-row-height) * 5) + 1px);
+  overflow-x: hidden;
   border: 1px solid var(--competition-border);
   border-radius: 8px;
   background: var(--competition-surface);
 }
 
 .club-member-compact-row {
+  box-sizing: border-box;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto auto auto;
   align-items: center;
   gap: 8px;
-  min-height: 54px;
+  min-height: var(--club-member-row-height);
   border-top: 1px solid var(--competition-border);
   padding: 9px 11px;
+}
+
+.club-member-compact-row .club-row-actions {
+  display: contents;
+  gap: 5px;
+}
+
+.club-member-compact-row .club-button.small {
+  min-height: 28px;
+  border-radius: 999px;
+  padding: 0 9px;
+  font-size: 11px;
 }
 
 .club-member-compact-row:first-child {
@@ -309,13 +409,23 @@
 }
 
 @media (max-width: 420px) {
-  .club-member-compact-row {
-    grid-template-columns: minmax(0, 1fr) auto auto;
+  .club-member-compact-list {
+    --club-member-row-height: 54px;
   }
 
-  .club-member-compact-row .club-button {
-    grid-column: 1 / -1;
-    width: 100%;
+  .club-member-compact-row {
+    grid-template-columns: minmax(0, 1fr) auto auto auto;
+    align-items: center;
+  }
+
+  .club-member-compact-row .club-row-actions {
+    display: contents;
+  }
+
+  .club-member-compact-row > .club-chip {
+    min-height: 22px;
+    padding: 0 7px;
+    font-size: 11px;
   }
 
   .club-row-main {
@@ -326,5 +436,9 @@
   .club-row-actions {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .club-form-grid {
+    grid-template-columns: 1fr;
   }
 }

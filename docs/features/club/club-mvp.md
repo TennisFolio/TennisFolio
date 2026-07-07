@@ -74,7 +74,7 @@
   - 테스트 설명: 프론트엔드 테스트 코드는 기본 작성하지 않고, 화면에서 빈 목록, 생성 폼, 상세, 멤버 추가/수정/삭제 상태가 깨지지 않는지 수동 검증한다.
   - 검증 기준: `/clubs` 라우트와 화면 상태 정적 확인. 프론트엔드 테스트/빌드는 사용자 허가가 있을 때만 실행한다.
 
-- [ ] `feat: integrate club api`
+- [x] `feat: integrate club api` - done, verified
   - 구현: Club 화면에서 `GET/POST /api/clubs`, `GET/PATCH/DELETE /api/clubs/{clubPublicId}`, `GET/POST /api/clubs/{clubPublicId}/members`, `PATCH/DELETE /api/clubs/{clubPublicId}/members/{memberId}`를 호출한다.
   - 테스트 설명: 로그인 상태에서 내 클럽 목록 조회, 클럽 생성 후 상세 이동, ADMIN 전용 변경 작업, 401/403/409 실패 메시지를 수동 검증한다.
   - 검증 기준: 로컬 화면과 백엔드 API 연동 수동 확인. 프론트엔드 테스트/빌드는 사용자 허가가 있을 때만 실행한다.

@@ -105,6 +105,18 @@ function App() {
           <Route path="/clubs" element={<Club currentUser={currentUser} />} />
           <Route path="/clubs/new" element={<Club currentUser={currentUser} />} />
           <Route path="/clubs/:publicId" element={<Club currentUser={currentUser} />} />
+          <Route
+            path="/clubs/:publicId/edit"
+            element={<Club currentUser={currentUser} />}
+          />
+          <Route
+            path="/clubs/:publicId/members/new"
+            element={<Club currentUser={currentUser} />}
+          />
+          <Route
+            path="/clubs/:publicId/members/:memberId/edit"
+            element={<Club currentUser={currentUser} />}
+          />
           <Route path="/meetings/new" element={<MeetingCreate />} />
           <Route path="/meetings/:publicId" element={<MeetingPublic />} />
           <Route path="/meetings/:publicId/edit" element={<MeetingUpdate />} />
