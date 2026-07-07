@@ -153,6 +153,52 @@ class MeetingQueryServiceTest {
         assertThat(response.get(0).getNotAttendingCount()).isZero();
     }
 
+    @Test
+    void findActiveClubMeetings_returnsClubMeetingDomains() {
+        Meeting meeting = meeting(10L);
+        meeting.connectClub(100L);
+        when(meetingRepository.findByClubIdAndDeletedAtIsNullOrderByStartAtDescIdDesc(100L))
+                .thenReturn(List.of(meeting));
+
+        List<Meeting> response = service.findActiveClubMeetings(100L);
+
+        assertThat(response).containsExactly(meeting);
+    }
+
+    @Test
+    void findActiveClubMeeting_returnsDomainOnlyWhenMeetingBelongsToClub() {
+        Meeting meeting = meeting(10L);
+        meeting.connectClub(100L);
+        when(meetingRepository.findByPublicIdAndClubIdAndDeletedAtIsNull("meeting-public-id", 100L))
+                .thenReturn(Optional.of(meeting));
+
+        Meeting response = service.findActiveClubMeeting("meeting-public-id", 100L);
+
+        assertThat(response).isSameAs(meeting);
+        assertThat(response.belongsToClub(100L)).isTrue();
+    }
+
+    @Test
+    void findActiveClubMeeting_throwsNotFoundWhenMeetingDoesNotBelongToClub() {
+        when(meetingRepository.findByPublicIdAndClubIdAndDeletedAtIsNull("meeting-public-id", 100L))
+                .thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.findActiveClubMeeting("meeting-public-id", 100L))
+                .isInstanceOf(NotFoundException.class);
+    }
+
+    @Test
+    void toDetailResponse_mapsDomainToApiResponse() {
+        Meeting meeting = meeting(10L);
+        when(attendanceRepository.findByMeetingAndDeletedAtIsNullOrderByIdAsc(meeting))
+                .thenReturn(List.of());
+
+        MeetingDetailResponse response = service.toDetailResponse(meeting, 20L);
+
+        assertThat(response.getPublicId()).isEqualTo("meeting-public-id");
+        assertThat(response.getOwnedByCurrentUser()).isFalse();
+    }
+
     private static Meeting meeting(Long ownerUserId) {
         Meeting meeting = new Meeting(
                 ownerUserId,

@@ -41,6 +41,13 @@ public class ClubAccessService {
         return findActiveMember(club, currentUserId);
     }
 
+    public Club requireActiveMemberClub(String clubPublicId, Long currentUserId) {
+        requireAuthenticated(currentUserId);
+        Club club = findActiveClub(clubPublicId);
+        findActiveMember(club, currentUserId);
+        return club;
+    }
+
     public Club findActiveClub(String clubPublicId) {
         return clubRepository.findByPublicIdAndDeletedAtIsNull(clubPublicId)
                 .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND));

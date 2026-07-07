@@ -217,12 +217,64 @@ class MeetingCommandServiceTest {
     }
 
     @Test
+    void updateClubMeeting_updatesMeetingByClubId() {
+        Meeting meeting = meeting(10L);
+        meeting.connectClub(100L);
+        when(meetingRepository.findByPublicIdAndClubIdAndDeletedAtIsNull("meeting-public-id", 100L))
+                .thenReturn(Optional.of(meeting));
+
+        MeetingDetailResponse response = service.updateClubMeeting("meeting-public-id", 100L, updateRequest(), 20L);
+
+        assertThat(response.getTitle()).isEqualTo("Sunday doubles");
+        assertThat(response.getOwnedByCurrentUser()).isFalse();
+    }
+
+    @Test
+    void updateClubMeeting_rejectsMeetingOutsideClub() {
+        when(meetingRepository.findByPublicIdAndClubIdAndDeletedAtIsNull("meeting-public-id", 100L))
+                .thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.updateClubMeeting("meeting-public-id", 100L, updateRequest(), 20L))
+                .isInstanceOf(com.tennisfolio.Tennisfolio.exception.NotFoundException.class);
+    }
+
+    @Test
     void deleteMeeting_softDeletesOwnerMeeting() {
         Meeting meeting = meeting(10L);
         when(meetingRepository.findByPublicIdAndOwnerUserIdAndDeletedAtIsNull("meeting-public-id", 10L))
                 .thenReturn(Optional.of(meeting));
 
         service.deleteMeeting("meeting-public-id", 10L);
+
+        assertThat(meeting.isDeleted()).isTrue();
+    }
+
+    @Test
+    void updateClubMeetingStatus_changesMeetingByClubId() {
+        Meeting meeting = meeting(10L);
+        meeting.connectClub(100L);
+        when(meetingRepository.findByPublicIdAndClubIdAndDeletedAtIsNull("meeting-public-id", 100L))
+                .thenReturn(Optional.of(meeting));
+
+        MeetingDetailResponse response = service.updateClubMeetingStatus(
+                "meeting-public-id",
+                100L,
+                new MeetingStatusUpdateRequest("CLOSED"),
+                20L
+        );
+
+        assertThat(response.getStatus()).isEqualTo("CLOSED");
+        assertThat(response.getOwnedByCurrentUser()).isFalse();
+    }
+
+    @Test
+    void deleteClubMeeting_softDeletesMeetingByClubId() {
+        Meeting meeting = meeting(10L);
+        meeting.connectClub(100L);
+        when(meetingRepository.findByPublicIdAndClubIdAndDeletedAtIsNull("meeting-public-id", 100L))
+                .thenReturn(Optional.of(meeting));
+
+        service.deleteClubMeeting("meeting-public-id", 100L);
 
         assertThat(meeting.isDeleted()).isTrue();
     }

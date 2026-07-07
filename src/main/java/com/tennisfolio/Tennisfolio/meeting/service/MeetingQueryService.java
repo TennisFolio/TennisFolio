@@ -41,6 +41,11 @@ public class MeetingQueryService {
     @Transactional(readOnly = true)
     public MeetingDetailResponse getMeeting(String publicId, Long currentUserId) {
         Meeting meeting = findActiveMeeting(publicId);
+        return toDetailResponse(meeting, currentUserId);
+    }
+
+    @Transactional(readOnly = true)
+    public MeetingDetailResponse toDetailResponse(Meeting meeting, Long currentUserId) {
         return MeetingDetailResponse.from(
                 meeting,
                 currentUserId,
@@ -77,13 +82,27 @@ public class MeetingQueryService {
 
     @Transactional(readOnly = true)
     public List<MeetingSummaryResponse> getClubMeetings(Long clubId) {
-        if (clubId == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "클럽 ID가 필요합니다.");
-        }
-        return meetingRepository.findByClubIdAndDeletedAtIsNullOrderByStartAtDescIdDesc(clubId)
+        return findActiveClubMeetings(clubId)
                 .stream()
                 .map(this::toSummaryResponse)
                 .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<Meeting> findActiveClubMeetings(Long clubId) {
+        if (clubId == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "클럽 ID가 필요합니다.");
+        }
+        return meetingRepository.findByClubIdAndDeletedAtIsNullOrderByStartAtDescIdDesc(clubId);
+    }
+
+    @Transactional(readOnly = true)
+    public Meeting findActiveClubMeeting(String publicId, Long clubId) {
+        if (clubId == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "클럽 ID가 필요합니다.");
+        }
+        return meetingRepository.findByPublicIdAndClubIdAndDeletedAtIsNull(publicId, clubId)
+                .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND));
     }
 
     private MeetingSummaryResponse toSummaryResponse(Meeting meeting) {
