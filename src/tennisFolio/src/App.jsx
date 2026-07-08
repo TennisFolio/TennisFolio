@@ -26,7 +26,12 @@ import MeetingCreate from './page/MeetingCreate.jsx';
 import MeetingManage from './page/MeetingManage.jsx';
 import MeetingUpdate from './page/MeetingUpdate.jsx';
 import MeetingPublic from './page/MeetingPublic.jsx';
-import Club from './page/Club.jsx';
+import ClubCreatePage from './page/club/ClubCreatePage.jsx';
+import ClubDetailPage from './page/club/ClubDetailPage.jsx';
+import ClubEditPage from './page/club/ClubEditPage.jsx';
+import ClubListPage from './page/club/ClubListPage.jsx';
+import ClubMemberCreatePage from './page/club/ClubMemberCreatePage.jsx';
+import ClubMemberEditPage from './page/club/ClubMemberEditPage.jsx';
 import Schedule from './page/Schedule.jsx';
 import NotFound from './page/NotFound.jsx';
 import { initializeAnalytics, trackPageView } from './utils/analytics';
@@ -103,20 +108,26 @@ function App() {
           <Route path="/" element={<Competition />} />
           <Route path="/me/competitions" element={<MyCompetitions />} />
           <Route path="/meetings" element={<Meetings />} />
-          <Route path="/clubs" element={<Club currentUser={currentUser} />} />
-          <Route path="/clubs/new" element={<Club currentUser={currentUser} />} />
-          <Route path="/clubs/:publicId" element={<Club currentUser={currentUser} />} />
+          <Route path="/clubs" element={<ClubListPage currentUser={currentUser} />} />
+          <Route
+            path="/clubs/new"
+            element={<ClubCreatePage currentUser={currentUser} />}
+          />
+          <Route
+            path="/clubs/:publicId"
+            element={<ClubDetailPage currentUser={currentUser} />}
+          />
           <Route
             path="/clubs/:publicId/edit"
-            element={<Club currentUser={currentUser} />}
+            element={<ClubEditPage currentUser={currentUser} />}
           />
           <Route
             path="/clubs/:publicId/members/new"
-            element={<Club currentUser={currentUser} />}
+            element={<ClubMemberCreatePage currentUser={currentUser} />}
           />
           <Route
             path="/clubs/:publicId/members/:memberId/edit"
-            element={<Club currentUser={currentUser} />}
+            element={<ClubMemberEditPage currentUser={currentUser} />}
           />
           <Route
             path="/clubs/:clubPublicId/meetings/new"

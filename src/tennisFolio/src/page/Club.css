@@ -312,6 +312,10 @@
   align-items: center;
 }
 
+.club-row-main > div:first-child {
+  min-width: 0;
+}
+
 .club-row-title {
   font-size: 15px;
 }
@@ -320,6 +324,13 @@
   margin-top: 4px;
   color: var(--competition-text-muted);
   font-size: 12px;
+}
+
+.club-meeting-list .club-row-title,
+.club-meeting-list .club-row-sub {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .club-row-actions {
@@ -436,6 +447,24 @@
   .club-row-actions {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .club-meeting-list .club-row-main {
+    align-items: center;
+    flex-direction: row;
+  }
+
+  .club-meeting-list .club-row-actions {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .club-meeting-list .club-button.small {
+    min-width: 54px;
+    min-height: 30px;
+    border-radius: 999px;
+    padding: 0 10px;
+    font-size: 11px;
   }
 
   .club-form-grid {
