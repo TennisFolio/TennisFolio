@@ -314,8 +314,16 @@
 
 .meeting-field textarea {
   min-height: 88px;
-  padding: 10px;
+  line-height: 1.65;
+  padding: 12px;
   resize: vertical;
+}
+
+.meeting-field input:read-only,
+.meeting-field select:disabled {
+  background: var(--competition-surface-soft);
+  color: var(--competition-text-muted);
+  cursor: not-allowed;
 }
 
 .meeting-muted {
@@ -334,7 +342,7 @@
   padding: 10px;
   font-size: 13px;
   font-weight: 700;
-  line-height: 1.45;
+  line-height: 1.65;
 }
 
 .meeting-note-box {
@@ -416,6 +424,7 @@
   position: relative;
   display: inline-flex;
   align-items: center;
+  gap: 5px;
   min-height: 28px;
   padding: 0 9px;
   border: 1px solid var(--competition-border-soft);
@@ -465,6 +474,20 @@
   line-height: 1.05;
   text-align: center;
   white-space: normal;
+}
+
+.meeting-participant-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 18px;
+  border: 1px solid var(--competition-border);
+  border-radius: 999px;
+  background: var(--competition-surface);
+  color: var(--competition-text-muted);
+  padding: 0 6px;
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 1;
 }
 
 .meeting-chip.ok {

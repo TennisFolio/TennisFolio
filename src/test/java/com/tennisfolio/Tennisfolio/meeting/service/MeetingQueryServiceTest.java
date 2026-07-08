@@ -1,6 +1,9 @@
 package com.tennisfolio.Tennisfolio.meeting.service;
 
 import com.tennisfolio.Tennisfolio.club.entity.Club;
+import com.tennisfolio.Tennisfolio.club.entity.ClubMember;
+import com.tennisfolio.Tennisfolio.club.entity.ClubMemberRole;
+import com.tennisfolio.Tennisfolio.club.repository.ClubMemberRepository;
 import com.tennisfolio.Tennisfolio.club.repository.ClubRepository;
 import com.tennisfolio.Tennisfolio.exception.NotFoundException;
 import com.tennisfolio.Tennisfolio.matching.entity.Competition;
@@ -45,6 +48,9 @@ class MeetingQueryServiceTest {
     @Mock
     ClubRepository clubRepository;
 
+    @Mock
+    ClubMemberRepository clubMemberRepository;
+
     MeetingQueryService service;
 
     @BeforeEach
@@ -54,7 +60,8 @@ class MeetingQueryServiceTest {
                 attendanceRepository,
                 competitionRepository,
                 userRepository,
-                clubRepository
+                clubRepository,
+                clubMemberRepository
         );
     }
 
@@ -108,6 +115,37 @@ class MeetingQueryServiceTest {
 
         assertThat(response.getClubMeeting()).isTrue();
         assertThat(response.getClubName()).isEqualTo("서초 테니스 크루");
+    }
+
+    @Test
+    void getMeeting_returnsCurrentClubMemberForLoggedInMember() {
+        Club club = club(50L, "서초 테니스 크루");
+        ClubMember member = new ClubMember(
+                club,
+                10L,
+                "Jamie Lee",
+                com.tennisfolio.Tennisfolio.meeting.domain.Gender.FEMALE,
+                ClubMemberRole.MEMBER,
+                null,
+                null,
+                null
+        );
+        ReflectionTestUtils.setField(member, "id", 100L);
+        Meeting meeting = meeting(20L);
+        meeting.connectClub(50L);
+        when(meetingRepository.findByPublicIdAndDeletedAtIsNull("meeting-public-id"))
+                .thenReturn(Optional.of(meeting));
+        when(clubRepository.findByIdAndDeletedAtIsNull(50L)).thenReturn(Optional.of(club));
+        when(clubMemberRepository.findByClubAndUserIdAndActiveTrue(club, 10L))
+                .thenReturn(Optional.of(member));
+        when(attendanceRepository.findByMeetingAndDeletedAtIsNullOrderByIdAsc(meeting))
+                .thenReturn(List.of());
+
+        MeetingDetailResponse response = service.getMeeting("meeting-public-id", 10L);
+
+        assertThat(response.getCurrentClubMemberId()).isEqualTo(100L);
+        assertThat(response.getCurrentClubMemberName()).isEqualTo("Jamie Lee");
+        assertThat(response.getCurrentClubMemberGender()).isEqualTo("FEMALE");
     }
 
     @Test
@@ -253,5 +291,11 @@ class MeetingQueryServiceTest {
         );
         ReflectionTestUtils.setField(competition, "publicId", publicId);
         return competition;
+    }
+
+    private static Club club(Long id, String name) {
+        Club club = new Club(name, null, 10L);
+        ReflectionTestUtils.setField(club, "id", id);
+        return club;
     }
 }

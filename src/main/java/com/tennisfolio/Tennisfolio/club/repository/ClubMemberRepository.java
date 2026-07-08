@@ -2,6 +2,7 @@ package com.tennisfolio.Tennisfolio.club.repository;
 
 import com.tennisfolio.Tennisfolio.club.entity.Club;
 import com.tennisfolio.Tennisfolio.club.entity.ClubMember;
+import com.tennisfolio.Tennisfolio.meeting.domain.Gender;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -24,6 +25,8 @@ public interface ClubMemberRepository extends JpaRepository<ClubMember, Long> {
     List<ClubMember> findByUserIdAndActiveTrueOrderByIdAsc(Long userId);
 
     Optional<ClubMember> findByClubAndUserIdAndActiveTrue(Club club, Long userId);
+
+    List<ClubMember> findByClubAndNameAndGenderAndActiveTrueOrderByIdAsc(Club club, String name, Gender gender);
 
     Optional<ClubMember> findByClubAndIdAndActiveTrue(Club club, Long id);
 

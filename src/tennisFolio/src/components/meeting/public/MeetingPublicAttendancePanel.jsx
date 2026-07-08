@@ -15,19 +15,22 @@ function MeetingPublicAttendancePanel({
         name={form.participantName}
         gender={form.gender}
         nameReadOnly={isNameLocked}
+        genderDisabled={isNameLocked}
         onNameChange={(value) => onFieldChange('participantName', value)}
         onGenderChange={(value) => onFieldChange('gender', value)}
       />
       <button type="button" className="meeting-button full" onClick={onSaveProfile}>
         정보 저장
       </button>
-      <button
-        type="button"
-        className="meeting-button full"
-        onClick={onEnterAsDifferentParticipant}
-      >
-        다른 이름으로 입장
-      </button>
+      {!isNameLocked && (
+        <button
+          type="button"
+          className="meeting-button full"
+          onClick={onEnterAsDifferentParticipant}
+        >
+          다른 이름으로 입장
+        </button>
+      )}
       <div className="meeting-status-row">
         <span className="meeting-muted">상태</span>
         <AttendanceStatusOptions

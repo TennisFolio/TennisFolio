@@ -11,6 +11,22 @@ function OwnerTag() {
   );
 }
 
+function ParticipantBadge({ attendance, meeting }) {
+  if (
+    !meeting?.clubMeeting ||
+    attendance.participantType !== 'GUEST' ||
+    !attendance.badgeLabel
+  ) {
+    return null;
+  }
+
+  return (
+    <span className="meeting-participant-badge">
+      {attendance.badgeLabel}
+    </span>
+  );
+}
+
 function AttendanceChip({
   attendance,
   meeting,
@@ -25,6 +41,7 @@ function AttendanceChip({
   const content = (
     <>
       {attendance.participantName}
+      <ParticipantBadge attendance={attendance} meeting={meeting} />
       {isOwner && <OwnerTag />}
       {!isOwner && onRemove && (
         <button

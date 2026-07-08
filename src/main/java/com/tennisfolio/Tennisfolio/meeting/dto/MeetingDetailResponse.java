@@ -32,6 +32,9 @@ public class MeetingDetailResponse {
     private Boolean competitionCreated;
     private String clubName;
     private Boolean clubMeeting;
+    private Long currentClubMemberId;
+    private String currentClubMemberName;
+    private String currentClubMemberGender;
     private List<MeetingAttendanceResponse> attendances;
 
     public MeetingDetailResponse(
@@ -71,6 +74,9 @@ public class MeetingDetailResponse {
                 competitionCreated,
                 null,
                 false,
+                null,
+                null,
+                null,
                 attendances
         );
     }
@@ -111,6 +117,10 @@ public class MeetingDetailResponse {
                 ownedByCurrentUser,
                 ownerNickName,
                 competitionCreated,
+                null,
+                false,
+                null,
+                null,
                 null,
                 attendances
         );
@@ -154,7 +164,10 @@ public class MeetingDetailResponse {
                 ownerNickName,
                 competitionCreated,
                 null,
-                false,
+                clubMeeting,
+                null,
+                null,
+                null,
                 attendances
         );
     }
@@ -198,6 +211,20 @@ public class MeetingDetailResponse {
             String clubName,
             List<MeetingAttendance> attendances
     ) {
+        return from(meeting, currentUserId, competitionPublicId, ownerNickName, clubName, null, null, null, attendances);
+    }
+
+    public static MeetingDetailResponse from(
+            Meeting meeting,
+            Long currentUserId,
+            String competitionPublicId,
+            String ownerNickName,
+            String clubName,
+            Long currentClubMemberId,
+            String currentClubMemberName,
+            String currentClubMemberGender,
+            List<MeetingAttendance> attendances
+    ) {
         return new MeetingDetailResponse(
                 meeting.getPublicId(),
                 meeting.getCompetitionId(),
@@ -217,6 +244,9 @@ public class MeetingDetailResponse {
                 meeting.hasCompetition(),
                 clubName,
                 meeting.getClubId() != null,
+                currentClubMemberId,
+                currentClubMemberName,
+                currentClubMemberGender,
                 attendances.stream()
                         .map(MeetingAttendanceResponse::from)
                         .toList()

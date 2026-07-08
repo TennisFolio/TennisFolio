@@ -2,6 +2,9 @@ package com.tennisfolio.Tennisfolio.meeting.service;
 
 import com.tennisfolio.Tennisfolio.common.ExceptionCode;
 import com.tennisfolio.Tennisfolio.common.UserStatus;
+import com.tennisfolio.Tennisfolio.club.entity.Club;
+import com.tennisfolio.Tennisfolio.club.entity.ClubMember;
+import com.tennisfolio.Tennisfolio.club.repository.ClubMemberRepository;
 import com.tennisfolio.Tennisfolio.club.repository.ClubRepository;
 import com.tennisfolio.Tennisfolio.exception.NotFoundException;
 import com.tennisfolio.Tennisfolio.matching.repository.CompetitionRepository;
@@ -27,19 +30,22 @@ public class MeetingQueryService {
     private final CompetitionRepository competitionRepository;
     private final UserRepository userRepository;
     private final ClubRepository clubRepository;
+    private final ClubMemberRepository clubMemberRepository;
 
     public MeetingQueryService(
             MeetingRepository meetingRepository,
             MeetingAttendanceRepository attendanceRepository,
             CompetitionRepository competitionRepository,
             UserRepository userRepository,
-            ClubRepository clubRepository
+            ClubRepository clubRepository,
+            ClubMemberRepository clubMemberRepository
     ) {
         this.meetingRepository = meetingRepository;
         this.attendanceRepository = attendanceRepository;
         this.competitionRepository = competitionRepository;
         this.userRepository = userRepository;
         this.clubRepository = clubRepository;
+        this.clubMemberRepository = clubMemberRepository;
     }
 
     @Transactional(readOnly = true)
@@ -50,12 +56,16 @@ public class MeetingQueryService {
 
     @Transactional(readOnly = true)
     public MeetingDetailResponse toDetailResponse(Meeting meeting, Long currentUserId) {
+        ClubMember currentClubMember = findCurrentClubMember(meeting, currentUserId);
         return MeetingDetailResponse.from(
                 meeting,
                 currentUserId,
                 findCompetitionPublicId(meeting),
                 findOwnerNickName(meeting),
                 findClubName(meeting),
+                currentClubMember == null ? null : currentClubMember.getId(),
+                currentClubMember == null ? null : currentClubMember.getName(),
+                currentClubMember == null ? null : currentClubMember.getGender().name(),
                 attendanceRepository.findByMeetingAndDeletedAtIsNullOrderByIdAsc(meeting)
         );
     }
@@ -83,6 +93,21 @@ public class MeetingQueryService {
 
         return clubRepository.findByIdAndDeletedAtIsNull(meeting.getClubId())
                 .map(club -> club.getName())
+                .orElse(null);
+    }
+
+    private ClubMember findCurrentClubMember(Meeting meeting, Long currentUserId) {
+        if (meeting.getClubId() == null || currentUserId == null) {
+            return null;
+        }
+
+        Club club = clubRepository.findByIdAndDeletedAtIsNull(meeting.getClubId())
+                .orElse(null);
+        if (club == null) {
+            return null;
+        }
+
+        return clubMemberRepository.findByClubAndUserIdAndActiveTrue(club, currentUserId)
                 .orElse(null);
     }
 

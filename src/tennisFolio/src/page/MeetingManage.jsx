@@ -43,8 +43,8 @@ function MeetingManage({ initialMeeting = null, initialNotice = null }) {
 
   const attendances = useMemo(() => normalizeAttendances(meeting), [meeting]);
   const ownerAttendance = useMemo(
-    () => findCurrentUserAttendance(currentUser, attendances),
-    [attendances, currentUser],
+    () => findCurrentUserAttendance(currentUser, meeting, attendances),
+    [attendances, currentUser, meeting],
   );
   const groupedAttendances = useMemo(
     () => groupAttendances(attendances),

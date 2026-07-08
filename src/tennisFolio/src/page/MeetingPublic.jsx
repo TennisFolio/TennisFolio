@@ -65,9 +65,10 @@ function MeetingPublic() {
           );
           const currentUserAttendance = findCurrentUserAttendance(
             currentUser,
+            nextMeeting,
             nextAttendances,
           );
-          const currentUserForm = getCurrentUserForm(currentUser);
+          const currentUserForm = getCurrentUserForm(currentUser, nextMeeting);
 
           setMeeting(nextMeeting);
 
@@ -79,10 +80,12 @@ function MeetingPublic() {
           }
 
           if (currentUserForm) {
+            forgetRememberedAttendance(publicId);
             setForm((current) => ({
               ...currentUserForm,
               attendanceStatus: current.attendanceStatus,
             }));
+            setHasEntered(false);
             return;
           }
 
@@ -130,8 +133,13 @@ function MeetingPublic() {
     setNotice({ type, message });
   };
 
-  const currentUserName = currentUser?.nickName?.trim() || '';
-  const isCurrentUserNameLocked = Boolean(currentUserName);
+  const lockedParticipantName =
+    meeting?.currentClubMemberName?.trim() ||
+    (!meeting?.clubMeeting ? currentUser?.nickName?.trim() : '') ||
+    '';
+  const lockedParticipantGender =
+    meeting?.currentClubMemberGender || currentUser?.gender || emptyAttendance.gender;
+  const isParticipantLocked = Boolean(lockedParticipantName);
 
   const selectAttendance = (attendance) => {
     setForm(getAttendanceForm(attendance));
@@ -142,7 +150,7 @@ function MeetingPublic() {
 
   const saveAttendance = async (nextForm) => {
     const participantName = (
-      isCurrentUserNameLocked ? currentUserName : nextForm.participantName
+      isParticipantLocked ? lockedParticipantName : nextForm.participantName
     ).trim();
     const ownerNickName = meeting?.ownerNickName?.trim();
 
@@ -188,8 +196,8 @@ function MeetingPublic() {
     forgetRememberedAttendance(publicId);
     setForm({
       ...emptyAttendance,
-      participantName: isCurrentUserNameLocked ? currentUserName : '',
-      gender: currentUser?.gender || emptyAttendance.gender,
+      participantName: isParticipantLocked ? lockedParticipantName : '',
+      gender: lockedParticipantGender,
     });
     setHasEntered(false);
     setNotice(null);
@@ -244,7 +252,7 @@ function MeetingPublic() {
         meeting={meeting}
         attendances={attendances}
         form={form}
-        isNameLocked={isCurrentUserNameLocked}
+        isNameLocked={isParticipantLocked}
         notice={notice}
         onCloseNotice={() => setNotice(null)}
         onFieldChange={updateField}
@@ -265,7 +273,7 @@ function MeetingPublic() {
 
       <MeetingPublicAttendancePanel
         form={form}
-        isNameLocked={isCurrentUserNameLocked}
+        isNameLocked={isParticipantLocked}
         onFieldChange={updateField}
         onSaveProfile={handleSaveProfile}
         onEnterAsDifferentParticipant={handleEnterAsDifferentParticipant}
