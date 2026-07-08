@@ -145,6 +145,15 @@
   gap: 10px;
 }
 
+.meeting-title-chip-row {
+  display: flex;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
+  max-width: 48%;
+}
+
 .meeting-card-title-row h2 {
   font-size: 17px;
 }

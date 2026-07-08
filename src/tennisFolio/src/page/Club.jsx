@@ -8,6 +8,7 @@ import {
   deleteClub,
   deleteClubMember,
   getClub,
+  getClubMeetings,
   getClubMembers,
   getMyClubs,
   updateClub,
@@ -51,6 +52,28 @@ function roleLabel(role) {
 
 function genderLabel(gender) {
   return gender === 'FEMALE' ? '여성' : '남성';
+}
+
+function formatMeetingDate(startAt) {
+  if (!startAt) {
+    return '-';
+  }
+
+  const date = new Date(startAt);
+  return `${date.getMonth() + 1}월 ${date.getDate()}일`;
+}
+
+function meetingStateLabel(meeting) {
+  if (meeting.competitionCreated) {
+    return '경기표 생성';
+  }
+  if (meeting.status === 'CLOSED') {
+    return '마감';
+  }
+  if (meeting.status === 'CANCELLED') {
+    return '취소';
+  }
+  return '경기표 전';
 }
 
 function sortClubMembers(members = []) {
@@ -118,6 +141,7 @@ function Club({ currentUser }) {
   const [activeTab, setActiveTab] = useState('meetings');
   const [clubs, setClubs] = useState([]);
   const [members, setMembers] = useState([]);
+  const [meetings, setMeetings] = useState([]);
   const [selectedClub, setSelectedClub] = useState(null);
   const [clubForm, setClubForm] = useState(emptyClubForm);
   const [memberForm, setMemberForm] = useState(emptyMemberForm);
@@ -127,6 +151,7 @@ function Club({ currentUser }) {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isMembersLoading, setIsMembersLoading] = useState(false);
+  const [isMeetingsLoading, setIsMeetingsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
@@ -185,6 +210,7 @@ function Club({ currentUser }) {
     setError('');
     setSelectedClub(null);
     setMembers([]);
+    setMeetings([]);
 
     try {
       const response = await getClub(clubPublicId);
@@ -212,6 +238,19 @@ function Club({ currentUser }) {
       setError(errorMessage(requestError, '클럽원 목록을 불러오지 못했습니다.'));
     } finally {
       setIsMembersLoading(false);
+    }
+  };
+
+  const loadMeetings = async (clubPublicId) => {
+    setIsMeetingsLoading(true);
+
+    try {
+      const response = await getClubMeetings(clubPublicId);
+      setMeetings(unwrapData(response, []));
+    } catch (requestError) {
+      setError(errorMessage(requestError, '모임 목록을 불러오지 못했습니다.'));
+    } finally {
+      setIsMeetingsLoading(false);
     }
   };
 
@@ -250,6 +289,14 @@ function Club({ currentUser }) {
 
     return () => window.clearTimeout(timeoutId);
   }, [currentUser, view, publicId, memberQuery]);
+
+  useEffect(() => {
+    if (!currentUser || view !== 'detail' || activeTab !== 'meetings' || !publicId) {
+      return;
+    }
+
+    loadMeetings(publicId);
+  }, [activeTab, currentUser, publicId, view]);
 
   const editingMember = useMemo(
     () => members.find((member) => String(member.id) === String(memberId)) ?? null,
@@ -895,13 +942,62 @@ function Club({ currentUser }) {
               <section className="club-section">
                 <div className="club-section-title">
                   <h2>모임</h2>
+                  {isAdmin && (
+                    <button
+                      className="club-button small accent"
+                      type="button"
+                      onClick={() =>
+                        navigate(`/clubs/${selectedClub.publicId}/meetings/new`)
+                      }
+                    >
+                      모임 추가
+                    </button>
+                  )}
                 </div>
                 <div className="club-scroll-list club-meeting-list">
-                  <article className="club-row">
-                    <p className="club-row-sub">
-                      아직 등록된 모임이 없습니다.
-                    </p>
-                  </article>
+                  {isMeetingsLoading && (
+                    <article className="club-row">
+                      <p className="club-row-sub">
+                        모임 목록을 불러오는 중입니다.
+                      </p>
+                    </article>
+                  )}
+                  {!isMeetingsLoading && meetings.length === 0 && (
+                    <article className="club-row">
+                      <p className="club-row-sub">
+                        아직 등록된 모임이 없습니다.
+                      </p>
+                    </article>
+                  )}
+                  {!isMeetingsLoading && meetings.map((meeting) => (
+                    <article className="club-row" key={meeting.publicId}>
+                      <div className="club-row-main">
+                        <div>
+                          <div className="club-row-title">{meeting.title}</div>
+                          <p className="club-row-sub">
+                            {formatMeetingDate(meeting.startAt)} · 참석{' '}
+                            {meeting.attendingCount ?? 0} ·{' '}
+                            {meetingStateLabel(meeting)}
+                          </p>
+                        </div>
+                        <div className="club-row-actions">
+                          <button
+                            className="club-button small"
+                            type="button"
+                            onClick={() =>
+                              navigate(
+                                isAdmin
+                                  ? `/clubs/${selectedClub.publicId}/meetings/${meeting.publicId}`
+                                  : `/meetings/${meeting.publicId}`,
+                              )
+                            }
+                          >
+                            {isAdmin ? '관리' : '보기'}
+                          </button>
+                        </div>
+                      </div>
+                    </article>
+                  ))}
                 </div>
               </section>
             )}

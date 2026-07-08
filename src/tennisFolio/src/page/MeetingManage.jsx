@@ -4,14 +4,16 @@ import { getCurrentUser } from '../utils/authApi';
 import {
   createMeetingCompetitionWithOptions,
   deleteAttendance,
-  deleteMeeting,
   deleteMeetingCompetition,
   getPublicMeeting,
   upsertAttendance,
   updateMeetingStatus,
 } from '../utils/meetingApi';
+import {
+  getClubMeeting,
+  updateClubMeetingStatus,
+} from '../utils/clubApi';
 import MeetingConfirmModal from '../components/meeting/shared/MeetingConfirmModal';
-import MeetingDangerZone from '../components/meeting/manage/MeetingDangerZone';
 import MeetingManageOverviewPanel from '../components/meeting/manage/MeetingManageOverviewPanel';
 import MeetingManageOperationsPanel from '../components/meeting/manage/MeetingManageOperationsPanel';
 import MeetingOwnerAttendancePanel from '../components/meeting/manage/MeetingOwnerAttendancePanel';
@@ -26,7 +28,7 @@ import './Meeting.css';
 import MeetingToast from './MeetingToast';
 
 function MeetingManage({ initialMeeting = null, initialNotice = null }) {
-  const { publicId } = useParams();
+  const { clubPublicId, publicId } = useParams();
   const navigate = useNavigate();
   const [meeting, setMeeting] = useState(initialMeeting);
   const [currentUser, setCurrentUser] = useState(null);
@@ -82,27 +84,36 @@ function MeetingManage({ initialMeeting = null, initialNotice = null }) {
     sameGenderDoublesOnly && Boolean(sameGenderDoublesOnlyUnavailableReason);
 
   const loadMeeting = useCallback(
-    () =>
-      getPublicMeeting(publicId).then((response) => {
+    () => {
+      const request = clubPublicId
+        ? getClubMeeting(clubPublicId, publicId)
+        : getPublicMeeting(publicId);
+
+      return request.then((response) => {
         const nextMeeting = response.data.data;
-        if (nextMeeting?.ownedByCurrentUser !== true) {
+        if (!clubPublicId && nextMeeting?.ownedByCurrentUser !== true) {
           throw new Error('FORBIDDEN_MEETING_OWNER');
         }
         setMeeting(nextMeeting);
-      }),
-    [publicId],
+      });
+    },
+    [clubPublicId, publicId],
   );
 
   useEffect(() => {
     let cancelled = false;
 
-    Promise.all([getPublicMeeting(publicId), getCurrentUser()])
+    const meetingRequest = clubPublicId
+      ? getClubMeeting(clubPublicId, publicId)
+      : getPublicMeeting(publicId);
+
+    Promise.all([meetingRequest, getCurrentUser()])
       .then(([meetingResponse, userResponse]) => {
         if (cancelled) {
           return;
         }
         const nextMeeting = meetingResponse.data.data;
-        if (nextMeeting?.ownedByCurrentUser !== true) {
+        if (!clubPublicId && nextMeeting?.ownedByCurrentUser !== true) {
           setMeeting(null);
           setErrorMessage('모임을 관리할 권한이 없습니다.');
           return;
@@ -128,7 +139,7 @@ function MeetingManage({ initialMeeting = null, initialNotice = null }) {
     return () => {
       cancelled = true;
     };
-  }, [publicId]);
+  }, [clubPublicId, publicId]);
 
   useEffect(() => {
     if (ownerAttendance?.attendanceStatus) {
@@ -141,7 +152,11 @@ function MeetingManage({ initialMeeting = null, initialNotice = null }) {
   };
 
   const handleStatus = async (status) => {
-    await updateMeetingStatus(publicId, status);
+    if (clubPublicId) {
+      await updateClubMeetingStatus(clubPublicId, publicId, status);
+    } else {
+      await updateMeetingStatus(publicId, status);
+    }
     await loadMeeting();
     showNotice('success', status === 'OPEN' ? '참석 체크를 다시 열었습니다.' : '참석 체크를 마감했습니다.');
   };
@@ -226,15 +241,6 @@ function MeetingManage({ initialMeeting = null, initialNotice = null }) {
     }
   };
 
-  const handleDeleteMeeting = async () => {
-    const confirmed = window.confirm('모임을 삭제할까요?');
-    if (!confirmed) {
-      return;
-    }
-    await deleteMeeting(publicId);
-    navigate('/meetings');
-  };
-
   if (isLoading) {
     return (
       <main className="meeting-page">
@@ -259,7 +265,13 @@ function MeetingManage({ initialMeeting = null, initialNotice = null }) {
           attendances={attendances}
           editDisabled={meetingEditDisabled}
           onCopyShareLink={handleCopyShareLink}
-          onEditMeeting={() => navigate(`/meetings/${publicId}/edit`)}
+          onEditMeeting={() =>
+            navigate(
+              clubPublicId
+                ? `/clubs/${clubPublicId}/meetings/${publicId}/edit`
+                : `/meetings/${publicId}/edit`,
+            )
+          }
         />
 
         <MeetingManageOperationsPanel
@@ -286,7 +298,6 @@ function MeetingManage({ initialMeeting = null, initialNotice = null }) {
           emptyMessage={null}
           onAskDelete={setAttendeeToDelete}
         />
-        <MeetingDangerZone onDeleteMeeting={handleDeleteMeeting} />
       </div>
 
       {attendeeToDelete && (

@@ -2,6 +2,7 @@ package com.tennisfolio.Tennisfolio.meeting.service;
 
 import com.tennisfolio.Tennisfolio.common.ExceptionCode;
 import com.tennisfolio.Tennisfolio.common.UserStatus;
+import com.tennisfolio.Tennisfolio.club.repository.ClubRepository;
 import com.tennisfolio.Tennisfolio.exception.NotFoundException;
 import com.tennisfolio.Tennisfolio.matching.repository.CompetitionRepository;
 import com.tennisfolio.Tennisfolio.meeting.domain.AttendanceStatus;
@@ -25,17 +26,20 @@ public class MeetingQueryService {
     private final MeetingAttendanceRepository attendanceRepository;
     private final CompetitionRepository competitionRepository;
     private final UserRepository userRepository;
+    private final ClubRepository clubRepository;
 
     public MeetingQueryService(
             MeetingRepository meetingRepository,
             MeetingAttendanceRepository attendanceRepository,
             CompetitionRepository competitionRepository,
-            UserRepository userRepository
+            UserRepository userRepository,
+            ClubRepository clubRepository
     ) {
         this.meetingRepository = meetingRepository;
         this.attendanceRepository = attendanceRepository;
         this.competitionRepository = competitionRepository;
         this.userRepository = userRepository;
+        this.clubRepository = clubRepository;
     }
 
     @Transactional(readOnly = true)
@@ -51,6 +55,7 @@ public class MeetingQueryService {
                 currentUserId,
                 findCompetitionPublicId(meeting),
                 findOwnerNickName(meeting),
+                findClubName(meeting),
                 attendanceRepository.findByMeetingAndDeletedAtIsNullOrderByIdAsc(meeting)
         );
     }
@@ -68,6 +73,16 @@ public class MeetingQueryService {
     private String findOwnerNickName(Meeting meeting) {
         return userRepository.findByIdAndStatus(meeting.getOwnerUserId(), UserStatus.ACTIVE)
                 .map(user -> user.getNickName())
+                .orElse(null);
+    }
+
+    private String findClubName(Meeting meeting) {
+        if (meeting.getClubId() == null) {
+            return null;
+        }
+
+        return clubRepository.findByIdAndDeletedAtIsNull(meeting.getClubId())
+                .map(club -> club.getName())
                 .orElse(null);
     }
 

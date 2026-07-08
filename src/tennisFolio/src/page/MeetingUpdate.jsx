@@ -1,8 +1,18 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { getPublicMeeting, updateMeeting } from '../utils/meetingApi';
+import {
+  deleteMeeting,
+  getPublicMeeting,
+  updateMeeting,
+} from '../utils/meetingApi';
+import {
+  deleteClubMeeting,
+  getClubMeeting,
+  updateClubMeeting,
+} from '../utils/clubApi';
 import MeetingBasicInfoStep from '../components/meeting/shared/MeetingBasicInfoStep';
 import MeetingSettingsStep from '../components/meeting/shared/MeetingSettingsStep';
+import MeetingDangerZone from '../components/meeting/manage/MeetingDangerZone';
 import {
   buildDateTime,
   toMeetingForm,
@@ -25,7 +35,7 @@ const initialForm = {
 };
 
 function MeetingUpdate() {
-  const { publicId } = useParams();
+  const { clubPublicId, publicId } = useParams();
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [form, setForm] = useState(initialForm);
@@ -33,6 +43,7 @@ function MeetingUpdate() {
   const [accessDenied, setAccessDenied] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const startAt = useMemo(
     () => buildDateTime(form.date, form.startTime),
@@ -46,11 +57,15 @@ function MeetingUpdate() {
   useEffect(() => {
     let cancelled = false;
 
-    getPublicMeeting(publicId)
+    const loadMeeting = clubPublicId
+      ? getClubMeeting(clubPublicId, publicId)
+      : getPublicMeeting(publicId);
+
+    loadMeeting
       .then((response) => {
         if (!cancelled) {
           const meeting = response.data.data;
-          if (meeting?.ownedByCurrentUser !== true) {
+          if (!clubPublicId && meeting?.ownedByCurrentUser !== true) {
             setAccessDenied(true);
             setErrorMessage('모임을 수정할 권한이 없습니다.');
             return;
@@ -75,7 +90,7 @@ function MeetingUpdate() {
     return () => {
       cancelled = true;
     };
-  }, [publicId]);
+  }, [clubPublicId, publicId]);
 
   const updateField = (field, value) => {
     setForm((current) => ({ ...current, [field]: value }));
@@ -149,19 +164,51 @@ function MeetingUpdate() {
 
     try {
       setIsSubmitting(true);
-      await updateMeeting(publicId, payload);
-      navigate(`/meetings/${publicId}`, {
-        state: {
-          meetingNotice: {
-            type: 'success',
-            message: '모임을 수정했습니다.',
+      if (clubPublicId) {
+        await updateClubMeeting(clubPublicId, publicId, payload);
+      } else {
+        await updateMeeting(publicId, payload);
+      }
+      navigate(
+        clubPublicId
+          ? `/clubs/${clubPublicId}/meetings/${publicId}`
+          : `/meetings/${publicId}`,
+        {
+          state: {
+            meetingNotice: {
+              type: 'success',
+              message: '모임을 수정했습니다.',
+            },
           },
         },
-      });
+      );
     } catch (error) {
       setErrorMessage(error.response?.data?.message || '모임을 수정하지 못했습니다.');
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleDeleteMeeting = async () => {
+    const confirmed = window.confirm('모임을 삭제할까요?');
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      setIsDeleting(true);
+      if (clubPublicId) {
+        await deleteClubMeeting(clubPublicId, publicId);
+        navigate(`/clubs/${clubPublicId}`);
+        return;
+      }
+
+      await deleteMeeting(publicId);
+      navigate('/meetings');
+    } catch (error) {
+      setErrorMessage(error.response?.data?.message || '모임을 삭제하지 못했습니다.');
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -184,7 +231,7 @@ function MeetingUpdate() {
   return (
     <main className="meeting-page">
       <header className="meeting-header">
-        <h1>모임 수정</h1>
+        <h1>{clubPublicId ? '클럽 모임 수정' : '모임 수정'}</h1>
         <p>공유된 참석 체크와 대진표 생성 조건에 쓰이는 모임 정보를 수정합니다.</p>
         <div className="meeting-stepper" aria-hidden="true">
           <span className="meeting-step active" />
@@ -198,7 +245,13 @@ function MeetingUpdate() {
         <MeetingBasicInfoStep
           form={form}
           onFieldChange={updateField}
-          onPrevious={() => navigate(`/meetings/${publicId}`)}
+          onPrevious={() =>
+            navigate(
+              clubPublicId
+                ? `/clubs/${clubPublicId}/meetings/${publicId}`
+                : `/meetings/${publicId}`,
+            )
+          }
           onNext={handleNext}
         />
       ) : (
@@ -212,6 +265,11 @@ function MeetingUpdate() {
           onSubmit={handleSubmit}
         />
       )}
+
+      <MeetingDangerZone
+        disabled={isSubmitting || isDeleting}
+        onDeleteMeeting={handleDeleteMeeting}
+      />
     </main>
   );
 }

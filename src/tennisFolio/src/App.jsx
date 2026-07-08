@@ -23,6 +23,7 @@ import CompetitionResult from './page/CompetitionResult.jsx';
 import MyCompetitions from './page/MyCompetitions.jsx';
 import Meetings from './page/Meetings.jsx';
 import MeetingCreate from './page/MeetingCreate.jsx';
+import MeetingManage from './page/MeetingManage.jsx';
 import MeetingUpdate from './page/MeetingUpdate.jsx';
 import MeetingPublic from './page/MeetingPublic.jsx';
 import Club from './page/Club.jsx';
@@ -116,6 +117,18 @@ function App() {
           <Route
             path="/clubs/:publicId/members/:memberId/edit"
             element={<Club currentUser={currentUser} />}
+          />
+          <Route
+            path="/clubs/:clubPublicId/meetings/new"
+            element={<MeetingCreate />}
+          />
+          <Route
+            path="/clubs/:clubPublicId/meetings/:publicId"
+            element={<MeetingManage />}
+          />
+          <Route
+            path="/clubs/:clubPublicId/meetings/:publicId/edit"
+            element={<MeetingUpdate />}
           />
           <Route path="/meetings/new" element={<MeetingCreate />} />
           <Route path="/meetings/:publicId" element={<MeetingPublic />} />

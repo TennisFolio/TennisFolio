@@ -1,5 +1,7 @@
 package com.tennisfolio.Tennisfolio.meeting.service;
 
+import com.tennisfolio.Tennisfolio.club.entity.Club;
+import com.tennisfolio.Tennisfolio.club.repository.ClubRepository;
 import com.tennisfolio.Tennisfolio.exception.NotFoundException;
 import com.tennisfolio.Tennisfolio.matching.entity.Competition;
 import com.tennisfolio.Tennisfolio.matching.repository.CompetitionRepository;
@@ -40,6 +42,9 @@ class MeetingQueryServiceTest {
     @Mock
     UserRepository userRepository;
 
+    @Mock
+    ClubRepository clubRepository;
+
     MeetingQueryService service;
 
     @BeforeEach
@@ -48,7 +53,8 @@ class MeetingQueryServiceTest {
                 meetingRepository,
                 attendanceRepository,
                 competitionRepository,
-                userRepository
+                userRepository,
+                clubRepository
         );
     }
 
@@ -84,6 +90,24 @@ class MeetingQueryServiceTest {
 
         assertThat(response.getCompetitionCreated()).isTrue();
         assertThat(response.getCompetitionPublicId()).isEqualTo("competition-public-id");
+    }
+
+    @Test
+    void getMeeting_returnsClubNameWhenMeetingBelongsToClub() {
+        Meeting meeting = meeting(10L);
+        meeting.connectClub(100L);
+        Club club = new Club("서초 테니스 크루", null, 10L);
+        when(meetingRepository.findByPublicIdAndDeletedAtIsNull("meeting-public-id"))
+                .thenReturn(Optional.of(meeting));
+        when(clubRepository.findByIdAndDeletedAtIsNull(100L))
+                .thenReturn(Optional.of(club));
+        when(attendanceRepository.findByMeetingAndDeletedAtIsNullOrderByIdAsc(meeting))
+                .thenReturn(List.of());
+
+        MeetingDetailResponse response = service.getMeeting("meeting-public-id", 10L);
+
+        assertThat(response.getClubMeeting()).isTrue();
+        assertThat(response.getClubName()).isEqualTo("서초 테니스 크루");
     }
 
     @Test

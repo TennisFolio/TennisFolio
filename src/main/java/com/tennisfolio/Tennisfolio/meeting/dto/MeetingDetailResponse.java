@@ -30,6 +30,8 @@ public class MeetingDetailResponse {
     private Boolean ownedByCurrentUser;
     private String ownerNickName;
     private Boolean competitionCreated;
+    private String clubName;
+    private Boolean clubMeeting;
     private List<MeetingAttendanceResponse> attendances;
 
     public MeetingDetailResponse(
@@ -67,6 +69,92 @@ public class MeetingDetailResponse {
                 ownedByCurrentUser,
                 ownerNickName,
                 competitionCreated,
+                null,
+                false,
+                attendances
+        );
+    }
+
+    public MeetingDetailResponse(
+            String publicId,
+            Long competitionId,
+            String competitionPublicId,
+            String title,
+            LocalDateTime startAt,
+            LocalDateTime endAt,
+            String note,
+            Integer maxParticipants,
+            Integer maxMaleParticipants,
+            Integer maxFemaleParticipants,
+            Integer courtCount,
+            Integer totalGames,
+            String status,
+            Boolean ownedByCurrentUser,
+            String ownerNickName,
+            Boolean competitionCreated,
+            List<MeetingAttendanceResponse> attendances
+    ) {
+        this(
+                publicId,
+                competitionId,
+                competitionPublicId,
+                title,
+                startAt,
+                endAt,
+                note,
+                maxParticipants,
+                maxMaleParticipants,
+                maxFemaleParticipants,
+                courtCount,
+                totalGames,
+                status,
+                ownedByCurrentUser,
+                ownerNickName,
+                competitionCreated,
+                null,
+                attendances
+        );
+    }
+
+    public MeetingDetailResponse(
+            String publicId,
+            Long competitionId,
+            String competitionPublicId,
+            String title,
+            LocalDateTime startAt,
+            LocalDateTime endAt,
+            String note,
+            Integer maxParticipants,
+            Integer maxMaleParticipants,
+            Integer maxFemaleParticipants,
+            Integer courtCount,
+            Integer totalGames,
+            String status,
+            Boolean ownedByCurrentUser,
+            String ownerNickName,
+            Boolean competitionCreated,
+            Boolean clubMeeting,
+            List<MeetingAttendanceResponse> attendances
+    ) {
+        this(
+                publicId,
+                competitionId,
+                competitionPublicId,
+                title,
+                startAt,
+                endAt,
+                note,
+                maxParticipants,
+                maxMaleParticipants,
+                maxFemaleParticipants,
+                courtCount,
+                totalGames,
+                status,
+                ownedByCurrentUser,
+                ownerNickName,
+                competitionCreated,
+                null,
+                false,
                 attendances
         );
     }
@@ -99,6 +187,17 @@ public class MeetingDetailResponse {
             String ownerNickName,
             List<MeetingAttendance> attendances
     ) {
+        return from(meeting, currentUserId, competitionPublicId, ownerNickName, null, attendances);
+    }
+
+    public static MeetingDetailResponse from(
+            Meeting meeting,
+            Long currentUserId,
+            String competitionPublicId,
+            String ownerNickName,
+            String clubName,
+            List<MeetingAttendance> attendances
+    ) {
         return new MeetingDetailResponse(
                 meeting.getPublicId(),
                 meeting.getCompetitionId(),
@@ -116,6 +215,8 @@ public class MeetingDetailResponse {
                 meeting.isOwnedBy(currentUserId),
                 ownerNickName,
                 meeting.hasCompetition(),
+                clubName,
+                meeting.getClubId() != null,
                 attendances.stream()
                         .map(MeetingAttendanceResponse::from)
                         .toList()

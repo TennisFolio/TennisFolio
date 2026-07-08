@@ -202,7 +202,7 @@ DELETE /api/clubs/{clubPublicId}/meetings/{meetingPublicId}/competition
   - 테스트 설명: 클럽원 목록 조회 가능, 비클럽원 목록 조회 거부, MEMBER 생성/수정 거부, ADMIN 생성/수정/삭제 가능 검증
   - 검증 기준: club meeting controller/service 테스트
 
-- [ ] `feat: connect club meeting frontend`
+- [x] `feat: connect club meeting frontend`
   - 구현: 클럽 상세 모임 탭 목록 API 연결, 모임 생성/상세/수정/관리 라우트 연결
   - 테스트 설명: 클럽 상세에서 모임 목록, 빈 상태, 생성 후 이동, 권한별 버튼 노출을 수동 검증
   - 검증 기준: `/clubs/:publicId`와 `/clubs/:publicId/meetings/new` 화면 수동 확인
@@ -254,6 +254,7 @@ DELETE /api/clubs/{clubPublicId}/meetings/{meetingPublicId}/competition
 
 | Date | Change | Reason |
 |---|---|---|
+| 2026-07-08 | Club meeting frontend 연결 | 클럽 상세 모임 탭과 생성/상세/수정 라우트를 클럽 모임 API에 연결 |
 | 2026-07-08 | Club meeting service 책임 분리 | Controller에서 권한/clubId 조립 제거, MeetingQueryService 도메인 조회와 DTO 변환 분리 |
 | 2026-07-07 | Club meeting API 구현 | `/api/clubs/{clubPublicId}/meetings` 계열 API와 clubId 기준 관리 경로 추가 |
 | 2026-07-07 | Club meeting domain link 구현 | `Meeting.clubId`, club meeting create/query path, repository/service tests 추가 |

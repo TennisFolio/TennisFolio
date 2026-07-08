@@ -10,4 +10,6 @@ import java.util.Optional;
 public interface ClubRepository extends JpaRepository<Club, Long> {
 
     Optional<Club> findByPublicIdAndDeletedAtIsNull(String publicId);
+
+    Optional<Club> findByIdAndDeletedAtIsNull(Long id);
 }
