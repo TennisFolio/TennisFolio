@@ -32,17 +32,20 @@ public class CompetitionQueryService {
     private final CompetitionEntryRepository competitionEntryRepository;
     private final CompetitionStatRepository competitionStatRepository;
     private final GameEntryRepository gameEntryRepository;
+    private final CompetitionAdminAuthorizationService competitionAdminAuthorizationService;
 
     public CompetitionQueryService(
             CompetitionRepository competitionRepository,
             CompetitionEntryRepository competitionEntryRepository,
             CompetitionStatRepository competitionStatRepository,
-            GameEntryRepository gameEntryRepository
+            GameEntryRepository gameEntryRepository,
+            CompetitionAdminAuthorizationService competitionAdminAuthorizationService
     ) {
         this.competitionRepository = competitionRepository;
         this.competitionEntryRepository = competitionEntryRepository;
         this.competitionStatRepository = competitionStatRepository;
         this.gameEntryRepository = gameEntryRepository;
+        this.competitionAdminAuthorizationService = competitionAdminAuthorizationService;
     }
 
     @Transactional(readOnly = true)
@@ -55,8 +58,16 @@ public class CompetitionQueryService {
         Competition competition = findActiveCompetition(publicId);
         CompetitionStat stat = competitionStatRepository.findByCompetitionId(competition.getId()).orElse(null);
         List<GameEntry> gameEntries = gameEntryRepository.findScheduleEntriesByCompetitionId(competition.getId());
+        boolean manageableByCurrentUser = competitionAdminAuthorizationService
+                .canManageByIdentity(competition, currentUserId);
 
-        return CompetitionDetailResponse.from(competition, stat, gameEntries, currentUserId);
+        return CompetitionDetailResponse.from(
+                competition,
+                stat,
+                gameEntries,
+                currentUserId,
+                manageableByCurrentUser
+        );
     }
 
     @Transactional(readOnly = true)

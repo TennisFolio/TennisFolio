@@ -343,7 +343,8 @@ function CompetitionDetail() {
     }, SCORE_AUTOSAVE_DELAY_MS);
   }
 
-  const canManage = Boolean(adminToken) || competition?.ownedByCurrentUser === true;
+  const canManage =
+    Boolean(adminToken) || competition?.manageableByCurrentUser === true;
   const isClubSession = competition?.mode === 'CLUB_SESSION';
   const requiresAdminPasswordBeforeShare =
     canManage && competition?.adminPasswordSet === false;
@@ -564,9 +565,7 @@ function CompetitionDetail() {
     const handleAdminTokenCleared = (event) => {
       if (event.detail?.publicId === publicId) {
         setAdminToken('');
-        setCompetition((prev) =>
-          prev ? { ...prev, ownedByCurrentUser: false } : prev
-        );
+        setAdminToken('');
       }
     };
 

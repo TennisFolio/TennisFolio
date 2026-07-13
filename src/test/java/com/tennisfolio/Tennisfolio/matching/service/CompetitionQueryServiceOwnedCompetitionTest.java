@@ -9,11 +9,13 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.when;
 
 @DataJpaTest
 @Import({CompetitionQueryService.class, QuerydslConfig.class})
@@ -24,6 +26,9 @@ class CompetitionQueryServiceOwnedCompetitionTest {
 
     @Autowired
     private CompetitionQueryService competitionQueryService;
+
+    @MockitoBean
+    private CompetitionAdminAuthorizationService competitionAdminAuthorizationService;
 
     @Test
     void getOwnedCompetitions_returnsOnlyCurrentUsersCompetitionsNewestFirst() {
@@ -148,6 +153,26 @@ class CompetitionQueryServiceOwnedCompetitionTest {
 
         assertThat(response.getOwnerUserIdSet()).isTrue();
         assertThat(response.getOwnedByCurrentUser()).isTrue();
+    }
+
+    @Test
+    void getCompetition_marksLinkedClubAdminAsManageableWithoutChangingOwnership() {
+        Competition competition = competitionRepository.save(new Competition(
+                "club",
+                4,
+                4,
+                2,
+                1,
+                136L,
+                Competition.CompetitionMode.CLUB_SESSION,
+                20L
+        ));
+        when(competitionAdminAuthorizationService.canManageByIdentity(competition, 10L)).thenReturn(true);
+
+        CompetitionDetailResponse response = competitionQueryService.getCompetition(competition.getPublicId(), 10L);
+
+        assertThat(response.getOwnedByCurrentUser()).isFalse();
+        assertThat(response.getManageableByCurrentUser()).isTrue();
     }
 
     @Test
