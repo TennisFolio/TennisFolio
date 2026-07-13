@@ -136,9 +136,12 @@ public class CompetitionCommandService {
     public CompetitionUpdateResponse updateCompetition(
             String publicId,
             CompetitionUpdateRequest request,
+            Long currentUserId,
             String adminToken
     ) {
-        Competition competition = competitionService.updateCompetitionName(publicId, request.getName(), adminToken);
+        Competition competition = competitionService.updateCompetitionName(
+                publicId, request.getName(), currentUserId, adminToken
+        );
         return CompetitionUpdateResponse.from(competition);
     }
 

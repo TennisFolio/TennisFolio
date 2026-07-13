@@ -45,17 +45,17 @@ public class CompetitionService {
         ));
     }
 
-    public Competition updateCompetitionName(String publicId, String name, String adminToken) {
+    public Competition updateCompetitionName(String publicId, String name, Long currentUserId, String adminToken) {
         String normalizedName = normalizeName(name);
-        Competition competition = findEditableCompetition(publicId, adminToken);
+        Competition competition = findEditableCompetition(publicId, currentUserId, adminToken);
         competition.rename(normalizedName);
         return competition;
     }
 
-    public Competition findEditableCompetition(String publicId, String adminToken) {
+    public Competition findEditableCompetition(String publicId, Long currentUserId, String adminToken) {
         Competition competition = competitionRepository.findByPublicIdAndDeletedAtIsNull(publicId)
                 .orElseThrow(() -> new IllegalArgumentException("Competition not found"));
-        competitionAdminAuthorizationService.validateAdminToken(publicId, adminToken);
+        competitionAdminAuthorizationService.validateManagementAccess(competition, currentUserId, adminToken);
         return competition;
     }
 

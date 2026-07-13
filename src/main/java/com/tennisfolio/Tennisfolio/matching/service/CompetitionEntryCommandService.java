@@ -81,9 +81,20 @@ public class CompetitionEntryCommandService {
             String adminToken,
             CompetitionEntryCreateRequest request
     ) {
+        competitionAdminAuthorizationService.validateAdminToken(publicId, adminToken);
+        return createCompetitionEntry(publicId, null, adminToken, request);
+    }
+
+    @Transactional
+    public CompetitionEntryResponse createCompetitionEntry(
+            String publicId,
+            Long currentUserId,
+            String adminToken,
+            CompetitionEntryCreateRequest request
+    ) {
         Competition competition = competitionRepository.findByPublicIdAndDeletedAtIsNull(publicId)
                 .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND));
-        competitionAdminAuthorizationService.validateAdminToken(publicId, adminToken);
+        competitionAdminAuthorizationService.validateManagementAccess(competition, currentUserId, adminToken);
         validateClubSession(competition);
 
         String playerName = normalizePlayerName(request.getPlayerName());
@@ -106,13 +117,25 @@ public class CompetitionEntryCommandService {
             String adminToken,
             CompetitionEntryUpdateRequest request
     ) {
+        competitionAdminAuthorizationService.validateAdminToken(publicId, adminToken);
+        return updateCompetitionEntry(publicId, entryId, null, adminToken, request);
+    }
+
+    @Transactional
+    public CompetitionEntryResponse updateCompetitionEntry(
+            String publicId,
+            Long entryId,
+            Long currentUserId,
+            String adminToken,
+            CompetitionEntryUpdateRequest request
+    ) {
         if (request.getPlayerName() == null && request.getGender() == null && request.getStatus() == null) {
             throw new InvalidRequestException(ExceptionCode.INVALID_REQUEST);
         }
 
         Competition competition = competitionRepository.findByPublicIdAndDeletedAtIsNull(publicId)
                 .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND));
-        competitionAdminAuthorizationService.validateAdminToken(publicId, adminToken);
+        competitionAdminAuthorizationService.validateManagementAccess(competition, currentUserId, adminToken);
         CompetitionEntry entry = competitionEntryRepository
                 .findByIdAndCompetitionId(entryId, competition.getId())
                 .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND));

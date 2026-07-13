@@ -250,7 +250,6 @@ class CompetitionEntryCommandServiceTest {
         Competition competition = clubSessionCompetition(1L, "public-id", null);
         CompetitionEntryCreateRequest request = createEntryRequest("Player", "MALE");
 
-        when(competitionRepository.findByPublicIdAndDeletedAtIsNull("public-id")).thenReturn(Optional.of(competition));
         doThrow(new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid competition admin token"))
                 .when(competitionAdminAuthorizationService)
                 .validateAdminToken("public-id", "bad-token");
