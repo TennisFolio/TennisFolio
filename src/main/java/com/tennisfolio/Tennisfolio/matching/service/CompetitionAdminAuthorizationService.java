@@ -1,7 +1,11 @@
 package com.tennisfolio.Tennisfolio.matching.service;
 
+import com.tennisfolio.Tennisfolio.club.service.ClubAccessService;
+import com.tennisfolio.Tennisfolio.common.ExceptionCode;
+import com.tennisfolio.Tennisfolio.exception.NotFoundException;
 import com.tennisfolio.Tennisfolio.matching.entity.Competition;
 import com.tennisfolio.Tennisfolio.matching.repository.CompetitionRepository;
+import com.tennisfolio.Tennisfolio.meeting.repository.MeetingRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -19,25 +23,37 @@ public class CompetitionAdminAuthorizationService {
     private final CompetitionRepository competitionRepository;
     private final CompetitionAdminTokenService tokenService;
     private final BCryptPasswordEncoder passwordEncoder;
+    private final MeetingRepository meetingRepository;
+    private final ClubAccessService clubAccessService;
 
     public CompetitionAdminAuthorizationService(
             CompetitionRepository competitionRepository,
             CompetitionAdminTokenService tokenService,
-            BCryptPasswordEncoder passwordEncoder
+            BCryptPasswordEncoder passwordEncoder,
+            MeetingRepository meetingRepository,
+            ClubAccessService clubAccessService
     ) {
         this.competitionRepository = competitionRepository;
         this.tokenService = tokenService;
         this.passwordEncoder = passwordEncoder;
+        this.meetingRepository = meetingRepository;
+        this.clubAccessService = clubAccessService;
     }
 
     @Transactional
     public String setAdminPassword(String publicId, String adminToken, String password) {
-        Competition competition = findCompetition(publicId);
-        validateAdminToken(publicId, adminToken);
-        validatePasswordFormat(password);
+        return setAdminPassword(publicId, getCurrentUserId(), adminToken, password);
+    }
+
+    @Transactional
+    public String setAdminPassword(String publicId, Long currentUserId, String adminToken, String password) {
+        Competition competition = competitionRepository.findByPublicIdAndDeletedAtIsNullForUpdate(publicId)
+                .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND));
         if (competition.hasAdminPassword()) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "관리자 비밀번호가 이미 설정되었습니다.");
         }
+        validateManagementAccess(competition, currentUserId, adminToken);
+        validatePasswordFormat(password);
         competition.setAdminPasswordHash(passwordEncoder.encode(password));
         return tokenService.createToken(publicId);
     }
@@ -52,6 +68,33 @@ public class CompetitionAdminAuthorizationService {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "관리자 비밀번호가 올바르지 않습니다.");
         }
         return tokenService.createToken(publicId);
+    }
+
+    public void validateManagementAccess(Competition competition, Long currentUserId, String adminToken) {
+        if (canManageByIdentity(competition, currentUserId)) {
+            return;
+        }
+        if (adminToken == null || adminToken.isBlank()) {
+            HttpStatus status = currentUserId == null ? HttpStatus.UNAUTHORIZED : HttpStatus.FORBIDDEN;
+            throw new ResponseStatusException(status, "Competition management access is required");
+        }
+        String tokenPublicId = tokenService.validateAndGetPublicId(adminToken);
+        if (!competition.getPublicId().equals(tokenPublicId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Competition management access is invalid");
+        }
+    }
+
+    public boolean canManageByIdentity(Competition competition, Long currentUserId) {
+        if (currentUserId == null) {
+            return false;
+        }
+        if (currentUserId.equals(competition.getOwnerUserId())) {
+            return true;
+        }
+        return meetingRepository.findByCompetitionIdAndDeletedAtIsNull(competition.getId())
+                .filter(meeting -> meeting.getClubId() != null)
+                .map(meeting -> clubAccessService.isActiveAdmin(meeting.getClubId(), currentUserId))
+                .orElse(false);
     }
 
     public void validateAdminToken(String publicId, String adminToken) {
@@ -98,6 +141,6 @@ public class CompetitionAdminAuthorizationService {
 
     private Competition findCompetition(String publicId) {
         return competitionRepository.findByPublicIdAndDeletedAtIsNull(publicId)
-                .orElseThrow(() -> new IllegalArgumentException("Competition not found"));
+                .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND));
     }
 }

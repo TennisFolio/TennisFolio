@@ -1,6 +1,8 @@
 package com.tennisfolio.Tennisfolio.matching.repository;
 
 import com.tennisfolio.Tennisfolio.matching.entity.Competition;
+import jakarta.persistence.LockModeType;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -17,6 +19,15 @@ public interface CompetitionRepository extends JpaRepository<Competition, Long> 
     Optional<Competition> findByPublicId(String publicId);
 
     Optional<Competition> findByPublicIdAndDeletedAtIsNull(String publicId);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("""
+            select competition
+            from Competition competition
+            where competition.publicId = :publicId
+              and competition.deletedAt is null
+            """)
+    Optional<Competition> findByPublicIdAndDeletedAtIsNullForUpdate(@Param("publicId") String publicId);
 
     Optional<Competition> findByIdAndDeletedAtIsNull(Long id);
 
