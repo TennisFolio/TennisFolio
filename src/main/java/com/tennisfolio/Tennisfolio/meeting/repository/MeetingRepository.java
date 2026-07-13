@@ -20,6 +20,8 @@ public interface MeetingRepository extends JpaRepository<Meeting, Long> {
 
     Optional<Meeting> findByPublicIdAndClubIdAndDeletedAtIsNull(String publicId, Long clubId);
 
+    Optional<Meeting> findByCompetitionIdAndDeletedAtIsNull(Long competitionId);
+
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("""
             select meeting

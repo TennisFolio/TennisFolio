@@ -16,6 +16,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -44,6 +45,43 @@ class ClubAccessServiceTest {
         Club response = service.requireActiveMemberClub("club-public-id", 10L);
 
         assertThat(response).isSameAs(club);
+    }
+
+    @Test
+    void isActiveAdmin_returnsTrueForActiveAdmin() {
+        ClubMember admin = clubMember(10L, ClubMemberRole.ADMIN);
+        when(clubMemberRepository.findByClubIdAndUserIdAndActiveTrue(100L, 10L))
+                .thenReturn(Optional.of(admin));
+
+        assertThat(service.isActiveAdmin(100L, 10L)).isTrue();
+    }
+
+    @Test
+    void isActiveAdmin_returnsFalseForMember() {
+        ClubMember member = clubMember(10L, ClubMemberRole.MEMBER);
+        when(clubMemberRepository.findByClubIdAndUserIdAndActiveTrue(100L, 10L))
+                .thenReturn(Optional.of(member));
+
+        assertThat(service.isActiveAdmin(100L, 10L)).isFalse();
+    }
+
+    @Test
+    void isActiveAdmin_returnsFalseWithoutAuthenticatedUser() {
+        assertThat(service.isActiveAdmin(100L, null)).isFalse();
+
+        verifyNoInteractions(clubMemberRepository);
+    }
+
+    @Test
+    void isActiveAdmin_returnsFalseForInactiveMember() {
+        when(clubMemberRepository.findByClubIdAndUserIdAndActiveTrue(100L, 10L))
+                .thenReturn(Optional.empty());
+
+        assertThat(service.isActiveAdmin(100L, 10L)).isFalse();
+    }
+
+    private static ClubMember clubMember(Long userId, ClubMemberRole role) {
+        return new ClubMember(club(), userId, "Alex Kim", Gender.MALE, role, null, null, null);
     }
 
     private static Club club() {

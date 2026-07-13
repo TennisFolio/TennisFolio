@@ -48,6 +48,15 @@ public class ClubAccessService {
         return club;
     }
 
+    public boolean isActiveAdmin(Long clubId, Long currentUserId) {
+        if (clubId == null || currentUserId == null) {
+            return false;
+        }
+        return clubMemberRepository.findByClubIdAndUserIdAndActiveTrue(clubId, currentUserId)
+                .map(member -> member.getRole() == ClubMemberRole.ADMIN)
+                .orElse(false);
+    }
+
     public Club findActiveClub(String clubPublicId) {
         return clubRepository.findByPublicIdAndDeletedAtIsNull(clubPublicId)
                 .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND));
