@@ -10,6 +10,8 @@ import {
   updateMeetingStatus,
 } from '../utils/meetingApi';
 import {
+  createClubMeetingCompetitionWithOptions,
+  deleteClubMeetingCompetition,
   getClubMeeting,
   updateClubMeetingStatus,
 } from '../utils/clubApi';
@@ -193,9 +195,13 @@ function MeetingManage({ initialMeeting = null, initialNotice = null }) {
     }
 
     try {
-      const response = await createMeetingCompetitionWithOptions(publicId, {
-        sameGenderDoublesOnly,
-      });
+      const response = clubPublicId
+        ? await createClubMeetingCompetitionWithOptions(clubPublicId, publicId, {
+            sameGenderDoublesOnly,
+          })
+        : await createMeetingCompetitionWithOptions(publicId, {
+            sameGenderDoublesOnly,
+          });
       showNotice('success', '대진표를 생성했습니다.');
       await loadMeeting();
       if (response.data.data?.publicId) {
@@ -207,7 +213,11 @@ function MeetingManage({ initialMeeting = null, initialNotice = null }) {
   };
 
   const handleDeleteCompetition = async () => {
-    await deleteMeetingCompetition(publicId);
+    if (clubPublicId) {
+      await deleteClubMeetingCompetition(clubPublicId, publicId);
+    } else {
+      await deleteMeetingCompetition(publicId);
+    }
     await loadMeeting();
     showNotice('success', '연결된 대진표를 삭제했습니다.');
     setCompetitionDeleteRequested(false);

@@ -3,6 +3,8 @@ package com.tennisfolio.Tennisfolio.club.api;
 import com.tennisfolio.Tennisfolio.club.service.ClubMeetingCommandService;
 import com.tennisfolio.Tennisfolio.club.service.ClubMeetingQueryService;
 import com.tennisfolio.Tennisfolio.common.response.ResponseDTO;
+import com.tennisfolio.Tennisfolio.meeting.dto.MeetingCompetitionCreateRequest;
+import com.tennisfolio.Tennisfolio.meeting.dto.MeetingCompetitionCreateResponse;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingCreateRequest;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingCreateResponse;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingDetailResponse;
@@ -22,6 +24,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -124,6 +128,75 @@ class ClubMeetingControllerTest {
                 clubMeetingController.deleteClubMeeting(authentication, "club-public-id", "meeting-public-id");
 
         verify(clubMeetingCommandService).deleteClubMeeting("club-public-id", "meeting-public-id", 20L);
+        assertThat(response.getStatusCode().value()).isEqualTo(204);
+    }
+
+    @Test
+    void createClubMeetingCompetition_passesCurrentUserToCommandService() {
+        Authentication authentication = auth(20L);
+        MeetingCompetitionCreateRequest request = new MeetingCompetitionCreateRequest(true);
+        when(clubMeetingCommandService.createClubMeetingCompetition(
+                "club-public-id",
+                "meeting-public-id",
+                request,
+                20L
+        )).thenReturn(new MeetingCompetitionCreateResponse("competition-public-id"));
+
+        ResponseEntity<ResponseDTO<MeetingCompetitionCreateResponse>> response =
+                clubMeetingController.createClubMeetingCompetition(
+                        authentication,
+                        "club-public-id",
+                        "meeting-public-id",
+                        request
+                );
+
+        verify(clubMeetingCommandService).createClubMeetingCompetition(
+                "club-public-id",
+                "meeting-public-id",
+                request,
+                20L
+        );
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getData().getPublicId()).isEqualTo("competition-public-id");
+    }
+
+    @Test
+    void createClubMeetingCompetition_usesDefaultRequestWhenBodyIsMissing() {
+        Authentication authentication = auth(20L);
+        when(clubMeetingCommandService.createClubMeetingCompetition(
+                eq("club-public-id"),
+                eq("meeting-public-id"),
+                argThat(request -> !request.isSameGenderDoublesOnly()),
+                eq(20L)
+        )).thenReturn(new MeetingCompetitionCreateResponse("competition-public-id"));
+
+        clubMeetingController.createClubMeetingCompetition(
+                authentication,
+                "club-public-id",
+                "meeting-public-id",
+                null
+        );
+
+        verify(clubMeetingCommandService).createClubMeetingCompetition(
+                eq("club-public-id"),
+                eq("meeting-public-id"),
+                argThat(request -> !request.isSameGenderDoublesOnly()),
+                eq(20L)
+        );
+    }
+
+    @Test
+    void deleteClubMeetingCompetition_passesCurrentUserToCommandService() {
+        Authentication authentication = auth(20L);
+
+        ResponseEntity<Void> response =
+                clubMeetingController.deleteClubMeetingCompetition(
+                        authentication,
+                        "club-public-id",
+                        "meeting-public-id"
+                );
+
+        verify(clubMeetingCommandService).deleteClubMeetingCompetition("club-public-id", "meeting-public-id", 20L);
         assertThat(response.getStatusCode().value()).isEqualTo(204);
     }
 

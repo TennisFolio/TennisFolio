@@ -212,7 +212,7 @@ DELETE /api/clubs/{clubPublicId}/meetings/{meetingPublicId}/competition
   - 테스트 설명: 로그인 클럽원 자동 연결, 비로그인 이름+성별 정확 일치 시 클럽원 연결, 불일치/복수 일치 시 게스트 저장, 정원 초과 거부, CLOSED 상태 응답 거부, Competition 생성 후 응답 변경 거부 검증
   - 검증 기준: attendance service/controller 테스트와 화면 수동 확인
 
-- [ ] `feat: enable competition from club meeting`
+- [x] `feat: enable competition from club meeting`
   - 구현: 클럽 ADMIN이 클럽 모임 참석자로 경기표 생성/삭제 가능하게 연결
   - 테스트 설명: 충분한 참석자에서 Competition 생성, 중복 생성 거부, 삭제 후 재생성 가능 검증
   - 검증 기준: club meeting competition service/controller 테스트
@@ -254,6 +254,7 @@ DELETE /api/clubs/{clubPublicId}/meetings/{meetingPublicId}/competition
 
 | Date | Change | Reason |
 |---|---|---|
+| 2026-07-09 | Club meeting competition 생성/삭제 지원 | 클럽 ADMIN이 클럽 모임 참석자로 경기표를 생성하고 연결된 경기표를 삭제할 수 있도록 연결 |
 | 2026-07-08 | Club meeting attendance 지원 | 공개 참석 API에서 클럽원/게스트 분류와 로그인 클럽원 자동 입력을 처리 |
 | 2026-07-08 | Club meeting frontend 연결 | 클럽 상세 모임 탭과 생성/상세/수정 라우트를 클럽 모임 API에 연결 |
 | 2026-07-08 | Club meeting service 책임 분리 | Controller에서 권한/clubId 조립 제거, MeetingQueryService 도메인 조회와 DTO 변환 분리 |

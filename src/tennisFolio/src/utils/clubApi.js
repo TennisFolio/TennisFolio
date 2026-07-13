@@ -47,3 +47,20 @@ export const updateClubMeetingStatus = (publicId, meetingPublicId, status) =>
 
 export const deleteClubMeeting = (publicId, meetingPublicId) =>
   apiRequestSilent.delete(`/api/clubs/${publicId}/meetings/${meetingPublicId}`);
+
+export const createClubMeetingCompetitionWithOptions = (
+  publicId,
+  meetingPublicId,
+  options = {},
+) =>
+  apiRequestSilent.post(
+    `/api/clubs/${publicId}/meetings/${meetingPublicId}/competition`,
+    {
+      sameGenderDoublesOnly: options.sameGenderDoublesOnly === true,
+    },
+  );
+
+export const deleteClubMeetingCompetition = (publicId, meetingPublicId) =>
+  apiRequestSilent.delete(
+    `/api/clubs/${publicId}/meetings/${meetingPublicId}/competition`,
+  );

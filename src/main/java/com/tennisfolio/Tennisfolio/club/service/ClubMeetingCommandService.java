@@ -1,12 +1,15 @@
 package com.tennisfolio.Tennisfolio.club.service;
 
 import com.tennisfolio.Tennisfolio.club.entity.Club;
+import com.tennisfolio.Tennisfolio.meeting.dto.MeetingCompetitionCreateRequest;
+import com.tennisfolio.Tennisfolio.meeting.dto.MeetingCompetitionCreateResponse;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingCreateRequest;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingCreateResponse;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingDetailResponse;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingStatusUpdateRequest;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingUpdateRequest;
 import com.tennisfolio.Tennisfolio.meeting.service.MeetingCommandService;
+import com.tennisfolio.Tennisfolio.meeting.service.MeetingCompetitionCreateService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,13 +18,16 @@ public class ClubMeetingCommandService {
 
     private final ClubAccessService clubAccessService;
     private final MeetingCommandService meetingCommandService;
+    private final MeetingCompetitionCreateService meetingCompetitionCreateService;
 
     public ClubMeetingCommandService(
             ClubAccessService clubAccessService,
-            MeetingCommandService meetingCommandService
+            MeetingCommandService meetingCommandService,
+            MeetingCompetitionCreateService meetingCompetitionCreateService
     ) {
         this.clubAccessService = clubAccessService;
         this.meetingCommandService = meetingCommandService;
+        this.meetingCompetitionCreateService = meetingCompetitionCreateService;
     }
 
     @Transactional
@@ -60,5 +66,27 @@ public class ClubMeetingCommandService {
     public void deleteClubMeeting(String clubPublicId, String meetingPublicId, Long currentUserId) {
         Club club = clubAccessService.requireAdmin(clubPublicId, currentUserId);
         meetingCommandService.deleteClubMeeting(meetingPublicId, club.getId());
+    }
+
+    @Transactional
+    public MeetingCompetitionCreateResponse createClubMeetingCompetition(
+            String clubPublicId,
+            String meetingPublicId,
+            MeetingCompetitionCreateRequest request,
+            Long currentUserId
+    ) {
+        Club club = clubAccessService.requireAdmin(clubPublicId, currentUserId);
+        return meetingCompetitionCreateService.createClubMeetingCompetition(
+                meetingPublicId,
+                club.getId(),
+                currentUserId,
+                request
+        );
+    }
+
+    @Transactional
+    public void deleteClubMeetingCompetition(String clubPublicId, String meetingPublicId, Long currentUserId) {
+        Club club = clubAccessService.requireAdmin(clubPublicId, currentUserId);
+        meetingCompetitionCreateService.deleteClubMeetingCompetition(meetingPublicId, club.getId());
     }
 }

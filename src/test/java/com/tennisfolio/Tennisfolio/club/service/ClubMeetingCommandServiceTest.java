@@ -3,10 +3,13 @@ package com.tennisfolio.Tennisfolio.club.service;
 import com.tennisfolio.Tennisfolio.club.entity.Club;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingCreateRequest;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingCreateResponse;
+import com.tennisfolio.Tennisfolio.meeting.dto.MeetingCompetitionCreateRequest;
+import com.tennisfolio.Tennisfolio.meeting.dto.MeetingCompetitionCreateResponse;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingDetailResponse;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingStatusUpdateRequest;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingUpdateRequest;
 import com.tennisfolio.Tennisfolio.meeting.service.MeetingCommandService;
+import com.tennisfolio.Tennisfolio.meeting.service.MeetingCompetitionCreateService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -29,6 +32,9 @@ class ClubMeetingCommandServiceTest {
 
     @Mock
     MeetingCommandService meetingCommandService;
+
+    @Mock
+    MeetingCompetitionCreateService meetingCompetitionCreateService;
 
     @InjectMocks
     ClubMeetingCommandService service;
@@ -88,6 +94,46 @@ class ClubMeetingCommandServiceTest {
         service.deleteClubMeeting("club-public-id", "meeting-public-id", 20L);
 
         verify(meetingCommandService).deleteClubMeeting("meeting-public-id", 100L);
+    }
+
+    @Test
+    void createClubMeetingCompetition_checksAdminAndCreatesCompetitionForClubMeeting() {
+        Club club = club(100L);
+        MeetingCompetitionCreateRequest request = new MeetingCompetitionCreateRequest(true);
+        when(clubAccessService.requireAdmin("club-public-id", 20L)).thenReturn(club);
+        when(meetingCompetitionCreateService.createClubMeetingCompetition(
+                "meeting-public-id",
+                100L,
+                20L,
+                request
+        )).thenReturn(new MeetingCompetitionCreateResponse("competition-public-id"));
+
+        MeetingCompetitionCreateResponse response = service.createClubMeetingCompetition(
+                "club-public-id",
+                "meeting-public-id",
+                request,
+                20L
+        );
+
+        verify(clubAccessService).requireAdmin("club-public-id", 20L);
+        verify(meetingCompetitionCreateService).createClubMeetingCompetition(
+                "meeting-public-id",
+                100L,
+                20L,
+                request
+        );
+        assertThat(response.getPublicId()).isEqualTo("competition-public-id");
+    }
+
+    @Test
+    void deleteClubMeetingCompetition_checksAdminAndDeletesCompetitionForClubMeeting() {
+        Club club = club(100L);
+        when(clubAccessService.requireAdmin("club-public-id", 20L)).thenReturn(club);
+
+        service.deleteClubMeetingCompetition("club-public-id", "meeting-public-id", 20L);
+
+        verify(clubAccessService).requireAdmin("club-public-id", 20L);
+        verify(meetingCompetitionCreateService).deleteClubMeetingCompetition("meeting-public-id", 100L);
     }
 
     private static Club club(Long id) {

@@ -3,6 +3,8 @@ package com.tennisfolio.Tennisfolio.club.api;
 import com.tennisfolio.Tennisfolio.club.service.ClubMeetingCommandService;
 import com.tennisfolio.Tennisfolio.club.service.ClubMeetingQueryService;
 import com.tennisfolio.Tennisfolio.common.response.ResponseDTO;
+import com.tennisfolio.Tennisfolio.meeting.dto.MeetingCompetitionCreateRequest;
+import com.tennisfolio.Tennisfolio.meeting.dto.MeetingCompetitionCreateResponse;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingCreateRequest;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingCreateResponse;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingDetailResponse;
@@ -116,6 +118,36 @@ public class ClubMeetingController {
             @PathVariable String meetingPublicId
     ) {
         clubMeetingCommandService.deleteClubMeeting(
+                clubPublicId,
+                meetingPublicId,
+                resolveAuthenticatedUserId(authentication)
+        );
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{meetingPublicId}/competition")
+    public ResponseEntity<ResponseDTO<MeetingCompetitionCreateResponse>> createClubMeetingCompetition(
+            Authentication authentication,
+            @PathVariable String clubPublicId,
+            @PathVariable String meetingPublicId,
+            @RequestBody(required = false) MeetingCompetitionCreateRequest request
+    ) {
+        MeetingCompetitionCreateResponse response = clubMeetingCommandService.createClubMeetingCompetition(
+                clubPublicId,
+                meetingPublicId,
+                request == null ? MeetingCompetitionCreateRequest.defaults() : request,
+                resolveAuthenticatedUserId(authentication)
+        );
+        return ResponseEntity.ok(ResponseDTO.success(response));
+    }
+
+    @DeleteMapping("/{meetingPublicId}/competition")
+    public ResponseEntity<Void> deleteClubMeetingCompetition(
+            Authentication authentication,
+            @PathVariable String clubPublicId,
+            @PathVariable String meetingPublicId
+    ) {
+        clubMeetingCommandService.deleteClubMeetingCompetition(
                 clubPublicId,
                 meetingPublicId,
                 resolveAuthenticatedUserId(authentication)
