@@ -23,8 +23,15 @@ import CompetitionResult from './page/CompetitionResult.jsx';
 import MyCompetitions from './page/MyCompetitions.jsx';
 import Meetings from './page/Meetings.jsx';
 import MeetingCreate from './page/MeetingCreate.jsx';
+import MeetingManage from './page/MeetingManage.jsx';
 import MeetingUpdate from './page/MeetingUpdate.jsx';
 import MeetingPublic from './page/MeetingPublic.jsx';
+import ClubCreatePage from './page/club/ClubCreatePage.jsx';
+import ClubDetailPage from './page/club/ClubDetailPage.jsx';
+import ClubEditPage from './page/club/ClubEditPage.jsx';
+import ClubListPage from './page/club/ClubListPage.jsx';
+import ClubMemberCreatePage from './page/club/ClubMemberCreatePage.jsx';
+import ClubMemberEditPage from './page/club/ClubMemberEditPage.jsx';
 import Schedule from './page/Schedule.jsx';
 import NotFound from './page/NotFound.jsx';
 import { initializeAnalytics, trackPageView } from './utils/analytics';
@@ -101,6 +108,39 @@ function App() {
           <Route path="/" element={<Competition />} />
           <Route path="/me/competitions" element={<MyCompetitions />} />
           <Route path="/meetings" element={<Meetings />} />
+          <Route path="/clubs" element={<ClubListPage currentUser={currentUser} />} />
+          <Route
+            path="/clubs/new"
+            element={<ClubCreatePage currentUser={currentUser} />}
+          />
+          <Route
+            path="/clubs/:publicId"
+            element={<ClubDetailPage currentUser={currentUser} />}
+          />
+          <Route
+            path="/clubs/:publicId/edit"
+            element={<ClubEditPage currentUser={currentUser} />}
+          />
+          <Route
+            path="/clubs/:publicId/members/new"
+            element={<ClubMemberCreatePage currentUser={currentUser} />}
+          />
+          <Route
+            path="/clubs/:publicId/members/:memberId/edit"
+            element={<ClubMemberEditPage currentUser={currentUser} />}
+          />
+          <Route
+            path="/clubs/:clubPublicId/meetings/new"
+            element={<MeetingCreate />}
+          />
+          <Route
+            path="/clubs/:clubPublicId/meetings/:publicId"
+            element={<MeetingManage />}
+          />
+          <Route
+            path="/clubs/:clubPublicId/meetings/:publicId/edit"
+            element={<MeetingUpdate />}
+          />
           <Route path="/meetings/new" element={<MeetingCreate />} />
           <Route path="/meetings/:publicId" element={<MeetingPublic />} />
           <Route path="/meetings/:publicId/edit" element={<MeetingUpdate />} />

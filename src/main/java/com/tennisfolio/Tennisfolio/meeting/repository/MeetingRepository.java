@@ -18,6 +18,10 @@ public interface MeetingRepository extends JpaRepository<Meeting, Long> {
 
     Optional<Meeting> findByPublicIdAndOwnerUserIdAndDeletedAtIsNull(String publicId, Long ownerUserId);
 
+    Optional<Meeting> findByPublicIdAndClubIdAndDeletedAtIsNull(String publicId, Long clubId);
+
+    Optional<Meeting> findByCompetitionIdAndDeletedAtIsNull(Long competitionId);
+
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("""
             select meeting
@@ -40,5 +44,20 @@ public interface MeetingRepository extends JpaRepository<Meeting, Long> {
             @Param("ownerUserId") Long ownerUserId
     );
 
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("""
+            select meeting
+            from Meeting meeting
+            where meeting.publicId = :publicId
+              and meeting.clubId = :clubId
+              and meeting.deletedAt is null
+            """)
+    Optional<Meeting> findByPublicIdAndClubIdAndDeletedAtIsNullForUpdate(
+            @Param("publicId") String publicId,
+            @Param("clubId") Long clubId
+    );
+
     List<Meeting> findByOwnerUserIdAndDeletedAtIsNullOrderByStartAtDescIdDesc(Long ownerUserId);
+
+    List<Meeting> findByClubIdAndDeletedAtIsNullOrderByStartAtDescIdDesc(Long clubId);
 }

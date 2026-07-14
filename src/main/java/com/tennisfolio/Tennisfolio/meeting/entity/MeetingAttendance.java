@@ -3,6 +3,7 @@ package com.tennisfolio.Tennisfolio.meeting.entity;
 import com.tennisfolio.Tennisfolio.common.Entity.BaseTimeEntity;
 import com.tennisfolio.Tennisfolio.meeting.domain.AttendanceStatus;
 import com.tennisfolio.Tennisfolio.meeting.domain.Gender;
+import com.tennisfolio.Tennisfolio.meeting.domain.MeetingParticipantType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
@@ -46,6 +47,13 @@ public class MeetingAttendance extends BaseTimeEntity {
     @Column(name = "ATTENDANCE_STATUS", nullable = false)
     private AttendanceStatus attendanceStatus;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "PARTICIPANT_TYPE")
+    private MeetingParticipantType participantType = MeetingParticipantType.GUEST;
+
+    @Column(name = "CLUB_MEMBER_ID")
+    private Long clubMemberId;
+
     @Column(name = "DEL_DT")
     private LocalDateTime deletedAt;
 
@@ -59,12 +67,33 @@ public class MeetingAttendance extends BaseTimeEntity {
         this.participantName = participantName;
         this.gender = gender;
         this.attendanceStatus = attendanceStatus;
+        this.participantType = MeetingParticipantType.GUEST;
     }
 
     public void update(String participantName, Gender gender, AttendanceStatus attendanceStatus) {
         this.participantName = participantName;
         this.gender = gender;
         this.attendanceStatus = attendanceStatus;
+    }
+
+    public void update(
+            String participantName,
+            Gender gender,
+            AttendanceStatus attendanceStatus,
+            MeetingParticipantType participantType,
+            Long clubMemberId
+    ) {
+        update(participantName, gender, attendanceStatus);
+        assignParticipant(participantType, clubMemberId);
+    }
+
+    public void assignParticipant(MeetingParticipantType participantType, Long clubMemberId) {
+        this.participantType = participantType == null ? MeetingParticipantType.GUEST : participantType;
+        this.clubMemberId = this.participantType == MeetingParticipantType.CLUB_MEMBER ? clubMemberId : null;
+    }
+
+    public MeetingParticipantType getParticipantType() {
+        return participantType == null ? MeetingParticipantType.GUEST : participantType;
     }
 
     public void delete(LocalDateTime deletedAt) {

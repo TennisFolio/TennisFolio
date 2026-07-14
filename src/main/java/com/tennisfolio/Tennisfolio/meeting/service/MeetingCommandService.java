@@ -28,6 +28,18 @@ public class MeetingCommandService {
 
     @Transactional
     public MeetingCreateResponse createMeeting(MeetingCreateRequest request, Long ownerUserId) {
+        return createMeeting(request, ownerUserId, null);
+    }
+
+    @Transactional
+    public MeetingCreateResponse createClubMeeting(MeetingCreateRequest request, Long ownerUserId, Long clubId) {
+        if (clubId == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "클럽 ID가 필요합니다.");
+        }
+        return createMeeting(request, ownerUserId, clubId);
+    }
+
+    private MeetingCreateResponse createMeeting(MeetingCreateRequest request, Long ownerUserId, Long clubId) {
         requireAuthenticated(ownerUserId);
         validateRequiredDetails(
                 request.getTitle(),
@@ -41,7 +53,7 @@ public class MeetingCommandService {
                 request.getMaxMaleParticipants(),
                 request.getMaxFemaleParticipants()
         );
-        Meeting meeting = meetingRepository.save(new Meeting(
+        Meeting meeting = new Meeting(
                 ownerUserId,
                 request.getTitle(),
                 request.getStartAt(),
@@ -52,13 +64,34 @@ public class MeetingCommandService {
                 request.getMaxFemaleParticipants(),
                 request.getCourtCount(),
                 request.getTotalGames()
-        ));
+        );
+        if (clubId != null) {
+            meeting.connectClub(clubId);
+        }
+        meeting = meetingRepository.save(meeting);
         return new MeetingCreateResponse(meeting.getPublicId());
     }
 
     @Transactional
     public MeetingDetailResponse updateMeeting(String publicId, MeetingUpdateRequest request, Long ownerUserId) {
         Meeting meeting = findOwnedMeeting(publicId, ownerUserId);
+        updateMeetingDetails(meeting, request);
+        return MeetingDetailResponse.from(meeting, ownerUserId);
+    }
+
+    @Transactional
+    public MeetingDetailResponse updateClubMeeting(
+            String publicId,
+            Long clubId,
+            MeetingUpdateRequest request,
+            Long currentUserId
+    ) {
+        Meeting meeting = findClubMeeting(publicId, clubId);
+        updateMeetingDetails(meeting, request);
+        return MeetingDetailResponse.from(meeting, currentUserId);
+    }
+
+    private void updateMeetingDetails(Meeting meeting, MeetingUpdateRequest request) {
         validateRequiredDetails(
                 request.getTitle(),
                 request.getStartAt(),
@@ -88,7 +121,6 @@ public class MeetingCommandService {
                 request.getCourtCount(),
                 request.getTotalGames()
         );
-        return MeetingDetailResponse.from(meeting, ownerUserId);
     }
 
     @Transactional
@@ -104,14 +136,41 @@ public class MeetingCommandService {
     }
 
     @Transactional
+    public MeetingDetailResponse updateClubMeetingStatus(
+            String publicId,
+            Long clubId,
+            MeetingStatusUpdateRequest request,
+            Long currentUserId
+    ) {
+        Meeting meeting = findClubMeeting(publicId, clubId);
+        MeetingStatus status = parseStatus(request.getStatus());
+        meeting.updateStatus(status);
+        return MeetingDetailResponse.from(meeting, currentUserId);
+    }
+
+    @Transactional
     public void deleteMeeting(String publicId, Long ownerUserId) {
         Meeting meeting = findOwnedMeeting(publicId, ownerUserId);
+        meeting.delete(LocalDateTime.now());
+    }
+
+    @Transactional
+    public void deleteClubMeeting(String publicId, Long clubId) {
+        Meeting meeting = findClubMeeting(publicId, clubId);
         meeting.delete(LocalDateTime.now());
     }
 
     private Meeting findOwnedMeeting(String publicId, Long ownerUserId) {
         requireAuthenticated(ownerUserId);
         return meetingRepository.findByPublicIdAndOwnerUserIdAndDeletedAtIsNull(publicId, ownerUserId)
+                .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND));
+    }
+
+    private Meeting findClubMeeting(String publicId, Long clubId) {
+        if (clubId == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "클럽 ID가 필요합니다.");
+        }
+        return meetingRepository.findByPublicIdAndClubIdAndDeletedAtIsNull(publicId, clubId)
                 .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND));
     }
 

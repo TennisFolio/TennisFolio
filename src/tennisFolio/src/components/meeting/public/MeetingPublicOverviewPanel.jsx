@@ -14,6 +14,11 @@ function MeetingPublicOverviewPanel({
         <div>
           <h1>{meeting.title}</h1>
         </div>
+        <div className="meeting-title-chip-row">
+          {meeting.clubName && (
+            <span className="meeting-chip">{meeting.clubName}</span>
+          )}
+        </div>
       </div>
       <div className="meeting-card-meta">
         <span className="meeting-chip">{formatDate(meeting.startAt)}</span>

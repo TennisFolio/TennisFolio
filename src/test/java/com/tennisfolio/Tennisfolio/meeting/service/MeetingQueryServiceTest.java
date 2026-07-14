@@ -1,5 +1,10 @@
 package com.tennisfolio.Tennisfolio.meeting.service;
 
+import com.tennisfolio.Tennisfolio.club.entity.Club;
+import com.tennisfolio.Tennisfolio.club.entity.ClubMember;
+import com.tennisfolio.Tennisfolio.club.entity.ClubMemberRole;
+import com.tennisfolio.Tennisfolio.club.repository.ClubMemberRepository;
+import com.tennisfolio.Tennisfolio.club.repository.ClubRepository;
 import com.tennisfolio.Tennisfolio.exception.NotFoundException;
 import com.tennisfolio.Tennisfolio.matching.entity.Competition;
 import com.tennisfolio.Tennisfolio.matching.repository.CompetitionRepository;
@@ -40,6 +45,12 @@ class MeetingQueryServiceTest {
     @Mock
     UserRepository userRepository;
 
+    @Mock
+    ClubRepository clubRepository;
+
+    @Mock
+    ClubMemberRepository clubMemberRepository;
+
     MeetingQueryService service;
 
     @BeforeEach
@@ -48,7 +59,9 @@ class MeetingQueryServiceTest {
                 meetingRepository,
                 attendanceRepository,
                 competitionRepository,
-                userRepository
+                userRepository,
+                clubRepository,
+                clubMemberRepository
         );
     }
 
@@ -84,6 +97,55 @@ class MeetingQueryServiceTest {
 
         assertThat(response.getCompetitionCreated()).isTrue();
         assertThat(response.getCompetitionPublicId()).isEqualTo("competition-public-id");
+    }
+
+    @Test
+    void getMeeting_returnsClubNameWhenMeetingBelongsToClub() {
+        Meeting meeting = meeting(10L);
+        meeting.connectClub(100L);
+        Club club = new Club("서초 테니스 크루", null, 10L);
+        when(meetingRepository.findByPublicIdAndDeletedAtIsNull("meeting-public-id"))
+                .thenReturn(Optional.of(meeting));
+        when(clubRepository.findByIdAndDeletedAtIsNull(100L))
+                .thenReturn(Optional.of(club));
+        when(attendanceRepository.findByMeetingAndDeletedAtIsNullOrderByIdAsc(meeting))
+                .thenReturn(List.of());
+
+        MeetingDetailResponse response = service.getMeeting("meeting-public-id", 10L);
+
+        assertThat(response.getClubMeeting()).isTrue();
+        assertThat(response.getClubName()).isEqualTo("서초 테니스 크루");
+    }
+
+    @Test
+    void getMeeting_returnsCurrentClubMemberForLoggedInMember() {
+        Club club = club(50L, "서초 테니스 크루");
+        ClubMember member = new ClubMember(
+                club,
+                10L,
+                "Jamie Lee",
+                com.tennisfolio.Tennisfolio.meeting.domain.Gender.FEMALE,
+                ClubMemberRole.MEMBER,
+                null,
+                null,
+                null
+        );
+        ReflectionTestUtils.setField(member, "id", 100L);
+        Meeting meeting = meeting(20L);
+        meeting.connectClub(50L);
+        when(meetingRepository.findByPublicIdAndDeletedAtIsNull("meeting-public-id"))
+                .thenReturn(Optional.of(meeting));
+        when(clubRepository.findByIdAndDeletedAtIsNull(50L)).thenReturn(Optional.of(club));
+        when(clubMemberRepository.findByClubAndUserIdAndActiveTrue(club, 10L))
+                .thenReturn(Optional.of(member));
+        when(attendanceRepository.findByMeetingAndDeletedAtIsNullOrderByIdAsc(meeting))
+                .thenReturn(List.of());
+
+        MeetingDetailResponse response = service.getMeeting("meeting-public-id", 10L);
+
+        assertThat(response.getCurrentClubMemberId()).isEqualTo(100L);
+        assertThat(response.getCurrentClubMemberName()).isEqualTo("Jamie Lee");
+        assertThat(response.getCurrentClubMemberGender()).isEqualTo("FEMALE");
     }
 
     @Test
@@ -124,6 +186,81 @@ class MeetingQueryServiceTest {
         assertThat(response.get(0).getNotAttendingCount()).isEqualTo(2L);
     }
 
+    @Test
+    void getClubMeetings_returnsClubMeetingSummaries() {
+        Meeting meeting = meeting(10L);
+        meeting.connectClub(100L);
+        when(meetingRepository.findByClubIdAndDeletedAtIsNullOrderByStartAtDescIdDesc(100L))
+                .thenReturn(List.of(meeting));
+        when(attendanceRepository.countByMeetingAndAttendanceStatusAndDeletedAtIsNull(
+                org.mockito.ArgumentMatchers.any(Meeting.class),
+                org.mockito.ArgumentMatchers.eq(AttendanceStatus.ATTENDING)
+        )).thenReturn(4L);
+        when(attendanceRepository.countByMeetingAndAttendanceStatusAndDeletedAtIsNull(
+                org.mockito.ArgumentMatchers.any(Meeting.class),
+                org.mockito.ArgumentMatchers.eq(AttendanceStatus.WAITING)
+        )).thenReturn(1L);
+        when(attendanceRepository.countByMeetingAndAttendanceStatusAndDeletedAtIsNull(
+                org.mockito.ArgumentMatchers.any(Meeting.class),
+                org.mockito.ArgumentMatchers.eq(AttendanceStatus.NOT_ATTENDING)
+        )).thenReturn(0L);
+
+        List<MeetingSummaryResponse> response = service.getClubMeetings(100L);
+
+        assertThat(response)
+                .extracting(MeetingSummaryResponse::getPublicId)
+                .containsExactly("meeting-public-id");
+        assertThat(response.get(0).getAttendingCount()).isEqualTo(4L);
+        assertThat(response.get(0).getWaitingCount()).isEqualTo(1L);
+        assertThat(response.get(0).getNotAttendingCount()).isZero();
+    }
+
+    @Test
+    void findActiveClubMeetings_returnsClubMeetingDomains() {
+        Meeting meeting = meeting(10L);
+        meeting.connectClub(100L);
+        when(meetingRepository.findByClubIdAndDeletedAtIsNullOrderByStartAtDescIdDesc(100L))
+                .thenReturn(List.of(meeting));
+
+        List<Meeting> response = service.findActiveClubMeetings(100L);
+
+        assertThat(response).containsExactly(meeting);
+    }
+
+    @Test
+    void findActiveClubMeeting_returnsDomainOnlyWhenMeetingBelongsToClub() {
+        Meeting meeting = meeting(10L);
+        meeting.connectClub(100L);
+        when(meetingRepository.findByPublicIdAndClubIdAndDeletedAtIsNull("meeting-public-id", 100L))
+                .thenReturn(Optional.of(meeting));
+
+        Meeting response = service.findActiveClubMeeting("meeting-public-id", 100L);
+
+        assertThat(response).isSameAs(meeting);
+        assertThat(response.belongsToClub(100L)).isTrue();
+    }
+
+    @Test
+    void findActiveClubMeeting_throwsNotFoundWhenMeetingDoesNotBelongToClub() {
+        when(meetingRepository.findByPublicIdAndClubIdAndDeletedAtIsNull("meeting-public-id", 100L))
+                .thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.findActiveClubMeeting("meeting-public-id", 100L))
+                .isInstanceOf(NotFoundException.class);
+    }
+
+    @Test
+    void toDetailResponse_mapsDomainToApiResponse() {
+        Meeting meeting = meeting(10L);
+        when(attendanceRepository.findByMeetingAndDeletedAtIsNullOrderByIdAsc(meeting))
+                .thenReturn(List.of());
+
+        MeetingDetailResponse response = service.toDetailResponse(meeting, 20L);
+
+        assertThat(response.getPublicId()).isEqualTo("meeting-public-id");
+        assertThat(response.getOwnedByCurrentUser()).isFalse();
+    }
+
     private static Meeting meeting(Long ownerUserId) {
         Meeting meeting = new Meeting(
                 ownerUserId,
@@ -154,5 +291,11 @@ class MeetingQueryServiceTest {
         );
         ReflectionTestUtils.setField(competition, "publicId", publicId);
         return competition;
+    }
+
+    private static Club club(Long id, String name) {
+        Club club = new Club(name, null, 10L);
+        ReflectionTestUtils.setField(club, "id", id);
+        return club;
     }
 }

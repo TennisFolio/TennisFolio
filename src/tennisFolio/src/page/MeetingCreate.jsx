@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { default_oauth_provider } from '@/constants';
 import { getCurrentUser, loginWithProvider } from '../utils/authApi';
 import {
   createMeeting,
   isAuthenticationRequiredError,
 } from '../utils/meetingApi';
+import { createClubMeeting, getClub } from '../utils/clubApi';
 import MeetingBasicInfoStep from '../components/meeting/shared/MeetingBasicInfoStep';
 import MeetingSettingsStep from '../components/meeting/shared/MeetingSettingsStep';
 import {
@@ -29,9 +30,11 @@ const initialForm = {
 };
 
 function MeetingCreate() {
+  const { clubPublicId } = useParams();
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [form, setForm] = useState(initialForm);
+  const [club, setClub] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
   const [authRequired, setAuthRequired] = useState(false);
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
@@ -81,6 +84,33 @@ function MeetingCreate() {
       cancelled = true;
     };
   }, []);
+
+  useEffect(() => {
+    if (!clubPublicId) {
+      setClub(null);
+      return;
+    }
+
+    let cancelled = false;
+
+    getClub(clubPublicId)
+      .then((response) => {
+        if (!cancelled) {
+          setClub(response.data.data);
+        }
+      })
+      .catch((error) => {
+        if (!cancelled) {
+          setErrorMessage(
+            error.response?.data?.message || '클럽 정보를 불러오지 못했습니다.',
+          );
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [clubPublicId]);
 
   const validateStepOne = () => {
     if (!form.title.trim()) {
@@ -146,8 +176,15 @@ function MeetingCreate() {
 
     try {
       setIsSubmitting(true);
-      const response = await createMeeting(payload);
-      navigate(`/meetings/${response.data.data.publicId}`);
+      const response = clubPublicId
+        ? await createClubMeeting(clubPublicId, payload)
+        : await createMeeting(payload);
+      const nextPublicId = response.data.data.publicId;
+      navigate(
+        clubPublicId
+          ? `/clubs/${clubPublicId}/meetings/${nextPublicId}`
+          : `/meetings/${nextPublicId}`,
+      );
     } catch (error) {
       if (isAuthenticationRequiredError(error)) {
         setAuthRequired(true);
@@ -163,8 +200,12 @@ function MeetingCreate() {
   return (
     <main className="meeting-page">
       <header className="meeting-header">
-        <h1>모임 만들기</h1>
-        <p>참석 확인에 필요한 정보와 경기표 생성 조건을 나눠 입력합니다.</p>
+        <h1>{clubPublicId ? '클럽 모임 만들기' : '모임 만들기'}</h1>
+        <p>
+          {clubPublicId && club
+            ? `이 모임은 ${club.name}에 연결됩니다.`
+            : '참석 확인에 필요한 정보와 경기표 생성 조건을 나눠 입력합니다.'}
+        </p>
         <div className="meeting-stepper" aria-hidden="true">
           <span className="meeting-step active" />
           <span className={`meeting-step ${step === 2 ? 'active' : ''}`} />
@@ -194,7 +235,9 @@ function MeetingCreate() {
         <MeetingBasicInfoStep
           form={form}
           onFieldChange={updateField}
-          onPrevious={() => navigate('/meetings')}
+          onPrevious={() =>
+            navigate(clubPublicId ? `/clubs/${clubPublicId}` : '/meetings')
+          }
           onNext={handleNext}
         />
       ) : null}
@@ -203,7 +246,7 @@ function MeetingCreate() {
         <MeetingSettingsStep
           form={form}
           isSubmitting={isSubmitting}
-          submitLabel="모임 만들기"
+          submitLabel={clubPublicId ? '클럽 모임 만들기' : '모임 만들기'}
           submittingLabel="생성 중"
           onFieldChange={updateField}
           onPrevious={() => setStep(1)}

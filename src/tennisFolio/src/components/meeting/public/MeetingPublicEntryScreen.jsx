@@ -57,6 +57,7 @@ function MeetingPublicEntryScreen({
             name={form.participantName}
             gender={form.gender}
             nameReadOnly={isNameLocked}
+            genderDisabled={isNameLocked}
             onNameChange={(value) => onFieldChange('participantName', value)}
             onGenderChange={(value) => onFieldChange('gender', value)}
           />
@@ -67,6 +68,12 @@ function MeetingPublicEntryScreen({
             onSelect={onStatusSelect}
           />
         </div>
+
+        {meeting.clubMeeting && (
+          <p className="meeting-state-note">
+            이름과 성별이 클럽원 정보와 일치하면 클럽원으로 표시됩니다.
+          </p>
+        )}
 
         <p className="meeting-state-note">
           참석 여부를 선택하면 참석 현황과 명단을 볼 수 있습니다.

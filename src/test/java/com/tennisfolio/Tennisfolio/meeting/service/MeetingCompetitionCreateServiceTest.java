@@ -233,6 +233,72 @@ class MeetingCompetitionCreateServiceTest {
                 .isEqualTo(HttpStatus.CONFLICT);
     }
 
+    @Test
+    void createClubMeetingCompetition_createsCompetitionForClubMeetingAsCurrentAdmin() {
+        Meeting meeting = clubMeeting(null, 100L);
+        Competition competition = competition(200L, "competition-public-id", 20L);
+        when(meetingRepository.findByPublicIdAndClubIdAndDeletedAtIsNullForUpdate("meeting-public-id", 100L))
+                .thenReturn(Optional.of(meeting));
+        when(attendanceRepository.findByMeetingAndAttendanceStatusAndDeletedAtIsNull(
+                meeting,
+                AttendanceStatus.ATTENDING
+        )).thenReturn(List.of(
+                attendance(meeting, "Alex Kim", Gender.MALE, AttendanceStatus.ATTENDING),
+                attendance(meeting, "Ben Park", Gender.MALE, AttendanceStatus.ATTENDING),
+                attendance(meeting, "Chris Lee", Gender.MALE, AttendanceStatus.ATTENDING),
+                attendance(meeting, "Dana Choi", Gender.MALE, AttendanceStatus.ATTENDING),
+                attendance(meeting, "Eun Seo", Gender.FEMALE, AttendanceStatus.ATTENDING),
+                attendance(meeting, "Fay Shin", Gender.FEMALE, AttendanceStatus.ATTENDING),
+                attendance(meeting, "Gina Han", Gender.FEMALE, AttendanceStatus.ATTENDING),
+                attendance(meeting, "Hana Jung", Gender.FEMALE, AttendanceStatus.ATTENDING)
+        ));
+        when(competitionCommandService.createCompetitionResult(any(CompetitionCreateRequest.class), eq(20L)))
+                .thenReturn(new CompetitionCreationResult(competition, "competition-token"));
+
+        MeetingCompetitionCreateResponse response = service.createClubMeetingCompetition(
+                "meeting-public-id",
+                100L,
+                20L,
+                new MeetingCompetitionCreateRequest(false)
+        );
+
+        verify(competitionCommandService).createCompetitionResult(any(CompetitionCreateRequest.class), eq(20L));
+        assertThat(response.getPublicId()).isEqualTo("competition-public-id");
+        assertThat(meeting.getCompetitionId()).isEqualTo(200L);
+    }
+
+    @Test
+    void createClubMeetingCompetition_rejectsMeetingOutsideClub() {
+        when(meetingRepository.findByPublicIdAndClubIdAndDeletedAtIsNullForUpdate("meeting-public-id", 100L))
+                .thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.createClubMeetingCompetition(
+                "meeting-public-id",
+                100L,
+                20L,
+                MeetingCompetitionCreateRequest.defaults()
+        )).isInstanceOf(NotFoundException.class);
+        verify(competitionCommandService, never()).createCompetitionResult(
+                any(CompetitionCreateRequest.class),
+                anyLong()
+        );
+    }
+
+    @Test
+    void deleteClubMeetingCompetition_softDeletesCompetitionEvenWhenCreatedByAnotherAdmin() {
+        Meeting meeting = clubMeeting(200L, 100L);
+        Competition competition = competition(200L, "competition-public-id", 99L);
+        when(meetingRepository.findByPublicIdAndClubIdAndDeletedAtIsNullForUpdate("meeting-public-id", 100L))
+                .thenReturn(Optional.of(meeting));
+        when(competitionRepository.findByIdAndDeletedAtIsNull(200L))
+                .thenReturn(Optional.of(competition));
+
+        service.deleteClubMeetingCompetition("meeting-public-id", 100L);
+
+        assertThat(competition.isDeleted()).isTrue();
+        assertThat(meeting.getCompetitionId()).isNull();
+    }
+
     private static Meeting meeting(Long competitionId) {
         Meeting meeting = new Meeting(
                 10L,
@@ -250,6 +316,12 @@ class MeetingCompetitionCreateServiceTest {
         if (competitionId != null) {
             meeting.connectCompetition(competitionId);
         }
+        return meeting;
+    }
+
+    private static Meeting clubMeeting(Long competitionId, Long clubId) {
+        Meeting meeting = meeting(competitionId);
+        meeting.connectClub(clubId);
         return meeting;
     }
 

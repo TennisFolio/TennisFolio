@@ -4,6 +4,7 @@ function MeetingParticipantFields({
   onNameChange,
   onGenderChange,
   nameReadOnly = false,
+  genderDisabled = false,
   showGender = true,
 }) {
   const content = (
@@ -21,6 +22,7 @@ function MeetingParticipantFields({
           <span>성별</span>
           <select
             value={gender}
+            disabled={genderDisabled}
             onChange={(event) => onGenderChange?.(event.target.value)}
           >
             <option value="MALE">남성</option>

@@ -212,7 +212,6 @@ class CompetitionGameCommandServiceTest {
         Game game = game(10L, competition, 1, 1, Game.MatchType.MIXED);
         GameStatusUpdateRequest request = gameStatusUpdateRequest("completed");
 
-        when(competitionRepository.findByPublicIdAndDeletedAtIsNull("public-id")).thenReturn(Optional.of(competition));
         doThrow(new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid competition admin token"))
                 .when(competitionAdminAuthorizationService)
                 .validateAdminToken("public-id", "bad-token");

@@ -1,4 +1,4 @@
-function MeetingDangerZone({ onDeleteMeeting }) {
+function MeetingDangerZone({ disabled = false, onDeleteMeeting }) {
   return (
     <section className="meeting-panel meeting-danger-zone">
       <div>
@@ -7,6 +7,7 @@ function MeetingDangerZone({ onDeleteMeeting }) {
       <button
         type="button"
         className="meeting-button danger"
+        disabled={disabled}
         onClick={onDeleteMeeting}
       >
         삭제

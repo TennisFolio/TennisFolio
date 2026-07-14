@@ -101,12 +101,14 @@ public class CompetitionController {
 
     @PostMapping("/competitions/{publicId}/admin-password")
     public ResponseEntity<ResponseDTO<CompetitionAdminTokenResponse>> setAdminPassword(
+            Authentication authentication,
             @PathVariable String publicId,
             @RequestHeader(value = "X-Competition-Admin-Token", required = false) String adminToken,
             @RequestBody CompetitionAdminPasswordRequest request
     ) {
         String token = competitionAdminAuthorizationService.setAdminPassword(
                 publicId,
+                resolveAuthenticatedUserId(authentication),
                 adminToken,
                 request.getPassword()
         );
@@ -130,21 +132,27 @@ public class CompetitionController {
 
     @PatchMapping("/competitions/{publicId}")
     public ResponseEntity<ResponseDTO<CompetitionUpdateResponse>> updateCompetition(
+            Authentication authentication,
             @PathVariable String publicId,
             @RequestHeader(value = "X-Competition-Admin-Token", required = false) String adminToken,
             @RequestBody CompetitionUpdateRequest request
     ) {
-        CompetitionUpdateResponse response = competitionCommandService.updateCompetition(publicId, request, adminToken);
+        CompetitionUpdateResponse response = competitionCommandService.updateCompetition(
+                publicId, request, resolveAuthenticatedUserId(authentication), adminToken
+        );
         return new ResponseEntity<>(ResponseDTO.success(response), HttpStatus.OK);
     }
 
     @PatchMapping("/competitions/{publicId}/court-count")
     public ResponseEntity<ResponseDTO<CompetitionStatResponse>> updateCourtCount(
+            Authentication authentication,
             @PathVariable String publicId,
             @RequestHeader(value = "X-Competition-Admin-Token", required = false) String adminToken,
             @RequestBody CourtCountUpdateRequest request
     ) {
-        CompetitionStatResponse response = competitionGameCommandService.updateCourtCount(publicId, adminToken, request);
+        CompetitionStatResponse response = competitionGameCommandService.updateCourtCount(
+                publicId, resolveAuthenticatedUserId(authentication), adminToken, request
+        );
         return new ResponseEntity<>(ResponseDTO.success(response), HttpStatus.OK);
     }
 
@@ -158,12 +166,14 @@ public class CompetitionController {
 
     @PostMapping("/competitions/{publicId}/entries")
     public ResponseEntity<ResponseDTO<CompetitionEntryResponse>> createCompetitionEntry(
+            Authentication authentication,
             @PathVariable String publicId,
             @RequestHeader(value = "X-Competition-Admin-Token", required = false) String adminToken,
             @RequestBody CompetitionEntryCreateRequest request
     ) {
         CompetitionEntryResponse response = competitionEntryCommandService.createCompetitionEntry(
                 publicId,
+                resolveAuthenticatedUserId(authentication),
                 adminToken,
                 request
         );
@@ -172,6 +182,7 @@ public class CompetitionController {
 
     @PatchMapping("/competitions/{publicId}/entries/{entryId}")
     public ResponseEntity<ResponseDTO<CompetitionEntryResponse>> updateCompetitionEntry(
+            Authentication authentication,
             @PathVariable String publicId,
             @PathVariable Long entryId,
             @RequestHeader(value = "X-Competition-Admin-Token", required = false) String adminToken,
@@ -180,6 +191,7 @@ public class CompetitionController {
         CompetitionEntryResponse response = competitionEntryCommandService.updateCompetitionEntry(
                 publicId,
                 entryId,
+                resolveAuthenticatedUserId(authentication),
                 adminToken,
                 request
         );
@@ -188,6 +200,7 @@ public class CompetitionController {
 
     @PatchMapping("/competitions/{publicId}/games/{gameId}/entries")
     public ResponseEntity<ResponseDTO<GameEntryUpdateResponse>> updateGameEntries(
+            Authentication authentication,
             @PathVariable String publicId,
             @PathVariable Long gameId,
             @RequestHeader(value = "X-Competition-Admin-Token", required = false) String adminToken,
@@ -196,6 +209,7 @@ public class CompetitionController {
         GameEntryUpdateResponse response = competitionGameCommandService.updateGameEntries(
                 publicId,
                 gameId,
+                resolveAuthenticatedUserId(authentication),
                 adminToken,
                 request
         );
@@ -204,43 +218,53 @@ public class CompetitionController {
 
     @PostMapping("/competitions/{publicId}/courts/{court}/games")
     public ResponseEntity<ResponseDTO<GameResponse>> createNextCourtGame(
+            Authentication authentication,
             @PathVariable String publicId,
             @PathVariable Integer court,
             @RequestHeader(value = "X-Competition-Admin-Token", required = false) String adminToken
     ) {
-        GameResponse response = competitionGameCommandService.createNextCourtGame(publicId, court, adminToken);
+        GameResponse response = competitionGameCommandService.createNextCourtGame(
+                publicId, court, resolveAuthenticatedUserId(authentication), adminToken
+        );
         return new ResponseEntity<>(ResponseDTO.success(response), HttpStatus.OK);
     }
 
     @PatchMapping("/competitions/{publicId}/games/{gameId}/status")
     public ResponseEntity<ResponseDTO<GameResponse>> updateGameStatus(
+            Authentication authentication,
             @PathVariable String publicId,
             @PathVariable Long gameId,
             @RequestHeader(value = "X-Competition-Admin-Token", required = false) String adminToken,
             @RequestBody GameStatusUpdateRequest request
     ) {
-        GameResponse response = competitionGameCommandService.updateGameStatus(publicId, gameId, adminToken, request);
+        GameResponse response = competitionGameCommandService.updateGameStatus(
+                publicId, gameId, resolveAuthenticatedUserId(authentication), adminToken, request
+        );
         return new ResponseEntity<>(ResponseDTO.success(response), HttpStatus.OK);
     }
 
     @DeleteMapping("/competitions/{publicId}/games/{gameId}")
     public ResponseEntity<ResponseDTO<Void>> deleteGame(
+            Authentication authentication,
             @PathVariable String publicId,
             @PathVariable Long gameId,
             @RequestHeader(value = "X-Competition-Admin-Token", required = false) String adminToken
     ) {
-        competitionGameCommandService.deleteGame(publicId, gameId, adminToken);
+        competitionGameCommandService.deleteGame(publicId, gameId, resolveAuthenticatedUserId(authentication), adminToken);
         return new ResponseEntity<>(ResponseDTO.success(null), HttpStatus.OK);
     }
 
     @PatchMapping("/competitions/{publicId}/games/{gameId}/score")
     public ResponseEntity<ResponseDTO<GameResponse>> updateGameScore(
+            Authentication authentication,
             @PathVariable String publicId,
             @PathVariable Long gameId,
             @RequestHeader(value = "X-Competition-Admin-Token", required = false) String adminToken,
             @RequestBody GameScoreUpdateRequest request
     ) {
-        GameResponse response = competitionGameCommandService.updateGameScore(publicId, gameId, adminToken, request);
+        GameResponse response = competitionGameCommandService.updateGameScore(
+                publicId, gameId, resolveAuthenticatedUserId(authentication), adminToken, request
+        );
         return new ResponseEntity<>(ResponseDTO.success(response), HttpStatus.OK);
     }
 

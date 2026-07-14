@@ -57,6 +57,26 @@ public class MeetingCompetitionCreateService {
             MeetingCompetitionCreateRequest request
     ) {
         Meeting meeting = findOwnedMeetingForUpdate(publicId, ownerUserId);
+        return createCompetitionForMeeting(meeting, ownerUserId, request);
+    }
+
+    @Transactional
+    public MeetingCompetitionCreateResponse createClubMeetingCompetition(
+            String publicId,
+            Long clubId,
+            Long currentUserId,
+            MeetingCompetitionCreateRequest request
+    ) {
+        requireAuthenticated(currentUserId);
+        Meeting meeting = findClubMeetingForUpdate(publicId, clubId);
+        return createCompetitionForMeeting(meeting, currentUserId, request);
+    }
+
+    private MeetingCompetitionCreateResponse createCompetitionForMeeting(
+            Meeting meeting,
+            Long creatorUserId,
+            MeetingCompetitionCreateRequest request
+    ) {
         if (meeting.hasCompetition()) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "이미 경기표가 생성된 모임입니다.");
         }
@@ -70,7 +90,7 @@ public class MeetingCompetitionCreateService {
                 request.isSameGenderDoublesOnly()
         );
         CompetitionCreationResult result =
-                competitionCommandService.createCompetitionResult(competitionRequest, ownerUserId);
+                competitionCommandService.createCompetitionResult(competitionRequest, creatorUserId);
         Competition competition = result.getCompetition();
         meeting.connectCompetition(competition.getId());
         return new MeetingCompetitionCreateResponse(competition.getPublicId());
@@ -90,9 +110,28 @@ public class MeetingCompetitionCreateService {
         meeting.clearCompetition();
     }
 
+    @Transactional
+    public void deleteClubMeetingCompetition(String publicId, Long clubId) {
+        Meeting meeting = findClubMeetingForUpdate(publicId, clubId);
+        if (!meeting.hasCompetition()) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "삭제할 경기표가 없습니다.");
+        }
+
+        Competition competition = competitionRepository
+                .findByIdAndDeletedAtIsNull(meeting.getCompetitionId())
+                .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND));
+        competition.delete(LocalDateTime.now());
+        meeting.clearCompetition();
+    }
+
     private Meeting findOwnedMeetingForUpdate(String publicId, Long ownerUserId) {
         requireAuthenticated(ownerUserId);
         return meetingRepository.findByPublicIdAndOwnerUserIdAndDeletedAtIsNullForUpdate(publicId, ownerUserId)
+                .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND));
+    }
+
+    private Meeting findClubMeetingForUpdate(String publicId, Long clubId) {
+        return meetingRepository.findByPublicIdAndClubIdAndDeletedAtIsNullForUpdate(publicId, clubId)
                 .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND));
     }
 

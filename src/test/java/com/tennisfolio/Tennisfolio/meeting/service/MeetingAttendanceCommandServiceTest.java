@@ -1,5 +1,10 @@
 package com.tennisfolio.Tennisfolio.meeting.service;
 
+import com.tennisfolio.Tennisfolio.club.entity.Club;
+import com.tennisfolio.Tennisfolio.club.entity.ClubMember;
+import com.tennisfolio.Tennisfolio.club.entity.ClubMemberRole;
+import com.tennisfolio.Tennisfolio.club.repository.ClubMemberRepository;
+import com.tennisfolio.Tennisfolio.club.repository.ClubRepository;
 import com.tennisfolio.Tennisfolio.exception.NotFoundException;
 import com.tennisfolio.Tennisfolio.meeting.domain.AttendanceStatus;
 import com.tennisfolio.Tennisfolio.meeting.domain.Gender;
@@ -21,6 +26,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -42,11 +48,23 @@ class MeetingAttendanceCommandServiceTest {
     @Mock
     UserRepository userRepository;
 
+    @Mock
+    ClubRepository clubRepository;
+
+    @Mock
+    ClubMemberRepository clubMemberRepository;
+
     MeetingAttendanceCommandService service;
 
     @BeforeEach
     void setUp() {
-        service = new MeetingAttendanceCommandService(meetingRepository, attendanceRepository, userRepository);
+        service = new MeetingAttendanceCommandService(
+                meetingRepository,
+                attendanceRepository,
+                userRepository,
+                clubRepository,
+                clubMemberRepository
+        );
     }
 
     @Test
@@ -263,6 +281,98 @@ class MeetingAttendanceCommandServiceTest {
     }
 
     @Test
+    void upsertAttendance_linksLoggedInClubMember() {
+        Club club = club(50L);
+        Meeting meeting = clubMeeting(club.getId());
+        ClubMember member = clubMember(club, 100L, 10L, "Jamie Lee", Gender.FEMALE);
+        when(meetingRepository.findByPublicIdAndDeletedAtIsNullForUpdate("meeting-public-id"))
+                .thenReturn(Optional.of(meeting));
+        when(clubRepository.findByIdAndDeletedAtIsNull(50L)).thenReturn(Optional.of(club));
+        when(clubMemberRepository.findByClubAndUserIdAndActiveTrue(club, 10L))
+                .thenReturn(Optional.of(member));
+        when(attendanceRepository.existsByMeetingAndParticipantNameAndDeletedAtIsNull(meeting, "Jamie Lee"))
+                .thenReturn(false);
+        when(attendanceRepository.save(any(MeetingAttendance.class)))
+                .thenAnswer(invocation -> {
+                    MeetingAttendance attendance = invocation.getArgument(0);
+                    ReflectionTestUtils.setField(attendance, "id", 100L);
+                    return attendance;
+                });
+
+        MeetingAttendanceResponse response = service.upsertAttendance(
+                "meeting-public-id",
+                new MeetingAttendanceUpsertRequest(null, "Wrong Name", "MALE", "ATTENDING"),
+                10L
+        );
+
+        assertThat(response.getParticipantName()).isEqualTo("Jamie Lee");
+        assertThat(response.getGender()).isEqualTo("FEMALE");
+        assertThat(response.getParticipantType()).isEqualTo("CLUB_MEMBER");
+        assertThat(response.getClubMemberId()).isEqualTo(100L);
+        assertThat(response.getBadgeLabel()).isEqualTo("클럽원");
+    }
+
+    @Test
+    void upsertAttendance_linksExactClubMemberMatchForGuestInput() {
+        Club club = club(50L);
+        Meeting meeting = clubMeeting(club.getId());
+        ClubMember member = clubMember(club, 100L, null, "Jamie Lee", Gender.FEMALE);
+        when(meetingRepository.findByPublicIdAndDeletedAtIsNullForUpdate("meeting-public-id"))
+                .thenReturn(Optional.of(meeting));
+        when(clubRepository.findByIdAndDeletedAtIsNull(50L)).thenReturn(Optional.of(club));
+        when(clubMemberRepository.findByClubAndNameAndGenderAndActiveTrueOrderByIdAsc(
+                club,
+                "Jamie Lee",
+                Gender.FEMALE
+        )).thenReturn(List.of(member));
+        when(attendanceRepository.existsByMeetingAndParticipantNameAndDeletedAtIsNull(meeting, "Jamie Lee"))
+                .thenReturn(false);
+        when(attendanceRepository.save(any(MeetingAttendance.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        MeetingAttendanceResponse response = service.upsertAttendance(
+                "meeting-public-id",
+                new MeetingAttendanceUpsertRequest(null, "Jamie Lee", "FEMALE", "ATTENDING"),
+                null
+        );
+
+        assertThat(response.getParticipantType()).isEqualTo("CLUB_MEMBER");
+        assertThat(response.getClubMemberId()).isEqualTo(100L);
+        assertThat(response.getBadgeLabel()).isEqualTo("클럽원");
+    }
+
+    @Test
+    void upsertAttendance_savesGuestWhenClubMemberMatchIsAmbiguous() {
+        Club club = club(50L);
+        Meeting meeting = clubMeeting(club.getId());
+        when(meetingRepository.findByPublicIdAndDeletedAtIsNullForUpdate("meeting-public-id"))
+                .thenReturn(Optional.of(meeting));
+        when(clubRepository.findByIdAndDeletedAtIsNull(50L)).thenReturn(Optional.of(club));
+        when(clubMemberRepository.findByClubAndNameAndGenderAndActiveTrueOrderByIdAsc(
+                club,
+                "Jamie Lee",
+                Gender.FEMALE
+        )).thenReturn(java.util.List.of(
+                clubMember(club, 100L, null, "Jamie Lee", Gender.FEMALE),
+                clubMember(club, 101L, null, "Jamie Lee", Gender.FEMALE)
+        ));
+        when(attendanceRepository.existsByMeetingAndParticipantNameAndDeletedAtIsNull(meeting, "Jamie Lee"))
+                .thenReturn(false);
+        when(attendanceRepository.save(any(MeetingAttendance.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        MeetingAttendanceResponse response = service.upsertAttendance(
+                "meeting-public-id",
+                new MeetingAttendanceUpsertRequest(null, "Jamie Lee", "FEMALE", "ATTENDING"),
+                null
+        );
+
+        assertThat(response.getParticipantType()).isEqualTo("GUEST");
+        assertThat(response.getClubMemberId()).isNull();
+        assertThat(response.getBadgeLabel()).isEqualTo("게스트");
+    }
+
+    @Test
     void updateAttendance_allowsOwnerToEditAttendance() {
         Meeting meeting = meeting(null, null);
         MeetingAttendance attendance = attendance(meeting, 100L, "Alex Kim", Gender.MALE, AttendanceStatus.WAITING);
@@ -362,6 +472,39 @@ class MeetingAttendanceCommandServiceTest {
             meeting.connectCompetition(competitionId);
         }
         return meeting;
+    }
+
+    private static Meeting clubMeeting(Long clubId) {
+        Meeting meeting = meeting(null, null);
+        meeting.connectClub(clubId);
+        return meeting;
+    }
+
+    private static Club club(Long id) {
+        Club club = new Club("테니스 클럽", null, 10L);
+        ReflectionTestUtils.setField(club, "id", id);
+        return club;
+    }
+
+    private static ClubMember clubMember(
+            Club club,
+            Long id,
+            Long userId,
+            String name,
+            Gender gender
+    ) {
+        ClubMember member = new ClubMember(
+                club,
+                userId,
+                name,
+                gender,
+                ClubMemberRole.MEMBER,
+                null,
+                null,
+                null
+        );
+        ReflectionTestUtils.setField(member, "id", id);
+        return member;
     }
 
     private static MeetingAttendance attendance(

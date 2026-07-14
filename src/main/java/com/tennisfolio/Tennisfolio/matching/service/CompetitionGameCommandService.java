@@ -67,9 +67,15 @@ public class CompetitionGameCommandService {
 
     @Transactional
     public GameResponse createNextCourtGame(String publicId, Integer court, String adminToken) {
+        competitionAdminAuthorizationService.validateAdminToken(publicId, adminToken);
+        return createNextCourtGame(publicId, court, null, adminToken);
+    }
+
+    @Transactional
+    public GameResponse createNextCourtGame(String publicId, Integer court, Long currentUserId, String adminToken) {
         Competition competition = competitionRepository.findByPublicIdAndDeletedAtIsNull(publicId)
                 .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND));
-        competitionAdminAuthorizationService.validateAdminToken(publicId, adminToken);
+        competitionAdminAuthorizationService.validateManagementAccess(competition, currentUserId, adminToken);
         validateClubSession(competition);
         validateCourt(competition, court);
 
@@ -107,9 +113,21 @@ public class CompetitionGameCommandService {
             String adminToken,
             GameStatusUpdateRequest request
     ) {
+        competitionAdminAuthorizationService.validateAdminToken(publicId, adminToken);
+        return updateGameStatus(publicId, gameId, null, adminToken, request);
+    }
+
+    @Transactional
+    public GameResponse updateGameStatus(
+            String publicId,
+            Long gameId,
+            Long currentUserId,
+            String adminToken,
+            GameStatusUpdateRequest request
+    ) {
         Competition competition = competitionRepository.findByPublicIdAndDeletedAtIsNull(publicId)
                 .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND));
-        competitionAdminAuthorizationService.validateAdminToken(publicId, adminToken);
+        competitionAdminAuthorizationService.validateManagementAccess(competition, currentUserId, adminToken);
         validateClubSession(competition);
 
         Game game = gameRepository.findByIdAndCompetitionId(gameId, competition.getId())
@@ -131,9 +149,15 @@ public class CompetitionGameCommandService {
 
     @Transactional
     public void deleteGame(String publicId, Long gameId, String adminToken) {
+        competitionAdminAuthorizationService.validateAdminToken(publicId, adminToken);
+        deleteGame(publicId, gameId, null, adminToken);
+    }
+
+    @Transactional
+    public void deleteGame(String publicId, Long gameId, Long currentUserId, String adminToken) {
         Competition competition = competitionRepository.findByPublicIdAndDeletedAtIsNull(publicId)
                 .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND));
-        competitionAdminAuthorizationService.validateAdminToken(publicId, adminToken);
+        competitionAdminAuthorizationService.validateManagementAccess(competition, currentUserId, adminToken);
         validateClubSession(competition);
 
         Game game = gameRepository.findByIdAndCompetitionId(gameId, competition.getId())
@@ -153,9 +177,20 @@ public class CompetitionGameCommandService {
             String adminToken,
             CourtCountUpdateRequest request
     ) {
+        competitionAdminAuthorizationService.validateAdminToken(publicId, adminToken);
+        return updateCourtCount(publicId, null, adminToken, request);
+    }
+
+    @Transactional
+    public CompetitionStatResponse updateCourtCount(
+            String publicId,
+            Long currentUserId,
+            String adminToken,
+            CourtCountUpdateRequest request
+    ) {
         Competition competition = competitionRepository.findByPublicIdAndDeletedAtIsNull(publicId)
                 .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND));
-        competitionAdminAuthorizationService.validateAdminToken(publicId, adminToken);
+        competitionAdminAuthorizationService.validateManagementAccess(competition, currentUserId, adminToken);
         validateClubSession(competition);
 
         if (request.getCourtCount() == null || request.getCourtCount() <= 0 || request.getCourtCount() > 10) {
@@ -173,9 +208,21 @@ public class CompetitionGameCommandService {
             String adminToken,
             GameEntryUpdateRequest request
     ) {
+        competitionAdminAuthorizationService.validateAdminToken(publicId, adminToken);
+        return updateGameEntries(publicId, gameId, null, adminToken, request);
+    }
+
+    @Transactional
+    public GameEntryUpdateResponse updateGameEntries(
+            String publicId,
+            Long gameId,
+            Long currentUserId,
+            String adminToken,
+            GameEntryUpdateRequest request
+    ) {
         Competition competition = competitionRepository.findByPublicIdAndDeletedAtIsNull(publicId)
                 .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND));
-        competitionAdminAuthorizationService.validateAdminToken(publicId, adminToken);
+        competitionAdminAuthorizationService.validateManagementAccess(competition, currentUserId, adminToken);
 
         Game game = gameRepository.findByIdAndCompetitionId(gameId, competition.getId())
                 .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND));
@@ -217,8 +264,20 @@ public class CompetitionGameCommandService {
             String adminToken,
             GameScoreUpdateRequest request
     ) {
+        return updateGameScore(publicId, gameId, null, adminToken, request);
+    }
+
+    @Transactional
+    public GameResponse updateGameScore(
+            String publicId,
+            Long gameId,
+            Long currentUserId,
+            String adminToken,
+            GameScoreUpdateRequest request
+    ) {
         Competition competition = competitionRepository.findByPublicIdAndDeletedAtIsNull(publicId)
                 .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND));
+        competitionAdminAuthorizationService.validateManagementAccess(competition, currentUserId, adminToken);
         Game game = gameRepository.findByIdAndCompetitionId(gameId, competition.getId())
                 .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND));
 

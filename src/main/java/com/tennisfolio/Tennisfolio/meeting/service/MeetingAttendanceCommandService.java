@@ -2,10 +2,15 @@ package com.tennisfolio.Tennisfolio.meeting.service;
 
 import com.tennisfolio.Tennisfolio.common.ExceptionCode;
 import com.tennisfolio.Tennisfolio.common.UserStatus;
+import com.tennisfolio.Tennisfolio.club.entity.Club;
+import com.tennisfolio.Tennisfolio.club.entity.ClubMember;
+import com.tennisfolio.Tennisfolio.club.repository.ClubMemberRepository;
+import com.tennisfolio.Tennisfolio.club.repository.ClubRepository;
 import com.tennisfolio.Tennisfolio.exception.NotFoundException;
 import com.tennisfolio.Tennisfolio.meeting.domain.AttendanceStatus;
 import com.tennisfolio.Tennisfolio.meeting.domain.Gender;
 import com.tennisfolio.Tennisfolio.meeting.domain.MeetingStatus;
+import com.tennisfolio.Tennisfolio.meeting.domain.ParticipantResolution;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingAttendanceResponse;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingAttendanceUpsertRequest;
 import com.tennisfolio.Tennisfolio.meeting.entity.Meeting;
@@ -19,6 +24,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 public class MeetingAttendanceCommandService {
@@ -26,15 +33,21 @@ public class MeetingAttendanceCommandService {
     private final MeetingRepository meetingRepository;
     private final MeetingAttendanceRepository attendanceRepository;
     private final UserRepository userRepository;
+    private final ClubRepository clubRepository;
+    private final ClubMemberRepository clubMemberRepository;
 
     public MeetingAttendanceCommandService(
             MeetingRepository meetingRepository,
             MeetingAttendanceRepository attendanceRepository,
-            UserRepository userRepository
+            UserRepository userRepository,
+            ClubRepository clubRepository,
+            ClubMemberRepository clubMemberRepository
     ) {
         this.meetingRepository = meetingRepository;
         this.attendanceRepository = attendanceRepository;
         this.userRepository = userRepository;
+        this.clubRepository = clubRepository;
+        this.clubMemberRepository = clubMemberRepository;
     }
 
     @Transactional
@@ -49,17 +62,26 @@ public class MeetingAttendanceCommandService {
         ensureOwnerNameAvailableOnlyToOwner(meeting, participantName, currentUserId);
         Gender gender = parseGender(request.getGender());
         AttendanceStatus status = parseAttendanceStatus(request.getAttendanceStatus());
+        ParticipantResolution participant = resolveParticipant(meeting, participantName, gender, currentUserId);
 
         MeetingAttendance attendance;
         if (request.getAttendanceId() == null) {
-            rejectDuplicateName(meeting, participantName);
-            ensureCapacityAvailable(meeting, null, gender, status);
-            attendance = attendanceRepository.save(new MeetingAttendance(meeting, participantName, gender, status));
+            rejectDuplicateName(meeting, participant.name());
+            ensureCapacityAvailable(meeting, null, participant.gender(), status);
+            MeetingAttendance newAttendance = new MeetingAttendance(meeting, participant.name(), participant.gender(), status);
+            newAttendance.assignParticipant(participant.type(), participant.clubMemberId());
+            attendance = attendanceRepository.save(newAttendance);
         } else {
             attendance = findAttendance(request.getAttendanceId(), meeting);
-            rejectDuplicateNameExceptSelf(meeting, participantName, attendance.getId());
-            ensureCapacityAvailable(meeting, attendance, gender, status);
-            attendance.update(participantName, gender, status);
+            rejectDuplicateNameExceptSelf(meeting, participant.name(), attendance.getId());
+            ensureCapacityAvailable(meeting, attendance, participant.gender(), status);
+            attendance.update(
+                    participant.name(),
+                    participant.gender(),
+                    status,
+                    participant.type(),
+                    participant.clubMemberId()
+            );
         }
         return MeetingAttendanceResponse.from(attendance);
     }
@@ -167,6 +189,44 @@ public class MeetingAttendanceCommandService {
         }
     }
 
+    private ParticipantResolution resolveParticipant(
+            Meeting meeting,
+            String participantName,
+            Gender gender,
+            Long currentUserId
+    ) {
+        if (!meeting.isClubMeeting()) {
+            return ParticipantResolution.guest(participantName, gender);
+        }
+
+        Club club = clubRepository.findByIdAndDeletedAtIsNull(meeting.getClubId())
+                .orElse(null);
+        if (club == null) {
+            return ParticipantResolution.guest(participantName, gender);
+        }
+
+        Optional<ClubMember> currentMember = currentUserId == null
+                ? Optional.empty()
+                : clubMemberRepository.findByClubAndUserIdAndActiveTrue(club, currentUserId);
+        if (currentMember.isPresent()) {
+            ClubMember member = currentMember.get();
+            return ParticipantResolution.clubMember(member.getName(), member.getGender(), member.getId());
+        }
+
+        List<ClubMember> exactMatches =
+                clubMemberRepository.findByClubAndNameAndGenderAndActiveTrueOrderByIdAsc(
+                        club,
+                        participantName,
+                        gender
+        );
+        if (exactMatches.size() == 1) {
+            ClubMember member = exactMatches.get(0);
+            return ParticipantResolution.clubMember(member.getName(), member.getGender(), member.getId());
+        }
+
+        return ParticipantResolution.guest(participantName, gender);
+    }
+
     private void rejectDuplicateName(Meeting meeting, String participantName) {
         if (attendanceRepository.existsByMeetingAndParticipantNameAndDeletedAtIsNull(meeting, participantName)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "이미 같은 이름으로 참석 응답이 등록되었습니다.");
@@ -263,4 +323,5 @@ public class MeetingAttendanceCommandService {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "로그인이 필요합니다.");
         }
     }
+
 }
