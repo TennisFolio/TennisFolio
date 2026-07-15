@@ -79,7 +79,7 @@
 - 비로그인 게스트 응답의 기존 이름·성별·상태 수정은 유지한다.
 - 결과: 로그인 사용자의 참석 정보는 누구도 이름·성별을 바꿀 수 없다.
 
-### 4단계 — 공개 화면 동작 정리
+### 4단계 — 공개 화면 동작 정리 (완료)
 
 - `MeetingDetailResponse`에 현재 로그인 사용자의 참석 응답 ID를 추가한다.
 - `MeetingPublic`은 이 ID로 본인 응답을 열고, 로그인 상태에서는 이름·성별 입력과 다른 참석자 선택을 막는다.
@@ -507,6 +507,8 @@ node --test src/tennisFolio/src/**/*.test.mjs
 | 2026-07-15 | `./gradlew.bat test --tests com.tennisfolio.Tennisfolio.meeting.repository.MeetingRepositoryTest` | PASS | 활성 참석 응답을 `meeting + userId`로 조회하는 저장소 계약 검증 |
 | 2026-07-15 | `./gradlew.bat test --tests com.tennisfolio.Tennisfolio.meeting.service.MeetingAttendanceCommandServiceTest` | PASS | 로그인 일반 사용자는 프로필, 로그인 클럽원은 클럽원 정보로 이름·성별이 결정되는지 검증 |
 | 2026-07-15 | `./gradlew.bat test --tests com.tennisfolio.Tennisfolio.meeting.service.MeetingAttendanceCommandServiceTest` | PASS | 로그인 사용자는 본인 응답의 상태만 변경하고, 모임장은 계정 연결 응답의 이름·성별을 변경할 수 없는지 검증 |
+| 2026-07-15 | `./gradlew.bat test --tests com.tennisfolio.Tennisfolio.meeting.service.MeetingQueryServiceTest` | PASS | 공개 조회가 로그인 사용자의 계정 연결 참석 응답 ID를 제공하는지 검증 |
+| 2026-07-15 | 프론트엔드 테스트·빌드 | SKIPPED | 프로젝트 규칙상 별도 요청 없이 프론트엔드 테스트와 빌드를 실행하지 않음 |
 
 ## 10. Change Log
 
@@ -520,3 +522,4 @@ node --test src/tennisFolio/src/**/*.test.mjs
 | 2026-07-15 | 로그인 사용자 참석 응답 저장 기반 추가 | `MeetingAttendance.userId`와 활성 응답 조회를 추가하고, 이름·성별 고정은 다음 단계에서 적용 |
 | 2026-07-15 | 로그인 참석자 이름·성별 서버 고정 | 요청의 이름·성별 대신 User 또는 ClubMember 정보를 사용하도록 변경 |
 | 2026-07-15 | 로그인 참석자 수정 권한 제한 | 본인 응답의 상태 변경만 허용하고, 모임장의 계정 연결 응답 정보 변경을 차단 |
+| 2026-07-15 | 공개 참석 화면 계정 응답 식별 | `currentUserAttendanceId`로 본인 응답을 선택하고 로그인 입력을 잠금 |
