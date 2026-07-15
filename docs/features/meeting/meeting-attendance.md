@@ -19,9 +19,11 @@
 - 사용자 화면 용어는 `모임`을 사용하고, 코드/API/DB 도메인은 `Meeting`을 사용한다.
 - 모임 생성은 로그인 사용자만 가능하다. 생성자의 user id를 `Meeting.ownerUserId`로 저장한다.
 - 모임 owner는 모임 정보를 조회, 수정, 삭제할 수 있다.
-- 모임 owner는 참석 응답의 이름, 성별, 참석 상태를 수정하거나 참석 응답을 삭제할 수 있다.
-- 공개 참석 화면에서도 사용자는 기존 참석 응답을 선택해 이름, 성별, 참석 상태를 모두 수정할 수 있다.
-- 로그인한 사용자가 공개 참석 화면에서 참석하는 경우 이름은 프로필 nickname으로 고정하고, 생성자 참석 이름과 같이 화면에서 수정할 수 없게 한다.
+- 모임 owner는 게스트 참석 응답의 이름, 성별, 참석 상태를 수정하거나 참석 응답을 삭제할 수 있다. 로그인 계정에 귀속된 응답은 참석 상태만 수정할 수 있다.
+- 비로그인 게스트는 공개 참석 화면에서 기존 응답을 선택해 이름, 성별, 참석 상태를 수정할 수 있다.
+- 로그인한 사용자의 참석 응답은 계정에 귀속한다. 일반 모임에서는 프로필 nickname/성별을, 클럽 모임에서 로그인한 클럽원인 경우 클럽원 이름/성별을 서버가 사용한다.
+- 로그인한 사용자는 자신의 참석 응답을 다른 이름으로 만들거나 입장할 수 없고, 이름과 성별을 수정할 수 없다. 참석 상태만 변경할 수 있다.
+- 로그인 사용자에게 귀속된 참석 응답은 모임장도 이름과 성별을 수정할 수 없고, 참석 상태만 변경할 수 있다.
 - 공개 참석 화면은 사용자가 선택하거나 저장한 참석 응답을 브라우저 `localStorage`에 모임별로 기억할 수 있다.
 - 같은 브라우저에서 같은 공개 참석 링크를 다시 열면 저장된 참석 응답이 현재 명단에 존재하는 경우 바로 상세 화면으로 진입한다.
 - 저장된 참석 응답이 삭제됐거나 현재 모임 명단에 없으면 기억 값을 무시하고 최초 입장 화면을 보여준다.
@@ -29,6 +31,7 @@
 - 참석 체크는 로그인 없이 가능하며, 이름과 성별은 필수이다.
 - 참석 상태는 `ATTENDING`, `NOT_ATTENDING`, `WAITING`를 지원한다.
 - 한 모임에서는 같은 이름의 활성 참석 응답을 중복 생성하지 않는다.
+- `participantType`은 로그인 여부가 아닌 클럽 소속 참가자인지를 나타낸다. 로그인했지만 클럽원이 아닌 참가자는 `GUEST`이며 `userId`만 가진다.
 - 한 모임은 최대 하나의 Competition만 연결한다.
 - Meeting은 `competitionId`만 저장하고, Competition은 Meeting id를 저장하지 않는다.
 - Meeting 상세 응답은 연결된 Competition이 있으면 화면 이동을 위해 `competitionPublicId`를 함께 반환한다.
@@ -53,7 +56,43 @@
 - 참석 응답과 CompetitionEntry는 분리한다. 참석 응답은 원본 RSVP이고, CompetitionEntry는 실제 경기/매칭 참가자 스냅샷이다.
 - 경기표 생성 후 `Meeting.competitionId`를 저장한다. MeetingAttendance와 CompetitionEntry는 직접 매핑하지 않는다.
 
-## 4. Design Review
+## 4. 이번 변경 구현 순서
+
+### 1단계 — 로그인 사용자 연결 저장
+
+- DB의 `tb_meeting_attendance`에 nullable `USER_ID` 컬럼을 추가한다.
+- `MeetingAttendance`에 `userId`를 추가한다.
+- `MeetingAttendanceRepository`에 모임과 `userId`로 활성 참석 응답을 찾는 조회를 추가한다.
+- 결과: 로그인한 일반 사용자도 `GUEST` 유형을 유지하면서, 자신의 참석 응답을 계정으로 식별할 수 있다.
+
+### 2단계 — 서버에서 이름·성별 고정
+
+- `MeetingAttendanceCommandService`에서 로그인 여부를 확인한다.
+- 로그인한 일반 사용자는 User 프로필의 이름·성별을 사용하고, 로그인한 클럽원은 ClubMember의 이름·성별을 사용한다.
+- 요청 body의 이름·성별은 로그인 사용자에게 적용하지 않는다.
+- 결과: API를 직접 호출해도 로그인 사용자는 다른 이름이나 성별로 참석할 수 없다.
+
+### 3단계 — 수정 권한 제한
+
+- 로그인 사용자 본인은 자신의 `userId`가 저장된 참석 응답만 상태 변경할 수 있게 한다.
+- 모임장은 `userId`가 있는 참석 응답의 이름·성별 변경을 거절하고, 상태 변경만 허용한다.
+- 비로그인 게스트 응답의 기존 이름·성별·상태 수정은 유지한다.
+- 결과: 로그인 사용자의 참석 정보는 누구도 이름·성별을 바꿀 수 없다.
+
+### 4단계 — 공개 화면 동작 정리
+
+- `MeetingDetailResponse`에 현재 로그인 사용자의 참석 응답 ID를 추가한다.
+- `MeetingPublic`은 이 ID로 본인 응답을 열고, 로그인 상태에서는 이름·성별 입력과 다른 참석자 선택을 막는다.
+- 로그인 상태에서는 `다른 이름으로 입장` 버튼을 숨긴다.
+- 결과: 화면에서도 서버 규칙과 같은 동작만 가능하다.
+
+### 5단계 — 검증 및 문서 갱신
+
+- `MeetingAttendanceCommandServiceTest`에 로그인 일반 사용자, 로그인 클럽원, 모임장, 게스트 시나리오를 추가한다.
+- Java/Gradle 테스트는 별도 승인 전에는 실행하지 않는다.
+- 변경한 파일과 수동 확인 결과를 이 문서의 Verification Log에 기록한다.
+
+## 5. Design Review
 
 ### Responsibility
 
@@ -64,7 +103,8 @@
   - `MeetingQueryService`는 공개 링크 상세와 소유자 관리 상세 조회를 처리한다.
 - Domain:
   - `Meeting`은 공유 링크, 소유자, 모임 정보, Competition 연결을 가진다.
-  - `MeetingAttendance`는 이름/성별 기반 참석 응답만 가진다.
+- `MeetingAttendance`는 이름/성별 기반 참석 응답만 가진다.
+- `MeetingAttendance`는 게스트/클럽원 구분과 별도로, 로그인 계정에 귀속된 응답을 식별하기 위한 nullable `userId`를 가진다.
 - Repository / Persistence:
   - `MeetingRepository`, `MeetingAttendanceRepository`를 추가한다.
   - `tb_meeting.COMPETITION_ID`는 nullable unique FK로 둔다.
@@ -132,6 +172,7 @@ tb_meeting
 tb_meeting_attendance
 - MEETING_ATTENDANCE_ID PK
 - MEETING_ID not null FK
+- USER_ID nullable: 로그인 계정에 귀속된 참석 응답 식별자
 - PARTICIPANT_NAME not null
 - ATTENDANCE_STATUS not null: ATTENDING, NOT_ATTENDING, WAITING
 - GENDER not null: MALE, FEMALE
@@ -193,14 +234,16 @@ DELETE /api/meetings/{publicId}
 
 POST /api/meetings/{publicId}/attendances
 - 공개 접근
-- 이름/성별/참석 상태로 응답 생성 또는 이름 선택 기반 수정
-- 이름 선택 기반 수정 시 이름, 성별, 참석 상태 모두 수정 가능
+- 비로그인 게스트는 이름/성별/참석 상태로 응답 생성 또는 이름 선택 기반 수정
+- 로그인 사용자는 서버가 확인한 계정 또는 클럽원 정보로만 응답을 생성/수정하며, 요청의 이름/성별은 신뢰하지 않는다.
+- 로그인 사용자는 자신의 `userId`에 귀속된 응답만 수정할 수 있고, 다른 참석자 선택 또는 다른 이름으로 입장은 거절한다.
 - Meeting에 Competition이 연결되어 있으면 실패
 
 PATCH /api/meetings/{publicId}/attendances/{attendanceId}
 - 로그인 필요
 - owner만 가능
-- 참석자 이름, 성별, 참석 상태 수정
+- 게스트 응답은 이름, 성별, 참석 상태 수정
+- 로그인 사용자에게 귀속된 응답은 참석 상태만 수정
 - 정원 제한은 owner 수정에도 동일하게 적용
 - Meeting에 Competition이 연결되어 있으면 실패
 
@@ -225,6 +268,19 @@ DELETE /api/meetings/{publicId}/competition
 ```
 
 ## 5. Plan / Commit Units
+
+- [ ] `fix(meeting): bind authenticated attendance identity`
+  - 구현:
+    - `tb_meeting_attendance.USER_ID`와 `MeetingAttendance.userId`를 추가한다.
+    - `GUEST`/`CLUB_MEMBER` 참가자 구분은 유지하고, 로그인 사용자의 응답에만 `userId`를 저장한다.
+    - 로그인 사용자 본인과 모임장 모두 계정 귀속 응답의 이름/성별을 변경하지 못하게 하고, 본인은 다른 참가자 응답을 선택하거나 생성하지 못하게 한다.
+    - 공개 조회는 현재 로그인 사용자의 계정 귀속 응답을 식별할 수 있는 값만 제공한다.
+  - 테스트 설명:
+    - 로그인 일반 사용자와 로그인 클럽원의 생성 시 계정 귀속 및 이름/성별 고정을 검증한다.
+    - 로그인 사용자의 다른 이름 생성/타인 응답 수정과 모임장의 계정 귀속 응답 이름·성별 수정을 거절하는지 검증한다.
+    - 비로그인 게스트 응답의 기존 수정 흐름이 유지되는지 검증한다.
+  - 검증 기준:
+    - `MeetingAttendanceCommandServiceTest` 관련 케이스가 통과한다.
 
 - [x] `feat(meeting): add meeting persistence` - done, verified
   - 구현:
@@ -447,6 +503,9 @@ node --test src/tennisFolio/src/**/*.test.mjs
 | 2026-06-30 | `node --test src\tennisFolio\src\page\MeetingToast.test.mjs src\tennisFolio\src\page\MeetingPublic.test.mjs src\tennisFolio\src\page\MeetingManage.test.mjs src\tennisFolio\src\page\Meetings.test.mjs src\tennisFolio\src\utils\meetingApi.test.mjs` | PASS | 관리 화면 운영 관리를 대진표 생성 중심으로 재배치하고 모임 삭제를 불참 명단 아래로 분리한 계약 검증 |
 | 2026-06-30 | `node --test src\tennisFolio\src\page\MeetingToast.test.mjs src\tennisFolio\src\page\MeetingPublic.test.mjs src\tennisFolio\src\page\MeetingManage.test.mjs src\tennisFolio\src\page\Meetings.test.mjs src\tennisFolio\src\utils\meetingApi.test.mjs` | PASS | 공개 참석 최초 입장 화면과 상세 화면에 제한 인원수와 현재 참석 인원 표시 계약 검증 |
 | 2026-06-30 | Gradle 테스트 | SKIPPED | 프로젝트 규칙상 명시 승인 없이 Java/Gradle 테스트를 실행하지 않음 |
+| 2026-07-15 | `./gradlew.bat test --tests com.tennisfolio.Tennisfolio.meeting.entity.MeetingAttendanceTest` | PASS | 로그인 사용자 ID를 `MeetingAttendance`에 저장하는 엔티티 계약 검증 |
+| 2026-07-15 | `./gradlew.bat test --tests com.tennisfolio.Tennisfolio.meeting.repository.MeetingRepositoryTest` | PASS | 활성 참석 응답을 `meeting + userId`로 조회하는 저장소 계약 검증 |
+| 2026-07-15 | `./gradlew.bat test --tests com.tennisfolio.Tennisfolio.meeting.service.MeetingAttendanceCommandServiceTest` | PASS | 로그인 일반 사용자는 프로필, 로그인 클럽원은 클럽원 정보로 이름·성별이 결정되는지 검증 |
 
 ## 10. Change Log
 
@@ -457,3 +516,5 @@ node --test src/tennisFolio/src/**/*.test.mjs
 | 2026-06-30 | 공개 참석 화면 localStorage 기억 요구사항 추가 | 같은 공개 링크 재방문 시 선택한 참석자로 이어서 접속하는 UX 정의 |
 | 2026-06-30 | 관리 화면 삭제 확인 팝업 요구사항 추가 | 참석자 삭제와 연결된 경기표 삭제가 화면 하단 패널 대신 중앙 확인 팝업을 사용하도록 정의 |
 | 2026-06-30 | Meeting에서 Competition으로 이동하는 단방향 링크 요구사항 추가 | DB 연결은 `Meeting.competitionId`만 유지하고 화면 이동용 `competitionPublicId`만 응답으로 조립 |
+| 2026-07-15 | 로그인 사용자 참석 응답 저장 기반 추가 | `MeetingAttendance.userId`와 활성 응답 조회를 추가하고, 이름·성별 고정은 다음 단계에서 적용 |
+| 2026-07-15 | 로그인 참석자 이름·성별 서버 고정 | 요청의 이름·성별 대신 User 또는 ClubMember 정보를 사용하도록 변경 |

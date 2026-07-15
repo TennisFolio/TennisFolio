@@ -15,6 +15,7 @@ import com.tennisfolio.Tennisfolio.meeting.entity.Meeting;
 import com.tennisfolio.Tennisfolio.meeting.entity.MeetingAttendance;
 import com.tennisfolio.Tennisfolio.meeting.repository.MeetingAttendanceRepository;
 import com.tennisfolio.Tennisfolio.meeting.repository.MeetingRepository;
+import com.tennisfolio.Tennisfolio.user.domain.User;
 import com.tennisfolio.Tennisfolio.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -107,6 +108,26 @@ class MeetingAttendanceCommandServiceTest {
         );
 
         assertThat(response.getAttendanceStatus()).isEqualTo("WAITING");
+    }
+
+    @Test
+    void upsertAttendance_usesAuthenticatedUserProfileInsteadOfRequestIdentity() {
+        Meeting meeting = meeting(null, null);
+        when(meetingRepository.findByPublicIdAndDeletedAtIsNullForUpdate("meeting-public-id"))
+                .thenReturn(Optional.of(meeting));
+        when(userRepository.findByIdAndStatus(10L, com.tennisfolio.Tennisfolio.common.UserStatus.ACTIVE))
+                .thenReturn(Optional.of(user(10L, "Alex Kim", com.tennisfolio.Tennisfolio.user.domain.Gender.MALE)));
+        when(attendanceRepository.save(any(MeetingAttendance.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        MeetingAttendanceResponse response = service.upsertAttendance(
+                "meeting-public-id",
+                new MeetingAttendanceUpsertRequest(null, "Wrong Name", "FEMALE", "ATTENDING"),
+                10L
+        );
+
+        assertThat(response.getParticipantName()).isEqualTo("Alex Kim");
+        assertThat(response.getGender()).isEqualTo("MALE");
     }
 
     @Test
@@ -484,6 +505,16 @@ class MeetingAttendanceCommandServiceTest {
         Club club = new Club("테니스 클럽", null, 10L);
         ReflectionTestUtils.setField(club, "id", id);
         return club;
+    }
+
+    private static User user(Long id, String nickName, com.tennisfolio.Tennisfolio.user.domain.Gender gender) {
+        return User.builder()
+                .userId(id)
+                .email("user@example.com")
+                .nickName(nickName)
+                .gender(gender)
+                .status(com.tennisfolio.Tennisfolio.common.UserStatus.ACTIVE)
+                .build();
     }
 
     private static ClubMember clubMember(
