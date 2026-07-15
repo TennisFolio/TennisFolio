@@ -15,6 +15,7 @@ import com.tennisfolio.Tennisfolio.meeting.entity.Meeting;
 import com.tennisfolio.Tennisfolio.meeting.entity.MeetingAttendance;
 import com.tennisfolio.Tennisfolio.meeting.repository.MeetingAttendanceRepository;
 import com.tennisfolio.Tennisfolio.meeting.repository.MeetingRepository;
+import com.tennisfolio.Tennisfolio.user.domain.User;
 import com.tennisfolio.Tennisfolio.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -107,6 +108,68 @@ class MeetingAttendanceCommandServiceTest {
         );
 
         assertThat(response.getAttendanceStatus()).isEqualTo("WAITING");
+    }
+
+    @Test
+    void upsertAttendance_usesAuthenticatedUserProfileInsteadOfRequestIdentity() {
+        Meeting meeting = meeting(null, null);
+        when(meetingRepository.findByPublicIdAndDeletedAtIsNullForUpdate("meeting-public-id"))
+                .thenReturn(Optional.of(meeting));
+        when(userRepository.findByIdAndStatus(10L, com.tennisfolio.Tennisfolio.common.UserStatus.ACTIVE))
+                .thenReturn(Optional.of(user(10L, "Alex Kim", com.tennisfolio.Tennisfolio.user.domain.Gender.MALE)));
+        when(attendanceRepository.save(any(MeetingAttendance.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        MeetingAttendanceResponse response = service.upsertAttendance(
+                "meeting-public-id",
+                new MeetingAttendanceUpsertRequest(null, "Wrong Name", "FEMALE", "ATTENDING"),
+                10L
+        );
+
+        assertThat(response.getParticipantName()).isEqualTo("Alex Kim");
+        assertThat(response.getGender()).isEqualTo("MALE");
+    }
+
+    @Test
+    void upsertAttendance_updatesOnlyLoggedInUsersOwnAttendanceWithStoredIdentity() {
+        Meeting meeting = meeting(null, null);
+        MeetingAttendance attendance = attendance(meeting, 100L, "Alex Kim", Gender.MALE, AttendanceStatus.WAITING);
+        attendance.assignUser(10L);
+        when(meetingRepository.findByPublicIdAndDeletedAtIsNullForUpdate("meeting-public-id"))
+                .thenReturn(Optional.of(meeting));
+        when(attendanceRepository.findByMeetingAndUserIdAndDeletedAtIsNull(meeting, 10L))
+                .thenReturn(Optional.of(attendance));
+
+        MeetingAttendanceResponse response = service.upsertAttendance(
+                "meeting-public-id",
+                new MeetingAttendanceUpsertRequest(null, "Wrong Name", "FEMALE", "ATTENDING"),
+                10L
+        );
+
+        assertThat(response.getId()).isEqualTo(100L);
+        assertThat(response.getParticipantName()).isEqualTo("Alex Kim");
+        assertThat(response.getGender()).isEqualTo("MALE");
+        assertThat(response.getAttendanceStatus()).isEqualTo("ATTENDING");
+    }
+
+    @Test
+    void upsertAttendance_rejectsLoggedInUserUpdatingAnotherAttendance() {
+        Meeting meeting = meeting(null, null);
+        MeetingAttendance ownAttendance = attendance(meeting, 100L, "Alex Kim", Gender.MALE, AttendanceStatus.WAITING);
+        ownAttendance.assignUser(10L);
+        when(meetingRepository.findByPublicIdAndDeletedAtIsNullForUpdate("meeting-public-id"))
+                .thenReturn(Optional.of(meeting));
+        when(attendanceRepository.findByMeetingAndUserIdAndDeletedAtIsNull(meeting, 10L))
+                .thenReturn(Optional.of(ownAttendance));
+
+        assertThatThrownBy(() -> service.upsertAttendance(
+                "meeting-public-id",
+                new MeetingAttendanceUpsertRequest(200L, "Wrong Name", "FEMALE", "ATTENDING"),
+                10L
+        ))
+                .isInstanceOf(ResponseStatusException.class)
+                .extracting("statusCode")
+                .isEqualTo(HttpStatus.CONFLICT);
     }
 
     @Test
@@ -394,6 +457,27 @@ class MeetingAttendanceCommandServiceTest {
     }
 
     @Test
+    void updateAttendance_rejectsOwnerChangingAccountLinkedAttendanceIdentity() {
+        Meeting meeting = meeting(null, null);
+        MeetingAttendance attendance = attendance(meeting, 100L, "Alex Kim", Gender.MALE, AttendanceStatus.WAITING);
+        attendance.assignUser(20L);
+        when(meetingRepository.findByPublicIdAndOwnerUserIdAndDeletedAtIsNullForUpdate("meeting-public-id", 10L))
+                .thenReturn(Optional.of(meeting));
+        when(attendanceRepository.findByIdAndMeetingAndDeletedAtIsNull(100L, meeting))
+                .thenReturn(Optional.of(attendance));
+
+        assertThatThrownBy(() -> service.updateAttendance(
+                "meeting-public-id",
+                100L,
+                new MeetingAttendanceUpsertRequest(null, "Jamie Lee", "FEMALE", "ATTENDING"),
+                10L
+        ))
+                .isInstanceOf(ResponseStatusException.class)
+                .extracting("statusCode")
+                .isEqualTo(HttpStatus.CONFLICT);
+    }
+
+    @Test
     void updateAttendance_rejectsCapacityExceededForOwnerEdit() {
         Meeting meeting = meeting(1, null);
         MeetingAttendance attendance = attendance(meeting, 100L, "Alex Kim", Gender.MALE, AttendanceStatus.WAITING);
@@ -484,6 +568,16 @@ class MeetingAttendanceCommandServiceTest {
         Club club = new Club("테니스 클럽", null, 10L);
         ReflectionTestUtils.setField(club, "id", id);
         return club;
+    }
+
+    private static User user(Long id, String nickName, com.tennisfolio.Tennisfolio.user.domain.Gender gender) {
+        return User.builder()
+                .userId(id)
+                .email("user@example.com")
+                .nickName(nickName)
+                .gender(gender)
+                .status(com.tennisfolio.Tennisfolio.common.UserStatus.ACTIVE)
+                .build();
     }
 
     private static ClubMember clubMember(

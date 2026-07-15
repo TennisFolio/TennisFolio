@@ -54,6 +54,9 @@ public class MeetingAttendance extends BaseTimeEntity {
     @Column(name = "CLUB_MEMBER_ID")
     private Long clubMemberId;
 
+    @Column(name = "USER_ID")
+    private Long userId;
+
     @Column(name = "DEL_DT")
     private LocalDateTime deletedAt;
 
@@ -90,6 +93,10 @@ public class MeetingAttendance extends BaseTimeEntity {
     public void assignParticipant(MeetingParticipantType participantType, Long clubMemberId) {
         this.participantType = participantType == null ? MeetingParticipantType.GUEST : participantType;
         this.clubMemberId = this.participantType == MeetingParticipantType.CLUB_MEMBER ? clubMemberId : null;
+    }
+
+    public void assignUser(Long userId) {
+        this.userId = userId;
     }
 
     public MeetingParticipantType getParticipantType() {

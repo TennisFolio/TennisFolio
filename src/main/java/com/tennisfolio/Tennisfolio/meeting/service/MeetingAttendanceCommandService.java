@@ -17,6 +17,7 @@ import com.tennisfolio.Tennisfolio.meeting.entity.Meeting;
 import com.tennisfolio.Tennisfolio.meeting.entity.MeetingAttendance;
 import com.tennisfolio.Tennisfolio.meeting.repository.MeetingAttendanceRepository;
 import com.tennisfolio.Tennisfolio.meeting.repository.MeetingRepository;
+import com.tennisfolio.Tennisfolio.user.domain.User;
 import com.tennisfolio.Tennisfolio.user.repository.UserRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -58,11 +59,30 @@ public class MeetingAttendanceCommandService {
     ) {
         Meeting meeting = findActiveMeetingForAttendanceUpdate(publicId);
         ensureAttendanceEditable(meeting);
-        String participantName = requireParticipantName(request.getParticipantName());
-        ensureOwnerNameAvailableOnlyToOwner(meeting, participantName, currentUserId);
-        Gender gender = parseGender(request.getGender());
         AttendanceStatus status = parseAttendanceStatus(request.getAttendanceStatus());
-        ParticipantResolution participant = resolveParticipant(meeting, participantName, gender, currentUserId);
+        Optional<MeetingAttendance> currentUserAttendance = findCurrentUserAttendance(meeting, currentUserId);
+        if (currentUserAttendance.isPresent()) {
+            MeetingAttendance attendance = currentUserAttendance.get();
+            ensureRequestedAttendanceIsOwn(request.getAttendanceId(), attendance.getId());
+            ensureCapacityAvailable(meeting, attendance, attendance.getGender(), status);
+            attendance.update(
+                    attendance.getParticipantName(),
+                    attendance.getGender(),
+                    status,
+                    attendance.getParticipantType(),
+                    attendance.getClubMemberId()
+            );
+            return MeetingAttendanceResponse.from(attendance);
+        }
+        rejectAuthenticatedUserUpdatingExistingAttendance(request.getAttendanceId(), currentUserId);
+
+        ParticipantResolution participant = resolveParticipant(
+                meeting,
+                request.getParticipantName(),
+                request.getGender(),
+                currentUserId
+        );
+        ensureOwnerNameAvailableOnlyToOwner(meeting, participant.name(), currentUserId);
 
         MeetingAttendance attendance;
         if (request.getAttendanceId() == null) {
@@ -70,6 +90,7 @@ public class MeetingAttendanceCommandService {
             ensureCapacityAvailable(meeting, null, participant.gender(), status);
             MeetingAttendance newAttendance = new MeetingAttendance(meeting, participant.name(), participant.gender(), status);
             newAttendance.assignParticipant(participant.type(), participant.clubMemberId());
+            newAttendance.assignUser(currentUserId);
             attendance = attendanceRepository.save(newAttendance);
         } else {
             attendance = findAttendance(request.getAttendanceId(), meeting);
@@ -105,6 +126,8 @@ public class MeetingAttendanceCommandService {
 
         Gender gender = parseGender(request.getGender());
 
+        ensureAccountLinkedIdentityUnchanged(attendance, participantName, gender);
+
         AttendanceStatus status = parseAttendanceStatus(request.getAttendanceStatus());
 
         rejectDuplicateNameExceptSelf(meeting, participantName, attendance.getId());
@@ -137,6 +160,37 @@ public class MeetingAttendanceCommandService {
     private MeetingAttendance findAttendance(Long attendanceId, Meeting meeting) {
         return attendanceRepository.findByIdAndMeetingAndDeletedAtIsNull(attendanceId, meeting)
                 .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND));
+    }
+
+    private Optional<MeetingAttendance> findCurrentUserAttendance(Meeting meeting, Long currentUserId) {
+        if (currentUserId == null) {
+            return Optional.empty();
+        }
+        return attendanceRepository.findByMeetingAndUserIdAndDeletedAtIsNull(meeting, currentUserId);
+    }
+
+    private void ensureRequestedAttendanceIsOwn(Long requestedAttendanceId, Long ownAttendanceId) {
+        if (requestedAttendanceId != null && !requestedAttendanceId.equals(ownAttendanceId)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "본인의 참석 정보만 수정할 수 있습니다.");
+        }
+    }
+
+    private void rejectAuthenticatedUserUpdatingExistingAttendance(Long requestedAttendanceId, Long currentUserId) {
+        if (currentUserId != null && requestedAttendanceId != null) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "본인의 참석 정보만 수정할 수 있습니다.");
+        }
+    }
+
+    private void ensureAccountLinkedIdentityUnchanged(
+            MeetingAttendance attendance,
+            String participantName,
+            Gender gender
+    ) {
+        if (attendance.getUserId() != null
+                && (!attendance.getParticipantName().equals(participantName)
+                || attendance.getGender() != gender)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "계정 연결 참석자의 이름과 성별은 수정할 수 없습니다.");
+        }
     }
 
     private void ensureAttendanceEditable(Meeting meeting) {
@@ -192,39 +246,62 @@ public class MeetingAttendanceCommandService {
     private ParticipantResolution resolveParticipant(
             Meeting meeting,
             String participantName,
-            Gender gender,
+            String gender,
             Long currentUserId
     ) {
+        if (currentUserId != null) {
+            return resolveAuthenticatedParticipant(meeting, currentUserId);
+        }
+
+        String requestedName = requireParticipantName(participantName);
+        Gender requestedGender = parseGender(gender);
         if (!meeting.isClubMeeting()) {
-            return ParticipantResolution.guest(participantName, gender);
+            return ParticipantResolution.guest(requestedName, requestedGender);
         }
 
         Club club = clubRepository.findByIdAndDeletedAtIsNull(meeting.getClubId())
                 .orElse(null);
         if (club == null) {
-            return ParticipantResolution.guest(participantName, gender);
-        }
-
-        Optional<ClubMember> currentMember = currentUserId == null
-                ? Optional.empty()
-                : clubMemberRepository.findByClubAndUserIdAndActiveTrue(club, currentUserId);
-        if (currentMember.isPresent()) {
-            ClubMember member = currentMember.get();
-            return ParticipantResolution.clubMember(member.getName(), member.getGender(), member.getId());
+            return ParticipantResolution.guest(requestedName, requestedGender);
         }
 
         List<ClubMember> exactMatches =
                 clubMemberRepository.findByClubAndNameAndGenderAndActiveTrueOrderByIdAsc(
                         club,
-                        participantName,
-                        gender
-        );
+                        requestedName,
+                        requestedGender
+                );
         if (exactMatches.size() == 1) {
             ClubMember member = exactMatches.get(0);
             return ParticipantResolution.clubMember(member.getName(), member.getGender(), member.getId());
         }
 
-        return ParticipantResolution.guest(participantName, gender);
+        return ParticipantResolution.guest(requestedName, requestedGender);
+    }
+
+    private ParticipantResolution resolveAuthenticatedParticipant(Meeting meeting, Long currentUserId) {
+        if (meeting.isClubMeeting()) {
+            Club club = clubRepository.findByIdAndDeletedAtIsNull(meeting.getClubId()).orElse(null);
+            if (club != null) {
+                Optional<ClubMember> currentMember =
+                        clubMemberRepository.findByClubAndUserIdAndActiveTrue(club, currentUserId);
+                if (currentMember.isPresent()) {
+                    ClubMember member = currentMember.get();
+                    return ParticipantResolution.clubMember(member.getName(), member.getGender(), member.getId());
+                }
+            }
+        }
+
+        User user = userRepository.findByIdAndStatus(currentUserId, UserStatus.ACTIVE)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "로그인이 필요합니다."));
+
+        if (user.getNickName() == null || user.getNickName().isBlank() || user.getGender() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "프로필 이름과 성별을 먼저 설정해주세요.");
+        }
+        return ParticipantResolution.guest(
+                user.getNickName().trim(),
+                Gender.valueOf(user.getGender().name())
+        );
     }
 
     private void rejectDuplicateName(Meeting meeting, String participantName) {

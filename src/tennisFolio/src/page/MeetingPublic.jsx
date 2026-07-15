@@ -135,7 +135,7 @@ function MeetingPublic() {
 
   const lockedParticipantName =
     meeting?.currentClubMemberName?.trim() ||
-    (!meeting?.clubMeeting ? currentUser?.nickName?.trim() : '') ||
+    currentUser?.nickName?.trim() ||
     '';
   const lockedParticipantGender =
     meeting?.currentClubMemberGender || currentUser?.gender || emptyAttendance.gender;

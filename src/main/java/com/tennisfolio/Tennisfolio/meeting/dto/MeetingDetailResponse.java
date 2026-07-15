@@ -35,6 +35,7 @@ public class MeetingDetailResponse {
     private Long currentClubMemberId;
     private String currentClubMemberName;
     private String currentClubMemberGender;
+    private Long currentUserAttendanceId;
     private List<MeetingAttendanceResponse> attendances;
 
     public MeetingDetailResponse(
@@ -74,6 +75,7 @@ public class MeetingDetailResponse {
                 competitionCreated,
                 null,
                 false,
+                null,
                 null,
                 null,
                 null,
@@ -119,6 +121,7 @@ public class MeetingDetailResponse {
                 competitionCreated,
                 null,
                 false,
+                null,
                 null,
                 null,
                 null,
@@ -165,6 +168,7 @@ public class MeetingDetailResponse {
                 competitionCreated,
                 null,
                 clubMeeting,
+                null,
                 null,
                 null,
                 null,
@@ -247,6 +251,11 @@ public class MeetingDetailResponse {
                 currentClubMemberId,
                 currentClubMemberName,
                 currentClubMemberGender,
+                currentUserId == null ? null : attendances.stream()
+                        .filter(attendance -> currentUserId.equals(attendance.getUserId()))
+                        .map(MeetingAttendance::getId)
+                        .findFirst()
+                        .orElse(null),
                 attendances.stream()
                         .map(MeetingAttendanceResponse::from)
                         .toList()

@@ -13,6 +13,7 @@ import org.springframework.context.annotation.Import;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -104,6 +105,35 @@ class MeetingRepositoryTest {
         assertThat(found.getGender()).isEqualTo(Gender.MALE);
         assertThat(found.getAttendanceStatus()).isEqualTo(AttendanceStatus.ATTENDING);
         assertThat(found.getDeletedAt()).isNull();
+    }
+
+    @Test
+    void findByMeetingAndUserId_returnsOnlyActiveAttendanceForUser() {
+        Meeting meeting = meetingRepository.saveAndFlush(meeting(
+                "Saturday doubles",
+                LocalDateTime.of(2026, 7, 4, 10, 0)
+        ));
+        MeetingAttendance activeAttendance = new MeetingAttendance(
+                meeting,
+                "Alex Kim",
+                Gender.MALE,
+                AttendanceStatus.ATTENDING
+        );
+        activeAttendance.assignUser(10L);
+        MeetingAttendance deletedAttendance = new MeetingAttendance(
+                meeting,
+                "Alex Kim old response",
+                Gender.MALE,
+                AttendanceStatus.NOT_ATTENDING
+        );
+        deletedAttendance.assignUser(10L);
+        deletedAttendance.delete(LocalDateTime.of(2026, 7, 1, 0, 0));
+        meetingAttendanceRepository.saveAllAndFlush(List.of(activeAttendance, deletedAttendance));
+
+        Optional<MeetingAttendance> found =
+                meetingAttendanceRepository.findByMeetingAndUserIdAndDeletedAtIsNull(meeting, 10L);
+
+        assertThat(found).contains(activeAttendance);
     }
 
     private static Meeting clubMeeting(Long clubId, LocalDateTime startAt, String title) {

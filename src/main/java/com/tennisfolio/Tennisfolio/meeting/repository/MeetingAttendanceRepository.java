@@ -23,6 +23,8 @@ public interface MeetingAttendanceRepository extends JpaRepository<MeetingAttend
 
     Optional<MeetingAttendance> findByIdAndMeetingAndDeletedAtIsNull(Long id, Meeting meeting);
 
+    Optional<MeetingAttendance> findByMeetingAndUserIdAndDeletedAtIsNull(Meeting meeting, Long userId);
+
     List<MeetingAttendance> findByMeetingAndAttendanceStatusAndDeletedAtIsNull(
             Meeting meeting,
             AttendanceStatus attendanceStatus

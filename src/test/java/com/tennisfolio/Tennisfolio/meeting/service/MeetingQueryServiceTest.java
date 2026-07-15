@@ -9,9 +9,11 @@ import com.tennisfolio.Tennisfolio.exception.NotFoundException;
 import com.tennisfolio.Tennisfolio.matching.entity.Competition;
 import com.tennisfolio.Tennisfolio.matching.repository.CompetitionRepository;
 import com.tennisfolio.Tennisfolio.meeting.domain.AttendanceStatus;
+import com.tennisfolio.Tennisfolio.meeting.domain.Gender;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingDetailResponse;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingSummaryResponse;
 import com.tennisfolio.Tennisfolio.meeting.entity.Meeting;
+import com.tennisfolio.Tennisfolio.meeting.entity.MeetingAttendance;
 import com.tennisfolio.Tennisfolio.meeting.repository.MeetingAttendanceRepository;
 import com.tennisfolio.Tennisfolio.meeting.repository.MeetingRepository;
 import com.tennisfolio.Tennisfolio.user.repository.UserRepository;
@@ -79,6 +81,27 @@ class MeetingQueryServiceTest {
         assertThat(response.getOwnedByCurrentUser()).isTrue();
         assertThat(response.getCompetitionCreated()).isFalse();
         assertThat(response.getAttendances()).isEmpty();
+    }
+
+    @Test
+    void getMeeting_returnsCurrentUsersAccountLinkedAttendanceId() {
+        Meeting meeting = meeting(20L);
+        MeetingAttendance attendance = new MeetingAttendance(
+                meeting,
+                "Alex Kim",
+                Gender.MALE,
+                AttendanceStatus.ATTENDING
+        );
+        ReflectionTestUtils.setField(attendance, "id", 100L);
+        attendance.assignUser(10L);
+        when(meetingRepository.findByPublicIdAndDeletedAtIsNull("meeting-public-id"))
+                .thenReturn(Optional.of(meeting));
+        when(attendanceRepository.findByMeetingAndDeletedAtIsNullOrderByIdAsc(meeting))
+                .thenReturn(List.of(attendance));
+
+        MeetingDetailResponse response = service.getMeeting("meeting-public-id", 10L);
+
+        assertThat(response.getCurrentUserAttendanceId()).isEqualTo(100L);
     }
 
     @Test

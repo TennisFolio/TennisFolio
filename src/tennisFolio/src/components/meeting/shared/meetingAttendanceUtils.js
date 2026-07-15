@@ -25,36 +25,13 @@ export function getAttendanceForm(attendance) {
 }
 
 export function findCurrentUserAttendance(currentUser, meeting, attendances) {
-  if (meeting?.currentClubMemberId) {
-    const clubMemberName = meeting.currentClubMemberName?.trim();
-    return (
-      attendances.find(
-        (attendance) =>
-          Number(attendance.clubMemberId) === Number(meeting.currentClubMemberId),
-      ) ||
-      attendances.find(
-        (attendance) =>
-          clubMemberName &&
-          attendance.participantType === 'CLUB_MEMBER' &&
-          attendance.participantName === clubMemberName,
-      ) ||
-      null
-    );
-  }
-
-  if (meeting?.clubMeeting) {
+  const currentUserAttendanceId = meeting?.currentUserAttendanceId;
+  if (!currentUser || !currentUserAttendanceId) {
     return null;
   }
 
-  const nickName = currentUser?.nickName?.trim();
-
-  if (!nickName) {
-    return null;
-  }
-
-  return (
-    attendances.find((attendance) => attendance.participantName === nickName) ||
-    null
+  return attendances.find(
+    (attendance) => Number(attendance.id) === Number(currentUserAttendanceId),
   );
 }
 
@@ -67,10 +44,6 @@ export function getCurrentUserForm(currentUser, meeting) {
       participantName: clubMemberName,
       gender: meeting.currentClubMemberGender || emptyAttendance.gender,
     };
-  }
-
-  if (meeting?.clubMeeting) {
-    return null;
   }
 
   const nickName = currentUser?.nickName?.trim();
