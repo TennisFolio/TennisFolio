@@ -60,6 +60,22 @@ public class MeetingAttendanceCommandService {
         Meeting meeting = findActiveMeetingForAttendanceUpdate(publicId);
         ensureAttendanceEditable(meeting);
         AttendanceStatus status = parseAttendanceStatus(request.getAttendanceStatus());
+        Optional<MeetingAttendance> currentUserAttendance = findCurrentUserAttendance(meeting, currentUserId);
+        if (currentUserAttendance.isPresent()) {
+            MeetingAttendance attendance = currentUserAttendance.get();
+            ensureRequestedAttendanceIsOwn(request.getAttendanceId(), attendance.getId());
+            ensureCapacityAvailable(meeting, attendance, attendance.getGender(), status);
+            attendance.update(
+                    attendance.getParticipantName(),
+                    attendance.getGender(),
+                    status,
+                    attendance.getParticipantType(),
+                    attendance.getClubMemberId()
+            );
+            return MeetingAttendanceResponse.from(attendance);
+        }
+        rejectAuthenticatedUserUpdatingExistingAttendance(request.getAttendanceId(), currentUserId);
+
         ParticipantResolution participant = resolveParticipant(
                 meeting,
                 request.getParticipantName(),
@@ -110,6 +126,8 @@ public class MeetingAttendanceCommandService {
 
         Gender gender = parseGender(request.getGender());
 
+        ensureAccountLinkedIdentityUnchanged(attendance, participantName, gender);
+
         AttendanceStatus status = parseAttendanceStatus(request.getAttendanceStatus());
 
         rejectDuplicateNameExceptSelf(meeting, participantName, attendance.getId());
@@ -142,6 +160,37 @@ public class MeetingAttendanceCommandService {
     private MeetingAttendance findAttendance(Long attendanceId, Meeting meeting) {
         return attendanceRepository.findByIdAndMeetingAndDeletedAtIsNull(attendanceId, meeting)
                 .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND));
+    }
+
+    private Optional<MeetingAttendance> findCurrentUserAttendance(Meeting meeting, Long currentUserId) {
+        if (currentUserId == null) {
+            return Optional.empty();
+        }
+        return attendanceRepository.findByMeetingAndUserIdAndDeletedAtIsNull(meeting, currentUserId);
+    }
+
+    private void ensureRequestedAttendanceIsOwn(Long requestedAttendanceId, Long ownAttendanceId) {
+        if (requestedAttendanceId != null && !requestedAttendanceId.equals(ownAttendanceId)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "본인의 참석 정보만 수정할 수 있습니다.");
+        }
+    }
+
+    private void rejectAuthenticatedUserUpdatingExistingAttendance(Long requestedAttendanceId, Long currentUserId) {
+        if (currentUserId != null && requestedAttendanceId != null) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "본인의 참석 정보만 수정할 수 있습니다.");
+        }
+    }
+
+    private void ensureAccountLinkedIdentityUnchanged(
+            MeetingAttendance attendance,
+            String participantName,
+            Gender gender
+    ) {
+        if (attendance.getUserId() != null
+                && (!attendance.getParticipantName().equals(participantName)
+                || attendance.getGender() != gender)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "계정 연결 참석자의 이름과 성별은 수정할 수 없습니다.");
+        }
     }
 
     private void ensureAttendanceEditable(Meeting meeting) {

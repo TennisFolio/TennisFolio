@@ -58,21 +58,21 @@
 
 ## 4. 이번 변경 구현 순서
 
-### 1단계 — 로그인 사용자 연결 저장
+### 1단계 — 로그인 사용자 연결 저장 (완료)
 
 - DB의 `tb_meeting_attendance`에 nullable `USER_ID` 컬럼을 추가한다.
 - `MeetingAttendance`에 `userId`를 추가한다.
 - `MeetingAttendanceRepository`에 모임과 `userId`로 활성 참석 응답을 찾는 조회를 추가한다.
 - 결과: 로그인한 일반 사용자도 `GUEST` 유형을 유지하면서, 자신의 참석 응답을 계정으로 식별할 수 있다.
 
-### 2단계 — 서버에서 이름·성별 고정
+### 2단계 — 서버에서 이름·성별 고정 (완료)
 
 - `MeetingAttendanceCommandService`에서 로그인 여부를 확인한다.
 - 로그인한 일반 사용자는 User 프로필의 이름·성별을 사용하고, 로그인한 클럽원은 ClubMember의 이름·성별을 사용한다.
 - 요청 body의 이름·성별은 로그인 사용자에게 적용하지 않는다.
 - 결과: API를 직접 호출해도 로그인 사용자는 다른 이름이나 성별로 참석할 수 없다.
 
-### 3단계 — 수정 권한 제한
+### 3단계 — 수정 권한 제한 (완료)
 
 - 로그인 사용자 본인은 자신의 `userId`가 저장된 참석 응답만 상태 변경할 수 있게 한다.
 - 모임장은 `userId`가 있는 참석 응답의 이름·성별 변경을 거절하고, 상태 변경만 허용한다.
@@ -506,6 +506,7 @@ node --test src/tennisFolio/src/**/*.test.mjs
 | 2026-07-15 | `./gradlew.bat test --tests com.tennisfolio.Tennisfolio.meeting.entity.MeetingAttendanceTest` | PASS | 로그인 사용자 ID를 `MeetingAttendance`에 저장하는 엔티티 계약 검증 |
 | 2026-07-15 | `./gradlew.bat test --tests com.tennisfolio.Tennisfolio.meeting.repository.MeetingRepositoryTest` | PASS | 활성 참석 응답을 `meeting + userId`로 조회하는 저장소 계약 검증 |
 | 2026-07-15 | `./gradlew.bat test --tests com.tennisfolio.Tennisfolio.meeting.service.MeetingAttendanceCommandServiceTest` | PASS | 로그인 일반 사용자는 프로필, 로그인 클럽원은 클럽원 정보로 이름·성별이 결정되는지 검증 |
+| 2026-07-15 | `./gradlew.bat test --tests com.tennisfolio.Tennisfolio.meeting.service.MeetingAttendanceCommandServiceTest` | PASS | 로그인 사용자는 본인 응답의 상태만 변경하고, 모임장은 계정 연결 응답의 이름·성별을 변경할 수 없는지 검증 |
 
 ## 10. Change Log
 
@@ -518,3 +519,4 @@ node --test src/tennisFolio/src/**/*.test.mjs
 | 2026-06-30 | Meeting에서 Competition으로 이동하는 단방향 링크 요구사항 추가 | DB 연결은 `Meeting.competitionId`만 유지하고 화면 이동용 `competitionPublicId`만 응답으로 조립 |
 | 2026-07-15 | 로그인 사용자 참석 응답 저장 기반 추가 | `MeetingAttendance.userId`와 활성 응답 조회를 추가하고, 이름·성별 고정은 다음 단계에서 적용 |
 | 2026-07-15 | 로그인 참석자 이름·성별 서버 고정 | 요청의 이름·성별 대신 User 또는 ClubMember 정보를 사용하도록 변경 |
+| 2026-07-15 | 로그인 참석자 수정 권한 제한 | 본인 응답의 상태 변경만 허용하고, 모임장의 계정 연결 응답 정보 변경을 차단 |
