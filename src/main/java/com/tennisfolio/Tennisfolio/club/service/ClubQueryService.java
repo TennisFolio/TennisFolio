@@ -2,10 +2,12 @@ package com.tennisfolio.Tennisfolio.club.service;
 
 import com.tennisfolio.Tennisfolio.club.dto.ClubDetailResponse;
 import com.tennisfolio.Tennisfolio.club.dto.ClubMemberResponse;
+import com.tennisfolio.Tennisfolio.club.dto.ClubSkillTierResponse;
 import com.tennisfolio.Tennisfolio.club.dto.ClubSummaryResponse;
 import com.tennisfolio.Tennisfolio.club.entity.Club;
 import com.tennisfolio.Tennisfolio.club.entity.ClubMember;
 import com.tennisfolio.Tennisfolio.club.repository.ClubMemberRepository;
+import com.tennisfolio.Tennisfolio.club.repository.ClubSkillTierRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,13 +18,16 @@ public class ClubQueryService {
 
     private final ClubMemberRepository clubMemberRepository;
     private final ClubAccessService clubAccessService;
+    private final ClubSkillTierRepository clubSkillTierRepository;
 
     public ClubQueryService(
             ClubMemberRepository clubMemberRepository,
-            ClubAccessService clubAccessService
+            ClubAccessService clubAccessService,
+            ClubSkillTierRepository clubSkillTierRepository
     ) {
         this.clubMemberRepository = clubMemberRepository;
         this.clubAccessService = clubAccessService;
+        this.clubSkillTierRepository = clubSkillTierRepository;
     }
 
     @Transactional(readOnly = true)
@@ -45,7 +50,11 @@ public class ClubQueryService {
         return ClubDetailResponse.from(
                 club,
                 currentMember,
-                clubMemberRepository.countByClubAndActiveTrue(club)
+                clubMemberRepository.countByClubAndActiveTrue(club),
+                clubSkillTierRepository.findByClubOrderByLevelDescIdAsc(club)
+                        .stream()
+                        .map(ClubSkillTierResponse::from)
+                        .toList()
         );
     }
 

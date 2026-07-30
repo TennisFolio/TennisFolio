@@ -8,9 +8,7 @@ import com.tennisfolio.Tennisfolio.club.entity.ClubMember;
 import com.tennisfolio.Tennisfolio.club.entity.ClubMemberRole;
 import com.tennisfolio.Tennisfolio.club.repository.ClubMemberRepository;
 import com.tennisfolio.Tennisfolio.club.repository.ClubRepository;
-import com.tennisfolio.Tennisfolio.common.ExceptionCode;
 import com.tennisfolio.Tennisfolio.common.UserStatus;
-import com.tennisfolio.Tennisfolio.exception.NotFoundException;
 import com.tennisfolio.Tennisfolio.meeting.domain.Gender;
 import com.tennisfolio.Tennisfolio.user.domain.User;
 import com.tennisfolio.Tennisfolio.user.repository.UserRepository;
@@ -28,17 +26,20 @@ public class ClubCommandService {
     private final ClubMemberRepository clubMemberRepository;
     private final UserRepository userRepository;
     private final ClubAccessService clubAccessService;
+    private final ClubSkillTierService clubSkillTierService;
 
     public ClubCommandService(
             ClubRepository clubRepository,
             ClubMemberRepository clubMemberRepository,
             UserRepository userRepository,
-            ClubAccessService clubAccessService
+            ClubAccessService clubAccessService,
+            ClubSkillTierService clubSkillTierService
     ) {
         this.clubRepository = clubRepository;
         this.clubMemberRepository = clubMemberRepository;
         this.userRepository = userRepository;
         this.clubAccessService = clubAccessService;
+        this.clubSkillTierService = clubSkillTierService;
     }
 
     @Transactional
@@ -59,6 +60,7 @@ public class ClubCommandService {
                 null,
                 null
         ));
+        clubSkillTierService.replaceSkillTiers(club, request.getSkillTiers());
         return new ClubCreateResponse(club.getPublicId());
     }
 
@@ -66,6 +68,7 @@ public class ClubCommandService {
     public void updateClub(String clubPublicId, ClubUpdateRequest request, Long currentUserId) {
         Club club = clubAccessService.requireAdmin(clubPublicId, currentUserId);
         club.update(requireName(request.getName()), request.getDescription());
+        clubSkillTierService.replaceSkillTiers(club, request.getSkillTiers());
     }
 
     @Transactional

@@ -100,4 +100,8 @@ public class ClubMember extends BaseTimeEntity {
     public void deactivate() {
         this.active = false;
     }
+
+    public void clearSkillTier() {
+        this.skillTier = null;
+    }
 }

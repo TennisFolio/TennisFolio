@@ -8,6 +8,7 @@ import com.tennisfolio.Tennisfolio.club.entity.ClubMember;
 import com.tennisfolio.Tennisfolio.club.entity.ClubMemberRole;
 import com.tennisfolio.Tennisfolio.club.repository.ClubMemberRepository;
 import com.tennisfolio.Tennisfolio.club.repository.ClubRepository;
+import com.tennisfolio.Tennisfolio.club.repository.ClubSkillTierRepository;
 import com.tennisfolio.Tennisfolio.meeting.domain.Gender;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,12 +35,15 @@ class ClubQueryServiceTest {
     @Mock
     ClubMemberRepository clubMemberRepository;
 
+    @Mock
+    ClubSkillTierRepository clubSkillTierRepository;
+
     ClubQueryService service;
 
     @BeforeEach
     void setUp() {
         ClubAccessService accessService = new ClubAccessService(clubRepository, clubMemberRepository);
-        service = new ClubQueryService(clubMemberRepository, accessService);
+        service = new ClubQueryService(clubMemberRepository, accessService, clubSkillTierRepository);
     }
 
     @Test
@@ -72,6 +76,7 @@ class ClubQueryServiceTest {
         when(clubRepository.findByPublicIdAndDeletedAtIsNull("club-public-id")).thenReturn(Optional.of(club));
         when(clubMemberRepository.findByClubAndUserIdAndActiveTrue(club, 10L)).thenReturn(Optional.of(member));
         when(clubMemberRepository.countByClubAndActiveTrue(club)).thenReturn(2L);
+        when(clubSkillTierRepository.findByClubOrderByLevelDescIdAsc(club)).thenReturn(List.of());
 
         ClubDetailResponse response = service.getClub("club-public-id", 10L);
 
