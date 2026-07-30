@@ -5,8 +5,10 @@ import com.tennisfolio.Tennisfolio.club.dto.ClubMemberUpdateRequest;
 import com.tennisfolio.Tennisfolio.club.entity.Club;
 import com.tennisfolio.Tennisfolio.club.entity.ClubMember;
 import com.tennisfolio.Tennisfolio.club.entity.ClubMemberRole;
+import com.tennisfolio.Tennisfolio.club.entity.ClubSkillTier;
 import com.tennisfolio.Tennisfolio.club.repository.ClubMemberRepository;
 import com.tennisfolio.Tennisfolio.club.repository.ClubRepository;
+import com.tennisfolio.Tennisfolio.club.repository.ClubSkillTierRepository;
 import com.tennisfolio.Tennisfolio.meeting.domain.Gender;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,12 +38,19 @@ class ClubMemberCommandServiceTest {
     @Mock
     ClubMemberRepository clubMemberRepository;
 
+    @Mock
+    ClubSkillTierRepository clubSkillTierRepository;
+
     ClubMemberCommandService service;
 
     @BeforeEach
     void setUp() {
         ClubAccessService accessService = new ClubAccessService(clubRepository, clubMemberRepository);
-        service = new ClubMemberCommandService(clubMemberRepository, accessService);
+        service = new ClubMemberCommandService(
+                clubMemberRepository,
+                clubSkillTierRepository,
+                accessService
+        );
     }
 
     @Test
@@ -56,7 +65,7 @@ class ClubMemberCommandServiceTest {
 
         service.addMember(
                 "club-public-id",
-                new ClubMemberCreateRequest(" Jamie Lee ", "FEMALE", "MEMBER", "NTRP 3.5", "010", "lefty"),
+                new ClubMemberCreateRequest(" Jamie Lee ", "FEMALE", "MEMBER", null, "010", "lefty"),
                 10L
         );
 
@@ -67,7 +76,78 @@ class ClubMemberCommandServiceTest {
         assertThat(captor.getValue().getName()).isEqualTo("Jamie Lee");
         assertThat(captor.getValue().getGender()).isEqualTo(Gender.FEMALE);
         assertThat(captor.getValue().getRole()).isEqualTo(ClubMemberRole.MEMBER);
-        assertThat(captor.getValue().getSkillNote()).isEqualTo("NTRP 3.5");
+        assertThat(captor.getValue().getSkillTier()).isNull();
+    }
+
+    @Test
+    void addMember_assignsSkillTierFromSameClub() {
+        Club club = club();
+        ClubMember admin = member(club, 100L, 10L, "Alex Kim", ClubMemberRole.ADMIN);
+        ClubSkillTier skillTier = skillTier(club, 1L, "상급", 3);
+        when(clubRepository.findByPublicIdAndDeletedAtIsNull("club-public-id")).thenReturn(Optional.of(club));
+        when(clubMemberRepository.findByClubAndUserIdAndActiveTrue(club, 10L)).thenReturn(Optional.of(admin));
+        when(clubMemberRepository.existsByClubAndNameAndActiveTrue(club, "Jamie Lee")).thenReturn(false);
+        when(clubSkillTierRepository.findByIdAndClub(1L, club)).thenReturn(Optional.of(skillTier));
+
+        service.addMember(
+                "club-public-id",
+                new ClubMemberCreateRequest("Jamie Lee", "FEMALE", "MEMBER", 1L, "010", "lefty"),
+                10L
+        );
+
+        ArgumentCaptor<ClubMember> captor = ArgumentCaptor.forClass(ClubMember.class);
+        verify(clubMemberRepository).save(captor.capture());
+        assertThat(captor.getValue().getSkillTier()).isSameAs(skillTier);
+    }
+
+    @Test
+    void addMember_rejectsSkillTierFromAnotherClub() {
+        Club club = club();
+        ClubMember admin = member(club, 100L, 10L, "Alex Kim", ClubMemberRole.ADMIN);
+        when(clubRepository.findByPublicIdAndDeletedAtIsNull("club-public-id")).thenReturn(Optional.of(club));
+        when(clubMemberRepository.findByClubAndUserIdAndActiveTrue(club, 10L)).thenReturn(Optional.of(admin));
+        when(clubMemberRepository.existsByClubAndNameAndActiveTrue(club, "Jamie Lee")).thenReturn(false);
+        when(clubSkillTierRepository.findByIdAndClub(2L, club)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.addMember(
+                "club-public-id",
+                new ClubMemberCreateRequest("Jamie Lee", "FEMALE", "MEMBER", 2L, null, null),
+                10L
+        ))
+                .isInstanceOf(ResponseStatusException.class)
+                .extracting("statusCode")
+                .isEqualTo(HttpStatus.BAD_REQUEST);
+        verify(clubMemberRepository, never()).save(any());
+    }
+
+    @Test
+    void updateMember_clearsSkillTierWhenSkillTierIdIsNull() {
+        Club club = club();
+        ClubMember admin = member(club, 100L, 10L, "Alex Kim", ClubMemberRole.ADMIN);
+        ClubSkillTier skillTier = skillTier(club, 1L, "상급", 3);
+        ClubMember member = new ClubMember(
+                club,
+                null,
+                "Jamie Lee",
+                Gender.FEMALE,
+                ClubMemberRole.MEMBER,
+                skillTier,
+                null,
+                null
+        );
+        ReflectionTestUtils.setField(member, "id", 101L);
+        when(clubRepository.findByPublicIdAndDeletedAtIsNull("club-public-id")).thenReturn(Optional.of(club));
+        when(clubMemberRepository.findByClubAndUserIdAndActiveTrue(club, 10L)).thenReturn(Optional.of(admin));
+        when(clubMemberRepository.findByClubAndIdAndActiveTrue(club, 101L)).thenReturn(Optional.of(member));
+
+        service.updateMember(
+                "club-public-id",
+                101L,
+                new ClubMemberUpdateRequest("Jamie Lee", "FEMALE", "MEMBER", null, null, null),
+                10L
+        );
+
+        assertThat(member.getSkillTier()).isNull();
     }
 
     @Test
@@ -158,5 +238,11 @@ class ClubMemberCommandServiceTest {
         ClubMember member = new ClubMember(club, userId, name, Gender.MALE, role, null, null, null);
         ReflectionTestUtils.setField(member, "id", id);
         return member;
+    }
+
+    private static ClubSkillTier skillTier(Club club, Long id, String name, int level) {
+        ClubSkillTier skillTier = new ClubSkillTier(club, name, level);
+        ReflectionTestUtils.setField(skillTier, "id", id);
+        return skillTier;
     }
 }

@@ -5,7 +5,9 @@ import com.tennisfolio.Tennisfolio.club.dto.ClubMemberUpdateRequest;
 import com.tennisfolio.Tennisfolio.club.entity.Club;
 import com.tennisfolio.Tennisfolio.club.entity.ClubMember;
 import com.tennisfolio.Tennisfolio.club.entity.ClubMemberRole;
+import com.tennisfolio.Tennisfolio.club.entity.ClubSkillTier;
 import com.tennisfolio.Tennisfolio.club.repository.ClubMemberRepository;
+import com.tennisfolio.Tennisfolio.club.repository.ClubSkillTierRepository;
 import com.tennisfolio.Tennisfolio.common.ExceptionCode;
 import com.tennisfolio.Tennisfolio.exception.NotFoundException;
 import com.tennisfolio.Tennisfolio.meeting.domain.Gender;
@@ -18,13 +20,16 @@ import org.springframework.web.server.ResponseStatusException;
 public class ClubMemberCommandService {
 
     private final ClubMemberRepository clubMemberRepository;
+    private final ClubSkillTierRepository clubSkillTierRepository;
     private final ClubAccessService clubAccessService;
 
     public ClubMemberCommandService(
             ClubMemberRepository clubMemberRepository,
+            ClubSkillTierRepository clubSkillTierRepository,
             ClubAccessService clubAccessService
     ) {
         this.clubMemberRepository = clubMemberRepository;
+        this.clubSkillTierRepository = clubSkillTierRepository;
         this.clubAccessService = clubAccessService;
     }
 
@@ -33,13 +38,14 @@ public class ClubMemberCommandService {
         Club club = clubAccessService.requireAdmin(clubPublicId, currentUserId);
         String name = requireName(request.getName());
         rejectDuplicateName(club, name);
+        ClubSkillTier skillTier = resolveSkillTier(club, request.getSkillTierId());
         clubMemberRepository.save(new ClubMember(
                 club,
                 null,
                 name,
                 parseGender(request.getGender()),
                 parseRole(request.getRole()),
-                request.getSkillNote(),
+                skillTier,
                 request.getContactMemo(),
                 request.getMemo()
         ));
@@ -58,11 +64,12 @@ public class ClubMemberCommandService {
         rejectDuplicateNameExceptSelf(club, name, member.getId());
         ClubMemberRole requestedRole = parseRole(request.getRole());
         ensureAdminCanChange(member, requestedRole);
+        ClubSkillTier skillTier = resolveSkillTier(club, request.getSkillTierId());
         member.update(
                 name,
                 parseGender(request.getGender()),
                 requestedRole,
-                request.getSkillNote(),
+                skillTier,
                 request.getContactMemo(),
                 request.getMemo()
         );
@@ -79,6 +86,14 @@ public class ClubMemberCommandService {
     private ClubMember findActiveMember(Club club, Long memberId) {
         return clubMemberRepository.findByClubAndIdAndActiveTrue(club, memberId)
                 .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND));
+    }
+
+    private ClubSkillTier resolveSkillTier(Club club, Long skillTierId) {
+        if (skillTierId == null) {
+            return null;
+        }
+        return clubSkillTierRepository.findByIdAndClub(skillTierId, club)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "클럽에 속하지 않은 등급입니다."));
     }
 
     private void rejectDuplicateName(Club club, String name) {

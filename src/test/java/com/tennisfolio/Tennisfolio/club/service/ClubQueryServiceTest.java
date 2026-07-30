@@ -6,6 +6,7 @@ import com.tennisfolio.Tennisfolio.club.dto.ClubSummaryResponse;
 import com.tennisfolio.Tennisfolio.club.entity.Club;
 import com.tennisfolio.Tennisfolio.club.entity.ClubMember;
 import com.tennisfolio.Tennisfolio.club.entity.ClubMemberRole;
+import com.tennisfolio.Tennisfolio.club.entity.ClubSkillTier;
 import com.tennisfolio.Tennisfolio.club.repository.ClubMemberRepository;
 import com.tennisfolio.Tennisfolio.club.repository.ClubRepository;
 import com.tennisfolio.Tennisfolio.club.repository.ClubSkillTierRepository;
@@ -133,6 +134,27 @@ class ClubQueryServiceTest {
         assertThat(response).extracting(ClubMemberResponse::getName).containsExactly("Jamie Lee");
     }
 
+    @Test
+    void getMembers_returnsSelectedSkillTierFields() {
+        Club club = club("club-public-id", "Morning Tennis");
+        ClubMember admin = member(club, 100L, 10L, "Alex Kim", ClubMemberRole.ADMIN);
+        ClubSkillTier skillTier = new ClubSkillTier(club, "상급", 3);
+        ReflectionTestUtils.setField(skillTier, "id", 1L);
+        ClubMember member = new ClubMember(
+                club, null, "Jamie Lee", Gender.FEMALE, ClubMemberRole.MEMBER, skillTier, null, null
+        );
+        ReflectionTestUtils.setField(member, "id", 101L);
+        when(clubRepository.findByPublicIdAndDeletedAtIsNull("club-public-id")).thenReturn(Optional.of(club));
+        when(clubMemberRepository.findByClubAndUserIdAndActiveTrue(club, 10L)).thenReturn(Optional.of(admin));
+        when(clubMemberRepository.findByClubAndActiveTrueOrderByNameAscIdAsc(club)).thenReturn(List.of(member));
+
+        ClubMemberResponse response = service.getMembers("club-public-id", null, 10L).get(0);
+
+        assertThat(response.getSkillTierId()).isEqualTo(1L);
+        assertThat(response.getSkillTierName()).isEqualTo("상급");
+        assertThat(response.getSkillTierLevel()).isEqualTo(3);
+    }
+
     private static Club club(String publicId, String name) {
         Club club = new Club(name, "Indoor club", 10L);
         ReflectionTestUtils.setField(club, "publicId", publicId);
@@ -146,7 +168,7 @@ class ClubQueryServiceTest {
             String name,
             ClubMemberRole role
     ) {
-        ClubMember member = new ClubMember(club, userId, name, Gender.MALE, role, "NTRP 3.5", "010", "memo");
+        ClubMember member = new ClubMember(club, userId, name, Gender.MALE, role, null, "010", "memo");
         ReflectionTestUtils.setField(member, "id", id);
         return member;
     }

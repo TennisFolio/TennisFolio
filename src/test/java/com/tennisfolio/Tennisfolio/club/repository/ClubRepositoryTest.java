@@ -55,7 +55,7 @@ class ClubRepositoryTest {
                 "Kim Admin",
                 Gender.MALE,
                 ClubMemberRole.ADMIN,
-                "advanced",
+                null,
                 "open chat",
                 "creator"
         );
@@ -68,7 +68,7 @@ class ClubRepositoryTest {
         assertThat(found.getName()).isEqualTo("Kim Admin");
         assertThat(found.getGender()).isEqualTo(Gender.MALE);
         assertThat(found.getRole()).isEqualTo(ClubMemberRole.ADMIN);
-        assertThat(found.getSkillNote()).isEqualTo("advanced");
+        assertThat(found.getSkillTier()).isNull();
         assertThat(found.getContactMemo()).isEqualTo("open chat");
         assertThat(found.getMemo()).isEqualTo("creator");
         assertThat(found.isActive()).isTrue();
@@ -87,7 +87,7 @@ class ClubRepositoryTest {
                 "Park Member",
                 Gender.FEMALE,
                 ClubMemberRole.MEMBER,
-                "intermediate",
+                null,
                 null,
                 null
         ));

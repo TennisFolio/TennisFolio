@@ -131,7 +131,9 @@ class ClubControllerTest {
                         "Jamie Lee",
                         "FEMALE",
                         "MEMBER",
-                        "NTRP 3.5",
+                        1L,
+                        "상급",
+                        3,
                         "010",
                         "lefty"
                 )));

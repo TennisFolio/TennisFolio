@@ -2,7 +2,10 @@ package com.tennisfolio.Tennisfolio.club.service;
 
 import com.tennisfolio.Tennisfolio.club.dto.ClubSkillTierRequest;
 import com.tennisfolio.Tennisfolio.club.entity.Club;
+import com.tennisfolio.Tennisfolio.club.entity.ClubMember;
+import com.tennisfolio.Tennisfolio.club.entity.ClubMemberRole;
 import com.tennisfolio.Tennisfolio.club.entity.ClubSkillTier;
+import com.tennisfolio.Tennisfolio.meeting.domain.Gender;
 import com.tennisfolio.Tennisfolio.club.repository.ClubMemberRepository;
 import com.tennisfolio.Tennisfolio.club.repository.ClubSkillTierRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,6 +15,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
@@ -87,5 +91,27 @@ class ClubSkillTierServiceTest {
                 .isInstanceOf(ResponseStatusException.class)
                 .extracting("statusCode")
                 .isEqualTo(HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    void replaceSkillTiers_clearsActiveAndInactiveMembersBeforeDeletingTier() {
+        Club club = new Club("Morning Tennis", null, 10L);
+        ClubSkillTier skillTier = new ClubSkillTier(club, "상급", 1);
+        ReflectionTestUtils.setField(skillTier, "id", 1L);
+        ClubMember activeMember = new ClubMember(
+                club, null, "Alex Kim", Gender.MALE, ClubMemberRole.MEMBER, skillTier, null, null
+        );
+        ClubMember inactiveMember = new ClubMember(
+                club, null, "Jamie Lee", Gender.FEMALE, ClubMemberRole.MEMBER, skillTier, null, null
+        );
+        inactiveMember.deactivate();
+        when(clubSkillTierRepository.findByClubOrderByLevelDescIdAsc(club)).thenReturn(List.of(skillTier));
+        when(clubMemberRepository.findBySkillTier(skillTier)).thenReturn(List.of(activeMember, inactiveMember));
+
+        service.replaceSkillTiers(club, List.of());
+
+        assertThat(activeMember.getSkillTier()).isNull();
+        assertThat(inactiveMember.getSkillTier()).isNull();
+        verify(clubSkillTierRepository).deleteAll(List.of(skillTier));
     }
 }
