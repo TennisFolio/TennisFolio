@@ -62,6 +62,15 @@ Keep `Matching` names inside algorithm/domain internals only when they describe 
 - Only run Java/Gradle or npm build commands when the user explicitly asks for verification, asks to run a build/test, or grants permission for that specific command.
 - When build verification is skipped because of this rule, state that it was skipped in the final response.
 
+## Service Method Composition
+
+Keep application service methods readable as a sequence of business steps.
+
+- A public use-case method should primarily orchestrate the flow: normalize or validate input, load required state, apply changes, and handle removal or follow-up work.
+- Extract non-trivial validation, lookup/mapping, create-or-update, and deletion behavior into clearly named private methods so the high-level flow is visible at a glance.
+- Name extracted methods by their domain action, such as `validateSkillTiers`, `findExistingById`, `saveOrUpdateSkillTiers`, and `removeDeletedSkillTiers`.
+- Do not split trivial one-line expressions solely to increase method count; extract when it clarifies a distinct responsibility or a meaningful business step.
+
 ## Frontend Component Refactoring
 
 When a frontend page grows large, split components by responsibility instead of leaving all JSX in the page file.
