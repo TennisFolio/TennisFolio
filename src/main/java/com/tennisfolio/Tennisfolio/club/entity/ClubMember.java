@@ -48,6 +48,10 @@ public class ClubMember extends BaseTimeEntity {
     @Column(name = "SKILL_NOTE")
     private String skillNote;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "SKILL_TIER_ID")
+    private ClubSkillTier skillTier;
+
     @Column(name = "CONTACT_MEMO")
     private String contactMemo;
 
