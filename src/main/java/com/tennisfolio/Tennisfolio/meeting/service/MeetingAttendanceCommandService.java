@@ -11,6 +11,7 @@ import com.tennisfolio.Tennisfolio.exception.NotFoundException;
 import com.tennisfolio.Tennisfolio.meeting.domain.AttendanceStatus;
 import com.tennisfolio.Tennisfolio.meeting.domain.Gender;
 import com.tennisfolio.Tennisfolio.meeting.domain.MeetingStatus;
+import com.tennisfolio.Tennisfolio.meeting.domain.MeetingParticipantType;
 import com.tennisfolio.Tennisfolio.meeting.domain.ParticipantResolution;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingAttendanceResponse;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingAttendanceUpsertRequest;
@@ -121,6 +122,13 @@ public class MeetingAttendanceCommandService {
 
         ParticipantResolution participant = resolveManagedParticipant(meeting, request);
         AttendanceStatus status = parseAttendanceStatus(request.getAttendanceStatus());
+        Optional<MeetingAttendance> guestToPromote = findGuestToPromote(meeting, participant);
+        if (guestToPromote.isPresent()) {
+            MeetingAttendance attendance = guestToPromote.get();
+            attendance.assignParticipant(MeetingParticipantType.CLUB_MEMBER, participant.clubMemberId());
+            return MeetingAttendanceResponse.from(attendance);
+        }
+
         rejectDuplicateName(meeting, participant.name());
         ensureCapacityAvailable(meeting, null, participant.gender(), status);
 
@@ -366,6 +374,19 @@ public class MeetingAttendanceCommandService {
                 user.getNickName().trim(),
                 Gender.valueOf(user.getGender().name())
         );
+    }
+
+    private Optional<MeetingAttendance> findGuestToPromote(Meeting meeting, ParticipantResolution participant) {
+        if (participant.type() != MeetingParticipantType.CLUB_MEMBER) {
+            return Optional.empty();
+        }
+
+        return attendanceRepository.findByMeetingAndParticipantNameAndGenderAndDeletedAtIsNull(
+                        meeting,
+                        participant.name(),
+                        participant.gender()
+                )
+                .filter(attendance -> attendance.getParticipantType() == MeetingParticipantType.GUEST);
     }
 
     private void rejectDuplicateName(Meeting meeting, String participantName) {

@@ -227,12 +227,35 @@ function MeetingManage({ initialMeeting = null, initialNotice = null }) {
     }
   };
 
+  const isGuestPromotion = (participant) => {
+    if (!participant.clubMemberId) {
+      return false;
+    }
+
+    const selectedMember = clubMembers.find((member) => member.id === participant.clubMemberId);
+    return Boolean(
+      selectedMember &&
+        attendances.some(
+          (attendance) =>
+            attendance.participantType === 'GUEST' &&
+            attendance.participantName === selectedMember.name &&
+            attendance.gender === selectedMember.gender,
+        ),
+    );
+  };
+
   const handleAddParticipant = async (participant) => {
     try {
       setIsParticipantSubmitting(true);
+      const promotedGuest = isGuestPromotion(participant);
       await addManagedParticipant(publicId, participant);
       await loadMeeting();
-      showNotice('success', '참가자를 추가했습니다.');
+      showNotice(
+        'success',
+        promotedGuest
+          ? '기존 게스트 참가자를 클럽원으로 전환했어요.'
+          : '참가자를 추가했습니다.',
+      );
       return true;
     } catch (error) {
       showNotice(

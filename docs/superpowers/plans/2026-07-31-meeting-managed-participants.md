@@ -123,7 +123,7 @@
 
 - [ ] **Step 3: 게스트 승격 조회와 command 흐름을 구현한다**
 
-  `MeetingAttendanceRepository`에 모임·이름·성별·미삭제 기준의 참석자 조회를 추가한다. `addManagedParticipant`에서 클럽원 해석 후 같은 이름·성별의 기존 게스트가 있으면 새 엔티티를 저장하거나 정원을 다시 차감하지 않고, `assignParticipant(CLUB_MEMBER, clubMemberId)`만 수행한다. 상태는 요청값으로 바꾸지 않는다.
+`MeetingAttendanceRepository`에 모임·이름·성별·미삭제 기준의 참석자 조회를 추가한다. `addManagedParticipant`에서 클럽원 해석 후 같은 이름·성별의 기존 게스트가 있으면 새 엔티티를 저장하거나 정원을 다시 차감하지 않고, `assignParticipant(CLUB_MEMBER, clubMemberId)`만 수행한다. 상태는 요청값으로 바꾸지 않는다. 관리 화면은 승격 성공 시 안내 토스트를 표시한다.
 
 - [ ] **Step 4: service 테스트를 통과시킨다**
 

@@ -486,6 +486,38 @@ class MeetingAttendanceCommandServiceTest {
     }
 
     @Test
+    void addManagedParticipant_promotesMatchingGuestToClubMember() {
+        Club club = club(50L);
+        Meeting meeting = clubMeeting(club.getId());
+        ClubMember admin = clubMember(club, 10L, 10L, "관리자", Gender.MALE);
+        ReflectionTestUtils.setField(admin, "role", ClubMemberRole.ADMIN);
+        ClubMember member = clubMember(club, 100L, 20L, "김테니스", Gender.FEMALE);
+        MeetingAttendance guest = attendance(meeting, 200L, "김테니스", Gender.FEMALE, AttendanceStatus.ATTENDING);
+        when(meetingRepository.findByPublicIdAndDeletedAtIsNullForUpdate("meeting-public-id"))
+                .thenReturn(Optional.of(meeting));
+        when(clubRepository.findByIdAndDeletedAtIsNull(50L)).thenReturn(Optional.of(club));
+        when(clubMemberRepository.findByClubAndUserIdAndActiveTrue(club, 10L)).thenReturn(Optional.of(admin));
+        when(clubMemberRepository.findByClubAndIdAndActiveTrue(club, 100L)).thenReturn(Optional.of(member));
+        when(attendanceRepository.findByMeetingAndParticipantNameAndGenderAndDeletedAtIsNull(
+                meeting,
+                "김테니스",
+                Gender.FEMALE
+        )).thenReturn(Optional.of(guest));
+
+        MeetingAttendanceResponse response = service.addManagedParticipant(
+                "meeting-public-id",
+                new ManagedMeetingParticipantCreateRequest(100L, null, null, "WAITING"),
+                10L
+        );
+
+        verify(attendanceRepository, never()).save(any(MeetingAttendance.class));
+        assertThat(response.getId()).isEqualTo(200L);
+        assertThat(response.getAttendanceStatus()).isEqualTo("ATTENDING");
+        assertThat(response.getParticipantType()).isEqualTo("CLUB_MEMBER");
+        assertThat(response.getClubMemberId()).isEqualTo(100L);
+    }
+
+    @Test
     void addManagedParticipant_rejectsNonOwnerForPersonalMeeting() {
         Meeting meeting = meeting(null, null);
         when(meetingRepository.findByPublicIdAndDeletedAtIsNullForUpdate("meeting-public-id"))
