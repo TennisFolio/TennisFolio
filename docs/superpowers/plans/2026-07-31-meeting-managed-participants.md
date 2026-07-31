@@ -180,15 +180,15 @@
 - Modify: `src/main/java/com/tennisfolio/Tennisfolio/meeting/service/MeetingAttendanceCommandService.java`
 - Modify: `src/test/java/com/tennisfolio/Tennisfolio/meeting/service/MeetingAttendanceCommandServiceTest.java`
 
-- [ ] **Step 1: 실패하는 service 테스트를 추가한다**
+- [x] **Step 1: 실패하는 service 테스트를 추가한다**
 
   게스트의 이름·성별·상태·등급 수정 성공과 클럽원의 상태 수정 성공을 검증한다. 권한 없음, 이름 중복, `ATTENDING` 정원 초과, 개인 모임 등급 요청, 클럽원의 이름·성별·등급 변경 요청은 실패를 검증한다.
 
-- [ ] **Step 2: DTO, controller route, service를 구현한다**
+- [x] **Step 2: DTO, controller route, service를 구현한다**
 
   `PATCH /api/meetings/{publicId}/participants/{attendanceId}`는 인증 사용자 ID와 `ManagedMeetingParticipantUpdateRequest`를 `updateManagedParticipant`로 전달한다. 게스트에는 identity·등급·정원·중복 규칙을, 클럽원에는 불변 필드 거절과 상태 갱신만 적용한다.
 
-- [ ] **Step 3: service 테스트를 통과시킨다**
+- [x] **Step 3: service 테스트를 통과시킨다**
 
   Run: `rtk .\\gradlew.bat test --tests com.tennisfolio.Tennisfolio.meeting.service.MeetingAttendanceCommandServiceTest`
 

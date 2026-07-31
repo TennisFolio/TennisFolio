@@ -11,9 +11,11 @@ import com.tennisfolio.Tennisfolio.exception.NotFoundException;
 import com.tennisfolio.Tennisfolio.meeting.domain.AttendanceStatus;
 import com.tennisfolio.Tennisfolio.meeting.domain.Gender;
 import com.tennisfolio.Tennisfolio.meeting.domain.MeetingStatus;
+import com.tennisfolio.Tennisfolio.meeting.domain.MeetingParticipantType;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingAttendanceResponse;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingAttendanceUpsertRequest;
 import com.tennisfolio.Tennisfolio.meeting.dto.ManagedMeetingParticipantCreateRequest;
+import com.tennisfolio.Tennisfolio.meeting.dto.ManagedMeetingParticipantUpdateRequest;
 import com.tennisfolio.Tennisfolio.meeting.entity.Meeting;
 import com.tennisfolio.Tennisfolio.meeting.entity.MeetingAttendance;
 import com.tennisfolio.Tennisfolio.meeting.repository.MeetingAttendanceRepository;
@@ -698,6 +700,170 @@ class MeetingAttendanceCommandServiceTest {
         assertThatThrownBy(() -> service.addManagedParticipant(
                 "meeting-public-id",
                 new ManagedMeetingParticipantCreateRequest(null, "김테니스", "MALE", "ATTENDING"),
+                10L
+        ))
+                .isInstanceOf(ResponseStatusException.class)
+                .extracting(error -> ((ResponseStatusException) error).getStatusCode())
+                .isEqualTo(HttpStatus.CONFLICT);
+    }
+
+    @Test
+    void updateManagedParticipant_allowsOwnerToUpdatePersonalMeetingGuest() {
+        Meeting meeting = meeting(null, null);
+        MeetingAttendance attendance = attendance(meeting, 100L, "Alex Kim", Gender.MALE, AttendanceStatus.WAITING);
+        when(meetingRepository.findByPublicIdAndDeletedAtIsNullForUpdate("meeting-public-id"))
+                .thenReturn(Optional.of(meeting));
+        when(attendanceRepository.findByIdAndMeetingAndDeletedAtIsNull(100L, meeting))
+                .thenReturn(Optional.of(attendance));
+        when(attendanceRepository.existsByMeetingAndParticipantNameAndDeletedAtIsNullAndIdNot(
+                meeting,
+                "Jamie Lee",
+                100L
+        )).thenReturn(false);
+
+        MeetingAttendanceResponse response = service.updateManagedParticipant(
+                "meeting-public-id",
+                100L,
+                new ManagedMeetingParticipantUpdateRequest("Jamie Lee", "FEMALE", "ATTENDING", null),
+                10L
+        );
+
+        assertThat(response.getParticipantName()).isEqualTo("Jamie Lee");
+        assertThat(response.getGender()).isEqualTo("FEMALE");
+        assertThat(response.getAttendanceStatus()).isEqualTo("ATTENDING");
+    }
+
+    @Test
+    void updateManagedParticipant_allowsClubAdminToUpdateClubMemberStatusOnly() {
+        Club club = club(50L);
+        Meeting meeting = clubMeeting(club.getId());
+        ClubMember admin = clubMember(club, 10L, 10L, "관리자", Gender.MALE);
+        ReflectionTestUtils.setField(admin, "role", ClubMemberRole.ADMIN);
+        MeetingAttendance attendance = attendance(meeting, 100L, "클럽원", Gender.FEMALE, AttendanceStatus.WAITING);
+        attendance.assignParticipant(MeetingParticipantType.CLUB_MEMBER, 200L);
+        when(meetingRepository.findByPublicIdAndDeletedAtIsNullForUpdate("meeting-public-id"))
+                .thenReturn(Optional.of(meeting));
+        when(clubRepository.findByIdAndDeletedAtIsNull(50L)).thenReturn(Optional.of(club));
+        when(clubMemberRepository.findByClubAndUserIdAndActiveTrue(club, 10L)).thenReturn(Optional.of(admin));
+        when(attendanceRepository.findByIdAndMeetingAndDeletedAtIsNull(100L, meeting))
+                .thenReturn(Optional.of(attendance));
+
+        MeetingAttendanceResponse response = service.updateManagedParticipant(
+                "meeting-public-id",
+                100L,
+                new ManagedMeetingParticipantUpdateRequest(null, null, "ATTENDING", null),
+                10L
+        );
+
+        assertThat(response.getParticipantName()).isEqualTo("클럽원");
+        assertThat(response.getAttendanceStatus()).isEqualTo("ATTENDING");
+    }
+
+    @Test
+    void updateManagedParticipant_rejectsClubMemberIdentityChange() {
+        Club club = club(50L);
+        Meeting meeting = clubMeeting(club.getId());
+        ClubMember admin = clubMember(club, 10L, 10L, "관리자", Gender.MALE);
+        ReflectionTestUtils.setField(admin, "role", ClubMemberRole.ADMIN);
+        MeetingAttendance attendance = attendance(meeting, 100L, "클럽원", Gender.FEMALE, AttendanceStatus.WAITING);
+        attendance.assignParticipant(MeetingParticipantType.CLUB_MEMBER, 200L);
+        when(meetingRepository.findByPublicIdAndDeletedAtIsNullForUpdate("meeting-public-id"))
+                .thenReturn(Optional.of(meeting));
+        when(clubRepository.findByIdAndDeletedAtIsNull(50L)).thenReturn(Optional.of(club));
+        when(clubMemberRepository.findByClubAndUserIdAndActiveTrue(club, 10L)).thenReturn(Optional.of(admin));
+        when(attendanceRepository.findByIdAndMeetingAndDeletedAtIsNull(100L, meeting))
+                .thenReturn(Optional.of(attendance));
+
+        assertThatThrownBy(() -> service.updateManagedParticipant(
+                "meeting-public-id",
+                100L,
+                new ManagedMeetingParticipantUpdateRequest("다른 이름", null, "ATTENDING", null),
+                10L
+        ))
+                .isInstanceOf(ResponseStatusException.class)
+                .extracting(error -> ((ResponseStatusException) error).getStatusCode())
+                .isEqualTo(HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    void updateManagedParticipant_updatesClubGuestSkillTier() {
+        Club club = club(50L);
+        Meeting meeting = clubMeeting(club.getId());
+        ClubMember admin = clubMember(club, 10L, 10L, "관리자", Gender.MALE);
+        ClubSkillTier skillTier = clubSkillTier(club, 300L, "A", 1);
+        ReflectionTestUtils.setField(admin, "role", ClubMemberRole.ADMIN);
+        MeetingAttendance attendance = attendance(meeting, 100L, "김테니스", Gender.FEMALE, AttendanceStatus.WAITING);
+        when(meetingRepository.findByPublicIdAndDeletedAtIsNullForUpdate("meeting-public-id"))
+                .thenReturn(Optional.of(meeting));
+        when(clubRepository.findByIdAndDeletedAtIsNull(50L)).thenReturn(Optional.of(club));
+        when(clubMemberRepository.findByClubAndUserIdAndActiveTrue(club, 10L)).thenReturn(Optional.of(admin));
+        when(attendanceRepository.findByIdAndMeetingAndDeletedAtIsNull(100L, meeting))
+                .thenReturn(Optional.of(attendance));
+        when(attendanceRepository.existsByMeetingAndParticipantNameAndDeletedAtIsNullAndIdNot(
+                meeting,
+                "김테니스",
+                100L
+        )).thenReturn(false);
+        when(clubSkillTierRepository.findByIdAndClub(300L, club)).thenReturn(Optional.of(skillTier));
+
+        MeetingAttendanceResponse response = service.updateManagedParticipant(
+                "meeting-public-id",
+                100L,
+                new ManagedMeetingParticipantUpdateRequest("김테니스", "FEMALE", "ATTENDING", 300L),
+                10L
+        );
+
+        assertThat(response.getClubSkillTierId()).isEqualTo(300L);
+        assertThat(response.getClubSkillTierName()).isEqualTo("A");
+    }
+
+    @Test
+    void updateManagedParticipant_rejectsSkillTierForPersonalMeetingGuest() {
+        Meeting meeting = meeting(null, null);
+        MeetingAttendance attendance = attendance(meeting, 100L, "김테니스", Gender.FEMALE, AttendanceStatus.WAITING);
+        when(meetingRepository.findByPublicIdAndDeletedAtIsNullForUpdate("meeting-public-id"))
+                .thenReturn(Optional.of(meeting));
+        when(attendanceRepository.findByIdAndMeetingAndDeletedAtIsNull(100L, meeting))
+                .thenReturn(Optional.of(attendance));
+        when(attendanceRepository.existsByMeetingAndParticipantNameAndDeletedAtIsNullAndIdNot(
+                meeting,
+                "김테니스",
+                100L
+        )).thenReturn(false);
+
+        assertThatThrownBy(() -> service.updateManagedParticipant(
+                "meeting-public-id",
+                100L,
+                new ManagedMeetingParticipantUpdateRequest("김테니스", "FEMALE", "ATTENDING", 300L),
+                10L
+        ))
+                .isInstanceOf(ResponseStatusException.class)
+                .extracting(error -> ((ResponseStatusException) error).getStatusCode())
+                .isEqualTo(HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    void updateManagedParticipant_rejectsCapacityExceededWhenGuestBecomesAttending() {
+        Meeting meeting = meeting(1, null);
+        MeetingAttendance attendance = attendance(meeting, 100L, "김테니스", Gender.FEMALE, AttendanceStatus.WAITING);
+        when(meetingRepository.findByPublicIdAndDeletedAtIsNullForUpdate("meeting-public-id"))
+                .thenReturn(Optional.of(meeting));
+        when(attendanceRepository.findByIdAndMeetingAndDeletedAtIsNull(100L, meeting))
+                .thenReturn(Optional.of(attendance));
+        when(attendanceRepository.existsByMeetingAndParticipantNameAndDeletedAtIsNullAndIdNot(
+                meeting,
+                "김테니스",
+                100L
+        )).thenReturn(false);
+        when(attendanceRepository.countByMeetingAndAttendanceStatusAndDeletedAtIsNull(
+                meeting,
+                AttendanceStatus.ATTENDING
+        )).thenReturn(1L);
+
+        assertThatThrownBy(() -> service.updateManagedParticipant(
+                "meeting-public-id",
+                100L,
+                new ManagedMeetingParticipantUpdateRequest("김테니스", "FEMALE", "ATTENDING", null),
                 10L
         ))
                 .isInstanceOf(ResponseStatusException.class)
