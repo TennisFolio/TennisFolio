@@ -30,6 +30,9 @@ function MeetingParticipantEditPanel({
 
   const submit = async (event) => {
     event.preventDefault();
+    const selectedSkillTier = skillTiers.find(
+      (skillTier) => String(skillTier.id) === participant.clubSkillTierId,
+    );
     const saved = await onSubmit(
       isClubMember
         ? { attendanceStatus: participant.attendanceStatus }
@@ -38,9 +41,7 @@ function MeetingParticipantEditPanel({
             gender: participant.gender,
             attendanceStatus: participant.attendanceStatus,
             ...(isClubMeeting && {
-              clubSkillTierId: participant.clubSkillTierId
-                ? Number(participant.clubSkillTierId)
-                : null,
+              clubSkillTierId: selectedSkillTier?.id || null,
             }),
           },
     );

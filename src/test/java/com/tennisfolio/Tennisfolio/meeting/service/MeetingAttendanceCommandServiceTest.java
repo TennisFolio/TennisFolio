@@ -965,6 +965,25 @@ class MeetingAttendanceCommandServiceTest {
         assertThat(attendance.isDeleted()).isTrue();
     }
 
+    @Test
+    void deleteAttendance_allowsClubAdminToDeleteParticipant() {
+        Club club = club(50L);
+        Meeting meeting = clubMeeting(club.getId());
+        ClubMember admin = clubMember(club, 10L, 10L, "관리자", Gender.MALE);
+        ReflectionTestUtils.setField(admin, "role", ClubMemberRole.ADMIN);
+        MeetingAttendance attendance = attendance(meeting, 100L, "김테니스", Gender.FEMALE, AttendanceStatus.WAITING);
+        when(meetingRepository.findByPublicIdAndDeletedAtIsNullForUpdate("meeting-public-id"))
+                .thenReturn(Optional.of(meeting));
+        when(clubRepository.findByIdAndDeletedAtIsNull(50L)).thenReturn(Optional.of(club));
+        when(clubMemberRepository.findByClubAndUserIdAndActiveTrue(club, 10L)).thenReturn(Optional.of(admin));
+        when(attendanceRepository.findByIdAndMeetingAndDeletedAtIsNull(100L, meeting))
+                .thenReturn(Optional.of(attendance));
+
+        service.deleteAttendance("meeting-public-id", 100L, 10L);
+
+        assertThat(attendance.isDeleted()).isTrue();
+    }
+
     private static Meeting meeting(Integer maxParticipants, Long competitionId) {
         return meetingWithCapacities(maxParticipants, null, null, competitionId);
     }

@@ -227,17 +227,17 @@
 - Modify: `docs/superpowers/specs/2026-07-31-meeting-managed-participants.md`
 - Modify: `docs/superpowers/plans/2026-07-31-meeting-managed-participants.md`
 
-- [ ] **Step 1: backend 테스트를 실행한다**
+- [x] **Step 1: backend 테스트를 실행한다**
 
   Run: `rtk .\\gradlew.bat test --tests com.tennisfolio.Tennisfolio.meeting.service.MeetingAttendanceCommandServiceTest --tests com.tennisfolio.Tennisfolio.meeting.api.MeetingControllerTest`
 
   Expected: `BUILD SUCCESSFUL`.
 
-- [ ] **Step 2: 문서의 체크박스와 Verification Log를 갱신한다**
+- [x] **Step 2: 문서의 체크박스와 Verification Log를 갱신한다**
 
   실제 추가·검증한 항목만 완료 처리하고, 프런트엔드 build/test는 프로젝트 규칙상 사용자 요청이 없으므로 실행하지 않았음을 남긴다.
 
-- [ ] **Step 3: 변경 범위를 점검한다**
+- [x] **Step 3: 변경 범위를 점검한다**
 
   Run: `rtk git diff --check`
 

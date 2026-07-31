@@ -56,6 +56,7 @@ function AttendanceChip({
             event.stopPropagation();
             onRemove(attendance);
           }}
+          onKeyDown={(event) => event.stopPropagation()}
         >
           x
         </button>

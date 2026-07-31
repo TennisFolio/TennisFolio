@@ -237,9 +237,10 @@ public class MeetingAttendanceCommandService {
     }
 
     @Transactional
-    public void deleteAttendance(String publicId, Long attendanceId, Long ownerUserId) {
-        Meeting meeting = findOwnedMeetingForAttendanceUpdate(publicId, ownerUserId);
+    public void deleteAttendance(String publicId, Long attendanceId, Long currentUserId) {
+        Meeting meeting = findActiveMeetingForAttendanceUpdate(publicId);
         ensureAttendanceEditable(meeting);
+        ensureManagerCanAddParticipant(meeting, currentUserId);
         MeetingAttendance attendance = findAttendance(attendanceId, meeting);
         attendance.delete(LocalDateTime.now());
     }
