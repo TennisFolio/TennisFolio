@@ -955,7 +955,7 @@ class MeetingAttendanceCommandServiceTest {
     void deleteAttendance_softDeletesOwnerAttendance() {
         Meeting meeting = meeting(null, null);
         MeetingAttendance attendance = attendance(meeting, 100L, "Alex Kim", Gender.MALE, AttendanceStatus.WAITING);
-        when(meetingRepository.findByPublicIdAndOwnerUserIdAndDeletedAtIsNullForUpdate("meeting-public-id", 10L))
+        when(meetingRepository.findByPublicIdAndDeletedAtIsNullForUpdate("meeting-public-id"))
                 .thenReturn(Optional.of(meeting));
         when(attendanceRepository.findByIdAndMeetingAndDeletedAtIsNull(100L, meeting))
                 .thenReturn(Optional.of(attendance));
