@@ -40,7 +40,7 @@ public class ClubSkillTierService {
 
         Map<Long, ClubSkillTier> existingById = findExistingById(club);
         if (!existingById.isEmpty()) {
-            moveExistingLevelsToTemporaryRange(existingById.values(), skillTiers.size());
+            moveExistingTiersToTemporaryRange(existingById.values(), skillTiers);
             clubSkillTierRepository.flush();
         }
 
@@ -60,19 +60,27 @@ public class ClubSkillTierService {
         return existingById;
     }
 
-    private void moveExistingLevelsToTemporaryRange(
+    private void moveExistingTiersToTemporaryRange(
             Collection<ClubSkillTier> existingSkillTiers,
-            int targetCount
+            List<ClubSkillTierRequest> requestedSkillTiers
     ) {
         int currentMaxLevel = existingSkillTiers.stream()
                 .mapToInt(ClubSkillTier::getLevel)
                 .max()
                 .orElse(0);
-        int temporaryOffset = currentMaxLevel + targetCount;
+        int temporaryOffset = currentMaxLevel + requestedSkillTiers.size();
+        Set<String> reservedNames = new HashSet<>();
+        existingSkillTiers.forEach(skillTier -> reservedNames.add(normalizeNameKey(skillTier.getName())));
+        requestedSkillTiers.forEach(request -> reservedNames.add(normalizeNameKey(request.getName())));
 
-        existingSkillTiers.forEach(skillTier ->
-                skillTier.moveLevel(skillTier.getLevel() + temporaryOffset)
-        );
+        int temporaryNameIndex = 1;
+        for (ClubSkillTier skillTier : existingSkillTiers) {
+            String temporaryName;
+            do {
+                temporaryName = "_" + temporaryNameIndex++;
+            } while (!reservedNames.add(normalizeNameKey(temporaryName)));
+            skillTier.moveToTemporaryState(temporaryName, skillTier.getLevel() + temporaryOffset);
+        }
     }
 
     private Set<Long> saveOrUpdateSkillTiers(
@@ -120,7 +128,7 @@ public class ClubSkillTierService {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "등급 정보가 올바르지 않습니다.");
             }
             String name = normalizeName(skillTier.getName());
-            if (!names.add(name.toLowerCase(Locale.ROOT))) {
+            if (!names.add(normalizeNameKey(name))) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "등급 이름은 중복될 수 없습니다.");
             }
         }
@@ -135,5 +143,9 @@ public class ClubSkillTierService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "등급 이름은 최대 10자입니다.");
         }
         return normalizedName;
+    }
+
+    private String normalizeNameKey(String name) {
+        return name.toLowerCase(Locale.ROOT);
     }
 }

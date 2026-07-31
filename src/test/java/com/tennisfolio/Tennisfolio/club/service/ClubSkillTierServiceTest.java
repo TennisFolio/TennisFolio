@@ -23,6 +23,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.verify;
@@ -85,6 +86,28 @@ class ClubSkillTierServiceTest {
         assertThat(List.of(tierA, tierB, tierC))
                 .extracting(ClubSkillTier::getLevel)
                 .containsExactly(4, 3, 2);
+    }
+
+    @Test
+    void replaceSkillTiers_movesExistingNamesBeforeSwappingNames() {
+        Club club = new Club("Morning Tennis", null, 10L);
+        ClubSkillTier tierA = skillTier(club, 1L, "A", 2);
+        ClubSkillTier tierB = skillTier(club, 2L, "B", 1);
+        when(clubSkillTierRepository.findByClubOrderByLevelDescIdAsc(club))
+                .thenReturn(List.of(tierA, tierB));
+        doAnswer(invocation -> {
+            assertThat(List.of(tierA.getName(), tierB.getName()))
+                    .doesNotContain("A", "B");
+            return null;
+        }).when(clubSkillTierRepository).flush();
+
+        service.replaceSkillTiers(club, List.of(
+                new ClubSkillTierRequest(1L, "B"),
+                new ClubSkillTierRequest(2L, "A")
+        ));
+
+        assertThat(List.of(tierA.getName(), tierB.getName()))
+                .containsExactly("B", "A");
     }
 
     @Test
