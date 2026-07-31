@@ -13,6 +13,7 @@ import {
 import {
   createClubMeetingCompetitionWithOptions,
   deleteClubMeetingCompetition,
+  getClub,
   getClubMembers,
   getClubMeeting,
   updateClubMeetingStatus,
@@ -46,6 +47,7 @@ function MeetingManage({ initialMeeting = null, initialNotice = null }) {
   const [notice, setNotice] = useState(initialNotice);
   const [errorMessage, setErrorMessage] = useState('');
   const [clubMembers, setClubMembers] = useState([]);
+  const [clubSkillTiers, setClubSkillTiers] = useState([]);
   const [memberQuery, setMemberQuery] = useState('');
   const [isParticipantSubmitting, setIsParticipantSubmitting] = useState(false);
   const [participantAddOpen, setParticipantAddOpen] = useState(false);
@@ -181,6 +183,30 @@ function MeetingManage({ initialMeeting = null, initialNotice = null }) {
       cancelled = true;
     };
   }, [clubPublicId, memberQuery]);
+
+  useEffect(() => {
+    if (!clubPublicId) {
+      setClubSkillTiers([]);
+      return undefined;
+    }
+
+    let cancelled = false;
+    getClub(clubPublicId)
+      .then((response) => {
+        if (!cancelled) {
+          setClubSkillTiers(response.data.data?.skillTiers || []);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setClubSkillTiers([]);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [clubPublicId]);
 
   useEffect(() => {
     if (ownerAttendance?.attendanceStatus) {
@@ -408,6 +434,7 @@ function MeetingManage({ initialMeeting = null, initialNotice = null }) {
           <MeetingParticipantAddPanel
             isClubMeeting={Boolean(clubPublicId)}
             members={selectableClubMembers}
+            skillTiers={clubSkillTiers}
             query={memberQuery}
             onQueryChange={setMemberQuery}
             onSubmit={async (participant) => {

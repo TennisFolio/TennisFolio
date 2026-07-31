@@ -1,8 +1,8 @@
-# 모임 관리자 참가자 추가 Implementation Plan
+# 모임 관리자 참가자 추가·수정 Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** 모임장이 개인 모임 게스트와 클럽 모임의 멤버·게스트를 관리 화면에서 참가자로 등록한다.
+**Goal:** 모임장이 개인 모임 게스트와 클럽 모임의 멤버·게스트를 관리 화면에서 등록하고 수정한다.
 
 **Architecture:** 기존 `MeetingAttendance`와 정원 검증을 재사용한다. 자기 참석 응답과 분리된 `participants` command를 `MeetingAttendanceCommandService`에 두고, `MeetingManage`가 관리 화면 안의 패널을 통해 이를 호출한다.
 
@@ -21,6 +21,11 @@
 - Create: `src/tennisFolio/src/components/meeting/manage/MeetingParticipantAddPanel.jsx` — 모임 관리 화면의 추가 패널.
 - Modify: `src/tennisFolio/src/page/MeetingManage.jsx` — 패널 state, 클럽 멤버 검색, 저장·새로고침 연결.
 - Modify: `src/tennisFolio/src/page/Meeting.css` — 패널의 반응형 스타일.
+- Create: `src/main/java/com/tennisfolio/Tennisfolio/meeting/dto/ManagedMeetingParticipantUpdateRequest.java` — 관리자 수정 요청 DTO.
+- Create: `src/tennisFolio/src/components/meeting/manage/MeetingParticipantEditPanel.jsx` — 참가자 수정 바텀시트.
+- Modify: `src/tennisFolio/src/components/meeting/shared/AttendanceChip.jsx` — 삭제와 공존하는 명단 선택 동작.
+- Modify: `src/tennisFolio/src/components/meeting/shared/RosterPanel.jsx` — 수정 선택 handler 전달.
+- Modify: `src/tennisFolio/src/components/meeting/shared/MeetingRosterSections.jsx` — 수정 선택 handler 전달.
 
 ### Task 1: 관리자 참가자 command 테스트와 API
 
@@ -145,7 +150,7 @@
 
 - [ ] **Step 1: 실패하는 service 테스트를 추가한다**
 
-  클럽 관리자 게스트가 해당 클럽 등급을 선택해 저장하는 성공, 개인 모임의 등급 요청·다른 클럽 등급 요청·존재하지 않는 등급 요청의 `BAD_REQUEST` 실패를 검증한다. 게스트 응답에 등급 ID와 이름이 포함되는지도 검증한다.
+  클럽 관리자 게스트가 해당 클럽의 현재 등급을 선택해 저장하는 성공, 개인 모임의 등급 요청·다른 클럽 등급 요청·존재하지 않는 등급 요청의 `BAD_REQUEST` 실패를 검증한다. 게스트 응답에 등급 ID와 이름이 포함되는지도 검증한다.
 
 - [ ] **Step 2: 해당 테스트가 실패하는 것을 확인한다**
 
@@ -155,7 +160,7 @@
 
 - [ ] **Step 3: 게스트 등급을 저장하고 응답으로 매핑한다**
 
-  `MeetingAttendance`에 선택한 클럽 등급 ID를 저장한다. 관리자 등록 요청과 응답 DTO에 등급 ID·이름을 추가하고, 클럽 모임 게스트의 등급이 해당 클럽 소속인지 확인한다. 클럽원은 멤버의 기존 등급을 응답에 사용하며, 개인 모임 게스트는 등급 없이 유지한다.
+  `MeetingAttendance`에 선택한 클럽 등급 ID만 저장한다. 관리자 등록 요청과 응답 DTO에 등급 ID·이름을 추가하고, 상세 조회 시 등급 ID로 현재 이름을 매핑한다. 클럽 모임 게스트의 등급이 해당 클럽 소속인지 확인하며, 개인 모임 게스트는 등급 없이 유지한다.
 
 - [ ] **Step 4: 관리 바텀시트에 등급 선택을 연결한다**
 
@@ -167,7 +172,51 @@
 
   Expected: `BUILD SUCCESSFUL`.
 
-### Task 5: 회귀 확인과 문서 갱신
+### Task 5: 관리자 참가자 수정 command와 API
+
+**Files:**
+- Create: `src/main/java/com/tennisfolio/Tennisfolio/meeting/dto/ManagedMeetingParticipantUpdateRequest.java`
+- Modify: `src/main/java/com/tennisfolio/Tennisfolio/meeting/api/MeetingController.java`
+- Modify: `src/main/java/com/tennisfolio/Tennisfolio/meeting/service/MeetingAttendanceCommandService.java`
+- Modify: `src/test/java/com/tennisfolio/Tennisfolio/meeting/service/MeetingAttendanceCommandServiceTest.java`
+
+- [ ] **Step 1: 실패하는 service 테스트를 추가한다**
+
+  게스트의 이름·성별·상태·등급 수정 성공과 클럽원의 상태 수정 성공을 검증한다. 권한 없음, 이름 중복, `ATTENDING` 정원 초과, 개인 모임 등급 요청, 클럽원의 이름·성별·등급 변경 요청은 실패를 검증한다.
+
+- [ ] **Step 2: DTO, controller route, service를 구현한다**
+
+  `PATCH /api/meetings/{publicId}/participants/{attendanceId}`는 인증 사용자 ID와 `ManagedMeetingParticipantUpdateRequest`를 `updateManagedParticipant`로 전달한다. 게스트에는 identity·등급·정원·중복 규칙을, 클럽원에는 불변 필드 거절과 상태 갱신만 적용한다.
+
+- [ ] **Step 3: service 테스트를 통과시킨다**
+
+  Run: `rtk .\\gradlew.bat test --tests com.tennisfolio.Tennisfolio.meeting.service.MeetingAttendanceCommandServiceTest`
+
+  Expected: `BUILD SUCCESSFUL` 및 수정 응답의 현재 등급 이름 확인.
+
+### Task 6: 명단 선택과 참가자 수정 바텀시트
+
+**Files:**
+- Create: `src/tennisFolio/src/components/meeting/manage/MeetingParticipantEditPanel.jsx`
+- Modify: `src/tennisFolio/src/utils/meetingApi.js`
+- Modify: `src/tennisFolio/src/components/meeting/shared/AttendanceChip.jsx`
+- Modify: `src/tennisFolio/src/components/meeting/shared/RosterPanel.jsx`
+- Modify: `src/tennisFolio/src/components/meeting/shared/MeetingRosterSections.jsx`
+- Modify: `src/tennisFolio/src/page/MeetingManage.jsx`
+
+- [ ] **Step 1: 수정 API client와 바텀시트를 만든다**
+
+  `updateManagedParticipant(publicId, attendanceId, participant)`는 `PATCH /api/meetings/{publicId}/participants/{attendanceId}`를 호출한다. 게스트 시트는 이름·성별·클럽 등급·상태를 초기값으로 편집하고, 클럽원 시트는 identity·등급을 읽기 전용으로 표시하며 상태만 변경한다.
+
+- [ ] **Step 2: 명단 선택을 수정 흐름에 연결한다**
+
+  `AttendanceChip`은 관리 명단에서 삭제 버튼과 중첩된 `button` 없이 클릭·키보드 선택을 지원한다. 삭제 클릭은 선택으로 전파하지 않고, `MeetingManage`는 모임장 본인을 제외한 선택 참가자와 수정 시트를 관리한다.
+
+- [ ] **Step 3: 저장·안내·수동 검증을 연결한다**
+
+  저장 성공 시 상세 정보를 다시 읽고 시트를 닫은 뒤 `참가자 정보를 수정했습니다.`를 표시한다. 참가자 추가 아래에는 `참가자를 선택하면 정보를 수정할 수 있어요.`를 표시한다. 프런트엔드 테스트·빌드는 사용자 요청이 없으므로 실행하지 않고, 게스트 전체 수정·클럽원 상태 수정·삭제 동작을 수동 확인한다.
+
+### Task 7: 회귀 확인과 문서 갱신
 
 **Files:**
 - Modify: `docs/features/meeting-managed-participants.md`

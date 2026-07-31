@@ -12,4 +12,14 @@ public class ManagedMeetingParticipantCreateRequest {
     private String participantName;
     private String gender;
     private String attendanceStatus;
+    private Long clubSkillTierId;
+
+    public ManagedMeetingParticipantCreateRequest(
+            Long clubMemberId,
+            String participantName,
+            String gender,
+            String attendanceStatus
+    ) {
+        this(clubMemberId, participantName, gender, attendanceStatus, null);
+    }
 }

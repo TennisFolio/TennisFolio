@@ -4,6 +4,8 @@ import com.tennisfolio.Tennisfolio.meeting.entity.MeetingAttendance;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.util.Map;
+
 @Getter
 @AllArgsConstructor
 public class MeetingAttendanceResponse {
@@ -13,6 +15,8 @@ public class MeetingAttendanceResponse {
     private String attendanceStatus;
     private String participantType;
     private Long clubMemberId;
+    private Long clubSkillTierId;
+    private String clubSkillTierName;
     private String badgeLabel;
 
     public MeetingAttendanceResponse(
@@ -21,10 +25,18 @@ public class MeetingAttendanceResponse {
             String gender,
             String attendanceStatus
     ) {
-        this(id, participantName, gender, attendanceStatus, "GUEST", null, "게스트");
+        this(id, participantName, gender, attendanceStatus, "GUEST", null, null, null, "게스트");
     }
 
     public static MeetingAttendanceResponse from(MeetingAttendance attendance) {
+        return from(attendance, Map.of());
+    }
+
+    public static MeetingAttendanceResponse from(
+            MeetingAttendance attendance,
+            Map<Long, String> skillTierNames
+    ) {
+        Long clubSkillTierId = attendance.getClubSkillTierId();
         return new MeetingAttendanceResponse(
                 attendance.getId(),
                 attendance.getParticipantName(),
@@ -32,6 +44,8 @@ public class MeetingAttendanceResponse {
                 attendance.getAttendanceStatus().name(),
                 attendance.getParticipantType().name(),
                 attendance.getClubMemberId(),
+                clubSkillTierId,
+                clubSkillTierId == null ? null : skillTierNames.get(clubSkillTierId),
                 attendance.getParticipantType().name().equals("CLUB_MEMBER") ? "클럽원" : "게스트"
         );
     }

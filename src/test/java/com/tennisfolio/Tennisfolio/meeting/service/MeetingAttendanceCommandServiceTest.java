@@ -3,8 +3,10 @@ package com.tennisfolio.Tennisfolio.meeting.service;
 import com.tennisfolio.Tennisfolio.club.entity.Club;
 import com.tennisfolio.Tennisfolio.club.entity.ClubMember;
 import com.tennisfolio.Tennisfolio.club.entity.ClubMemberRole;
+import com.tennisfolio.Tennisfolio.club.entity.ClubSkillTier;
 import com.tennisfolio.Tennisfolio.club.repository.ClubMemberRepository;
 import com.tennisfolio.Tennisfolio.club.repository.ClubRepository;
+import com.tennisfolio.Tennisfolio.club.repository.ClubSkillTierRepository;
 import com.tennisfolio.Tennisfolio.exception.NotFoundException;
 import com.tennisfolio.Tennisfolio.meeting.domain.AttendanceStatus;
 import com.tennisfolio.Tennisfolio.meeting.domain.Gender;
@@ -29,6 +31,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -56,6 +59,9 @@ class MeetingAttendanceCommandServiceTest {
     @Mock
     ClubMemberRepository clubMemberRepository;
 
+    @Mock
+    ClubSkillTierRepository clubSkillTierRepository;
+
     MeetingAttendanceCommandService service;
 
     @BeforeEach
@@ -65,7 +71,8 @@ class MeetingAttendanceCommandServiceTest {
                 attendanceRepository,
                 userRepository,
                 clubRepository,
-                clubMemberRepository
+                clubMemberRepository,
+                clubSkillTierRepository
         );
     }
 
@@ -486,6 +493,91 @@ class MeetingAttendanceCommandServiceTest {
     }
 
     @Test
+    void addManagedParticipant_savesClubGuestSkillTier() {
+        Club club = club(50L);
+        Meeting meeting = clubMeeting(club.getId());
+        ClubMember admin = clubMember(club, 10L, 10L, "관리자", Gender.MALE);
+        ClubSkillTier skillTier = clubSkillTier(club, 300L, "A", 3);
+        ReflectionTestUtils.setField(admin, "role", ClubMemberRole.ADMIN);
+        when(meetingRepository.findByPublicIdAndDeletedAtIsNullForUpdate("meeting-public-id"))
+                .thenReturn(Optional.of(meeting));
+        when(clubRepository.findByIdAndDeletedAtIsNull(50L)).thenReturn(Optional.of(club));
+        when(clubMemberRepository.findByClubAndUserIdAndActiveTrue(club, 10L)).thenReturn(Optional.of(admin));
+        when(clubSkillTierRepository.findByIdAndClub(300L, club)).thenReturn(Optional.of(skillTier));
+        when(attendanceRepository.existsByMeetingAndParticipantNameAndDeletedAtIsNull(meeting, "김테니스"))
+                .thenReturn(false);
+        when(attendanceRepository.save(any(MeetingAttendance.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        MeetingAttendanceResponse response = service.addManagedParticipant(
+                "meeting-public-id",
+                new ManagedMeetingParticipantCreateRequest(null, "김테니스", "FEMALE", "ATTENDING", 300L),
+                10L
+        );
+
+        assertThat(response.getClubSkillTierId()).isEqualTo(300L);
+        assertThat(response.getClubSkillTierName()).isEqualTo("A");
+    }
+
+    @Test
+    void addManagedParticipant_rejectsSkillTierForPersonalMeetingGuest() {
+        Meeting meeting = meeting(null, null);
+        when(meetingRepository.findByPublicIdAndDeletedAtIsNullForUpdate("meeting-public-id"))
+                .thenReturn(Optional.of(meeting));
+
+        assertThatThrownBy(() -> service.addManagedParticipant(
+                "meeting-public-id",
+                new ManagedMeetingParticipantCreateRequest(null, "김테니스", "FEMALE", "ATTENDING", 300L),
+                10L
+        ))
+                .isInstanceOf(ResponseStatusException.class)
+                .extracting(error -> ((ResponseStatusException) error).getStatusCode())
+                .isEqualTo(HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    void addManagedParticipant_rejectsUnknownOrForeignClubGuestSkillTier() {
+        Club club = club(50L);
+        Meeting meeting = clubMeeting(club.getId());
+        ClubMember admin = clubMember(club, 10L, 10L, "관리자", Gender.MALE);
+        ReflectionTestUtils.setField(admin, "role", ClubMemberRole.ADMIN);
+        when(meetingRepository.findByPublicIdAndDeletedAtIsNullForUpdate("meeting-public-id"))
+                .thenReturn(Optional.of(meeting));
+        when(clubRepository.findByIdAndDeletedAtIsNull(50L)).thenReturn(Optional.of(club));
+        when(clubMemberRepository.findByClubAndUserIdAndActiveTrue(club, 10L)).thenReturn(Optional.of(admin));
+        when(clubSkillTierRepository.findByIdAndClub(300L, club)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.addManagedParticipant(
+                "meeting-public-id",
+                new ManagedMeetingParticipantCreateRequest(null, "김테니스", "FEMALE", "ATTENDING", 300L),
+                10L
+        ))
+                .isInstanceOf(ResponseStatusException.class)
+                .extracting(error -> ((ResponseStatusException) error).getStatusCode())
+                .isEqualTo(HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    void meetingAttendanceResponse_usesResolvedCurrentSkillTierName() {
+        MeetingAttendance attendance = attendance(
+                meeting(null, null),
+                200L,
+                "김테니스",
+                Gender.FEMALE,
+                AttendanceStatus.ATTENDING
+        );
+        ReflectionTestUtils.setField(attendance, "clubSkillTierId", 300L);
+
+        MeetingAttendanceResponse response = MeetingAttendanceResponse.from(
+                attendance,
+                Map.of(300L, "새 A")
+        );
+
+        assertThat(response.getClubSkillTierId()).isEqualTo(300L);
+        assertThat(response.getClubSkillTierName()).isEqualTo("새 A");
+    }
+
+    @Test
     void addManagedParticipant_promotesMatchingGuestToClubMember() {
         Club club = club(50L);
         Meeting meeting = clubMeeting(club.getId());
@@ -777,6 +869,12 @@ class MeetingAttendanceCommandServiceTest {
         );
         ReflectionTestUtils.setField(member, "id", id);
         return member;
+    }
+
+    private static ClubSkillTier clubSkillTier(Club club, Long id, String name, int level) {
+        ClubSkillTier skillTier = new ClubSkillTier(club, name, level);
+        ReflectionTestUtils.setField(skillTier, "id", id);
+        return skillTier;
     }
 
     private static MeetingAttendance attendance(

@@ -5,11 +5,13 @@ const emptyGuest = {
   participantName: '',
   gender: 'MALE',
   attendanceStatus: 'ATTENDING',
+  clubSkillTierId: '',
 };
 
 function MeetingParticipantAddPanel({
   isClubMeeting,
   members,
+  skillTiers,
   query,
   onQueryChange,
   onSubmit,
@@ -29,6 +31,9 @@ function MeetingParticipantAddPanel({
           participantName: guest.participantName.trim(),
           gender: guest.gender,
           attendanceStatus: guest.attendanceStatus,
+          ...(isClubMeeting && {
+            clubSkillTierId: guest.clubSkillTierId ? Number(guest.clubSkillTierId) : null,
+          }),
         }
       : selectedMember
         ? {
@@ -138,6 +143,25 @@ function MeetingParticipantAddPanel({
                 </button>
               </div>
             </div>
+            {isClubMeeting && (
+              <label className="meeting-field">
+                <span>등급</span>
+                <select
+                  value={guest.clubSkillTierId}
+                  onChange={(event) =>
+                    setGuest((current) => ({ ...current, clubSkillTierId: event.target.value }))
+                  }
+                  disabled={disabled || isSubmitting}
+                >
+                  <option value="">선택 안 함</option>
+                  {skillTiers.map((skillTier) => (
+                    <option key={skillTier.id} value={skillTier.id}>
+                      {skillTier.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            )}
           </>
         ) : (
           <>

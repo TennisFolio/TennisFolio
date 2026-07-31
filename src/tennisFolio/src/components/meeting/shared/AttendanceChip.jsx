@@ -20,9 +20,13 @@ function ParticipantBadge({ attendance, meeting }) {
     return null;
   }
 
+  const label = attendance.clubSkillTierName
+    ? `${attendance.badgeLabel} · ${attendance.clubSkillTierName}`
+    : attendance.badgeLabel;
+
   return (
     <span className="meeting-participant-badge">
-      {attendance.badgeLabel}
+      {label}
     </span>
   );
 }
