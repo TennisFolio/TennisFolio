@@ -11,6 +11,7 @@ import com.tennisfolio.Tennisfolio.meeting.domain.Gender;
 import com.tennisfolio.Tennisfolio.meeting.domain.MeetingStatus;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingAttendanceResponse;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingAttendanceUpsertRequest;
+import com.tennisfolio.Tennisfolio.meeting.dto.ManagedMeetingParticipantCreateRequest;
 import com.tennisfolio.Tennisfolio.meeting.entity.Meeting;
 import com.tennisfolio.Tennisfolio.meeting.entity.MeetingAttendance;
 import com.tennisfolio.Tennisfolio.meeting.repository.MeetingAttendanceRepository;
@@ -433,6 +434,151 @@ class MeetingAttendanceCommandServiceTest {
         assertThat(response.getParticipantType()).isEqualTo("GUEST");
         assertThat(response.getClubMemberId()).isNull();
         assertThat(response.getBadgeLabel()).isEqualTo("게스트");
+    }
+
+    @Test
+    void addManagedParticipant_allowsPersonalMeetingOwnerToAddGuest() {
+        Meeting meeting = meeting(null, null);
+        MeetingAttendance saved = attendance(meeting, 100L, "김테니스", Gender.MALE, AttendanceStatus.ATTENDING);
+        when(meetingRepository.findByPublicIdAndDeletedAtIsNullForUpdate("meeting-public-id"))
+                .thenReturn(Optional.of(meeting));
+        when(attendanceRepository.existsByMeetingAndParticipantNameAndDeletedAtIsNull(meeting, "김테니스"))
+                .thenReturn(false);
+        when(attendanceRepository.save(any(MeetingAttendance.class))).thenReturn(saved);
+
+        MeetingAttendanceResponse response = service.addManagedParticipant(
+                "meeting-public-id",
+                new ManagedMeetingParticipantCreateRequest(null, "김테니스", "MALE", "ATTENDING"),
+                10L
+        );
+
+        verify(attendanceRepository).save(any(MeetingAttendance.class));
+        assertThat(response.getAttendanceStatus()).isEqualTo("ATTENDING");
+        assertThat(response.getBadgeLabel()).isEqualTo("게스트");
+    }
+
+    @Test
+    void addManagedParticipant_allowsClubAdminToAddClubMemberAsWaiting() {
+        Club club = club(50L);
+        Meeting meeting = clubMeeting(club.getId());
+        ClubMember admin = clubMember(club, 10L, 10L, "관리자", Gender.MALE);
+        ReflectionTestUtils.setField(admin, "role", ClubMemberRole.ADMIN);
+        ClubMember member = clubMember(club, 100L, 20L, "김테니스", Gender.FEMALE);
+        when(meetingRepository.findByPublicIdAndDeletedAtIsNullForUpdate("meeting-public-id"))
+                .thenReturn(Optional.of(meeting));
+        when(clubRepository.findByIdAndDeletedAtIsNull(50L)).thenReturn(Optional.of(club));
+        when(clubMemberRepository.findByClubAndUserIdAndActiveTrue(club, 10L)).thenReturn(Optional.of(admin));
+        when(clubMemberRepository.findByClubAndIdAndActiveTrue(club, 100L)).thenReturn(Optional.of(member));
+        when(attendanceRepository.existsByMeetingAndParticipantNameAndDeletedAtIsNull(meeting, "김테니스"))
+                .thenReturn(false);
+        when(attendanceRepository.save(any(MeetingAttendance.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        MeetingAttendanceResponse response = service.addManagedParticipant(
+                "meeting-public-id",
+                new ManagedMeetingParticipantCreateRequest(100L, null, null, "WAITING"),
+                10L
+        );
+
+        assertThat(response.getParticipantName()).isEqualTo("김테니스");
+        assertThat(response.getAttendanceStatus()).isEqualTo("WAITING");
+        assertThat(response.getBadgeLabel()).isEqualTo("클럽원");
+    }
+
+    @Test
+    void addManagedParticipant_rejectsNonOwnerForPersonalMeeting() {
+        Meeting meeting = meeting(null, null);
+        when(meetingRepository.findByPublicIdAndDeletedAtIsNullForUpdate("meeting-public-id"))
+                .thenReturn(Optional.of(meeting));
+
+        assertThatThrownBy(() -> service.addManagedParticipant(
+                "meeting-public-id",
+                new ManagedMeetingParticipantCreateRequest(null, "김테니스", "MALE", "ATTENDING"),
+                20L
+        ))
+                .isInstanceOf(ResponseStatusException.class)
+                .extracting(error -> ((ResponseStatusException) error).getStatusCode())
+                .isEqualTo(HttpStatus.FORBIDDEN);
+    }
+
+    @Test
+    void addManagedParticipant_rejectsNonAdminForClubMeeting() {
+        Club club = club(50L);
+        Meeting meeting = clubMeeting(club.getId());
+        ClubMember member = clubMember(club, 20L, 20L, "일반회원", Gender.MALE);
+        when(meetingRepository.findByPublicIdAndDeletedAtIsNullForUpdate("meeting-public-id"))
+                .thenReturn(Optional.of(meeting));
+        when(clubRepository.findByIdAndDeletedAtIsNull(50L)).thenReturn(Optional.of(club));
+        when(clubMemberRepository.findByClubAndUserIdAndActiveTrue(club, 20L)).thenReturn(Optional.of(member));
+
+        assertThatThrownBy(() -> service.addManagedParticipant(
+                "meeting-public-id",
+                new ManagedMeetingParticipantCreateRequest(null, "김테니스", "MALE", "ATTENDING"),
+                20L
+        ))
+                .isInstanceOf(ResponseStatusException.class)
+                .extracting(error -> ((ResponseStatusException) error).getStatusCode())
+                .isEqualTo(HttpStatus.FORBIDDEN);
+    }
+
+    @Test
+    void addManagedParticipant_rejectsMemberFromAnotherClub() {
+        Club club = club(50L);
+        Meeting meeting = clubMeeting(club.getId());
+        ClubMember admin = clubMember(club, 10L, 10L, "관리자", Gender.MALE);
+        ReflectionTestUtils.setField(admin, "role", ClubMemberRole.ADMIN);
+        when(meetingRepository.findByPublicIdAndDeletedAtIsNullForUpdate("meeting-public-id"))
+                .thenReturn(Optional.of(meeting));
+        when(clubRepository.findByIdAndDeletedAtIsNull(50L)).thenReturn(Optional.of(club));
+        when(clubMemberRepository.findByClubAndUserIdAndActiveTrue(club, 10L)).thenReturn(Optional.of(admin));
+        when(clubMemberRepository.findByClubAndIdAndActiveTrue(club, 100L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.addManagedParticipant(
+                "meeting-public-id",
+                new ManagedMeetingParticipantCreateRequest(100L, null, null, "WAITING"),
+                10L
+        ))
+                .isInstanceOf(NotFoundException.class);
+    }
+
+    @Test
+    void addManagedParticipant_rejectsDuplicateName() {
+        Meeting meeting = meeting(null, null);
+        when(meetingRepository.findByPublicIdAndDeletedAtIsNullForUpdate("meeting-public-id"))
+                .thenReturn(Optional.of(meeting));
+        when(attendanceRepository.existsByMeetingAndParticipantNameAndDeletedAtIsNull(meeting, "김테니스"))
+                .thenReturn(true);
+
+        assertThatThrownBy(() -> service.addManagedParticipant(
+                "meeting-public-id",
+                new ManagedMeetingParticipantCreateRequest(null, "김테니스", "MALE", "ATTENDING"),
+                10L
+        ))
+                .isInstanceOf(ResponseStatusException.class)
+                .extracting(error -> ((ResponseStatusException) error).getStatusCode())
+                .isEqualTo(HttpStatus.CONFLICT);
+    }
+
+    @Test
+    void addManagedParticipant_rejectsTotalCapacityExceeded() {
+        Meeting meeting = meeting(1, null);
+        when(meetingRepository.findByPublicIdAndDeletedAtIsNullForUpdate("meeting-public-id"))
+                .thenReturn(Optional.of(meeting));
+        when(attendanceRepository.existsByMeetingAndParticipantNameAndDeletedAtIsNull(meeting, "김테니스"))
+                .thenReturn(false);
+        when(attendanceRepository.countByMeetingAndAttendanceStatusAndDeletedAtIsNull(
+                meeting,
+                AttendanceStatus.ATTENDING
+        )).thenReturn(1L);
+
+        assertThatThrownBy(() -> service.addManagedParticipant(
+                "meeting-public-id",
+                new ManagedMeetingParticipantCreateRequest(null, "김테니스", "MALE", "ATTENDING"),
+                10L
+        ))
+                .isInstanceOf(ResponseStatusException.class)
+                .extracting(error -> ((ResponseStatusException) error).getStatusCode())
+                .isEqualTo(HttpStatus.CONFLICT);
     }
 
     @Test

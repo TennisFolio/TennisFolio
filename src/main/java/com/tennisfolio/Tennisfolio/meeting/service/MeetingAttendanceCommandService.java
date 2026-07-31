@@ -4,6 +4,7 @@ import com.tennisfolio.Tennisfolio.common.ExceptionCode;
 import com.tennisfolio.Tennisfolio.common.UserStatus;
 import com.tennisfolio.Tennisfolio.club.entity.Club;
 import com.tennisfolio.Tennisfolio.club.entity.ClubMember;
+import com.tennisfolio.Tennisfolio.club.entity.ClubMemberRole;
 import com.tennisfolio.Tennisfolio.club.repository.ClubMemberRepository;
 import com.tennisfolio.Tennisfolio.club.repository.ClubRepository;
 import com.tennisfolio.Tennisfolio.exception.NotFoundException;
@@ -13,6 +14,7 @@ import com.tennisfolio.Tennisfolio.meeting.domain.MeetingStatus;
 import com.tennisfolio.Tennisfolio.meeting.domain.ParticipantResolution;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingAttendanceResponse;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingAttendanceUpsertRequest;
+import com.tennisfolio.Tennisfolio.meeting.dto.ManagedMeetingParticipantCreateRequest;
 import com.tennisfolio.Tennisfolio.meeting.entity.Meeting;
 import com.tennisfolio.Tennisfolio.meeting.entity.MeetingAttendance;
 import com.tennisfolio.Tennisfolio.meeting.repository.MeetingAttendanceRepository;
@@ -105,6 +107,26 @@ public class MeetingAttendanceCommandService {
             );
         }
         return MeetingAttendanceResponse.from(attendance);
+    }
+
+    @Transactional
+    public MeetingAttendanceResponse addManagedParticipant(
+            String publicId,
+            ManagedMeetingParticipantCreateRequest request,
+            Long currentUserId
+    ) {
+        Meeting meeting = findActiveMeetingForAttendanceUpdate(publicId);
+        ensureAttendanceEditable(meeting);
+        ensureManagerCanAddParticipant(meeting, currentUserId);
+
+        ParticipantResolution participant = resolveManagedParticipant(meeting, request);
+        AttendanceStatus status = parseAttendanceStatus(request.getAttendanceStatus());
+        rejectDuplicateName(meeting, participant.name());
+        ensureCapacityAvailable(meeting, null, participant.gender(), status);
+
+        MeetingAttendance attendance = new MeetingAttendance(meeting, participant.name(), participant.gender(), status);
+        attendance.assignParticipant(participant.type(), participant.clubMemberId());
+        return MeetingAttendanceResponse.from(attendanceRepository.save(attendance));
     }
 
     @Transactional
@@ -202,6 +224,23 @@ public class MeetingAttendanceCommandService {
         }
     }
 
+    private void ensureManagerCanAddParticipant(Meeting meeting, Long currentUserId) {
+        requireAuthenticated(currentUserId);
+        if (!meeting.isClubMeeting()) {
+            if (!meeting.isOwnedBy(currentUserId)) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "모임장만 참가자를 추가할 수 있습니다.");
+            }
+            return;
+        }
+
+        Club club = findActiveClub(meeting.getClubId());
+        ClubMember member = clubMemberRepository.findByClubAndUserIdAndActiveTrue(club, currentUserId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN, "클럽 관리자만 참가자를 추가할 수 있습니다."));
+        if (member.getRole() != ClubMemberRole.ADMIN) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "클럽 관리자만 참가자를 추가할 수 있습니다.");
+        }
+    }
+
     private String requireParticipantName(String participantName) {
         if (participantName == null || participantName.isBlank()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "이름을 입력해주세요.");
@@ -277,6 +316,31 @@ public class MeetingAttendanceCommandService {
         }
 
         return ParticipantResolution.guest(requestedName, requestedGender);
+    }
+
+    private ParticipantResolution resolveManagedParticipant(
+            Meeting meeting,
+            ManagedMeetingParticipantCreateRequest request
+    ) {
+        if (request.getClubMemberId() == null) {
+            return ParticipantResolution.guest(
+                    requireParticipantName(request.getParticipantName()),
+                    parseGender(request.getGender())
+            );
+        }
+        if (!meeting.isClubMeeting()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "개인 모임에는 클럽 멤버를 추가할 수 없습니다.");
+        }
+
+        Club club = findActiveClub(meeting.getClubId());
+        ClubMember member = clubMemberRepository.findByClubAndIdAndActiveTrue(club, request.getClubMemberId())
+                .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND));
+        return ParticipantResolution.clubMember(member.getName(), member.getGender(), member.getId());
+    }
+
+    private Club findActiveClub(Long clubId) {
+        return clubRepository.findByIdAndDeletedAtIsNull(clubId)
+                .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND));
     }
 
     private ParticipantResolution resolveAuthenticatedParticipant(Meeting meeting, Long currentUserId) {

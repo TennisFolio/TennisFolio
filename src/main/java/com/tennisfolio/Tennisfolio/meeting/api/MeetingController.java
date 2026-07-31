@@ -3,6 +3,7 @@ package com.tennisfolio.Tennisfolio.meeting.api;
 import com.tennisfolio.Tennisfolio.common.response.ResponseDTO;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingAttendanceResponse;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingAttendanceUpsertRequest;
+import com.tennisfolio.Tennisfolio.meeting.dto.ManagedMeetingParticipantCreateRequest;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingCreateRequest;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingCreateResponse;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingCompetitionCreateRequest;
@@ -122,6 +123,20 @@ public class MeetingController {
             @RequestBody MeetingAttendanceUpsertRequest request
     ) {
         MeetingAttendanceResponse response = attendanceCommandService.upsertAttendance(
+                publicId,
+                request,
+                resolveAuthenticatedUserId(authentication)
+        );
+        return ResponseEntity.ok(ResponseDTO.success(response));
+    }
+
+    @PostMapping("/meetings/{publicId}/participants")
+    public ResponseEntity<ResponseDTO<MeetingAttendanceResponse>> addManagedParticipant(
+            Authentication authentication,
+            @PathVariable String publicId,
+            @RequestBody ManagedMeetingParticipantCreateRequest request
+    ) {
+        MeetingAttendanceResponse response = attendanceCommandService.addManagedParticipant(
                 publicId,
                 request,
                 resolveAuthenticatedUserId(authentication)
