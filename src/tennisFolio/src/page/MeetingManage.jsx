@@ -3,6 +3,8 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { getCurrentUser } from '../utils/authApi';
 import {
   createMeetingCompetitionWithOptions,
+  addManagedParticipant,
+  updateManagedParticipant,
   deleteAttendance,
   deleteMeetingCompetition,
   getPublicMeeting,
@@ -12,6 +14,8 @@ import {
 import {
   createClubMeetingCompetitionWithOptions,
   deleteClubMeetingCompetition,
+  getClub,
+  getClubMembers,
   getClubMeeting,
   updateClubMeetingStatus,
 } from '../utils/clubApi';
@@ -19,6 +23,8 @@ import MeetingConfirmModal from '../components/meeting/shared/MeetingConfirmModa
 import MeetingManageOverviewPanel from '../components/meeting/manage/MeetingManageOverviewPanel';
 import MeetingManageOperationsPanel from '../components/meeting/manage/MeetingManageOperationsPanel';
 import MeetingOwnerAttendancePanel from '../components/meeting/manage/MeetingOwnerAttendancePanel';
+import MeetingParticipantAddPanel from '../components/meeting/manage/MeetingParticipantAddPanel';
+import MeetingParticipantEditPanel from '../components/meeting/manage/MeetingParticipantEditPanel';
 import MeetingRosterSections from '../components/meeting/shared/MeetingRosterSections';
 import {
   findCurrentUserAttendance,
@@ -37,11 +43,17 @@ function MeetingManage({ initialMeeting = null, initialNotice = null }) {
   const [ownerStatus, setOwnerStatus] = useState('ATTENDING');
   const [isLoading, setIsLoading] = useState(true);
   const [attendeeToDelete, setAttendeeToDelete] = useState(null);
+  const [participantToEdit, setParticipantToEdit] = useState(null);
   const [competitionDeleteRequested, setCompetitionDeleteRequested] =
     useState(false);
   const [sameGenderDoublesOnly, setSameGenderDoublesOnly] = useState(false);
   const [notice, setNotice] = useState(initialNotice);
   const [errorMessage, setErrorMessage] = useState('');
+  const [clubMembers, setClubMembers] = useState([]);
+  const [clubSkillTiers, setClubSkillTiers] = useState([]);
+  const [memberQuery, setMemberQuery] = useState('');
+  const [isParticipantSubmitting, setIsParticipantSubmitting] = useState(false);
+  const [participantAddOpen, setParticipantAddOpen] = useState(false);
 
   const attendances = useMemo(() => normalizeAttendances(meeting), [meeting]);
   const ownerAttendance = useMemo(
@@ -54,6 +66,14 @@ function MeetingManage({ initialMeeting = null, initialNotice = null }) {
   );
   const ownerName = currentUser?.nickName?.trim() || '';
   const meetingEditDisabled = Boolean(meeting?.competitionCreated);
+  const registeredClubMemberIds = useMemo(
+    () => new Set(attendances.map((attendance) => attendance.clubMemberId).filter(Boolean)),
+    [attendances],
+  );
+  const selectableClubMembers = useMemo(
+    () => clubMembers.filter((member) => !registeredClubMemberIds.has(member.id)),
+    [clubMembers, registeredClubMemberIds],
+  );
   const attendingGenderCounts = useMemo(
     () =>
       attendances.reduce(
@@ -144,6 +164,54 @@ function MeetingManage({ initialMeeting = null, initialNotice = null }) {
   }, [clubPublicId, publicId]);
 
   useEffect(() => {
+    if (!clubPublicId) {
+      setClubMembers([]);
+      return undefined;
+    }
+
+    let cancelled = false;
+    getClubMembers(clubPublicId, memberQuery.trim())
+      .then((response) => {
+        if (!cancelled) {
+          setClubMembers(response.data.data || []);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setClubMembers([]);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [clubPublicId, memberQuery]);
+
+  useEffect(() => {
+    if (!clubPublicId) {
+      setClubSkillTiers([]);
+      return undefined;
+    }
+
+    let cancelled = false;
+    getClub(clubPublicId)
+      .then((response) => {
+        if (!cancelled) {
+          setClubSkillTiers(response.data.data?.skillTiers || []);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setClubSkillTiers([]);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [clubPublicId]);
+
+  useEffect(() => {
     if (ownerAttendance?.attendanceStatus) {
       setOwnerStatus(ownerAttendance.attendanceStatus);
     }
@@ -185,6 +253,47 @@ function MeetingManage({ initialMeeting = null, initialNotice = null }) {
         'error',
         error.response?.data?.message || '내 참석 상태를 저장하지 못했습니다.',
       );
+    }
+  };
+
+  const isGuestPromotion = (participant) => {
+    if (!participant.clubMemberId) {
+      return false;
+    }
+
+    const selectedMember = clubMembers.find((member) => member.id === participant.clubMemberId);
+    return Boolean(
+      selectedMember &&
+        attendances.some(
+          (attendance) =>
+            attendance.participantType === 'GUEST' &&
+            attendance.participantName === selectedMember.name &&
+            attendance.gender === selectedMember.gender,
+        ),
+    );
+  };
+
+  const handleAddParticipant = async (participant) => {
+    try {
+      setIsParticipantSubmitting(true);
+      const promotedGuest = isGuestPromotion(participant);
+      await addManagedParticipant(publicId, participant);
+      await loadMeeting();
+      showNotice(
+        'success',
+        promotedGuest
+          ? '기존 게스트 참가자를 클럽원으로 전환했어요.'
+          : '참가자를 추가했습니다.',
+      );
+      return true;
+    } catch (error) {
+      showNotice(
+        'error',
+        error.response?.data?.message || '참가자를 추가하지 못했습니다.',
+      );
+      return false;
+    } finally {
+      setIsParticipantSubmitting(false);
     }
   };
 
@@ -230,6 +339,28 @@ function MeetingManage({ initialMeeting = null, initialNotice = null }) {
       showNotice('success', '공유 링크를 복사했습니다.');
     } catch {
       showNotice('error', `공유 링크를 복사하지 못했습니다. ${shareUrl}`);
+    }
+  };
+
+  const handleUpdateParticipant = async (participant) => {
+    if (!participantToEdit) {
+      return false;
+    }
+
+    setIsParticipantSubmitting(true);
+    try {
+      await updateManagedParticipant(publicId, participantToEdit.id, participant);
+      await loadMeeting();
+      showNotice('success', '참가자 정보를 수정했습니다.');
+      return true;
+    } catch (error) {
+      showNotice(
+        'error',
+        error.response?.data?.message || '참가자 정보를 수정하지 못했습니다.',
+      );
+      return false;
+    } finally {
+      setIsParticipantSubmitting(false);
     }
   };
 
@@ -302,13 +433,73 @@ function MeetingManage({ initialMeeting = null, initialNotice = null }) {
           onStatusSelect={handleOwnerAttendance}
         />
 
+        <button
+          className="meeting-participant-add-trigger"
+          type="button"
+          onClick={() => setParticipantAddOpen(true)}
+          disabled={meetingEditDisabled || meeting.status !== 'OPEN'}
+        >
+          참가자 추가
+        </button>
+
+        <div className="meeting-roster-guide">
+          <p className="meeting-participant-edit-hint">
+            참가자를 선택하면 정보를 수정할 수 있어요.
+          </p>
+        </div>
+
         <MeetingRosterSections
           groupedAttendances={groupedAttendances}
           meeting={meeting}
           emptyMessage={null}
           onAskDelete={setAttendeeToDelete}
+          onSelectAttendance={setParticipantToEdit}
         />
       </div>
+
+      {participantAddOpen && (
+        <div
+          className="meeting-participant-sheet-backdrop"
+          role="presentation"
+          onClick={() => !isParticipantSubmitting && setParticipantAddOpen(false)}
+        >
+          <MeetingParticipantAddPanel
+            isClubMeeting={Boolean(clubPublicId)}
+            members={selectableClubMembers}
+            skillTiers={clubSkillTiers}
+            query={memberQuery}
+            onQueryChange={setMemberQuery}
+            onSubmit={async (participant) => {
+              const added = await handleAddParticipant(participant);
+              if (added) {
+                setParticipantAddOpen(false);
+              }
+              return added;
+            }}
+            onClose={() => setParticipantAddOpen(false)}
+            isSubmitting={isParticipantSubmitting}
+            disabled={meetingEditDisabled || meeting.status !== 'OPEN'}
+          />
+        </div>
+      )}
+
+      {participantToEdit && (
+        <div
+          className="meeting-participant-sheet-backdrop"
+          role="presentation"
+          onClick={() => !isParticipantSubmitting && setParticipantToEdit(null)}
+        >
+          <MeetingParticipantEditPanel
+            attendance={participantToEdit}
+            isClubMeeting={Boolean(clubPublicId)}
+            skillTiers={clubSkillTiers}
+            onSubmit={handleUpdateParticipant}
+            onClose={() => setParticipantToEdit(null)}
+            isSubmitting={isParticipantSubmitting}
+            disabled={meetingEditDisabled || meeting.status !== 'OPEN'}
+          />
+        </div>
+      )}
 
       {attendeeToDelete && (
         <MeetingConfirmModal

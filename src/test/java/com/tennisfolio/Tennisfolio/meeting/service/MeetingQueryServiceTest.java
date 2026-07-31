@@ -5,6 +5,7 @@ import com.tennisfolio.Tennisfolio.club.entity.ClubMember;
 import com.tennisfolio.Tennisfolio.club.entity.ClubMemberRole;
 import com.tennisfolio.Tennisfolio.club.repository.ClubMemberRepository;
 import com.tennisfolio.Tennisfolio.club.repository.ClubRepository;
+import com.tennisfolio.Tennisfolio.club.repository.ClubSkillTierRepository;
 import com.tennisfolio.Tennisfolio.exception.NotFoundException;
 import com.tennisfolio.Tennisfolio.matching.entity.Competition;
 import com.tennisfolio.Tennisfolio.matching.repository.CompetitionRepository;
@@ -53,6 +54,9 @@ class MeetingQueryServiceTest {
     @Mock
     ClubMemberRepository clubMemberRepository;
 
+    @Mock
+    ClubSkillTierRepository clubSkillTierRepository;
+
     MeetingQueryService service;
 
     @BeforeEach
@@ -63,7 +67,8 @@ class MeetingQueryServiceTest {
                 competitionRepository,
                 userRepository,
                 clubRepository,
-                clubMemberRepository
+                clubMemberRepository,
+                clubSkillTierRepository
         );
     }
 

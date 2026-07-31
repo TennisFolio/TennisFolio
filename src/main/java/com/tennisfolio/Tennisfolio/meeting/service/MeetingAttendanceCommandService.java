@@ -4,15 +4,21 @@ import com.tennisfolio.Tennisfolio.common.ExceptionCode;
 import com.tennisfolio.Tennisfolio.common.UserStatus;
 import com.tennisfolio.Tennisfolio.club.entity.Club;
 import com.tennisfolio.Tennisfolio.club.entity.ClubMember;
+import com.tennisfolio.Tennisfolio.club.entity.ClubMemberRole;
+import com.tennisfolio.Tennisfolio.club.entity.ClubSkillTier;
 import com.tennisfolio.Tennisfolio.club.repository.ClubMemberRepository;
 import com.tennisfolio.Tennisfolio.club.repository.ClubRepository;
+import com.tennisfolio.Tennisfolio.club.repository.ClubSkillTierRepository;
 import com.tennisfolio.Tennisfolio.exception.NotFoundException;
 import com.tennisfolio.Tennisfolio.meeting.domain.AttendanceStatus;
 import com.tennisfolio.Tennisfolio.meeting.domain.Gender;
 import com.tennisfolio.Tennisfolio.meeting.domain.MeetingStatus;
+import com.tennisfolio.Tennisfolio.meeting.domain.MeetingParticipantType;
 import com.tennisfolio.Tennisfolio.meeting.domain.ParticipantResolution;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingAttendanceResponse;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingAttendanceUpsertRequest;
+import com.tennisfolio.Tennisfolio.meeting.dto.ManagedMeetingParticipantCreateRequest;
+import com.tennisfolio.Tennisfolio.meeting.dto.ManagedMeetingParticipantUpdateRequest;
 import com.tennisfolio.Tennisfolio.meeting.entity.Meeting;
 import com.tennisfolio.Tennisfolio.meeting.entity.MeetingAttendance;
 import com.tennisfolio.Tennisfolio.meeting.repository.MeetingAttendanceRepository;
@@ -36,19 +42,22 @@ public class MeetingAttendanceCommandService {
     private final UserRepository userRepository;
     private final ClubRepository clubRepository;
     private final ClubMemberRepository clubMemberRepository;
+    private final ClubSkillTierRepository clubSkillTierRepository;
 
     public MeetingAttendanceCommandService(
             MeetingRepository meetingRepository,
             MeetingAttendanceRepository attendanceRepository,
             UserRepository userRepository,
             ClubRepository clubRepository,
-            ClubMemberRepository clubMemberRepository
+            ClubMemberRepository clubMemberRepository,
+            ClubSkillTierRepository clubSkillTierRepository
     ) {
         this.meetingRepository = meetingRepository;
         this.attendanceRepository = attendanceRepository;
         this.userRepository = userRepository;
         this.clubRepository = clubRepository;
         this.clubMemberRepository = clubMemberRepository;
+        this.clubSkillTierRepository = clubSkillTierRepository;
     }
 
     @Transactional
@@ -108,6 +117,95 @@ public class MeetingAttendanceCommandService {
     }
 
     @Transactional
+    public MeetingAttendanceResponse addManagedParticipant(
+            String publicId,
+            ManagedMeetingParticipantCreateRequest request,
+            Long currentUserId
+    ) {
+        Meeting meeting = findActiveMeetingForAttendanceUpdate(publicId);
+        ensureAttendanceEditable(meeting);
+        ensureManagerCanAddParticipant(meeting, currentUserId);
+
+        ParticipantResolution participant = resolveManagedParticipant(meeting, request);
+        AttendanceStatus status = parseAttendanceStatus(request.getAttendanceStatus());
+        ClubSkillTier guestSkillTier = resolveManagedGuestSkillTier(meeting, participant, request.getClubSkillTierId());
+        Optional<MeetingAttendance> guestToPromote = findGuestToPromote(meeting, participant);
+        if (guestToPromote.isPresent()) {
+            MeetingAttendance attendance = guestToPromote.get();
+            attendance.assignParticipant(MeetingParticipantType.CLUB_MEMBER, participant.clubMemberId());
+            attendance.clearClubSkillTier();
+            return MeetingAttendanceResponse.from(attendance);
+        }
+
+        rejectDuplicateName(meeting, participant.name());
+        ensureCapacityAvailable(meeting, null, participant.gender(), status);
+
+        MeetingAttendance attendance = new MeetingAttendance(meeting, participant.name(), participant.gender(), status);
+        attendance.assignParticipant(participant.type(), participant.clubMemberId());
+        if (guestSkillTier != null) {
+            attendance.assignClubSkillTier(guestSkillTier.getId());
+        }
+        MeetingAttendance savedAttendance = attendanceRepository.save(attendance);
+        return MeetingAttendanceResponse.from(
+                savedAttendance,
+                guestSkillTier == null ? java.util.Map.of() : java.util.Map.of(
+                        guestSkillTier.getId(),
+                        guestSkillTier.getName()
+                )
+        );
+    }
+
+    @Transactional
+    public MeetingAttendanceResponse updateManagedParticipant(
+            String publicId,
+            Long attendanceId,
+            ManagedMeetingParticipantUpdateRequest request,
+            Long currentUserId
+    ) {
+        Meeting meeting = findActiveMeetingForAttendanceUpdate(publicId);
+        ensureAttendanceEditable(meeting);
+        ensureManagerCanAddParticipant(meeting, currentUserId);
+
+        MeetingAttendance attendance = findAttendance(attendanceId, meeting);
+        AttendanceStatus status = parseAttendanceStatus(request.getAttendanceStatus());
+        if (attendance.getParticipantType() == MeetingParticipantType.CLUB_MEMBER) {
+            rejectClubMemberUpdate(request);
+            ensureCapacityAvailable(meeting, attendance, attendance.getGender(), status);
+            attendance.update(
+                    attendance.getParticipantName(),
+                    attendance.getGender(),
+                    status,
+                    attendance.getParticipantType(),
+                    attendance.getClubMemberId()
+            );
+            return MeetingAttendanceResponse.from(attendance);
+        }
+
+        String participantName = requireParticipantName(request.getParticipantName());
+        Gender gender = parseGender(request.getGender());
+        rejectDuplicateNameExceptSelf(meeting, participantName, attendance.getId());
+        ensureCapacityAvailable(meeting, attendance, gender, status);
+        ClubSkillTier guestSkillTier = resolveManagedGuestSkillTier(
+                meeting,
+                ParticipantResolution.guest(participantName, gender),
+                request.getClubSkillTierId()
+        );
+        attendance.update(participantName, gender, status, MeetingParticipantType.GUEST, null);
+        if (guestSkillTier == null) {
+            attendance.clearClubSkillTier();
+        } else {
+            attendance.assignClubSkillTier(guestSkillTier.getId());
+        }
+        return MeetingAttendanceResponse.from(
+                attendance,
+                guestSkillTier == null ? java.util.Map.of() : java.util.Map.of(
+                        guestSkillTier.getId(),
+                        guestSkillTier.getName()
+                )
+        );
+    }
+
+    @Transactional
     public MeetingAttendanceResponse updateAttendance(
             String publicId,
             Long attendanceId,
@@ -139,9 +237,10 @@ public class MeetingAttendanceCommandService {
     }
 
     @Transactional
-    public void deleteAttendance(String publicId, Long attendanceId, Long ownerUserId) {
-        Meeting meeting = findOwnedMeetingForAttendanceUpdate(publicId, ownerUserId);
+    public void deleteAttendance(String publicId, Long attendanceId, Long currentUserId) {
+        Meeting meeting = findActiveMeetingForAttendanceUpdate(publicId);
         ensureAttendanceEditable(meeting);
+        ensureManagerCanAddParticipant(meeting, currentUserId);
         MeetingAttendance attendance = findAttendance(attendanceId, meeting);
         attendance.delete(LocalDateTime.now());
     }
@@ -199,6 +298,31 @@ public class MeetingAttendanceCommandService {
         }
         if (meeting.hasCompetition()) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "이미 경기표가 생성된 모임입니다.");
+        }
+    }
+
+    private void ensureManagerCanAddParticipant(Meeting meeting, Long currentUserId) {
+        requireAuthenticated(currentUserId);
+        if (!meeting.isClubMeeting()) {
+            if (!meeting.isOwnedBy(currentUserId)) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "모임장만 참가자를 추가할 수 있습니다.");
+            }
+            return;
+        }
+
+        Club club = findActiveClub(meeting.getClubId());
+        ClubMember member = clubMemberRepository.findByClubAndUserIdAndActiveTrue(club, currentUserId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN, "클럽 관리자만 참가자를 추가할 수 있습니다."));
+        if (member.getRole() != ClubMemberRole.ADMIN) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "클럽 관리자만 참가자를 추가할 수 있습니다.");
+        }
+    }
+
+    private void rejectClubMemberUpdate(ManagedMeetingParticipantUpdateRequest request) {
+        if (request.getParticipantName() != null
+                || request.getGender() != null
+                || request.getClubSkillTierId() != null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "클럽원은 참가 상태만 수정할 수 있습니다.");
         }
     }
 
@@ -279,6 +403,31 @@ public class MeetingAttendanceCommandService {
         return ParticipantResolution.guest(requestedName, requestedGender);
     }
 
+    private ParticipantResolution resolveManagedParticipant(
+            Meeting meeting,
+            ManagedMeetingParticipantCreateRequest request
+    ) {
+        if (request.getClubMemberId() == null) {
+            return ParticipantResolution.guest(
+                    requireParticipantName(request.getParticipantName()),
+                    parseGender(request.getGender())
+            );
+        }
+        if (!meeting.isClubMeeting()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "개인 모임에는 클럽 멤버를 추가할 수 없습니다.");
+        }
+
+        Club club = findActiveClub(meeting.getClubId());
+        ClubMember member = clubMemberRepository.findByClubAndIdAndActiveTrue(club, request.getClubMemberId())
+                .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND));
+        return ParticipantResolution.clubMember(member.getName(), member.getGender(), member.getId());
+    }
+
+    private Club findActiveClub(Long clubId) {
+        return clubRepository.findByIdAndDeletedAtIsNull(clubId)
+                .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND));
+    }
+
     private ParticipantResolution resolveAuthenticatedParticipant(Meeting meeting, Long currentUserId) {
         if (meeting.isClubMeeting()) {
             Club club = clubRepository.findByIdAndDeletedAtIsNull(meeting.getClubId()).orElse(null);
@@ -302,6 +451,36 @@ public class MeetingAttendanceCommandService {
                 user.getNickName().trim(),
                 Gender.valueOf(user.getGender().name())
         );
+    }
+
+    private Optional<MeetingAttendance> findGuestToPromote(Meeting meeting, ParticipantResolution participant) {
+        if (participant.type() != MeetingParticipantType.CLUB_MEMBER) {
+            return Optional.empty();
+        }
+
+        return attendanceRepository.findByMeetingAndParticipantNameAndGenderAndDeletedAtIsNull(
+                        meeting,
+                        participant.name(),
+                        participant.gender()
+                )
+                .filter(attendance -> attendance.getParticipantType() == MeetingParticipantType.GUEST);
+    }
+
+    private ClubSkillTier resolveManagedGuestSkillTier(
+            Meeting meeting,
+            ParticipantResolution participant,
+            Long clubSkillTierId
+    ) {
+        if (clubSkillTierId == null) {
+            return null;
+        }
+        if (meeting.getClubId() == null || participant.type() != MeetingParticipantType.GUEST) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "게스트 등급은 클럽 모임에서만 선택할 수 있습니다.");
+        }
+
+        Club club = findActiveClub(meeting.getClubId());
+        return clubSkillTierRepository.findByIdAndClub(clubSkillTierId, club)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "클럽에 속하지 않은 등급입니다."));
     }
 
     private void rejectDuplicateName(Meeting meeting, String participantName) {

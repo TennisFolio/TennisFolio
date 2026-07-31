@@ -8,6 +8,7 @@ import lombok.Getter;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 @Getter
 @AllArgsConstructor
@@ -229,6 +230,32 @@ public class MeetingDetailResponse {
             String currentClubMemberGender,
             List<MeetingAttendance> attendances
     ) {
+        return from(
+                meeting,
+                currentUserId,
+                competitionPublicId,
+                ownerNickName,
+                clubName,
+                currentClubMemberId,
+                currentClubMemberName,
+                currentClubMemberGender,
+                attendances,
+                Map.of()
+        );
+    }
+
+    public static MeetingDetailResponse from(
+            Meeting meeting,
+            Long currentUserId,
+            String competitionPublicId,
+            String ownerNickName,
+            String clubName,
+            Long currentClubMemberId,
+            String currentClubMemberName,
+            String currentClubMemberGender,
+            List<MeetingAttendance> attendances,
+            Map<Long, String> skillTierNames
+    ) {
         return new MeetingDetailResponse(
                 meeting.getPublicId(),
                 meeting.getCompetitionId(),
@@ -257,7 +284,7 @@ public class MeetingDetailResponse {
                         .findFirst()
                         .orElse(null),
                 attendances.stream()
-                        .map(MeetingAttendanceResponse::from)
+                        .map(attendance -> MeetingAttendanceResponse.from(attendance, skillTierNames))
                         .toList()
         );
     }

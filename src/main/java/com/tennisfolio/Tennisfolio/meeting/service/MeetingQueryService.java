@@ -4,6 +4,7 @@ import com.tennisfolio.Tennisfolio.common.ExceptionCode;
 import com.tennisfolio.Tennisfolio.common.UserStatus;
 import com.tennisfolio.Tennisfolio.club.entity.Club;
 import com.tennisfolio.Tennisfolio.club.entity.ClubMember;
+import com.tennisfolio.Tennisfolio.club.repository.ClubSkillTierRepository;
 import com.tennisfolio.Tennisfolio.club.repository.ClubMemberRepository;
 import com.tennisfolio.Tennisfolio.club.repository.ClubRepository;
 import com.tennisfolio.Tennisfolio.exception.NotFoundException;
@@ -12,6 +13,7 @@ import com.tennisfolio.Tennisfolio.meeting.domain.AttendanceStatus;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingDetailResponse;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingSummaryResponse;
 import com.tennisfolio.Tennisfolio.meeting.entity.Meeting;
+import com.tennisfolio.Tennisfolio.meeting.entity.MeetingAttendance;
 import com.tennisfolio.Tennisfolio.meeting.repository.MeetingAttendanceRepository;
 import com.tennisfolio.Tennisfolio.meeting.repository.MeetingRepository;
 import com.tennisfolio.Tennisfolio.user.repository.UserRepository;
@@ -21,6 +23,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class MeetingQueryService {
@@ -31,6 +37,7 @@ public class MeetingQueryService {
     private final UserRepository userRepository;
     private final ClubRepository clubRepository;
     private final ClubMemberRepository clubMemberRepository;
+    private final ClubSkillTierRepository clubSkillTierRepository;
 
     public MeetingQueryService(
             MeetingRepository meetingRepository,
@@ -38,7 +45,8 @@ public class MeetingQueryService {
             CompetitionRepository competitionRepository,
             UserRepository userRepository,
             ClubRepository clubRepository,
-            ClubMemberRepository clubMemberRepository
+            ClubMemberRepository clubMemberRepository,
+            ClubSkillTierRepository clubSkillTierRepository
     ) {
         this.meetingRepository = meetingRepository;
         this.attendanceRepository = attendanceRepository;
@@ -46,6 +54,7 @@ public class MeetingQueryService {
         this.userRepository = userRepository;
         this.clubRepository = clubRepository;
         this.clubMemberRepository = clubMemberRepository;
+        this.clubSkillTierRepository = clubSkillTierRepository;
     }
 
     @Transactional(readOnly = true)
@@ -57,6 +66,8 @@ public class MeetingQueryService {
     @Transactional(readOnly = true)
     public MeetingDetailResponse toDetailResponse(Meeting meeting, Long currentUserId) {
         ClubMember currentClubMember = findCurrentClubMember(meeting, currentUserId);
+        List<MeetingAttendance> attendances =
+                attendanceRepository.findByMeetingAndDeletedAtIsNullOrderByIdAsc(meeting);
         return MeetingDetailResponse.from(
                 meeting,
                 currentUserId,
@@ -66,7 +77,8 @@ public class MeetingQueryService {
                 currentClubMember == null ? null : currentClubMember.getId(),
                 currentClubMember == null ? null : currentClubMember.getName(),
                 currentClubMember == null ? null : currentClubMember.getGender().name(),
-                attendanceRepository.findByMeetingAndDeletedAtIsNullOrderByIdAsc(meeting)
+                attendances,
+                findSkillTierNames(attendances)
         );
     }
 
@@ -109,6 +121,21 @@ public class MeetingQueryService {
 
         return clubMemberRepository.findByClubAndUserIdAndActiveTrue(club, currentUserId)
                 .orElse(null);
+    }
+
+    private Map<Long, String> findSkillTierNames(
+            List<MeetingAttendance> attendances
+    ) {
+        Set<Long> skillTierIds = attendances.stream()
+                .map(MeetingAttendance::getClubSkillTierId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+        if (skillTierIds.isEmpty()) {
+            return Map.of();
+        }
+
+        return clubSkillTierRepository.findAllById(skillTierIds).stream()
+                .collect(Collectors.toMap(skillTier -> skillTier.getId(), skillTier -> skillTier.getName()));
     }
 
     @Transactional(readOnly = true)

@@ -54,6 +54,9 @@ public class MeetingAttendance extends BaseTimeEntity {
     @Column(name = "CLUB_MEMBER_ID")
     private Long clubMemberId;
 
+    @Column(name = "CLUB_SKILL_TIER_ID")
+    private Long clubSkillTierId;
+
     @Column(name = "USER_ID")
     private Long userId;
 
@@ -97,6 +100,14 @@ public class MeetingAttendance extends BaseTimeEntity {
 
     public void assignUser(Long userId) {
         this.userId = userId;
+    }
+
+    public void assignClubSkillTier(Long clubSkillTierId) {
+        this.clubSkillTierId = clubSkillTierId;
+    }
+
+    public void clearClubSkillTier() {
+        assignClubSkillTier(null);
     }
 
     public MeetingParticipantType getParticipantType() {

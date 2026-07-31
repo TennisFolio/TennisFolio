@@ -20,9 +20,13 @@ function ParticipantBadge({ attendance, meeting }) {
     return null;
   }
 
+  const label = attendance.clubSkillTierId
+    ? `${attendance.badgeLabel} · ${attendance.clubSkillTierName || '등급 미정'}`
+    : attendance.badgeLabel;
+
   return (
     <span className="meeting-participant-badge">
-      {attendance.badgeLabel}
+      {label}
     </span>
   );
 }
@@ -48,7 +52,11 @@ function AttendanceChip({
           type="button"
           className="meeting-attendee-remove"
           aria-label={`${attendance.participantName} 제거`}
-          onClick={() => onRemove(attendance)}
+          onClick={(event) => {
+            event.stopPropagation();
+            onRemove(attendance);
+          }}
+          onKeyDown={(event) => event.stopPropagation()}
         >
           x
         </button>
@@ -56,7 +64,7 @@ function AttendanceChip({
     </>
   );
 
-  if (!asButton || isOwner) {
+  if (!asButton || isOwner || !onSelect) {
     return (
       <span className={className} key={attendance.id}>
         {content}
@@ -65,14 +73,21 @@ function AttendanceChip({
   }
 
   return (
-    <button
-      type="button"
+    <div
+      role="button"
+      tabIndex={0}
       className={className}
       key={attendance.id}
       onClick={() => onSelect(attendance)}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          onSelect(attendance);
+        }
+      }}
     >
       {content}
-    </button>
+    </div>
   );
 }
 

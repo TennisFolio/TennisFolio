@@ -4,6 +4,7 @@ function AttendanceStatusOptions({
   selectedStatus,
   onSelect,
   buttonClassName = 'meeting-button status-option',
+  disabled = false,
 }) {
   return (
     <div className="meeting-status-options">
@@ -15,6 +16,7 @@ function AttendanceStatusOptions({
           }`}
           key={status}
           onClick={() => onSelect(status)}
+          disabled={disabled}
         >
           {label}
         </button>

@@ -7,6 +7,7 @@ function RosterPanel({
   meeting,
   emptyMessage = '아직 표시할 참석자가 없습니다.',
   onAskDelete,
+  onSelectAttendance,
 }) {
   return (
     <section className="meeting-panel meeting-roster-panel" aria-label={title}>
@@ -24,6 +25,8 @@ function RosterPanel({
               key={attendance.id}
               meeting={meeting}
               onRemove={onAskDelete}
+              asButton={Boolean(onSelectAttendance)}
+              onSelect={onSelectAttendance}
             />
           ))}
         </div>
