@@ -104,7 +104,70 @@
 
   개인 모임에서 게스트를 각 상태로 저장하고, 클럽 모임에서 이름 검색·멤버 선택·게스트 입력을 각각 저장한다. 정원 초과와 이미 등록된 멤버의 선택 불가를 확인한다.
 
-### Task 3: 회귀 확인과 문서 갱신
+### Task 3: 같은 이름 게스트의 클럽원 승격
+
+**Files:**
+- Modify: `src/main/java/com/tennisfolio/Tennisfolio/meeting/service/MeetingAttendanceCommandService.java`
+- Modify: `src/main/java/com/tennisfolio/Tennisfolio/meeting/repository/MeetingAttendanceRepository.java`
+- Modify: `src/test/java/com/tennisfolio/Tennisfolio/meeting/service/MeetingAttendanceCommandServiceTest.java`
+
+- [ ] **Step 1: 실패하는 service 테스트를 추가한다**
+
+  클럽 관리자가 클럽원을 선택했을 때 같은 이름·성별의 게스트가 있으면 기존 참석자의 `id`와 상태를 유지한 채 `CLUB_MEMBER`로 연결되는지 검증한다. 같은 이름이지만 성별이 다른 게스트와 이미 클럽원인 참석자는 `CONFLICT`인지 검증한다.
+
+- [ ] **Step 2: 해당 테스트가 실패하는 것을 확인한다**
+
+  Run: `rtk .\gradlew.bat test --tests com.tennisfolio.Tennisfolio.meeting.service.MeetingAttendanceCommandServiceTest`
+
+  Expected: 기존 중복 이름 검증 때문에 승격 성공 테스트가 실패한다.
+
+- [ ] **Step 3: 게스트 승격 조회와 command 흐름을 구현한다**
+
+  `MeetingAttendanceRepository`에 모임·이름·성별·미삭제 기준의 참석자 조회를 추가한다. `addManagedParticipant`에서 클럽원 해석 후 같은 이름·성별의 기존 게스트가 있으면 새 엔티티를 저장하거나 정원을 다시 차감하지 않고, `assignParticipant(CLUB_MEMBER, clubMemberId)`만 수행한다. 상태는 요청값으로 바꾸지 않는다.
+
+- [ ] **Step 4: service 테스트를 통과시킨다**
+
+  Run: `rtk .\gradlew.bat test --tests com.tennisfolio.Tennisfolio.meeting.service.MeetingAttendanceCommandServiceTest`
+
+  Expected: `BUILD SUCCESSFUL`.
+
+### Task 4: 클럽 모임 게스트 등급 저장과 표시
+
+**Files:**
+- Modify: `src/main/java/com/tennisfolio/Tennisfolio/meeting/entity/MeetingAttendance.java`
+- Modify: `src/main/java/com/tennisfolio/Tennisfolio/meeting/dto/ManagedMeetingParticipantCreateRequest.java`
+- Modify: `src/main/java/com/tennisfolio/Tennisfolio/meeting/dto/MeetingAttendanceResponse.java`
+- Modify: `src/main/java/com/tennisfolio/Tennisfolio/meeting/service/MeetingAttendanceCommandService.java`
+- Modify: `src/main/java/com/tennisfolio/Tennisfolio/club/repository/ClubSkillTierRepository.java`
+- Modify: `src/test/java/com/tennisfolio/Tennisfolio/meeting/service/MeetingAttendanceCommandServiceTest.java`
+- Modify: `src/tennisFolio/src/components/meeting/manage/MeetingParticipantAddPanel.jsx`
+- Modify: `src/tennisFolio/src/page/MeetingManage.jsx`
+
+- [ ] **Step 1: 실패하는 service 테스트를 추가한다**
+
+  클럽 관리자 게스트가 해당 클럽 등급을 선택해 저장하는 성공, 개인 모임의 등급 요청·다른 클럽 등급 요청·존재하지 않는 등급 요청의 `BAD_REQUEST` 실패를 검증한다. 게스트 응답에 등급 ID와 이름이 포함되는지도 검증한다.
+
+- [ ] **Step 2: 해당 테스트가 실패하는 것을 확인한다**
+
+  Run: `rtk .\gradlew.bat test --tests com.tennisfolio.Tennisfolio.meeting.service.MeetingAttendanceCommandServiceTest`
+
+  Expected: 게스트 등급 필드와 검증·응답 매핑이 없어 테스트가 실패한다.
+
+- [ ] **Step 3: 게스트 등급을 저장하고 응답으로 매핑한다**
+
+  `MeetingAttendance`에 선택한 클럽 등급 ID를 저장한다. 관리자 등록 요청과 응답 DTO에 등급 ID·이름을 추가하고, 클럽 모임 게스트의 등급이 해당 클럽 소속인지 확인한다. 클럽원은 멤버의 기존 등급을 응답에 사용하며, 개인 모임 게스트는 등급 없이 유지한다.
+
+- [ ] **Step 4: 관리 바텀시트에 등급 선택을 연결한다**
+
+  클럽 모임의 게스트 탭에서 등급 선택을 노출하고 `{ participantName, gender, attendanceStatus, clubSkillTierId }`를 전송한다. 개인 모임과 클럽원 탭에는 등급 입력을 노출하지 않는다. 명단 칩에는 게스트 등급 이름을 표시한다.
+
+- [ ] **Step 5: service 테스트를 통과시킨다**
+
+  Run: `rtk .\gradlew.bat test --tests com.tennisfolio.Tennisfolio.meeting.service.MeetingAttendanceCommandServiceTest`
+
+  Expected: `BUILD SUCCESSFUL`.
+
+### Task 5: 회귀 확인과 문서 갱신
 
 **Files:**
 - Modify: `docs/features/meeting-managed-participants.md`

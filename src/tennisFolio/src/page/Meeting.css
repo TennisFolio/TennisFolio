@@ -184,6 +184,226 @@
   margin-bottom: 12px;
 }
 
+.meeting-participant-add-panel,
+.meeting-participant-add-form {
+  display: grid;
+  gap: 12px;
+}
+
+.meeting-participant-add-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 46px;
+  border: 1px solid var(--competition-primary);
+  border-radius: 9px;
+  background: var(--competition-surface);
+  color: var(--competition-primary);
+  cursor: pointer;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.meeting-participant-add-trigger:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.meeting-participant-sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 35;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background: rgba(15, 23, 42, 0.48);
+}
+
+.meeting-participant-sheet-backdrop .meeting-participant-add-panel {
+  width: min(520px, 100%);
+  max-height: min(80dvh, 720px);
+  margin: 0;
+  overflow-y: auto;
+  border-radius: 18px 18px 0 0;
+  box-shadow: 0 -12px 36px rgba(15, 23, 42, 0.2);
+  padding: 18px 14px calc(20px + env(safe-area-inset-bottom));
+}
+
+.meeting-participant-add-head h2 {
+  font-size: 18px;
+}
+
+.meeting-participant-add-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.meeting-participant-sheet-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 auto;
+  border: 0;
+  border-radius: 999px;
+  background: var(--competition-surface-soft);
+  color: var(--competition-text-body);
+  cursor: pointer;
+  font: inherit;
+  font-size: 24px;
+  font-weight: 500;
+  line-height: 1;
+  padding: 0;
+}
+
+.meeting-participant-add-head p {
+  margin-top: 4px;
+  color: var(--competition-text-muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.meeting-participant-type-tabs,
+.meeting-participant-gender-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.meeting-participant-choice-field {
+  display: grid;
+  gap: 7px;
+}
+
+.meeting-participant-choice-field > span {
+  color: var(--competition-text-strong);
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.meeting-participant-gender-option,
+.meeting-participant-status-option {
+  min-height: 42px;
+  border: 1px solid var(--competition-border-control);
+  border-radius: 8px;
+  background: var(--competition-surface);
+  color: var(--competition-text-body);
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.meeting-participant-gender-option.male {
+  color: var(--competition-male);
+}
+
+.meeting-participant-gender-option.female {
+  color: var(--competition-female);
+}
+
+.meeting-participant-gender-option.male.selected {
+  border-color: var(--competition-male-bg);
+  background: var(--competition-male-bg);
+}
+
+.meeting-participant-gender-option.female.selected {
+  border-color: var(--competition-female-bg);
+  background: var(--competition-female-bg);
+}
+
+.meeting-status-options .meeting-participant-status-option.primary {
+  border-color: var(--competition-primary);
+  background: var(--competition-primary);
+  color: var(--competition-text-inverse);
+}
+
+.meeting-participant-submit {
+  width: 100%;
+  min-height: 48px;
+  border: 0;
+  border-radius: 9px;
+  background: var(--competition-primary);
+  box-shadow: 0 7px 14px var(--competition-shadow);
+  color: var(--competition-text-inverse);
+  cursor: pointer;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.meeting-participant-submit:disabled,
+.meeting-participant-gender-option:disabled,
+.meeting-participant-status-option:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.meeting-participant-member-list {
+  display: grid;
+  gap: 7px;
+  max-height: 244px;
+  overflow-y: auto;
+}
+
+.meeting-participant-member {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  border: 1px solid var(--competition-border);
+  border-radius: 8px;
+  background: var(--competition-surface);
+  color: var(--competition-text-strong);
+  cursor: pointer;
+  padding: 10px;
+  text-align: left;
+}
+
+.meeting-participant-member.selected {
+  border-color: var(--competition-primary);
+  background: var(--competition-surface-soft);
+}
+
+.meeting-participant-member > span {
+  display: grid;
+  gap: 3px;
+}
+
+.meeting-participant-member strong {
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.meeting-participant-member small {
+  color: var(--competition-text-muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.meeting-participant-member em {
+  border-radius: 999px;
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 900;
+  padding: 4px 7px;
+}
+
+.meeting-participant-member em.male {
+  background: var(--competition-male-bg);
+  color: var(--competition-male);
+}
+
+.meeting-participant-member em.female {
+  background: var(--competition-female-bg);
+  color: var(--competition-female);
+}
+
 .meeting-manage-grid {
   display: grid;
   grid-template-columns: 1fr;
@@ -200,7 +420,7 @@
   position: fixed;
   left: 50%;
   bottom: 18px;
-  z-index: 20;
+  z-index: 40;
   display: flex;
   align-items: center;
   justify-content: space-between;
