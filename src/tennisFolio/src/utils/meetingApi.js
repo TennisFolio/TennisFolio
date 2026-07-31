@@ -26,6 +26,12 @@ export const upsertAttendance = (publicId, attendance) =>
 export const addManagedParticipant = (publicId, participant) =>
   apiRequestSilent.post(`/api/meetings/${publicId}/participants`, participant);
 
+export const updateManagedParticipant = (publicId, attendanceId, participant) =>
+  apiRequestSilent.patch(
+    `/api/meetings/${publicId}/participants/${attendanceId}`,
+    participant,
+  );
+
 export const updateAttendance = (publicId, attendanceId, attendance) =>
   apiRequestSilent.patch(
     `/api/meetings/${publicId}/attendances/${attendanceId}`,

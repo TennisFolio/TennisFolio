@@ -4,6 +4,7 @@ import { getCurrentUser } from '../utils/authApi';
 import {
   createMeetingCompetitionWithOptions,
   addManagedParticipant,
+  updateManagedParticipant,
   deleteAttendance,
   deleteMeetingCompetition,
   getPublicMeeting,
@@ -23,6 +24,7 @@ import MeetingManageOverviewPanel from '../components/meeting/manage/MeetingMana
 import MeetingManageOperationsPanel from '../components/meeting/manage/MeetingManageOperationsPanel';
 import MeetingOwnerAttendancePanel from '../components/meeting/manage/MeetingOwnerAttendancePanel';
 import MeetingParticipantAddPanel from '../components/meeting/manage/MeetingParticipantAddPanel';
+import MeetingParticipantEditPanel from '../components/meeting/manage/MeetingParticipantEditPanel';
 import MeetingRosterSections from '../components/meeting/shared/MeetingRosterSections';
 import {
   findCurrentUserAttendance,
@@ -41,6 +43,7 @@ function MeetingManage({ initialMeeting = null, initialNotice = null }) {
   const [ownerStatus, setOwnerStatus] = useState('ATTENDING');
   const [isLoading, setIsLoading] = useState(true);
   const [attendeeToDelete, setAttendeeToDelete] = useState(null);
+  const [participantToEdit, setParticipantToEdit] = useState(null);
   const [competitionDeleteRequested, setCompetitionDeleteRequested] =
     useState(false);
   const [sameGenderDoublesOnly, setSameGenderDoublesOnly] = useState(false);
@@ -339,6 +342,28 @@ function MeetingManage({ initialMeeting = null, initialNotice = null }) {
     }
   };
 
+  const handleUpdateParticipant = async (participant) => {
+    if (!participantToEdit) {
+      return false;
+    }
+
+    setIsParticipantSubmitting(true);
+    try {
+      await updateManagedParticipant(publicId, participantToEdit.id, participant);
+      await loadMeeting();
+      showNotice('success', '참가자 정보를 수정했습니다.');
+      return true;
+    } catch (error) {
+      showNotice(
+        'error',
+        error.response?.data?.message || '참가자 정보를 수정하지 못했습니다.',
+      );
+      return false;
+    } finally {
+      setIsParticipantSubmitting(false);
+    }
+  };
+
   const handleDeleteAttendance = async () => {
     if (!attendeeToDelete) {
       return;
@@ -417,11 +442,18 @@ function MeetingManage({ initialMeeting = null, initialNotice = null }) {
           참가자 추가
         </button>
 
+        <div className="meeting-roster-guide">
+          <p className="meeting-participant-edit-hint">
+            참가자를 선택하면 정보를 수정할 수 있어요.
+          </p>
+        </div>
+
         <MeetingRosterSections
           groupedAttendances={groupedAttendances}
           meeting={meeting}
           emptyMessage={null}
           onAskDelete={setAttendeeToDelete}
+          onSelectAttendance={setParticipantToEdit}
         />
       </div>
 
@@ -445,6 +477,24 @@ function MeetingManage({ initialMeeting = null, initialNotice = null }) {
               return added;
             }}
             onClose={() => setParticipantAddOpen(false)}
+            isSubmitting={isParticipantSubmitting}
+            disabled={meetingEditDisabled || meeting.status !== 'OPEN'}
+          />
+        </div>
+      )}
+
+      {participantToEdit && (
+        <div
+          className="meeting-participant-sheet-backdrop"
+          role="presentation"
+          onClick={() => !isParticipantSubmitting && setParticipantToEdit(null)}
+        >
+          <MeetingParticipantEditPanel
+            attendance={participantToEdit}
+            isClubMeeting={Boolean(clubPublicId)}
+            skillTiers={clubSkillTiers}
+            onSubmit={handleUpdateParticipant}
+            onClose={() => setParticipantToEdit(null)}
             isSubmitting={isParticipantSubmitting}
             disabled={meetingEditDisabled || meeting.status !== 'OPEN'}
           />

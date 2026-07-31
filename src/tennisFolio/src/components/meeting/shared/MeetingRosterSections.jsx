@@ -5,6 +5,7 @@ function MeetingRosterSections({
   meeting,
   emptyMessage,
   onAskDelete,
+  onSelectAttendance,
 }) {
   return (
     <>
@@ -15,6 +16,7 @@ function MeetingRosterSections({
         meeting={meeting}
         emptyMessage={emptyMessage}
         onAskDelete={onAskDelete}
+        onSelectAttendance={onSelectAttendance}
       />
       <RosterPanel
         title="여자 참석자"
@@ -23,6 +25,7 @@ function MeetingRosterSections({
         meeting={meeting}
         emptyMessage={emptyMessage}
         onAskDelete={onAskDelete}
+        onSelectAttendance={onSelectAttendance}
       />
       <RosterPanel
         title="대기"
@@ -31,6 +34,7 @@ function MeetingRosterSections({
         meeting={meeting}
         emptyMessage={emptyMessage}
         onAskDelete={onAskDelete}
+        onSelectAttendance={onSelectAttendance}
       />
       <RosterPanel
         title="불참"
@@ -39,6 +43,7 @@ function MeetingRosterSections({
         meeting={meeting}
         emptyMessage={emptyMessage}
         onAskDelete={onAskDelete}
+        onSelectAttendance={onSelectAttendance}
       />
     </>
   );

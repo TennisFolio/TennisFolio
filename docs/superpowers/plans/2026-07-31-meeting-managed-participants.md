@@ -204,17 +204,21 @@
 - Modify: `src/tennisFolio/src/components/meeting/shared/MeetingRosterSections.jsx`
 - Modify: `src/tennisFolio/src/page/MeetingManage.jsx`
 
-- [ ] **Step 1: 수정 API client와 바텀시트를 만든다**
+- [x] **Step 1: 수정 API client와 바텀시트를 만든다**
 
   `updateManagedParticipant(publicId, attendanceId, participant)`는 `PATCH /api/meetings/{publicId}/participants/{attendanceId}`를 호출한다. 게스트 시트는 이름·성별·클럽 등급·상태를 초기값으로 편집하고, 클럽원 시트는 identity·등급을 읽기 전용으로 표시하며 상태만 변경한다.
 
-- [ ] **Step 2: 명단 선택을 수정 흐름에 연결한다**
+- [x] **Step 2: 명단 선택을 수정 흐름에 연결한다**
 
   `AttendanceChip`은 관리 명단에서 삭제 버튼과 중첩된 `button` 없이 클릭·키보드 선택을 지원한다. 삭제 클릭은 선택으로 전파하지 않고, `MeetingManage`는 모임장 본인을 제외한 선택 참가자와 수정 시트를 관리한다.
 
-- [ ] **Step 3: 저장·안내·수동 검증을 연결한다**
+- [x] **Step 3: 저장과 안내를 연결한다**
 
-  저장 성공 시 상세 정보를 다시 읽고 시트를 닫은 뒤 `참가자 정보를 수정했습니다.`를 표시한다. 참가자 추가 아래에는 `참가자를 선택하면 정보를 수정할 수 있어요.`를 표시한다. 프런트엔드 테스트·빌드는 사용자 요청이 없으므로 실행하지 않고, 게스트 전체 수정·클럽원 상태 수정·삭제 동작을 수동 확인한다.
+  저장 성공 시 상세 정보를 다시 읽고 시트를 닫은 뒤 `참가자 정보를 수정했습니다.`를 표시한다. 참가자 추가 아래에는 `참가자를 선택하면 정보를 수정할 수 있어요.`를 표시한다.
+
+- [ ] **Step 4: 모바일 화면을 수동 확인한다**
+
+  프런트엔드 테스트·빌드는 사용자 요청이 없으므로 실행하지 않고, 게스트 전체 수정·클럽원 상태 수정·삭제 동작을 수동 확인한다.
 
 ### Task 7: 회귀 확인과 문서 갱신
 
