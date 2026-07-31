@@ -96,6 +96,7 @@ function ClubMemberCreatePage({ currentUser }) {
       <ClubMemberEditorView
         club={selectedClub}
         form={memberForm}
+        skillTiers={selectedClub?.skillTiers ?? []}
         notice={notice}
         error={error}
         editingMember={null}

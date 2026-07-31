@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>클럽 등급 컴포넌트 목업</title>
+  <style>
+    :root {
+      --competition-page-bg: #f5f7fa;
+      --competition-surface: #ffffff;
+      --competition-surface-soft: #f8fafc;
+      --competition-primary: #0f172a;
+      --competition-text-strong: #0f172a;
+      --competition-text-body: #475569;
+      --competition-text-muted: #64748b;
+      --competition-text-inverse: #ffffff;
+      --competition-border: #e3e8ef;
+      --competition-border-control: #dce4ef;
+      --competition-border-strong: #cbd5e1;
+      --competition-danger: #be123c;
+      --competition-danger-bg: #fff1f2;
+      --competition-danger-border: #fecdd3;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--competition-page-bg); color: var(--competition-text-strong); font-family: system-ui, -apple-system, "Noto Sans KR", sans-serif; }
+    .page { width: min(100%, 460px); min-height: 100vh; margin: 0 auto; padding: 14px 12px 42px; background: var(--competition-page-bg); }
+    .page-head { display: grid; gap: 8px; margin-bottom: 14px; }
+    .eyebrow, .component-label, .field-label { color: var(--competition-text-muted); font-size: 12px; font-weight: 900; }
+    h1, h2, p { margin: 0; }
+    h1 { font-size: 28px; line-height: 1.16; }
+    h2 { font-size: 17px; line-height: 1.25; }
+    .page-head p, .subcopy { color: var(--competition-text-body); font-size: 14px; font-weight: 700; line-height: 1.5; }
+    .component-label { margin: 22px 0 7px; letter-spacing: .02em; }
+    .card, .member-form { display: grid; gap: 11px; border: 1px solid var(--competition-border); border-radius: 8px; background: var(--competition-surface); padding: 13px; }
+    .card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+    .count { display: inline-flex; align-items: center; min-height: 24px; border: 1px solid var(--competition-border); border-radius: 999px; background: var(--competition-surface-soft); color: var(--competition-text-muted); padding: 0 8px; font-size: 11px; font-weight: 900; white-space: nowrap; }
+    .tier-list { display: grid; gap: 7px; }
+    .tier-row { display: grid; grid-template-columns: 30px minmax(0, 1fr) auto; align-items: center; gap: 8px; min-height: 48px; border: 1px solid var(--competition-border); border-radius: 8px; background: var(--competition-surface-soft); padding: 6px 7px; }
+    .tier-rank { color: var(--competition-text-muted); font-size: 12px; font-weight: 900; text-align: center; }
+    .tier-row:first-child .tier-rank::after { content: "최상"; display: block; margin-top: 2px; font-size: 9px; }
+    .tier-row:last-child .tier-rank::after { content: "기초"; display: block; margin-top: 2px; font-size: 9px; }
+    input, select { width: 100%; min-height: 42px; border: 1px solid var(--competition-border-control); border-radius: 8px; background: var(--competition-surface); color: var(--competition-text-strong); font: inherit; font-size: 14px; font-weight: 800; padding: 0 11px; }
+    .row-actions { display: flex; gap: 4px; }
+    button { min-height: 34px; border: 1px solid var(--competition-border-strong); border-radius: 7px; background: var(--competition-surface); color: var(--competition-text-body); cursor: pointer; font: inherit; font-size: 12px; font-weight: 900; padding: 0 9px; }
+    button:hover { border-color: var(--competition-primary); }
+    button.danger { border-color: var(--competition-danger-border); background: var(--competition-danger-bg); color: var(--competition-danger); }
+    button.primary { border-color: var(--competition-primary); background: var(--competition-primary); color: var(--competition-text-inverse); }
+    button:disabled { cursor: not-allowed; opacity: .45; }
+    .add-tier { width: 100%; min-height: 42px; border-style: dashed; }
+    .notice { border: 1px solid var(--competition-border); border-radius: 8px; background: var(--competition-surface-soft); color: var(--competition-text-muted); padding: 10px 11px; font-size: 12px; font-weight: 700; line-height: 1.5; }
+    .notice strong { color: var(--competition-text-body); }
+    .form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+    .field { display: grid; gap: 6px; }
+    .field.full { grid-column: 1 / -1; }
+    .selected-preview { display: flex; align-items: center; justify-content: space-between; border: 1px solid var(--competition-border); border-radius: 8px; background: var(--competition-surface-soft); padding: 10px 11px; }
+    .selected-preview span { color: var(--competition-text-muted); font-size: 12px; font-weight: 800; }
+    .selected-preview strong { font-size: 13px; }
+    .save { width: 100%; min-height: 44px; }
+    .divider { height: 1px; margin: 22px 0 0; background: var(--competition-border); }
+    @media (max-width: 360px) { .tier-row { grid-template-columns: 27px minmax(0, 1fr); } .row-actions { grid-column: 2; } .form-grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="page-head">
+      <span class="eyebrow">CLUB SETTINGS · ADDED COMPONENTS</span>
+      <h1>클럽 등급</h1>
+      <p>현재 모바일 클럽 생성·수정 흐름에 추가되는 컴포넌트만 표시합니다.</p>
+    </header>
+
+    <p class="component-label">클럽 생성 / 클럽 수정 화면에 추가</p>
+    <section class="card" aria-labelledby="tiers-title">
+      <div class="card-head">
+        <div>
+          <h2 id="tiers-title">클럽 등급</h2>
+          <p class="subcopy">위에 있을수록 높은 실력입니다.</p>
+        </div>
+        <span class="count" id="tierCount">4 / 10</span>
+      </div>
+
+      <div class="tier-list" id="tierList">
+        <div class="tier-row"><span class="tier-rank">4</span><input value="A조" aria-label="첫 번째 등급"><div class="row-actions"><button type="button" data-move="up" disabled>↑</button><button type="button" data-move="down">↓</button><button class="danger" type="button" data-remove>삭제</button></div></div>
+        <div class="tier-row"><span class="tier-rank">3</span><input value="B조" aria-label="두 번째 등급"><div class="row-actions"><button type="button" data-move="up">↑</button><button type="button" data-move="down">↓</button><button class="danger" type="button" data-remove>삭제</button></div></div>
+        <div class="tier-row"><span class="tier-rank">2</span><input value="C조" aria-label="세 번째 등급"><div class="row-actions"><button type="button" data-move="up">↑</button><button type="button" data-move="down">↓</button><button class="danger" type="button" data-remove>삭제</button></div></div>
+        <div class="tier-row"><span class="tier-rank">1</span><input value="D조" aria-label="네 번째 등급"><div class="row-actions"><button type="button" data-move="up">↑</button><button type="button" data-move="down" disabled>↓</button><button class="danger" type="button" data-remove>삭제</button></div></div>
+      </div>
+      <button class="add-tier" type="button" id="addTier">+ 등급 추가</button>
+      <p class="notice"><strong>등급은 선택 사항입니다.</strong> 추가하지 않아도 클럽을 저장할 수 있으며, 등급을 삭제하면 해당 등급의 클럽원은 자동으로 미정이 됩니다.</p>
+    </section>
+
+    <div class="divider"></div>
+    <p class="component-label">클럽원 등록 / 수정 화면에서 교체</p>
+    <form class="member-form" onsubmit="event.preventDefault()" aria-labelledby="member-title">
+      <div>
+        <h2 id="member-title">클럽원 정보</h2>
+        <p class="subcopy">기존 ‘실력 메모’ 입력 대신 등급을 선택합니다.</p>
+      </div>
+      <div class="form-grid">
+        <label class="field"><span class="field-label">이름</span><input value="김민수" aria-label="이름"></label>
+        <label class="field"><span class="field-label">성별</span><select aria-label="성별"><option>남성</option><option>여성</option></select></label>
+        <label class="field full"><span class="field-label">실력 등급</span><select id="memberTier" aria-label="실력 등급"></select></label>
+      </div>
+      <div class="selected-preview"><span>현재 선택</span><strong id="selectedTier">미정</strong></div>
+      <button class="primary save" type="submit">클럽원 추가</button>
+    </form>
+  </main>
+
+  <script>
+    const list = document.querySelector('#tierList');
+    const count = document.querySelector('#tierCount');
+    const select = document.querySelector('#memberTier');
+    const selected = document.querySelector('#selectedTier');
+    const add = document.querySelector('#addTier');
+
+    function refresh() {
+      const rows = [...list.querySelectorAll('.tier-row')];
+      rows.forEach((row, index) => {
+        row.querySelector('.tier-rank').textContent = rows.length - index;
+        const [up, down] = row.querySelectorAll('[data-move]');
+        if (up) up.disabled = index === 0;
+        if (down) down.disabled = index === rows.length - 1;
+      });
+      count.textContent = `${rows.length} / 10`;
+      add.disabled = rows.length >= 10;
+      const current = select.value;
+      select.innerHTML = '<option value="">미정</option>' + rows.map((row) => {
+        const value = row.querySelector('input').value.trim() || '이름 없는 등급';
+        return `<option value="${value}">${value}</option>`;
+      }).join('');
+      select.value = [...select.options].some((option) => option.value === current) ? current : '';
+      selected.textContent = select.value || '미정';
+    }
+
+    list.addEventListener('click', (event) => {
+      const row = event.target.closest('.tier-row');
+      if (!row) return;
+      if (event.target.matches('[data-remove]')) row.remove();
+      if (event.target.dataset.move === 'up') list.insertBefore(row, row.previousElementSibling);
+      if (event.target.dataset.move === 'down') list.insertBefore(row.nextElementSibling, row);
+      refresh();
+    });
+    list.addEventListener('input', refresh);
+    add.addEventListener('click', () => {
+      if (list.children.length >= 10) return;
+      const row = document.createElement('div');
+      row.className = 'tier-row';
+      row.innerHTML = '<span class="tier-rank"></span><input value="" placeholder="예: E조" aria-label="새 등급"><div class="row-actions"><button type="button" data-move="up">↑</button><button type="button" data-move="down">↓</button><button class="danger" type="button" data-remove>삭제</button></div>';
+      list.append(row);
+      refresh();
+      row.querySelector('input').focus();
+    });
+    select.addEventListener('change', () => { selected.textContent = select.value || '미정'; });
+    refresh();
+  </script>
+</body>
+</html>

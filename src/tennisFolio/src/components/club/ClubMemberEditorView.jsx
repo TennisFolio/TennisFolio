@@ -5,6 +5,7 @@ import ClubState from './ClubState';
 function ClubMemberEditorView({
   club,
   form,
+  skillTiers,
   notice,
   error,
   editingMember,
@@ -66,6 +67,7 @@ function ClubMemberEditorView({
             <>
               <ClubMemberForm
                 form={form}
+                skillTiers={skillTiers}
                 isEdit={isEdit}
                 isSaving={isSaving}
                 showDelete={isEdit && Boolean(editingMember)}

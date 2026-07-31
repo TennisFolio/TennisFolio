@@ -130,7 +130,7 @@ function ClubDetailView({
             className="club-search"
             value={memberQuery}
             onChange={(event) => onChangeMemberQuery(event.target.value)}
-            placeholder="이름, 실력, 메모 검색"
+            placeholder="이름 검색"
           />
 
           <div className="club-member-compact-list club-scroll-list">
@@ -158,7 +158,7 @@ function ClubDetailView({
                   <span className="club-member-compact-main">
                     <span className="club-member-compact-name">{member.name}</span>
                     <span className="club-member-compact-sub">
-                      {member.skillNote || member.memo || '-'}
+                      {member.skillTierName ?? '미정'}
                     </span>
                   </span>
                   <span

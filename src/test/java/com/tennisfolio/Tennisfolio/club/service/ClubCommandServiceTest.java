@@ -3,6 +3,7 @@ package com.tennisfolio.Tennisfolio.club.service;
 import com.tennisfolio.Tennisfolio.club.dto.ClubCreateRequest;
 import com.tennisfolio.Tennisfolio.club.dto.ClubCreateResponse;
 import com.tennisfolio.Tennisfolio.club.dto.ClubUpdateRequest;
+import com.tennisfolio.Tennisfolio.club.dto.ClubSkillTierRequest;
 import com.tennisfolio.Tennisfolio.club.entity.Club;
 import com.tennisfolio.Tennisfolio.club.entity.ClubMember;
 import com.tennisfolio.Tennisfolio.club.entity.ClubMemberRole;
@@ -23,6 +24,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -43,12 +45,21 @@ class ClubCommandServiceTest {
     @Mock
     UserRepository userRepository;
 
+    @Mock
+    ClubSkillTierService clubSkillTierService;
+
     ClubCommandService service;
 
     @BeforeEach
     void setUp() {
         ClubAccessService accessService = new ClubAccessService(clubRepository, clubMemberRepository);
-        service = new ClubCommandService(clubRepository, clubMemberRepository, userRepository, accessService);
+        service = new ClubCommandService(
+                clubRepository,
+                clubMemberRepository,
+                userRepository,
+                accessService,
+                clubSkillTierService
+        );
     }
 
     @Test
@@ -75,6 +86,42 @@ class ClubCommandServiceTest {
         assertThat(memberCaptor.getValue().getName()).isEqualTo("Alex Kim");
         assertThat(memberCaptor.getValue().getGender()).isEqualTo(Gender.MALE);
         assertThat(memberCaptor.getValue().getRole()).isEqualTo(ClubMemberRole.ADMIN);
+    }
+
+    @Test
+    void createClub_savesSkillTiersInRequestOrder() {
+        User creator = user(10L, "Alex Kim", com.tennisfolio.Tennisfolio.user.domain.Gender.MALE);
+        Club savedClub = club("club-public-id", "Morning Tennis", 10L);
+        List<ClubSkillTierRequest> skillTiers = List.of(
+                new ClubSkillTierRequest(null, "상급"),
+                new ClubSkillTierRequest(null, "중급"),
+                new ClubSkillTierRequest(null, "초급")
+        );
+        when(userRepository.findByIdAndStatus(10L, UserStatus.ACTIVE)).thenReturn(Optional.of(creator));
+        when(clubRepository.save(any(Club.class))).thenReturn(savedClub);
+
+        service.createClub(new ClubCreateRequest("Morning Tennis", null, skillTiers), 10L);
+
+        verify(clubSkillTierService).replaceSkillTiers(savedClub, skillTiers);
+    }
+
+    @Test
+    void updateClub_replacesSkillTiersAfterUpdatingDetails() {
+        Club club = club("club-public-id", "Morning Tennis", 10L);
+        ClubMember admin = member(club, 100L, 10L, "Alex Kim", ClubMemberRole.ADMIN);
+        List<ClubSkillTierRequest> skillTiers = java.util.stream.IntStream.range(0, 11)
+                .mapToObj(index -> new ClubSkillTierRequest(null, "등급" + index))
+                .toList();
+        when(clubRepository.findByPublicIdAndDeletedAtIsNull("club-public-id")).thenReturn(Optional.of(club));
+        when(clubMemberRepository.findByClubAndUserIdAndActiveTrue(club, 10L)).thenReturn(Optional.of(admin));
+
+        service.updateClub(
+                "club-public-id",
+                new ClubUpdateRequest("Morning Tennis", null, skillTiers),
+                10L
+        );
+
+        verify(clubSkillTierService).replaceSkillTiers(club, skillTiers);
     }
 
     @Test
@@ -109,6 +156,7 @@ class ClubCommandServiceTest {
 
         assertThat(club.getName()).isEqualTo("Evening Tennis");
         assertThat(club.getDescription()).isEqualTo("Outdoor club");
+        verify(clubSkillTierService).replaceSkillTiers(club, List.of());
     }
 
     @Test

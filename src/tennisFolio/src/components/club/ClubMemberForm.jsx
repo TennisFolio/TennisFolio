@@ -1,5 +1,6 @@
 function ClubMemberForm({
   form,
+  skillTiers,
   isEdit,
   isSaving,
   showDelete,
@@ -40,11 +41,20 @@ function ClubMemberForm({
         </label>
       </div>
       <label className="club-field">
-        <span>실력 메모</span>
-        <input
-          value={form.skillNote}
-          onChange={(event) => onChange({ ...form, skillNote: event.target.value })}
-        />
+        <span>등급</span>
+        <select
+          value={form.skillTierId ?? ''}
+          onChange={(event) =>
+            onChange({ ...form, skillTierId: event.target.value || null })
+          }
+        >
+          <option value="">미정</option>
+          {skillTiers.map((skillTier) => (
+            <option key={skillTier.id} value={skillTier.id}>
+              {skillTier.name}
+            </option>
+          ))}
+        </select>
       </label>
       <label className="club-field">
         <span>연락 메모</span>

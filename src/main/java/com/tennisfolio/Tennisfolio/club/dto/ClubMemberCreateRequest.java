@@ -9,7 +9,7 @@ public class ClubMemberCreateRequest {
     private final String name;
     private final String gender;
     private final String role;
-    private final String skillNote;
+    private final Long skillTierId;
     private final String contactMemo;
     private final String memo;
 
@@ -18,14 +18,14 @@ public class ClubMemberCreateRequest {
             @JsonProperty("name") String name,
             @JsonProperty("gender") String gender,
             @JsonProperty("role") String role,
-            @JsonProperty("skillNote") String skillNote,
+            @JsonProperty("skillTierId") Long skillTierId,
             @JsonProperty("contactMemo") String contactMemo,
             @JsonProperty("memo") String memo
     ) {
         this.name = name;
         this.gender = gender;
         this.role = role;
-        this.skillNote = skillNote;
+        this.skillTierId = skillTierId;
         this.contactMemo = contactMemo;
         this.memo = memo;
     }

@@ -45,8 +45,9 @@ public class ClubMember extends BaseTimeEntity {
     @Column(name = "ROLE", nullable = false)
     private ClubMemberRole role;
 
-    @Column(name = "SKILL_NOTE")
-    private String skillNote;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "SKILL_TIER_ID")
+    private ClubSkillTier skillTier;
 
     @Column(name = "CONTACT_MEMO")
     private String contactMemo;
@@ -63,7 +64,7 @@ public class ClubMember extends BaseTimeEntity {
             String name,
             Gender gender,
             ClubMemberRole role,
-            String skillNote,
+            ClubSkillTier skillTier,
             String contactMemo,
             String memo
     ) {
@@ -72,7 +73,7 @@ public class ClubMember extends BaseTimeEntity {
         this.name = name;
         this.gender = gender;
         this.role = role;
-        this.skillNote = skillNote;
+        this.skillTier = skillTier;
         this.contactMemo = contactMemo;
         this.memo = memo;
     }
@@ -81,19 +82,23 @@ public class ClubMember extends BaseTimeEntity {
             String name,
             Gender gender,
             ClubMemberRole role,
-            String skillNote,
+            ClubSkillTier skillTier,
             String contactMemo,
             String memo
     ) {
         this.name = name;
         this.gender = gender;
         this.role = role;
-        this.skillNote = skillNote;
+        this.skillTier = skillTier;
         this.contactMemo = contactMemo;
         this.memo = memo;
     }
 
     public void deactivate() {
         this.active = false;
+    }
+
+    public void clearSkillTier() {
+        this.skillTier = null;
     }
 }
