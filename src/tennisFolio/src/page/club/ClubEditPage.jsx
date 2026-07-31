@@ -7,6 +7,8 @@ import {
   emptyClubForm,
   errorMessage,
   normalizeClub,
+  clubPayload,
+  skillTierValidationMessage,
   unwrapData,
 } from './clubPageUtils';
 import '../Club.css';
@@ -46,6 +48,7 @@ function ClubEditPage({ currentUser }) {
           setClubForm({
             name: club?.name ?? '',
             description: club?.description ?? '',
+            skillTiers: club?.skillTiers ?? [],
           });
         }
       })
@@ -77,15 +80,17 @@ function ClubEditPage({ currentUser }) {
       showNotice('클럽명을 입력해 주세요.');
       return;
     }
+    const skillTierError = skillTierValidationMessage(clubForm.skillTiers);
+    if (skillTierError) {
+      showNotice(skillTierError);
+      return;
+    }
 
     setIsSaving(true);
     setError('');
 
     try {
-      await updateClub(selectedClub.publicId, {
-        name,
-        description: clubForm.description.trim(),
-      });
+      await updateClub(selectedClub.publicId, clubPayload(clubForm, name));
       navigate(`/clubs/${selectedClub.publicId}`);
     } catch (requestError) {
       setError(errorMessage(requestError, '클럽 정보를 수정하지 못했습니다.'));

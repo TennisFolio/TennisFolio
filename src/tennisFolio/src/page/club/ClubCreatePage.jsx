@@ -3,7 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import ClubCreateView from '../../components/club/ClubCreateView';
 import { createClub } from '../../utils/clubApi';
 import ClubAuthRequired from './ClubAuthRequired';
-import { emptyClubForm, errorMessage, unwrapData } from './clubPageUtils';
+import {
+  clubPayload,
+  emptyClubForm,
+  errorMessage,
+  skillTierValidationMessage,
+  unwrapData,
+} from './clubPageUtils';
 import '../Club.css';
 
 function ClubCreatePage({ currentUser }) {
@@ -26,15 +32,17 @@ function ClubCreatePage({ currentUser }) {
       showNotice('클럽명을 입력해 주세요.');
       return;
     }
+    const skillTierError = skillTierValidationMessage(clubForm.skillTiers);
+    if (skillTierError) {
+      showNotice(skillTierError);
+      return;
+    }
 
     setIsSaving(true);
     setError('');
 
     try {
-      const response = await createClub({
-        name,
-        description: clubForm.description.trim(),
-      });
+      const response = await createClub(clubPayload(clubForm, name));
       const nextPublicId = unwrapData(response, {})?.publicId;
 
       setClubForm(emptyClubForm);

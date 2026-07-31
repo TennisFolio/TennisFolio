@@ -111,7 +111,7 @@ function ClubMemberEditPage({ currentUser }) {
       name: editingMember.name ?? '',
       gender: editingMember.gender ?? 'MALE',
       role: editingMember.role ?? 'MEMBER',
-      skillNote: editingMember.skillNote ?? '',
+      skillTierId: editingMember.skillTierId ?? null,
       contactMemo: editingMember.contactMemo ?? '',
       memo: editingMember.memo ?? '',
     });
@@ -183,6 +183,7 @@ function ClubMemberEditPage({ currentUser }) {
       <ClubMemberEditorView
         club={selectedClub}
         form={memberForm}
+        skillTiers={selectedClub?.skillTiers ?? []}
         notice={notice}
         error={error}
         editingMember={editingMember}

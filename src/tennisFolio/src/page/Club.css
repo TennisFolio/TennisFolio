@@ -235,6 +235,14 @@
   font-weight: 900;
 }
 
+.club-field-help {
+  margin: 4px 0 0;
+  color: var(--competition-text-muted);
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.45;
+}
+
 .club-field input,
 .club-field textarea,
 .club-field select,
@@ -306,6 +314,52 @@
   border-radius: 8px;
   background: var(--competition-surface-soft);
   padding: 10px;
+}
+
+.club-skill-tier-editor {
+  display: grid;
+  gap: 10px;
+  border: 1px solid var(--competition-border);
+  border-radius: 8px;
+  background: var(--competition-surface-soft);
+  padding: 11px;
+}
+
+.club-skill-tier-list {
+  display: grid;
+  gap: 8px;
+}
+
+.club-skill-tier-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.club-skill-tier-row input {
+  width: 100%;
+  min-width: 0;
+  min-height: 38px;
+  border: 1px solid var(--competition-border-control);
+  border-radius: 7px;
+  background: var(--competition-surface);
+  color: var(--competition-text-strong);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 800;
+  padding: 0 10px;
+}
+
+.club-skill-tier-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.club-skill-tier-actions .club-button.small {
+  min-height: 32px;
+  padding: 0 8px;
+  font-size: 11px;
 }
 
 .club-row-main {
@@ -470,4 +524,5 @@
   .club-form-grid {
     grid-template-columns: 1fr;
   }
+
 }
