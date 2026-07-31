@@ -51,4 +51,8 @@ public class ClubSkillTier extends BaseTimeEntity {
         this.name = name;
         this.level = level;
     }
+
+    public void moveLevel(int level) {
+        this.level = level;
+    }
 }

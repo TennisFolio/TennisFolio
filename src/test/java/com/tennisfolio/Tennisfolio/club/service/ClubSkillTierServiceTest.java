@@ -24,6 +24,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -60,6 +61,30 @@ class ClubSkillTierServiceTest {
         assertThat(captor.getAllValues())
                 .extracting(ClubSkillTier::getLevel)
                 .containsExactly(4, 3, 2, 1);
+    }
+
+    @Test
+    void replaceSkillTiers_movesExistingLevelsBeforeSavingNewTier() {
+        Club club = new Club("Morning Tennis", null, 10L);
+        ClubSkillTier tierA = skillTier(club, 1L, "A", 3);
+        ClubSkillTier tierB = skillTier(club, 2L, "B", 2);
+        ClubSkillTier tierC = skillTier(club, 3L, "C", 1);
+        when(clubSkillTierRepository.findByClubOrderByLevelDescIdAsc(club))
+                .thenReturn(List.of(tierA, tierB, tierC));
+
+        service.replaceSkillTiers(club, List.of(
+                new ClubSkillTierRequest(1L, "A"),
+                new ClubSkillTierRequest(2L, "B"),
+                new ClubSkillTierRequest(3L, "C"),
+                new ClubSkillTierRequest(null, "D")
+        ));
+
+        org.mockito.InOrder inOrder = inOrder(clubSkillTierRepository);
+        inOrder.verify(clubSkillTierRepository).flush();
+        inOrder.verify(clubSkillTierRepository).save(any(ClubSkillTier.class));
+        assertThat(List.of(tierA, tierB, tierC))
+                .extracting(ClubSkillTier::getLevel)
+                .containsExactly(4, 3, 2);
     }
 
     @Test
@@ -113,5 +138,11 @@ class ClubSkillTierServiceTest {
         assertThat(activeMember.getSkillTier()).isNull();
         assertThat(inactiveMember.getSkillTier()).isNull();
         verify(clubSkillTierRepository).deleteAll(List.of(skillTier));
+    }
+
+    private ClubSkillTier skillTier(Club club, Long id, String name, int level) {
+        ClubSkillTier skillTier = new ClubSkillTier(club, name, level);
+        ReflectionTestUtils.setField(skillTier, "id", id);
+        return skillTier;
     }
 }

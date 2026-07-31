@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -38,6 +39,11 @@ public class ClubSkillTierService {
         validateSkillTiers(skillTiers);
 
         Map<Long, ClubSkillTier> existingById = findExistingById(club);
+        if (!existingById.isEmpty()) {
+            moveExistingLevelsToTemporaryRange(existingById.values(), skillTiers.size());
+            clubSkillTierRepository.flush();
+        }
+
         Set<Long> retainedIds = saveOrUpdateSkillTiers(club, skillTiers, existingById);
         removeDeletedSkillTiers(existingById, retainedIds);
     }
@@ -52,6 +58,21 @@ public class ClubSkillTierService {
             existingById.put(skillTier.getId(), skillTier);
         }
         return existingById;
+    }
+
+    private void moveExistingLevelsToTemporaryRange(
+            Collection<ClubSkillTier> existingSkillTiers,
+            int targetCount
+    ) {
+        int currentMaxLevel = existingSkillTiers.stream()
+                .mapToInt(ClubSkillTier::getLevel)
+                .max()
+                .orElse(0);
+        int temporaryOffset = currentMaxLevel + targetCount;
+
+        existingSkillTiers.forEach(skillTier ->
+                skillTier.moveLevel(skillTier.getLevel() + temporaryOffset)
+        );
     }
 
     private Set<Long> saveOrUpdateSkillTiers(
