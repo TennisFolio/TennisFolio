@@ -9,6 +9,8 @@ public class GamePlayer {
 
     public final String id;
     public final Gender gender;
+    public final int skillLevel;
+    public Long competitionEntryId;
 
     public int totalGames;
     public int mixedGames;
@@ -22,8 +24,18 @@ public class GamePlayer {
     public Map<MatchType, Integer> typeExperience = new EnumMap<>(MatchType.class);
 
     public GamePlayer(String id, Gender gender) {
+        this(id, gender, 0);
+    }
+
+    public GamePlayer(String id, Gender gender, int skillLevel) {
+        this(id, gender, skillLevel, null);
+    }
+
+    public GamePlayer(String id, Gender gender, int skillLevel, Long competitionEntryId) {
         this.id = id;
         this.gender = gender;
+        this.skillLevel = skillLevel;
+        this.competitionEntryId = competitionEntryId;
 
         for(MatchType t :MatchType.values()){
             typeExperience.put(t, 0);

@@ -3,7 +3,9 @@ package com.tennisfolio.Tennisfolio.matching.service;
 import com.tennisfolio.Tennisfolio.common.ExceptionCode;
 import com.tennisfolio.Tennisfolio.exception.NotFoundException;
 import com.tennisfolio.Tennisfolio.matching.domain.MatchType;
+import com.tennisfolio.Tennisfolio.matching.domain.GamePlayer;
 import com.tennisfolio.Tennisfolio.matching.domain.ScheduleResult;
+import com.tennisfolio.Tennisfolio.matching.domain.ScheduleGenerationRequest;
 import com.tennisfolio.Tennisfolio.matching.dto.CompetitionCreateRequest;
 import com.tennisfolio.Tennisfolio.matching.dto.CompetitionCreateResponse;
 import com.tennisfolio.Tennisfolio.matching.dto.CompetitionUpdateRequest;
@@ -21,6 +23,7 @@ import java.time.LocalDateTime;
 import java.util.EnumSet;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Collectors;
 
 @Service
 public class CompetitionCommandService {
@@ -76,10 +79,28 @@ public class CompetitionCommandService {
         return createCompetitionResult(request, ownerUserId, true);
     }
 
+    @Transactional
+    public CompetitionCreationResult createCompetitionResult(
+            CompetitionCreateRequest request,
+            Long ownerUserId,
+            ScheduleGenerationRequest scheduleGenerationRequest
+    ) {
+        return createCompetitionResult(request, ownerUserId, true, scheduleGenerationRequest);
+    }
+
     private CompetitionCreationResult createCompetitionResult(
             CompetitionCreateRequest request,
             Long ownerUserId,
             boolean ownerResolved
+    ) {
+        return createCompetitionResult(request, ownerUserId, ownerResolved, null);
+    }
+
+    private CompetitionCreationResult createCompetitionResult(
+            CompetitionCreateRequest request,
+            Long ownerUserId,
+            boolean ownerResolved,
+            ScheduleGenerationRequest scheduleGenerationRequest
     ) {
         Competition.CompetitionMode mode = resolveMode(request.getMode());
         validateRequest(request, mode);
@@ -87,7 +108,9 @@ public class CompetitionCommandService {
         int rounds = mode == Competition.CompetitionMode.CLUB_SESSION
                 ? 1
                 : calculateRounds(request.getTotalGames(), request.getCourtCount());
-        long seed = request.getSeed() != null
+        long seed = scheduleGenerationRequest != null
+                ? scheduleGenerationRequest.getSeed()
+                : request.getSeed() != null
                 ? request.getSeed()
                 : ThreadLocalRandom.current().nextLong(1, 10000);
 
@@ -95,12 +118,17 @@ public class CompetitionCommandService {
                 ? competitionService.createCompetition(request, rounds, seed, ownerUserId)
                 : competitionService.createCompetition(request, rounds, seed);
 
+        Map<String, CompetitionEntry> entriesByPlayerKey = competitionEntryCommandService.createCompetitionEntries(competition, request);
         int scheduleGames = mode == Competition.CompetitionMode.CLUB_SESSION ? rounds : request.getTotalGames();
-        ScheduleResult result = generateSchedule(request, mode, scheduleGames, seed);
+        ScheduleResult result = scheduleGenerationRequest == null
+                ? generateSchedule(request, mode, scheduleGames, seed)
+                : scheduler.generateSchedule(scheduleGenerationRequest);
+        assignCompetitionEntryIds(result, entriesByPlayerKey);
 
-        Map<String, CompetitionEntry> entriesByPlayerName = competitionEntryCommandService.createCompetitionEntries(competition, request);
-        gameService.saveSchedule(competition, result, entriesByPlayerName);
-        competitionStatService.createCompetitionStat(competition, result, entriesByPlayerName);
+        Map<Long, CompetitionEntry> entriesById = entriesByPlayerKey.values().stream()
+                .collect(Collectors.toMap(CompetitionEntry::getId, entry -> entry));
+        gameService.saveSchedule(competition, result, entriesById);
+        competitionStatService.createCompetitionStat(competition, result, entriesByPlayerKey);
 
         String competitionAdminToken = competitionAdminTokenService.createToken(competition.getPublicId());
         return new CompetitionCreationResult(competition, competitionAdminToken);
@@ -130,6 +158,24 @@ public class CompetitionCommandService {
                 scheduleGames,
                 seed
         );
+    }
+
+    private void assignCompetitionEntryIds(
+            ScheduleResult result,
+            Map<String, CompetitionEntry> entriesByPlayerKey
+    ) {
+        result.matches.forEach(match -> {
+            match.teamA.forEach(player -> assignCompetitionEntryId(player, entriesByPlayerKey));
+            match.teamB.forEach(player -> assignCompetitionEntryId(player, entriesByPlayerKey));
+        });
+    }
+
+    private void assignCompetitionEntryId(GamePlayer player, Map<String, CompetitionEntry> entriesByPlayerKey) {
+        CompetitionEntry entry = entriesByPlayerKey.get(player.id);
+        if (entry == null) {
+            throw new IllegalStateException("CompetitionEntry not found for schedule key: " + player.id);
+        }
+        player.competitionEntryId = entry.getId();
     }
 
     @Transactional

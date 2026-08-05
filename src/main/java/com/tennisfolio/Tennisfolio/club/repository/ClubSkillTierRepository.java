@@ -14,4 +14,6 @@ public interface ClubSkillTierRepository extends JpaRepository<ClubSkillTier, Lo
     List<ClubSkillTier> findByClubOrderByLevelDescIdAsc(Club club);
 
     Optional<ClubSkillTier> findByIdAndClub(Long id, Club club);
+
+    List<ClubSkillTier> findByClubIdAndIdIn(Long clubId, List<Long> ids);
 }

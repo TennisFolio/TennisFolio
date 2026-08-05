@@ -5,6 +5,9 @@ function MeetingCompetitionPanel({
   onAskDeleteCompetition,
   sameGenderDoublesOnly,
   onSameGenderDoublesOnlyChange,
+  isClubMeeting,
+  skillBalancedSchedule,
+  onSkillBalancedScheduleChange,
   sameGenderDoublesOnlyUnavailable,
   sameGenderDoublesOnlyUnavailableReason,
 }) {
@@ -68,6 +71,26 @@ function MeetingCompetitionPanel({
               </p>
             )}
           </div>
+          {isClubMeeting && (
+            <div className="meeting-same-gender-option">
+              <button
+                type="button"
+                className={`meeting-same-gender-switch ${
+                  skillBalancedSchedule ? 'active' : ''
+                }`}
+                role="switch"
+                aria-checked={skillBalancedSchedule}
+                onClick={() => onSkillBalancedScheduleChange(!skillBalancedSchedule)}
+              >
+                <span className="meeting-same-gender-switch-track">
+                  <span className="meeting-same-gender-switch-thumb" />
+                </span>
+                <span className="meeting-same-gender-switch-copy">
+                  <strong>실력 기반 대진</strong>
+                </span>
+              </button>
+            </div>
+          )}
         <button
           type="button"
           className="meeting-button primary full"

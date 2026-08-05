@@ -7,6 +7,7 @@ import com.tennisfolio.Tennisfolio.matching.domain.ScheduleResult;
 import com.tennisfolio.Tennisfolio.matching.engine.CandidateGenerator;
 import com.tennisfolio.Tennisfolio.matching.engine.ConstraintChecker;
 import com.tennisfolio.Tennisfolio.matching.engine.ScoreCalculator;
+import com.tennisfolio.Tennisfolio.matching.engine.SkillBalanceCalculator;
 import com.tennisfolio.Tennisfolio.matching.entity.Competition;
 import com.tennisfolio.Tennisfolio.matching.entity.CompetitionEntry;
 import com.tennisfolio.Tennisfolio.matching.entity.Game;
@@ -28,10 +29,10 @@ public class TennisMatchSchedulerTest {
     void test_basic() {
 
         ConstraintChecker checker = new ConstraintChecker();
-        ScoreCalculator calculator = new ScoreCalculator();
+        ScoreCalculator calculator = new ScoreCalculator(new SkillBalanceCalculator());
         CandidateGenerator generator = new CandidateGenerator();
 
-        TennisMatchScheduler scheduler = new TennisMatchScheduler(checker, calculator, generator);
+        TennisMatchScheduler scheduler = new TennisMatchScheduler(checker, calculator, generator, new SkillBalanceCalculator());
 
         int male = 15;
         int female = 25;
@@ -112,10 +113,10 @@ public class TennisMatchSchedulerTest {
     @Test
     void generateSchedule_usesRandomTypeWhenRestingPlayersHaveThreeToOneGenderSplit() {
         ConstraintChecker checker = new ConstraintChecker();
-        ScoreCalculator calculator = new ScoreCalculator();
+        ScoreCalculator calculator = new ScoreCalculator(new SkillBalanceCalculator());
         CandidateGenerator generator = new CandidateGenerator();
 
-        TennisMatchScheduler scheduler = new TennisMatchScheduler(checker, calculator, generator);
+        TennisMatchScheduler scheduler = new TennisMatchScheduler(checker, calculator, generator, new SkillBalanceCalculator());
 
         ScheduleResult result = scheduler.generateSchedule(7, 9, 3, 12, 136);
 
@@ -148,10 +149,10 @@ public class TennisMatchSchedulerTest {
     @Test
     void generateSchedule_usesRandomTypeWhenOnlyOnePlayerExistsInOneGender() {
         ConstraintChecker checker = new ConstraintChecker();
-        ScoreCalculator calculator = new ScoreCalculator();
+        ScoreCalculator calculator = new ScoreCalculator(new SkillBalanceCalculator());
         CandidateGenerator generator = new CandidateGenerator();
 
-        TennisMatchScheduler scheduler = new TennisMatchScheduler(checker, calculator, generator);
+        TennisMatchScheduler scheduler = new TennisMatchScheduler(checker, calculator, generator, new SkillBalanceCalculator());
 
         ScheduleResult result = scheduler.generateSchedule(1, 4, 1, 4, 136);
 
@@ -183,10 +184,10 @@ public class TennisMatchSchedulerTest {
     @Test
     void generateSchedule_usesRandomTypeWhenOneGenderCannotMakeSameGenderMatch() {
         ConstraintChecker checker = new ConstraintChecker();
-        ScoreCalculator calculator = new ScoreCalculator();
+        ScoreCalculator calculator = new ScoreCalculator(new SkillBalanceCalculator());
         CandidateGenerator generator = new CandidateGenerator();
 
-        TennisMatchScheduler scheduler = new TennisMatchScheduler(checker, calculator, generator);
+        TennisMatchScheduler scheduler = new TennisMatchScheduler(checker, calculator, generator, new SkillBalanceCalculator());
 
         int[][] cases = {
                 {2, 3, 1},
@@ -231,10 +232,10 @@ public class TennisMatchSchedulerTest {
     @Test
     void generateSchedule_usesRandomTypeWhenNormalTypesCannotFillOverallGenderSlots() {
         ConstraintChecker checker = new ConstraintChecker();
-        ScoreCalculator calculator = new ScoreCalculator();
+        ScoreCalculator calculator = new ScoreCalculator(new SkillBalanceCalculator());
         CandidateGenerator generator = new CandidateGenerator();
 
-        TennisMatchScheduler scheduler = new TennisMatchScheduler(checker, calculator, generator);
+        TennisMatchScheduler scheduler = new TennisMatchScheduler(checker, calculator, generator, new SkillBalanceCalculator());
 
         int[][] cases = {
                 {5, 7, 1},
@@ -664,8 +665,9 @@ public class TennisMatchSchedulerTest {
     private TennisMatchScheduler createScheduler() {
         return new TennisMatchScheduler(
                 new ConstraintChecker(),
-                new ScoreCalculator(),
-                new CandidateGenerator()
+                new ScoreCalculator(new SkillBalanceCalculator()),
+                new CandidateGenerator(),
+                new SkillBalanceCalculator()
         );
     }
 

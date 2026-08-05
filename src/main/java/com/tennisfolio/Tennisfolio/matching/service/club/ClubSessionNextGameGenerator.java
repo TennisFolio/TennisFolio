@@ -135,7 +135,7 @@ public class ClubSessionNextGameGenerator {
             GamePlayer.Gender gender = entry.getGender() == CompetitionEntry.Gender.MALE
                     ? GamePlayer.Gender.MALE
                     : GamePlayer.Gender.FEMALE;
-            list.add(new GamePlayer(String.valueOf(entry.getId()), gender));
+            list.add(new GamePlayer(String.valueOf(entry.getId()), gender, 0, entry.getId()));
         }
         return list;
     }

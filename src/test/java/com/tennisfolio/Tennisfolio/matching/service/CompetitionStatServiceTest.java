@@ -53,20 +53,35 @@ class CompetitionStatServiceTest {
                         new GamePlayer("F1", GamePlayer.Gender.FEMALE)
                 )
         ));
+        result.matches.add(new GameMatch(
+                1,
+                2,
+                MatchType.M2F2_SPLIT,
+                List.of(
+                        new GamePlayer("M1", GamePlayer.Gender.MALE),
+                        new GamePlayer("F1", GamePlayer.Gender.FEMALE)
+                ),
+                List.of(
+                        new GamePlayer("M2", GamePlayer.Gender.MALE),
+                        new GamePlayer("F2", GamePlayer.Gender.FEMALE)
+                )
+        ));
         Map<String, CompetitionEntry> entriesByPlayerName = Map.of(
                 "M1", entry(1L, competition, "誘쇱닔", CompetitionEntry.Gender.MALE),
                 "M2", entry(2L, competition, "誘쇱닔", CompetitionEntry.Gender.MALE),
                 "M3", entry(3L, competition, "誘쇱닔", CompetitionEntry.Gender.MALE),
-                "F1", entry(4L, competition, "誘쇱닔", CompetitionEntry.Gender.FEMALE)
+                "F1", entry(4L, competition, "誘쇱닔", CompetitionEntry.Gender.FEMALE),
+                "F2", entry(5L, competition, "誘쇱닔", CompetitionEntry.Gender.FEMALE)
         );
 
         when(competitionStatRepository.save(any(CompetitionStat.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         CompetitionStat stat = service.createCompetitionStat(competition, result, entriesByPlayerName);
 
-        assertEquals(1, stat.getTotalGames());
+        assertEquals(2, stat.getTotalGames());
         assertEquals(1, stat.getRandomM3F1Count());
-        assertEquals(1, stat.getMaxGames());
+        assertEquals(1, stat.getM2f2SplitCount());
+        assertEquals(2, stat.getMaxGames());
         assertEquals(1, stat.getMinGames());
     }
 }

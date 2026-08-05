@@ -5,5 +5,6 @@ public enum MatchType {
     MALE,
     FEMALE,
     RANDOM_M3F1,
+    M2F2_SPLIT,
     RANDOM_M1F3
 }

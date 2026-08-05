@@ -32,6 +32,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -99,6 +100,7 @@ public class MeetingAttendanceCommandService {
             ensureCapacityAvailable(meeting, null, participant.gender(), status);
             MeetingAttendance newAttendance = new MeetingAttendance(meeting, participant.name(), participant.gender(), status);
             newAttendance.assignParticipant(participant.type(), participant.clubMemberId());
+            applyParticipantSkillTier(newAttendance, participant, null);
             newAttendance.assignUser(currentUserId);
             attendance = attendanceRepository.save(newAttendance);
         } else {
@@ -112,8 +114,9 @@ public class MeetingAttendanceCommandService {
                     participant.type(),
                     participant.clubMemberId()
             );
+            applyParticipantSkillTier(attendance, participant, null);
         }
-        return MeetingAttendanceResponse.from(attendance);
+        return MeetingAttendanceResponse.from(attendance, skillTierNames(participant, null));
     }
 
     @Transactional
@@ -133,8 +136,8 @@ public class MeetingAttendanceCommandService {
         if (guestToPromote.isPresent()) {
             MeetingAttendance attendance = guestToPromote.get();
             attendance.assignParticipant(MeetingParticipantType.CLUB_MEMBER, participant.clubMemberId());
-            attendance.clearClubSkillTier();
-            return MeetingAttendanceResponse.from(attendance);
+            applyParticipantSkillTier(attendance, participant, guestSkillTier);
+            return MeetingAttendanceResponse.from(attendance, skillTierNames(participant, guestSkillTier));
         }
 
         rejectDuplicateName(meeting, participant.name());
@@ -142,17 +145,9 @@ public class MeetingAttendanceCommandService {
 
         MeetingAttendance attendance = new MeetingAttendance(meeting, participant.name(), participant.gender(), status);
         attendance.assignParticipant(participant.type(), participant.clubMemberId());
-        if (guestSkillTier != null) {
-            attendance.assignClubSkillTier(guestSkillTier.getId());
-        }
+        applyParticipantSkillTier(attendance, participant, guestSkillTier);
         MeetingAttendance savedAttendance = attendanceRepository.save(attendance);
-        return MeetingAttendanceResponse.from(
-                savedAttendance,
-                guestSkillTier == null ? java.util.Map.of() : java.util.Map.of(
-                        guestSkillTier.getId(),
-                        guestSkillTier.getName()
-                )
-        );
+        return MeetingAttendanceResponse.from(savedAttendance, skillTierNames(participant, guestSkillTier));
     }
 
     @Transactional
@@ -396,8 +391,7 @@ public class MeetingAttendanceCommandService {
                         requestedGender
                 );
         if (exactMatches.size() == 1) {
-            ClubMember member = exactMatches.get(0);
-            return ParticipantResolution.clubMember(member.getName(), member.getGender(), member.getId());
+            return clubMemberResolution(exactMatches.get(0));
         }
 
         return ParticipantResolution.guest(requestedName, requestedGender);
@@ -420,7 +414,7 @@ public class MeetingAttendanceCommandService {
         Club club = findActiveClub(meeting.getClubId());
         ClubMember member = clubMemberRepository.findByClubAndIdAndActiveTrue(club, request.getClubMemberId())
                 .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND));
-        return ParticipantResolution.clubMember(member.getName(), member.getGender(), member.getId());
+        return clubMemberResolution(member);
     }
 
     private Club findActiveClub(Long clubId) {
@@ -435,8 +429,7 @@ public class MeetingAttendanceCommandService {
                 Optional<ClubMember> currentMember =
                         clubMemberRepository.findByClubAndUserIdAndActiveTrue(club, currentUserId);
                 if (currentMember.isPresent()) {
-                    ClubMember member = currentMember.get();
-                    return ParticipantResolution.clubMember(member.getName(), member.getGender(), member.getId());
+                    return clubMemberResolution(currentMember.get());
                 }
             }
         }
@@ -502,6 +495,43 @@ public class MeetingAttendanceCommandService {
     private void ensureCapacityAvailable(
             Meeting meeting,
             MeetingAttendance currentAttendance,
+    private ParticipantResolution clubMemberResolution(ClubMember member) {
+        ClubSkillTier skillTier = member.getSkillTier();
+        return ParticipantResolution.clubMember(
+                member.getName(),
+                member.getGender(),
+                member.getId(),
+                skillTier == null ? null : skillTier.getId(),
+                skillTier == null ? null : skillTier.getName()
+        );
+    }
+
+    private void applyParticipantSkillTier(
+            MeetingAttendance attendance,
+            ParticipantResolution participant,
+            ClubSkillTier guestSkillTier
+    ) {
+        Long skillTierId = guestSkillTier != null ? guestSkillTier.getId() : participant.clubSkillTierId();
+        if (skillTierId == null) {
+            attendance.clearClubSkillTier();
+            return;
+        }
+        attendance.assignClubSkillTier(skillTierId);
+    }
+
+    private Map<Long, String> skillTierNames(
+            ParticipantResolution participant,
+            ClubSkillTier guestSkillTier
+    ) {
+        if (guestSkillTier != null) {
+            return Map.of(guestSkillTier.getId(), guestSkillTier.getName());
+        }
+        if (participant.clubSkillTierId() != null) {
+            return Map.of(participant.clubSkillTierId(), participant.clubSkillTierName());
+        }
+        return Map.of();
+    }
+
             Gender requestedGender,
             AttendanceStatus requestedStatus
     ) {

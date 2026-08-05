@@ -3,9 +3,11 @@ package com.tennisfolio.Tennisfolio.matching.service;
 import com.tennisfolio.Tennisfolio.matching.domain.GameMatch;
 import com.tennisfolio.Tennisfolio.matching.domain.MatchType;
 import com.tennisfolio.Tennisfolio.matching.domain.ScheduleResult;
+import com.tennisfolio.Tennisfolio.matching.domain.ScheduleGenerationRequest;
 import com.tennisfolio.Tennisfolio.matching.engine.CandidateGenerator;
 import com.tennisfolio.Tennisfolio.matching.engine.ConstraintChecker;
 import com.tennisfolio.Tennisfolio.matching.engine.ScoreCalculator;
+import com.tennisfolio.Tennisfolio.matching.engine.SkillBalanceCalculator;
 import com.tennisfolio.Tennisfolio.matching.entity.CompetitionEntry;
 import com.tennisfolio.Tennisfolio.matching.entity.GameEntry;
 import com.tennisfolio.Tennisfolio.matching.service.club.ClubSessionNextGameGenerator;
@@ -24,14 +26,24 @@ public class TennisMatchScheduler {
     public TennisMatchScheduler(
             ConstraintChecker constraintChecker,
             ScoreCalculator scoreCalculator,
-            CandidateGenerator generator
+            CandidateGenerator generator,
+            SkillBalanceCalculator skillBalanceCalculator
     ) {
-        this.fixedScheduleGenerator = new FixedScheduleGenerator(constraintChecker, scoreCalculator, generator);
+        this.fixedScheduleGenerator = new FixedScheduleGenerator(
+                constraintChecker,
+                scoreCalculator,
+                generator,
+                skillBalanceCalculator
+        );
         this.clubSessionNextGameGenerator = new ClubSessionNextGameGenerator(scoreCalculator, generator);
     }
 
     public ScheduleResult generateSchedule(int male, int female, int court, int totalGames, long seed) {
         return fixedScheduleGenerator.generateSchedule(male, female, court, totalGames, seed);
+    }
+
+    public ScheduleResult generateSchedule(ScheduleGenerationRequest request) {
+        return fixedScheduleGenerator.generateSchedule(request);
     }
 
     public ScheduleResult generateSchedule(

@@ -47,6 +47,7 @@ function MeetingManage({ initialMeeting = null, initialNotice = null }) {
   const [competitionDeleteRequested, setCompetitionDeleteRequested] =
     useState(false);
   const [sameGenderDoublesOnly, setSameGenderDoublesOnly] = useState(false);
+  const [skillBalancedSchedule, setSkillBalancedSchedule] = useState(false);
   const [notice, setNotice] = useState(initialNotice);
   const [errorMessage, setErrorMessage] = useState('');
   const [clubMembers, setClubMembers] = useState([]);
@@ -64,7 +65,7 @@ function MeetingManage({ initialMeeting = null, initialNotice = null }) {
     () => groupAttendances(attendances),
     [attendances],
   );
-  const ownerName = currentUser?.nickName?.trim() || '';
+  const ownerName = meeting?.currentClubMemberName?.trim() || currentUser?.nickName?.trim() || '';
   const meetingEditDisabled = Boolean(meeting?.competitionCreated);
   const registeredClubMemberIds = useMemo(
     () => new Set(attendances.map((attendance) => attendance.clubMemberId).filter(Boolean)),
@@ -233,7 +234,7 @@ function MeetingManage({ initialMeeting = null, initialNotice = null }) {
 
   const handleOwnerAttendance = async (status) => {
     if (!ownerName) {
-      showNotice('error', '프로필 nickname을 먼저 설정해주세요.');
+      showNotice('error', '참가자 이름을 먼저 설정해주세요.');
       return;
     }
 
@@ -242,7 +243,7 @@ function MeetingManage({ initialMeeting = null, initialNotice = null }) {
       await upsertAttendance(publicId, {
         attendanceId: ownerAttendance?.id,
         participantName: ownerName,
-        gender: currentUser?.gender || ownerAttendance?.gender || 'MALE',
+        gender: meeting?.currentClubMemberGender || currentUser?.gender || ownerAttendance?.gender || 'MALE',
         attendanceStatus: status,
       });
       await loadMeeting();
@@ -306,7 +307,8 @@ function MeetingManage({ initialMeeting = null, initialNotice = null }) {
     try {
       const response = clubPublicId
         ? await createClubMeetingCompetitionWithOptions(clubPublicId, publicId, {
-            sameGenderDoublesOnly,
+          sameGenderDoublesOnly,
+          skillBalancedSchedule,
           })
         : await createMeetingCompetitionWithOptions(publicId, {
             sameGenderDoublesOnly,
@@ -423,6 +425,9 @@ function MeetingManage({ initialMeeting = null, initialNotice = null }) {
           onChangeStatus={handleStatus}
           sameGenderDoublesOnly={sameGenderDoublesOnly}
           onSameGenderDoublesOnlyChange={setSameGenderDoublesOnly}
+          isClubMeeting={Boolean(clubPublicId)}
+          skillBalancedSchedule={skillBalancedSchedule}
+          onSkillBalancedScheduleChange={setSkillBalancedSchedule}
           sameGenderDoublesOnlyUnavailable={sameGenderDoublesOnlyUnavailable}
           sameGenderDoublesOnlyUnavailableReason={sameGenderDoublesOnlyUnavailableReason}
         />
