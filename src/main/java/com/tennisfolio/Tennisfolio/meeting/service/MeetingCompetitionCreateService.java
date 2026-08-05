@@ -6,6 +6,12 @@ import com.tennisfolio.Tennisfolio.matching.dto.CompetitionCreateRequest;
 import com.tennisfolio.Tennisfolio.matching.entity.Competition;
 import com.tennisfolio.Tennisfolio.matching.repository.CompetitionRepository;
 import com.tennisfolio.Tennisfolio.matching.service.CompetitionCommandService;
+import com.tennisfolio.Tennisfolio.matching.domain.GamePlayer;
+import com.tennisfolio.Tennisfolio.matching.domain.ScheduleGenerationOptions;
+import com.tennisfolio.Tennisfolio.matching.domain.ScheduleGenerationRequest;
+import com.tennisfolio.Tennisfolio.matching.domain.ScheduleParticipant;
+import com.tennisfolio.Tennisfolio.club.entity.ClubSkillTier;
+import com.tennisfolio.Tennisfolio.club.repository.ClubSkillTierRepository;
 import com.tennisfolio.Tennisfolio.matching.service.CompetitionCreationResult;
 import com.tennisfolio.Tennisfolio.meeting.domain.AttendanceStatus;
 import com.tennisfolio.Tennisfolio.meeting.domain.Gender;
@@ -16,12 +22,19 @@ import com.tennisfolio.Tennisfolio.meeting.entity.MeetingAttendance;
 import com.tennisfolio.Tennisfolio.meeting.repository.MeetingAttendanceRepository;
 import com.tennisfolio.Tennisfolio.meeting.repository.MeetingRepository;
 import org.springframework.http.HttpStatus;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.concurrent.ThreadLocalRandom;
 
 @Service
 public class MeetingCompetitionCreateService {
@@ -32,17 +45,30 @@ public class MeetingCompetitionCreateService {
     private final MeetingAttendanceRepository attendanceRepository;
     private final CompetitionCommandService competitionCommandService;
     private final CompetitionRepository competitionRepository;
+    private final ClubSkillTierRepository clubSkillTierRepository;
 
+    @Autowired
     public MeetingCompetitionCreateService(
             MeetingRepository meetingRepository,
             MeetingAttendanceRepository attendanceRepository,
             CompetitionCommandService competitionCommandService,
-            CompetitionRepository competitionRepository
+            CompetitionRepository competitionRepository,
+            ClubSkillTierRepository clubSkillTierRepository
     ) {
         this.meetingRepository = meetingRepository;
         this.attendanceRepository = attendanceRepository;
         this.competitionCommandService = competitionCommandService;
         this.competitionRepository = competitionRepository;
+        this.clubSkillTierRepository = clubSkillTierRepository;
+    }
+
+    MeetingCompetitionCreateService(
+            MeetingRepository meetingRepository,
+            MeetingAttendanceRepository attendanceRepository,
+            CompetitionCommandService competitionCommandService,
+            CompetitionRepository competitionRepository
+    ) {
+        this(meetingRepository, attendanceRepository, competitionCommandService, competitionRepository, null);
     }
 
     @Transactional
@@ -89,8 +115,13 @@ public class MeetingCompetitionCreateService {
                 attendingParticipants,
                 request.isSameGenderDoublesOnly()
         );
-        CompetitionCreationResult result =
-                competitionCommandService.createCompetitionResult(competitionRequest, creatorUserId);
+        CompetitionCreationResult result = request.isSkillBalancedSchedule()
+                ? competitionCommandService.createCompetitionResult(
+                        competitionRequest,
+                        creatorUserId,
+                        createSkillBalancedScheduleRequest(meeting, attendingParticipants, request)
+                )
+                : competitionCommandService.createCompetitionResult(competitionRequest, creatorUserId);
         Competition competition = result.getCompetition();
         meeting.connectCompetition(competition.getId());
         return new MeetingCompetitionCreateResponse(competition.getPublicId());
@@ -177,6 +208,78 @@ public class MeetingCompetitionCreateService {
                 .filter(attendance -> attendance.getGender() == gender)
                 .map(MeetingAttendance::getParticipantName)
                 .toList();
+    }
+
+    private ScheduleGenerationRequest createSkillBalancedScheduleRequest(
+            Meeting meeting,
+            List<MeetingAttendance> attendances,
+            MeetingCompetitionCreateRequest request
+    ) {
+        if (meeting.getClubId() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "실력 기반 대진은 클럽 모임에서만 사용할 수 있습니다.");
+        }
+
+        Map<Long, ClubSkillTier> tiersById = findClubSkillTiers(meeting.getClubId(), attendances);
+        validateSkillTiers(attendances, tiersById);
+
+        List<ScheduleParticipant> participants = toScheduleParticipants(attendances, tiersById);
+        return new ScheduleGenerationRequest(
+                participants,
+                meeting.getCourtCount(),
+                meeting.getTotalGames(),
+                ThreadLocalRandom.current().nextLong(1, 10000),
+                new ScheduleGenerationOptions(request.isSameGenderDoublesOnly(), true)
+        );
+    }
+
+    private Map<Long, ClubSkillTier> findClubSkillTiers(Long clubId, List<MeetingAttendance> attendances) {
+        List<Long> tierIds = attendances.stream()
+                .map(MeetingAttendance::getClubSkillTierId)
+                .filter(Objects::nonNull)
+                .distinct()
+                .toList();
+        if (tierIds.isEmpty()) {
+            return Map.of();
+        }
+        return clubSkillTierRepository.findByClubIdAndIdIn(clubId, tierIds).stream()
+                .collect(Collectors.toMap(ClubSkillTier::getId, Function.identity()));
+    }
+
+    private List<ScheduleParticipant> toScheduleParticipants(
+            List<MeetingAttendance> attendances,
+            Map<Long, ClubSkillTier> tiersById
+    ) {
+        List<ScheduleParticipant> participants = new ArrayList<>();
+        int maleIndex = 1;
+        int femaleIndex = 1;
+        for (MeetingAttendance attendance : attendances) {
+            boolean male = attendance.getGender() == Gender.MALE;
+            String playerId = male ? "M" + maleIndex++ : "F" + femaleIndex++;
+            participants.add(new ScheduleParticipant(
+                    playerId,
+                    toGamePlayerGender(attendance.getGender()),
+                    tiersById.get(attendance.getClubSkillTierId()).getLevel()
+            ));
+        }
+        return participants;
+    }
+
+    private void validateSkillTiers(List<MeetingAttendance> attendances, Map<Long, ClubSkillTier> tiersById) {
+        List<String> missingParticipantNames = attendances.stream()
+                .filter(attendance -> attendance.getClubSkillTierId() == null
+                        || !tiersById.containsKey(attendance.getClubSkillTierId()))
+                .map(MeetingAttendance::getParticipantName)
+                .toList();
+        if (!missingParticipantNames.isEmpty()) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "실력 등급이 설정되지 않았거나 이 클럽에 속하지 않은 참석자: " + String.join(", ", missingParticipantNames)
+            );
+        }
+    }
+
+    private GamePlayer.Gender toGamePlayerGender(Gender gender) {
+        return gender == Gender.MALE ? GamePlayer.Gender.MALE : GamePlayer.Gender.FEMALE;
     }
 
     private void requireAuthenticated(Long userId) {

@@ -5,9 +5,12 @@ import com.tennisfolio.Tennisfolio.matching.domain.GamePlayer;
 import com.tennisfolio.Tennisfolio.matching.domain.MatchCandidate;
 import com.tennisfolio.Tennisfolio.matching.domain.MatchType;
 import com.tennisfolio.Tennisfolio.matching.domain.ScheduleResult;
+import com.tennisfolio.Tennisfolio.matching.domain.ScheduleGenerationRequest;
+import com.tennisfolio.Tennisfolio.matching.domain.ScheduleParticipant;
 import com.tennisfolio.Tennisfolio.matching.engine.CandidateGenerator;
 import com.tennisfolio.Tennisfolio.matching.engine.ConstraintChecker;
 import com.tennisfolio.Tennisfolio.matching.engine.ScoreCalculator;
+import com.tennisfolio.Tennisfolio.matching.engine.SkillBalanceCalculator;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -35,17 +38,20 @@ public class FixedScheduleGenerator {
     private final ConstraintChecker constraintChecker;
     private final ScoreCalculator scoreCalculator;
     private final CandidateGenerator generator;
+    private final SkillBalanceCalculator skillBalanceCalculator;
     private final SameGenderScheduleTargetCalculator sameGenderTargetCalculator = new SameGenderScheduleTargetCalculator();
     private Random random;
 
     public FixedScheduleGenerator(
             ConstraintChecker constraintChecker,
             ScoreCalculator scoreCalculator,
-            CandidateGenerator generator
+            CandidateGenerator generator,
+            SkillBalanceCalculator skillBalanceCalculator
     ) {
         this.constraintChecker = constraintChecker;
         this.scoreCalculator = scoreCalculator;
         this.generator = generator;
+        this.skillBalanceCalculator = skillBalanceCalculator;
     }
 
     public ScheduleResult generateSchedule(int male, int female, int court, int totalGames, long seed) {
@@ -69,6 +75,37 @@ public class FixedScheduleGenerator {
             fallbackAllowedTypes.add(MatchType.RANDOM_M1F3);
             return generateSchedule(male, female, court, totalGames, rounds, seed, fallbackAllowedTypes);
         }
+    }
+
+    public ScheduleResult generateSchedule(ScheduleGenerationRequest request) {
+        List<GamePlayer> players = createPlayers(request.getParticipants());
+        int male = (int) players.stream().filter(player -> player.gender == GamePlayer.Gender.MALE).count();
+        int female = players.size() - male;
+
+        if (request.getOptions().isSameGenderDoublesOnly()) {
+            return generateSameGenderOnlySchedule(
+                    players,
+                    male,
+                    female,
+                    request.getCourtCount(),
+                    request.getTotalGames(),
+                    request.getSeed(),
+                    request.getOptions().isSkillBalancedSchedule()
+            );
+        }
+
+        return generateSchedule(
+                players,
+                male,
+                female,
+                request.getCourtCount(),
+                request.getTotalGames(),
+                calculateRounds(request.getTotalGames(), request.getCourtCount()),
+                request.getSeed(),
+                NORMAL_TYPES,
+                request.getOptions().isSkillBalancedSchedule(),
+                request.getOptions().isSkillBalancedSchedule()
+        );
     }
 
     public ScheduleResult generateSchedule(
@@ -99,6 +136,18 @@ public class FixedScheduleGenerator {
             int totalGames,
             long seed
     ) {
+        return generateSameGenderOnlySchedule(createPlayers(male, female), male, female, court, totalGames, seed, false);
+    }
+
+    private ScheduleResult generateSameGenderOnlySchedule(
+            List<GamePlayer> players,
+            int male,
+            int female,
+            int court,
+            int totalGames,
+            long seed,
+            boolean skillBalancedSchedule
+    ) {
         List<SameGenderScheduleTarget> targets = sameGenderTargetCalculator.calculate(male, female, totalGames);
         if (targets.isEmpty()) {
             throw new IllegalArgumentException(
@@ -109,7 +158,7 @@ public class FixedScheduleGenerator {
         NoSuchElementException lastFailure = null;
         for (SameGenderScheduleTarget target : targets) {
             try {
-                return generateSameGenderOnlySchedule(male, female, court, totalGames, seed, target);
+                return generateSameGenderOnlySchedule(players, male, female, court, totalGames, seed, target, skillBalancedSchedule);
             } catch (NoSuchElementException e) {
                 lastFailure = e;
             }
@@ -122,15 +171,16 @@ public class FixedScheduleGenerator {
     }
 
     private ScheduleResult generateSameGenderOnlySchedule(
+            List<GamePlayer> players,
             int male,
             int female,
             int court,
             int totalGames,
             long seed,
-            SameGenderScheduleTarget target
+            SameGenderScheduleTarget target,
+            boolean skillBalancedSchedule
     ) {
         this.random = new Random(seed);
-        List<GamePlayer> players = createPlayers(male, female);
         ScheduleResult result = new ScheduleResult();
         Map<MatchType, Integer> typeCount = new EnumMap<>(MatchType.class);
         for (MatchType type : MatchType.values()) {
@@ -150,7 +200,8 @@ public class FixedScheduleGenerator {
                 rounds,
                 male,
                 female,
-                0
+                0,
+                skillBalancedSchedule
         );
 
         if (!solved) {
@@ -170,7 +221,8 @@ public class FixedScheduleGenerator {
             int rounds,
             int male,
             int female,
-            int gameIndex
+            int gameIndex,
+            boolean skillBalancedSchedule
     ) {
         if (gameIndex == totalGames) {
             return typeCount.get(MatchType.MALE) == target.maleGames()
@@ -198,9 +250,16 @@ public class FixedScheduleGenerator {
         });
 
         Collections.shuffle(candidates, random);
-        candidates.sort((left, right) -> Integer.compare(
-                scoreSameGenderCandidate(right, typeCount, round, rounds, groupCount, male, female),
-                scoreSameGenderCandidate(left, typeCount, round, rounds, groupCount, male, female)
+        candidates.sort((left, right) -> compareCandidates(
+                left,
+                right,
+                typeCount,
+                round,
+                rounds,
+                groupCount,
+                male,
+                female,
+                skillBalancedSchedule
         ));
 
         for (MatchCandidate candidate : candidates) {
@@ -208,7 +267,7 @@ public class FixedScheduleGenerator {
             typeCount.put(candidate.type, typeCount.get(candidate.type) + 1);
             result.matches.add(new GameMatch(round, courtNumber, candidate.type, candidate.teamA, candidate.teamB));
 
-            if (fillSameGenderOnly(players, result, typeCount, groupCount, target, court, totalGames, rounds, male, female, gameIndex + 1)) {
+            if (fillSameGenderOnly(players, result, typeCount, groupCount, target, court, totalGames, rounds, male, female, gameIndex + 1, skillBalancedSchedule)) {
                 return true;
             }
 
@@ -258,7 +317,7 @@ public class FixedScheduleGenerator {
         return switch (type) {
             case MALE -> target.maleGames();
             case FEMALE -> target.femaleGames();
-            case MIXED, RANDOM_M3F1, RANDOM_M1F3 -> 0;
+            case MIXED, RANDOM_M3F1, RANDOM_M1F3, M2F2_SPLIT -> 0;
         };
     }
 
@@ -269,8 +328,12 @@ public class FixedScheduleGenerator {
             int rounds,
             Map<Set<String>, Integer> groupCount,
             int male,
-            int female
+            int female,
+            boolean skillBalancedSchedule
     ) {
+        if (skillBalancedSchedule) {
+            return scoreCalculator.scoreSkillBalanced(candidate, typeCount, Set.of(), round, rounds, groupCount, male, female);
+        }
         return scoreCalculator.score(
                 candidate,
                 typeCount,
@@ -292,8 +355,48 @@ public class FixedScheduleGenerator {
             long seed,
             Set<MatchType> allowedMatchTypes
     ) {
+        return generateSchedule(createPlayers(male, female), male, female, court, totalGames, rounds, seed, allowedMatchTypes, false, false);
+    }
+
+    private int compareCandidates(
+            MatchCandidate left,
+            MatchCandidate right,
+            Map<MatchType, Integer> typeCount,
+            int round,
+            int rounds,
+            Map<Set<String>, Integer> groupCount,
+            int male,
+            int female,
+            boolean skillBalancedSchedule
+    ) {
+        if (skillBalancedSchedule) {
+            int skillDifferenceComparison = Integer.compare(
+                    skillBalanceCalculator.teamSkillDifference(left),
+                    skillBalanceCalculator.teamSkillDifference(right)
+            );
+            if (skillDifferenceComparison != 0) {
+                return skillDifferenceComparison;
+            }
+        }
+        return Integer.compare(
+                scoreSameGenderCandidate(right, typeCount, round, rounds, groupCount, male, female, skillBalancedSchedule),
+                scoreSameGenderCandidate(left, typeCount, round, rounds, groupCount, male, female, skillBalancedSchedule)
+        );
+    }
+
+    private ScheduleResult generateSchedule(
+            List<GamePlayer> players,
+            int male,
+            int female,
+            int court,
+            int totalGames,
+            int rounds,
+            long seed,
+            Set<MatchType> allowedMatchTypes,
+            boolean skillBalancedSchedule,
+            boolean genderAgnosticCandidates
+    ) {
         this.random = new Random(seed);
-        List<GamePlayer> players = createPlayers(male, female);
 
         int totalSlots = totalGames * 4;
         int maxGames = (int) Math.ceil((double) totalSlots / players.size());
@@ -332,7 +435,9 @@ public class FixedScheduleGenerator {
                         groupCount,
                         male,
                         female,
-                        allowedMatchTypes
+                        allowedMatchTypes,
+                        skillBalancedSchedule,
+                        genderAgnosticCandidates
                 );
 
                 if (best.candidate == null) {
@@ -380,33 +485,40 @@ public class FixedScheduleGenerator {
             Map<Set<String>, Integer> groupCount,
             int male,
             int female,
-            Set<MatchType> allowedMatchTypes
+            Set<MatchType> allowedMatchTypes,
+            boolean skillBalancedSchedule,
+            boolean genderAgnosticCandidates
     ) {
         BestCandidate best = new BestCandidate();
 
-        generator.forEachCandidate(availablePlayers, allowedMatchTypes, candidate -> {
+        java.util.function.Consumer<MatchCandidate> candidateConsumer = candidate -> {
             if (!constraintChecker.isValid(candidate, players, used, court, maxGames)) {
                 return;
             }
 
-            int score = scoreCalculator.score(
-                    candidate,
-                    typeCount,
-                    roundTypes,
-                    currentRound,
-                    rounds,
-                    groupCount,
-                    male,
-                    female
-            );
+            int score = skillBalancedSchedule
+                    ? scoreCalculator.scoreSkillBalanced(candidate, typeCount, roundTypes, currentRound, rounds, groupCount, male, female)
+                    : scoreCalculator.score(candidate, typeCount, roundTypes, currentRound, rounds, groupCount, male, female);
             int tieBreaker = random.nextInt();
+            int skillDifference = skillBalancedSchedule
+                    ? skillBalanceCalculator.teamSkillDifference(candidate)
+                    : Integer.MAX_VALUE;
 
-            if (best.candidate == null || score > best.score || (score == best.score && tieBreaker > best.tieBreaker)) {
+            if (best.candidate == null
+                    || skillDifference < best.skillDifference
+                    || (skillDifference == best.skillDifference && score > best.score)
+                    || (skillDifference == best.skillDifference && score == best.score && tieBreaker > best.tieBreaker)) {
                 best.candidate = candidate;
                 best.score = score;
+                best.skillDifference = skillDifference;
                 best.tieBreaker = tieBreaker;
             }
-        });
+        };
+        if (genderAgnosticCandidates) {
+            generator.forEachSkillBalancedCandidate(availablePlayers, candidateConsumer);
+        } else {
+            generator.forEachCandidate(availablePlayers, allowedMatchTypes, candidateConsumer);
+        }
 
         return best;
     }
@@ -422,6 +534,16 @@ public class FixedScheduleGenerator {
         }
 
         return list;
+    }
+
+    private List<GamePlayer> createPlayers(List<ScheduleParticipant> participants) {
+        return participants.stream()
+                .map(participant -> new GamePlayer(
+                        participant.getId(),
+                        participant.getGender(),
+                        participant.getSkillLevel() == null ? 0 : participant.getSkillLevel()
+                ))
+                .toList();
     }
 
     private void apply(MatchCandidate c, Map<Set<String>, Integer> groupCount) {
@@ -612,6 +734,7 @@ public class FixedScheduleGenerator {
     private static class BestCandidate {
         private MatchCandidate candidate;
         private int score = Integer.MIN_VALUE;
+        private int skillDifference = Integer.MAX_VALUE;
         private int tieBreaker = Integer.MIN_VALUE;
     }
 }

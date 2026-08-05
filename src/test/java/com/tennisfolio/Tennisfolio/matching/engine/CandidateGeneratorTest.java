@@ -18,6 +18,19 @@ class CandidateGeneratorTest {
     private final CandidateGenerator generator = new CandidateGenerator();
 
     @Test
+    void generateSkillBalancedCandidatesIncludesGenderAgnosticM2F2Split() {
+        List<GamePlayer> players = List.of(
+                male("M3"), male("M1"), female("F3"), female("F1")
+        );
+
+        List<MatchCandidate> candidates = generator.generateSkillBalancedCandidates(players);
+
+        assertTrue(candidates.stream().anyMatch(candidate -> candidate.type == MatchType.M2F2_SPLIT
+                && candidate.teamA.stream().allMatch(player -> player.gender == GamePlayer.Gender.MALE)
+                && candidate.teamB.stream().allMatch(player -> player.gender == GamePlayer.Gender.FEMALE)));
+    }
+
+    @Test
     void generateWithAllowedTypesCreatesOnlyMaleAndFemaleCandidates() {
         List<GamePlayer> players = List.of(
                 male("M1"), male("M2"), male("M3"), male("M4"),

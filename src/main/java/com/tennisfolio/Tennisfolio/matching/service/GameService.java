@@ -30,7 +30,7 @@ public class GameService {
     public void saveSchedule(
             Competition competition,
             ScheduleResult result,
-            Map<String, CompetitionEntry> entriesByPlayerName
+            Map<?, CompetitionEntry> entriesByEntryId
     ) {
         List<Game> games = new ArrayList<>();
         for (GameMatch match : result.matches) {
@@ -43,8 +43,8 @@ public class GameService {
             GameMatch match = result.matches.get(i);
             Game game = savedGames.get(i);
 
-            addGameEntries(gameEntries, game, match.teamA, GameEntry.Team.A, entriesByPlayerName);
-            addGameEntries(gameEntries, game, match.teamB, GameEntry.Team.B, entriesByPlayerName);
+            addGameEntries(gameEntries, game, match.teamA, GameEntry.Team.A, entriesByEntryId);
+            addGameEntries(gameEntries, game, match.teamB, GameEntry.Team.B, entriesByEntryId);
         }
         gameEntryRepository.saveAll(gameEntries);
     }
@@ -52,7 +52,7 @@ public class GameService {
     public Game saveGame(
             Competition competition,
             GameMatch match,
-            Map<String, CompetitionEntry> entriesByPlayerName
+            Map<?, CompetitionEntry> entriesByEntryId
     ) {
         Game game = gameRepository.save(new Game(
                 competition,
@@ -62,8 +62,8 @@ public class GameService {
         ));
 
         List<GameEntry> gameEntries = new ArrayList<>();
-        addGameEntries(gameEntries, game, match.teamA, GameEntry.Team.A, entriesByPlayerName);
-        addGameEntries(gameEntries, game, match.teamB, GameEntry.Team.B, entriesByPlayerName);
+        addGameEntries(gameEntries, game, match.teamA, GameEntry.Team.A, entriesByEntryId);
+        addGameEntries(gameEntries, game, match.teamB, GameEntry.Team.B, entriesByEntryId);
         gameEntryRepository.saveAll(gameEntries);
 
         return game;
@@ -74,13 +74,13 @@ public class GameService {
             Game game,
             List<GamePlayer> players,
             GameEntry.Team team,
-            Map<String, CompetitionEntry> entriesByPlayerName
+            Map<?, CompetitionEntry> entriesByEntryId
     ) {
         for (int i = 0; i < players.size(); i++) {
             GamePlayer player = players.get(i);
-            CompetitionEntry competitionEntry = entriesByPlayerName.get(player.id);
+            CompetitionEntry competitionEntry = entriesByEntryId.get(player.competitionEntryId);
             if (competitionEntry == null) {
-                throw new IllegalStateException("CompetitionEntry not found for player: " + player.id);
+                throw new IllegalStateException("CompetitionEntry not found for ID: " + player.competitionEntryId);
             }
             gameEntries.add(new GameEntry(game, competitionEntry, team, i + 1));
         }
@@ -91,6 +91,7 @@ public class GameService {
             case MIXED -> Game.MatchType.MIXED;
             case MALE -> Game.MatchType.MALE;
             case FEMALE -> Game.MatchType.FEMALE;
+            case M2F2_SPLIT -> Game.MatchType.M2F2_SPLIT;
             case RANDOM_M3F1 -> Game.MatchType.RANDOM_M3F1;
             case RANDOM_M1F3 -> Game.MatchType.RANDOM_M1F3;
         };

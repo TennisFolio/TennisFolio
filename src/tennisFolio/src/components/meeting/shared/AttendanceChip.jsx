@@ -13,16 +13,12 @@ function OwnerTag() {
 
 function ParticipantBadge({ attendance, meeting }) {
   if (
-    !meeting?.clubMeeting ||
-    attendance.participantType !== 'GUEST' ||
-    !attendance.badgeLabel
+    !meeting?.clubMeeting
   ) {
     return null;
   }
 
-  const label = attendance.clubSkillTierId
-    ? `${attendance.badgeLabel} · ${attendance.clubSkillTierName || '등급 미정'}`
-    : attendance.badgeLabel;
+  const label = attendance.clubSkillTierName || '등급 미정';
 
   return (
     <span className="meeting-participant-badge">

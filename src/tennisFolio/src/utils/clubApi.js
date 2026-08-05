@@ -57,6 +57,7 @@ export const createClubMeetingCompetitionWithOptions = (
     `/api/clubs/${publicId}/meetings/${meetingPublicId}/competition`,
     {
       sameGenderDoublesOnly: options.sameGenderDoublesOnly === true,
+      skillBalancedSchedule: options.skillBalancedSchedule === true,
     },
   );
 

@@ -13,6 +13,13 @@ import java.util.Set;
 @Component
 public class ScoreCalculator {
 
+    private static final int SKILL_DIFFERENCE_PENALTY = 100;
+    private final SkillBalanceCalculator skillBalanceCalculator;
+
+    public ScoreCalculator(SkillBalanceCalculator skillBalanceCalculator) {
+        this.skillBalanceCalculator = skillBalanceCalculator;
+    }
+
     public int score(
             MatchCandidate c,
             Map<MatchType, Integer> typeCount,
@@ -37,6 +44,20 @@ public class ScoreCalculator {
             int femaleCount
     ) {
         return score(c, typeCount, roundTypes, round, totalRounds, groupCount, maleCount, femaleCount, false);
+    }
+
+    public int scoreSkillBalanced(
+            MatchCandidate c,
+            Map<MatchType, Integer> typeCount,
+            Set<MatchType> roundTypes,
+            int round,
+            int totalRounds,
+            Map<Set<String>, Integer> groupCount,
+            int maleCount,
+            int femaleCount
+    ) {
+        return score(c, typeCount, roundTypes, round, totalRounds, groupCount, maleCount, femaleCount, true)
+                - skillBalanceCalculator.teamSkillDifference(c) * SKILL_DIFFERENCE_PENALTY;
     }
 
     private int score(
@@ -163,6 +184,7 @@ public class ScoreCalculator {
             case MALE -> male > 4;
             case FEMALE -> female > 4;
             case MIXED -> male > 2 && female > 2;
+            case M2F2_SPLIT -> male > 2 && female > 2;
             case RANDOM_M3F1, RANDOM_M1F3 -> true;
         };
     }

@@ -9,6 +9,9 @@ function MeetingManageOperationsPanel({
   onChangeStatus,
   sameGenderDoublesOnly,
   onSameGenderDoublesOnlyChange,
+  isClubMeeting,
+  skillBalancedSchedule,
+  onSkillBalancedScheduleChange,
   sameGenderDoublesOnlyUnavailable,
   sameGenderDoublesOnlyUnavailableReason,
 }) {
@@ -21,6 +24,9 @@ function MeetingManageOperationsPanel({
         onAskDeleteCompetition={onAskDeleteCompetition}
         sameGenderDoublesOnly={sameGenderDoublesOnly}
         onSameGenderDoublesOnlyChange={onSameGenderDoublesOnlyChange}
+        isClubMeeting={isClubMeeting}
+        skillBalancedSchedule={skillBalancedSchedule}
+        onSkillBalancedScheduleChange={onSkillBalancedScheduleChange}
         sameGenderDoublesOnlyUnavailable={sameGenderDoublesOnlyUnavailable}
         sameGenderDoublesOnlyUnavailableReason={sameGenderDoublesOnlyUnavailableReason}
       />

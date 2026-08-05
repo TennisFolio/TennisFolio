@@ -58,6 +58,7 @@ public class CompetitionStatService {
             case MIXED -> stat.incrementMixedCount();
             case MALE -> stat.incrementMaleCount();
             case FEMALE -> stat.incrementFemaleCount();
+            case M2F2_SPLIT -> stat.incrementM2F2SplitCount();
             case RANDOM_M3F1 -> stat.incrementRandomM3F1Count();
             case RANDOM_M1F3 -> stat.incrementRandomM1F3Count();
         }

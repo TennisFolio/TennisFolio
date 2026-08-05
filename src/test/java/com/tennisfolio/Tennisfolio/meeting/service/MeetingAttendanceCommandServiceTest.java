@@ -358,6 +358,8 @@ class MeetingAttendanceCommandServiceTest {
         Club club = club(50L);
         Meeting meeting = clubMeeting(club.getId());
         ClubMember member = clubMember(club, 100L, 10L, "Jamie Lee", Gender.FEMALE);
+        ClubSkillTier skillTier = clubSkillTier(club, 300L, "A", 3);
+        ReflectionTestUtils.setField(member, "skillTier", skillTier);
         when(meetingRepository.findByPublicIdAndDeletedAtIsNullForUpdate("meeting-public-id"))
                 .thenReturn(Optional.of(meeting));
         when(clubRepository.findByIdAndDeletedAtIsNull(50L)).thenReturn(Optional.of(club));
@@ -383,6 +385,8 @@ class MeetingAttendanceCommandServiceTest {
         assertThat(response.getParticipantType()).isEqualTo("CLUB_MEMBER");
         assertThat(response.getClubMemberId()).isEqualTo(100L);
         assertThat(response.getBadgeLabel()).isEqualTo("클럽원");
+        assertThat(response.getClubSkillTierId()).isEqualTo(300L);
+        assertThat(response.getClubSkillTierName()).isEqualTo("A");
     }
 
     @Test
@@ -473,6 +477,8 @@ class MeetingAttendanceCommandServiceTest {
         ClubMember admin = clubMember(club, 10L, 10L, "관리자", Gender.MALE);
         ReflectionTestUtils.setField(admin, "role", ClubMemberRole.ADMIN);
         ClubMember member = clubMember(club, 100L, 20L, "김테니스", Gender.FEMALE);
+        ClubSkillTier skillTier = clubSkillTier(club, 300L, "A", 3);
+        ReflectionTestUtils.setField(member, "skillTier", skillTier);
         when(meetingRepository.findByPublicIdAndDeletedAtIsNullForUpdate("meeting-public-id"))
                 .thenReturn(Optional.of(meeting));
         when(clubRepository.findByIdAndDeletedAtIsNull(50L)).thenReturn(Optional.of(club));
@@ -492,6 +498,8 @@ class MeetingAttendanceCommandServiceTest {
         assertThat(response.getParticipantName()).isEqualTo("김테니스");
         assertThat(response.getAttendanceStatus()).isEqualTo("WAITING");
         assertThat(response.getBadgeLabel()).isEqualTo("클럽원");
+        assertThat(response.getClubSkillTierId()).isEqualTo(300L);
+        assertThat(response.getClubSkillTierName()).isEqualTo("A");
     }
 
     @Test
@@ -519,6 +527,28 @@ class MeetingAttendanceCommandServiceTest {
 
         assertThat(response.getClubSkillTierId()).isEqualTo(300L);
         assertThat(response.getClubSkillTierName()).isEqualTo("A");
+    }
+
+    @Test
+    void addManagedParticipant_rejectsGuestWhoseNameMatchesActiveClubMember() {
+        Club club = club(50L);
+        Meeting meeting = clubMeeting(club.getId());
+        ClubMember admin = clubMember(club, 10L, 10L, "관리자", Gender.MALE);
+        ReflectionTestUtils.setField(admin, "role", ClubMemberRole.ADMIN);
+        when(meetingRepository.findByPublicIdAndDeletedAtIsNullForUpdate("meeting-public-id"))
+                .thenReturn(Optional.of(meeting));
+        when(clubRepository.findByIdAndDeletedAtIsNull(50L)).thenReturn(Optional.of(club));
+        when(clubMemberRepository.findByClubAndUserIdAndActiveTrue(club, 10L)).thenReturn(Optional.of(admin));
+        when(clubMemberRepository.existsByClubAndNameAndActiveTrue(club, "CC")).thenReturn(true);
+
+        assertThatThrownBy(() -> service.addManagedParticipant(
+                "meeting-public-id",
+                new ManagedMeetingParticipantCreateRequest(null, "CC", "FEMALE", "ATTENDING"),
+                10L
+        ))
+                .isInstanceOf(ResponseStatusException.class)
+                .extracting(error -> ((ResponseStatusException) error).getStatusCode())
+                .isEqualTo(HttpStatus.CONFLICT);
     }
 
     @Test
@@ -757,6 +787,32 @@ class MeetingAttendanceCommandServiceTest {
 
         assertThat(response.getParticipantName()).isEqualTo("클럽원");
         assertThat(response.getAttendanceStatus()).isEqualTo("ATTENDING");
+    }
+
+    @Test
+    void updateManagedParticipant_rejectsGuestWhoseNameMatchesActiveClubMember() {
+        Club club = club(50L);
+        Meeting meeting = clubMeeting(club.getId());
+        ClubMember admin = clubMember(club, 10L, 10L, "관리자", Gender.MALE);
+        ReflectionTestUtils.setField(admin, "role", ClubMemberRole.ADMIN);
+        MeetingAttendance attendance = attendance(meeting, 100L, "게스트", Gender.FEMALE, AttendanceStatus.WAITING);
+        when(meetingRepository.findByPublicIdAndDeletedAtIsNullForUpdate("meeting-public-id"))
+                .thenReturn(Optional.of(meeting));
+        when(clubRepository.findByIdAndDeletedAtIsNull(50L)).thenReturn(Optional.of(club));
+        when(clubMemberRepository.findByClubAndUserIdAndActiveTrue(club, 10L)).thenReturn(Optional.of(admin));
+        when(attendanceRepository.findByIdAndMeetingAndDeletedAtIsNull(100L, meeting))
+                .thenReturn(Optional.of(attendance));
+        when(clubMemberRepository.existsByClubAndNameAndActiveTrue(club, "CC")).thenReturn(true);
+
+        assertThatThrownBy(() -> service.updateManagedParticipant(
+                "meeting-public-id",
+                100L,
+                new ManagedMeetingParticipantUpdateRequest("CC", "FEMALE", "ATTENDING", null),
+                10L
+        ))
+                .isInstanceOf(ResponseStatusException.class)
+                .extracting(error -> ((ResponseStatusException) error).getStatusCode())
+                .isEqualTo(HttpStatus.CONFLICT);
     }
 
     @Test

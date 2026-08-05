@@ -77,6 +77,63 @@ public class CandidateGenerator {
         }
     }
 
+    public List<MatchCandidate> generateSkillBalancedCandidates(List<GamePlayer> players) {
+        List<MatchCandidate> candidates = new ArrayList<>();
+        forEachSkillBalancedCandidate(players, candidates::add);
+        return candidates;
+    }
+
+    public void forEachSkillBalancedCandidate(List<GamePlayer> players, Consumer<MatchCandidate> consumer) {
+        for (int first = 0; first < players.size() - 3; first++) {
+            for (int second = first + 1; second < players.size() - 2; second++) {
+                for (int third = second + 1; third < players.size() - 1; third++) {
+                    for (int fourth = third + 1; fourth < players.size(); fourth++) {
+                        GamePlayer player1 = players.get(first);
+                        GamePlayer player2 = players.get(second);
+                        GamePlayer player3 = players.get(third);
+                        GamePlayer player4 = players.get(fourth);
+
+                        emitSkillBalancedCandidate(player1, player2, player3, player4, consumer);
+                        emitSkillBalancedCandidate(player1, player3, player2, player4, consumer);
+                        emitSkillBalancedCandidate(player1, player4, player2, player3, consumer);
+                    }
+                }
+            }
+        }
+    }
+
+    private void emitSkillBalancedCandidate(
+            GamePlayer first,
+            GamePlayer second,
+            GamePlayer third,
+            GamePlayer fourth,
+            Consumer<MatchCandidate> consumer
+    ) {
+        List<GamePlayer> teamA = List.of(first, second);
+        List<GamePlayer> teamB = List.of(third, fourth);
+        consumer.accept(new MatchCandidate(determineMatchType(teamA, teamB), teamA, teamB));
+    }
+
+    private MatchType determineMatchType(List<GamePlayer> teamA, List<GamePlayer> teamB) {
+        long maleCount = List.of(teamA, teamB).stream()
+                .flatMap(List::stream)
+                .filter(player -> player.gender == GamePlayer.Gender.MALE)
+                .count();
+
+        return switch ((int) maleCount) {
+            case 4 -> MatchType.MALE;
+            case 0 -> MatchType.FEMALE;
+            case 3 -> MatchType.RANDOM_M3F1;
+            case 1 -> MatchType.RANDOM_M1F3;
+            case 2 -> isMixedTeam(teamA) && isMixedTeam(teamB) ? MatchType.MIXED : MatchType.M2F2_SPLIT;
+            default -> throw new IllegalStateException("A doubles candidate must contain four players");
+        };
+    }
+
+    private boolean isMixedTeam(List<GamePlayer> team) {
+        return team.get(0).gender != team.get(1).gender;
+    }
+
     private void generateMixed(List<GamePlayer> men, List<GamePlayer> women, Consumer<MatchCandidate> consumer) {
         for (int m1 = 0; m1 < men.size() - 1; m1++) {
             for (int m2 = m1 + 1; m2 < men.size(); m2++) {

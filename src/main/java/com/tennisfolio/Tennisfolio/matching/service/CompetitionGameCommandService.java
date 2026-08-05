@@ -96,9 +96,9 @@ public class CompetitionGameCommandService {
                 ThreadLocalRandom.current().nextLong()
         );
 
-        Map<String, CompetitionEntry> entriesById = new HashMap<>();
+        Map<Long, CompetitionEntry> entriesById = new HashMap<>();
         for (CompetitionEntry candidate : candidates) {
-            entriesById.put(String.valueOf(candidate.getId()), candidate);
+            entriesById.put(candidate.getId(), candidate);
         }
         Game game = gameService.saveGame(competition, match, entriesById);
         CompetitionStat stat = recalculateCompetitionStat(competition);
