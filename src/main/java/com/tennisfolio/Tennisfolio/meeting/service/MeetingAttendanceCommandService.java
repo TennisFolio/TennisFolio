@@ -514,43 +514,6 @@ public class MeetingAttendanceCommandService {
     private void ensureCapacityAvailable(
             Meeting meeting,
             MeetingAttendance currentAttendance,
-    private ParticipantResolution clubMemberResolution(ClubMember member) {
-        ClubSkillTier skillTier = member.getSkillTier();
-        return ParticipantResolution.clubMember(
-                member.getName(),
-                member.getGender(),
-                member.getId(),
-                skillTier == null ? null : skillTier.getId(),
-                skillTier == null ? null : skillTier.getName()
-        );
-    }
-
-    private void applyParticipantSkillTier(
-            MeetingAttendance attendance,
-            ParticipantResolution participant,
-            ClubSkillTier guestSkillTier
-    ) {
-        Long skillTierId = guestSkillTier != null ? guestSkillTier.getId() : participant.clubSkillTierId();
-        if (skillTierId == null) {
-            attendance.clearClubSkillTier();
-            return;
-        }
-        attendance.assignClubSkillTier(skillTierId);
-    }
-
-    private Map<Long, String> skillTierNames(
-            ParticipantResolution participant,
-            ClubSkillTier guestSkillTier
-    ) {
-        if (guestSkillTier != null) {
-            return Map.of(guestSkillTier.getId(), guestSkillTier.getName());
-        }
-        if (participant.clubSkillTierId() != null) {
-            return Map.of(participant.clubSkillTierId(), participant.clubSkillTierName());
-        }
-        return Map.of();
-    }
-
             Gender requestedGender,
             AttendanceStatus requestedStatus
     ) {
@@ -621,6 +584,43 @@ public class MeetingAttendanceCommandService {
             genderAttending--;
         }
         return genderAttending;
+    }
+
+    private ParticipantResolution clubMemberResolution(ClubMember member) {
+        ClubSkillTier skillTier = member.getSkillTier();
+        return ParticipantResolution.clubMember(
+                member.getName(),
+                member.getGender(),
+                member.getId(),
+                skillTier == null ? null : skillTier.getId(),
+                skillTier == null ? null : skillTier.getName()
+        );
+    }
+
+    private void applyParticipantSkillTier(
+            MeetingAttendance attendance,
+            ParticipantResolution participant,
+            ClubSkillTier guestSkillTier
+    ) {
+        Long skillTierId = guestSkillTier != null ? guestSkillTier.getId() : participant.clubSkillTierId();
+        if (skillTierId == null) {
+            attendance.clearClubSkillTier();
+            return;
+        }
+        attendance.assignClubSkillTier(skillTierId);
+    }
+
+    private Map<Long, String> skillTierNames(
+            ParticipantResolution participant,
+            ClubSkillTier guestSkillTier
+    ) {
+        if (guestSkillTier != null) {
+            return Map.of(guestSkillTier.getId(), guestSkillTier.getName());
+        }
+        if (participant.clubSkillTierId() != null) {
+            return Map.of(participant.clubSkillTierId(), participant.clubSkillTierName());
+        }
+        return Map.of();
     }
 
     private void requireAuthenticated(Long userId) {
