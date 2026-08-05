@@ -131,6 +131,7 @@ public class MeetingAttendanceCommandService {
 
         ParticipantResolution participant = resolveManagedParticipant(meeting, request);
         AttendanceStatus status = parseAttendanceStatus(request.getAttendanceStatus());
+        ensureGuestNameDoesNotMatchActiveClubMember(meeting, participant);
         ClubSkillTier guestSkillTier = resolveManagedGuestSkillTier(meeting, participant, request.getClubSkillTierId());
         Optional<MeetingAttendance> guestToPromote = findGuestToPromote(meeting, participant);
         if (guestToPromote.isPresent()) {
@@ -178,6 +179,7 @@ public class MeetingAttendanceCommandService {
 
         String participantName = requireParticipantName(request.getParticipantName());
         Gender gender = parseGender(request.getGender());
+        ensureGuestNameDoesNotMatchActiveClubMember(meeting, ParticipantResolution.guest(participantName, gender));
         rejectDuplicateNameExceptSelf(meeting, participantName, attendance.getId());
         ensureCapacityAvailable(meeting, attendance, gender, status);
         ClubSkillTier guestSkillTier = resolveManagedGuestSkillTier(
@@ -318,6 +320,23 @@ public class MeetingAttendanceCommandService {
                 || request.getGender() != null
                 || request.getClubSkillTierId() != null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "클럽원은 참가 상태만 수정할 수 있습니다.");
+        }
+    }
+
+    private void ensureGuestNameDoesNotMatchActiveClubMember(
+            Meeting meeting,
+            ParticipantResolution participant
+    ) {
+        if (!meeting.isClubMeeting() || participant.type() != MeetingParticipantType.GUEST) {
+            return;
+        }
+
+        Club club = findActiveClub(meeting.getClubId());
+        if (clubMemberRepository.existsByClubAndNameAndActiveTrue(club, participant.name())) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "???? ?? ??? ???? ??? ? ????. ???? ???? ??? ???? ??????."
+            );
         }
     }
 
