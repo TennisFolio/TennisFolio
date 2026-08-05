@@ -335,7 +335,7 @@ public class MeetingAttendanceCommandService {
         if (clubMemberRepository.existsByClubAndNameAndActiveTrue(club, participant.name())) {
             throw new ResponseStatusException(
                     HttpStatus.CONFLICT,
-                    "???? ?? ??? ???? ??? ? ????. ???? ???? ??? ???? ??????."
+                    "클럽원과 같은 이름의 게스트는 등록할 수 없습니다. 동명이인 게스트는 이름을 구분해서 입력해주세요."
             );
         }
     }
