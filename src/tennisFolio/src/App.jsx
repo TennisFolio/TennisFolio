@@ -31,6 +31,7 @@ import ClubDetailPage from './page/club/ClubDetailPage.jsx';
 import ClubEditPage from './page/club/ClubEditPage.jsx';
 import ClubListPage from './page/club/ClubListPage.jsx';
 import ClubMemberCreatePage from './page/club/ClubMemberCreatePage.jsx';
+import ClubMemberBulkAddPage from './page/club/ClubMemberBulkAddPage.jsx';
 import ClubMemberEditPage from './page/club/ClubMemberEditPage.jsx';
 import Schedule from './page/Schedule.jsx';
 import NotFound from './page/NotFound.jsx';
@@ -124,6 +125,10 @@ function App() {
           <Route
             path="/clubs/:publicId/members/new"
             element={<ClubMemberCreatePage currentUser={currentUser} />}
+          />
+          <Route
+            path="/clubs/:publicId/members/bulk"
+            element={<ClubMemberBulkAddPage currentUser={currentUser} />}
           />
           <Route
             path="/clubs/:publicId/members/:memberId/edit"

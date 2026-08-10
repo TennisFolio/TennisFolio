@@ -57,7 +57,7 @@
   - 테스트 설명: 관리자 성공, 비관리자 거부, 입력 내 중복, 기존 활성 클럽원 중복, 잘못된 등급, 한 행 실패 시 전체 미저장을 검증한다.
   - 검증 기준: 관련 Club service/controller Java 테스트를 실행한다.
 
-- [ ] `feat: add club member bulk registration screen`
+- [x] `feat: add club member bulk registration screen` - done, static review verified
   - 구현: 일괄 등록 라우트·표 편집·TSV 붙여넣기·등급 드롭다운·내용 확인·등록 요청을 추가한다.
   - 테스트 설명: 프런트엔드 테스트 코드는 작성하지 않는다. PC와 모바일에서 직접 입력, 붙여넣기, 오류 표시, 등록 성공을 수동 확인한다.
   - 검증 기준: 프런트엔드 테스트·빌드는 사용자 요청이 있을 때만 실행한다.

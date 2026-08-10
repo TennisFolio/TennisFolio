@@ -18,6 +18,9 @@ export const getClubMembers = (publicId, keyword = '') =>
 export const addClubMember = (publicId, member) =>
   apiRequestSilent.post(`/api/clubs/${publicId}/members`, member);
 
+export const addClubMembers = (publicId, members) =>
+  apiRequestSilent.post(`/api/clubs/${publicId}/members/bulk`, { members });
+
 export const updateClubMember = (publicId, memberId, member) =>
   apiRequestSilent.patch(`/api/clubs/${publicId}/members/${memberId}`, member);
 
