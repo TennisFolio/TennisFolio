@@ -62,7 +62,7 @@
   - 테스트 설명: 프런트엔드 테스트 코드는 작성하지 않는다. PC와 모바일에서 직접 입력, 붙여넣기, 오류 표시, 등록 성공을 수동 확인한다.
   - 검증 기준: 프런트엔드 테스트·빌드는 사용자 요청이 있을 때만 실행한다.
 
-- [ ] `fix: align duplicate-name validation between preview and registration`
+- [x] `fix: align duplicate-name validation between preview and registration` - done, static review verified
   - 구현: 서버 응답을 행별 오류로 표시하고, 동시 등록으로 인한 중복 실패도 수정 가능한 상태로 유지한다.
   - 테스트 설명: 미리보기 이후 같은 이름이 등록된 경우 저장 거부와 오류 안내를 검증한다.
   - 검증 기준: 관련 Java 테스트와 수동 오류 흐름을 확인한다.

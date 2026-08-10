@@ -55,7 +55,17 @@ function ClubMemberBulkAddPage({ currentUser }) {
       await addClubMembers(club.publicId, bulkMemberPayload(members));
       backToMembers();
     } catch (requestError) {
-      setError(errorMessage(requestError, '클럽원을 일괄 등록하지 못했습니다.'));
+      if (requestError?.response?.status === 409) {
+        try {
+          const response = await getClubMembers(club.publicId);
+          setExistingMembers(unwrapData(response, []));
+          setError('등록 중 같은 이름의 클럽원이 추가되었습니다. 표시된 행을 수정해 주세요.');
+        } catch {
+          setError(errorMessage(requestError, '클럽원을 일괄 등록하지 못했습니다.'));
+        }
+      } else {
+        setError(errorMessage(requestError, '클럽원을 일괄 등록하지 못했습니다.'));
+      }
     } finally {
       setIsSaving(false);
     }
