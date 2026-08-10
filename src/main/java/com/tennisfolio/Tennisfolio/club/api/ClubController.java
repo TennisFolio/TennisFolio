@@ -4,6 +4,7 @@ import com.tennisfolio.Tennisfolio.club.dto.ClubCreateRequest;
 import com.tennisfolio.Tennisfolio.club.dto.ClubCreateResponse;
 import com.tennisfolio.Tennisfolio.club.dto.ClubDetailResponse;
 import com.tennisfolio.Tennisfolio.club.dto.ClubMemberCreateRequest;
+import com.tennisfolio.Tennisfolio.club.dto.ClubMemberBulkCreateRequest;
 import com.tennisfolio.Tennisfolio.club.dto.ClubMemberResponse;
 import com.tennisfolio.Tennisfolio.club.dto.ClubMemberUpdateRequest;
 import com.tennisfolio.Tennisfolio.club.dto.ClubSummaryResponse;
@@ -111,6 +112,16 @@ public class ClubController {
             @RequestBody ClubMemberCreateRequest request
     ) {
         clubMemberCommandService.addMember(clubPublicId, request, resolveAuthenticatedUserId(authentication));
+        return ResponseEntity.ok(ResponseDTO.success());
+    }
+
+    @PostMapping("/clubs/{clubPublicId}/members/bulk")
+    public ResponseEntity<ResponseDTO<Void>> addMembers(
+            Authentication authentication,
+            @PathVariable String clubPublicId,
+            @RequestBody ClubMemberBulkCreateRequest request
+    ) {
+        clubMemberCommandService.addMembers(clubPublicId, request, resolveAuthenticatedUserId(authentication));
         return ResponseEntity.ok(ResponseDTO.success());
     }
 

@@ -4,6 +4,7 @@ import com.tennisfolio.Tennisfolio.club.dto.ClubCreateRequest;
 import com.tennisfolio.Tennisfolio.club.dto.ClubCreateResponse;
 import com.tennisfolio.Tennisfolio.club.dto.ClubDetailResponse;
 import com.tennisfolio.Tennisfolio.club.dto.ClubMemberCreateRequest;
+import com.tennisfolio.Tennisfolio.club.dto.ClubMemberBulkCreateRequest;
 import com.tennisfolio.Tennisfolio.club.dto.ClubMemberResponse;
 import com.tennisfolio.Tennisfolio.club.dto.ClubMemberUpdateRequest;
 import com.tennisfolio.Tennisfolio.club.dto.ClubSummaryResponse;
@@ -156,6 +157,20 @@ class ClubControllerTest {
                 clubController.addMember(authentication, "club-public-id", request);
 
         verify(clubMemberCommandService).addMember("club-public-id", request, 10L);
+        assertThat(response.getStatusCode().value()).isEqualTo(200);
+    }
+
+    @Test
+    void addMembers_passesCurrentUserToCommandService() {
+        Authentication authentication = auth(10L);
+        ClubMemberBulkCreateRequest request = new ClubMemberBulkCreateRequest(List.of(
+                new ClubMemberCreateRequest("Jamie Lee", "FEMALE", "MEMBER", null, null, null)
+        ));
+
+        ResponseEntity<ResponseDTO<Void>> response =
+                clubController.addMembers(authentication, "club-public-id", request);
+
+        verify(clubMemberCommandService).addMembers("club-public-id", request, 10L);
         assertThat(response.getStatusCode().value()).isEqualTo(200);
     }
 

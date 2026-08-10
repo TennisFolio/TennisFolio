@@ -1,6 +1,7 @@
 package com.tennisfolio.Tennisfolio.club.service;
 
 import com.tennisfolio.Tennisfolio.club.dto.ClubMemberCreateRequest;
+import com.tennisfolio.Tennisfolio.club.dto.ClubMemberBulkCreateRequest;
 import com.tennisfolio.Tennisfolio.club.dto.ClubMemberUpdateRequest;
 import com.tennisfolio.Tennisfolio.club.entity.Club;
 import com.tennisfolio.Tennisfolio.club.entity.ClubMember;
@@ -15,6 +16,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @Service
 public class ClubMemberCommandService {
@@ -38,17 +44,18 @@ public class ClubMemberCommandService {
         Club club = clubAccessService.requireAdmin(clubPublicId, currentUserId);
         String name = requireName(request.getName());
         rejectDuplicateName(club, name);
-        ClubSkillTier skillTier = resolveSkillTier(club, request.getSkillTierId());
-        clubMemberRepository.save(new ClubMember(
-                club,
-                null,
-                name,
-                parseGender(request.getGender()),
-                parseRole(request.getRole()),
-                skillTier,
-                request.getContactMemo(),
-                request.getMemo()
-        ));
+        clubMemberRepository.save(createMember(club, request, name));
+    }
+
+    @Transactional
+    public void addMembers(
+            String clubPublicId,
+            ClubMemberBulkCreateRequest request,
+            Long currentUserId
+    ) {
+        Club club = clubAccessService.requireAdmin(clubPublicId, currentUserId);
+        List<ClubMember> members = createMembers(club, request);
+        clubMemberRepository.saveAll(members);
     }
 
     @Transactional
@@ -86,6 +93,48 @@ public class ClubMemberCommandService {
     private ClubMember findActiveMember(Club club, Long memberId) {
         return clubMemberRepository.findByClubAndIdAndActiveTrue(club, memberId)
                 .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND));
+    }
+
+    private List<ClubMember> createMembers(Club club, ClubMemberBulkCreateRequest request) {
+        List<ClubMemberCreateRequest> requests = requireMembers(request);
+        Set<String> names = new HashSet<>();
+        List<ClubMember> members = new ArrayList<>();
+
+        for (ClubMemberCreateRequest memberRequest : requests) {
+            String name = requireName(memberRequest.getName());
+            rejectDuplicateNameInRequest(names, name);
+            rejectDuplicateName(club, name);
+            members.add(createMember(club, memberRequest, name));
+        }
+
+        return members;
+    }
+
+    private List<ClubMemberCreateRequest> requireMembers(ClubMemberBulkCreateRequest request) {
+        if (request == null || request.getMembers() == null || request.getMembers().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "등록할 클럽원을 입력해 주세요.");
+        }
+        return request.getMembers();
+    }
+
+    private void rejectDuplicateNameInRequest(Set<String> names, String name) {
+        if (!names.add(name)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "입력한 클럽원 이름이 중복됩니다.");
+        }
+    }
+
+    private ClubMember createMember(Club club, ClubMemberCreateRequest request, String name) {
+        ClubSkillTier skillTier = resolveSkillTier(club, request.getSkillTierId());
+        return new ClubMember(
+                club,
+                null,
+                name,
+                parseGender(request.getGender()),
+                parseRole(request.getRole()),
+                skillTier,
+                request.getContactMemo(),
+                request.getMemo()
+        );
     }
 
     private ClubSkillTier resolveSkillTier(Club club, Long skillTierId) {

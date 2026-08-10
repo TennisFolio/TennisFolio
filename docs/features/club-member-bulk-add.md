@@ -52,7 +52,7 @@
 
 ## 5. Plan / Commit Units
 
-- [ ] `feat: add atomic club member bulk registration API`
+- [x] `feat: add atomic club member bulk registration API` - done, verified
   - 구현: 배치 request DTO, Controller endpoint, 전체 검증·저장 service flow를 추가한다.
   - 테스트 설명: 관리자 성공, 비관리자 거부, 입력 내 중복, 기존 활성 클럽원 중복, 잘못된 등급, 한 행 실패 시 전체 미저장을 검증한다.
   - 검증 기준: 관련 Club service/controller Java 테스트를 실행한다.
