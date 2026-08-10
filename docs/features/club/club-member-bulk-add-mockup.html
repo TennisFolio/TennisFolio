@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>클럽원 일괄 추가 목업</title>
+  <style>
+    :root { --competition-page-bg:#f5f7fa; --competition-surface:#ffffff; --competition-surface-soft:#f8fafc; --competition-surface-accent:#eef8ff; --competition-primary:#0f172a; --competition-primary-hover:#1e293b; --competition-primary-disabled:#cbd5e1; --competition-text-strong:#0f172a; --competition-text-body:#475569; --competition-text-muted:#64748b; --competition-text-inverse:#ffffff; --competition-border:#e3e8ef; --competition-border-strong:#cbd5e1; --competition-border-control:#dce4ef; --competition-danger:#be123c; --competition-danger-bg:#fff1f2; --competition-danger-border:#fecdd3; --competition-ok:#047857; --competition-ok-bg:#ecfdf5; --competition-ok-border:#bbf7d0; }
+    * { box-sizing:border-box; } body { margin:0; background:var(--competition-page-bg); color:var(--competition-text-strong); font:14px/1.5 Pretendard,system-ui,-apple-system,"Noto Sans KR",sans-serif; }
+    main { width:min(100%, 1200px); margin:48px auto; padding:0 24px 42px; } h1 { font-size:28px; margin:0 0 8px; font-weight:900; } h2 { font-size:17px; margin:0 0 8px; font-weight:900; } p { color:var(--competition-text-body); margin:0; font-weight:700; }
+    .card { background:var(--competition-surface); border:1px solid var(--competition-border); border-radius:8px; padding:24px; margin-top:20px; }
+    .steps { display:flex; gap:8px; margin:14px 0; } .step { flex:1; border:1px solid var(--competition-border-strong); border-radius:8px; padding:10px; background:var(--competition-surface); color:var(--competition-text-muted); font-size:12px; font-weight:900; text-align:center; } .step.active { border-color:var(--competition-primary); background:var(--competition-primary); color:var(--competition-text-inverse); }
+    .notice { margin:0 0 12px; padding:11px; background:var(--competition-surface-accent); border:1px solid var(--competition-border); border-radius:8px; color:var(--competition-text-body); } .notice strong { display:block; margin-bottom:3px; color:var(--competition-text-strong); } .notice ul { margin:0; padding-left:18px; font-size:12px; }
+    .grid-wrap { overflow:auto; border:1px solid var(--competition-border); border-radius:8px; } .member-grid { min-width:1030px; width:100%; border-collapse:collapse; font-size:13px; } th,td { padding:8px; border-bottom:1px solid var(--competition-border); text-align:left; vertical-align:middle; } th { background:var(--competition-surface-soft); color:var(--competition-text-muted); font-size:12px; white-space:nowrap; } tbody tr:last-child td { border-bottom:0; } .row-number { width:46px; text-align:center; color:var(--competition-text-muted); font-weight:900; } .required { color:var(--competition-danger); }
+    input,select { width:100%; min-height:38px; border:1px solid var(--competition-border-control); border-radius:7px; background:var(--competition-surface); color:var(--competition-text-strong); font:inherit; font-weight:800; padding:0 9px; } input:focus,select:focus { outline:3px solid var(--competition-surface-accent); border-color:var(--competition-primary); } input::placeholder { color:var(--competition-text-muted); }
+    button { cursor:pointer; border:1px solid var(--competition-border-strong); border-radius:8px; padding:10px 14px; background:var(--competition-surface); color:var(--competition-text-body); font:inherit; font-weight:900; } .secondary { background:var(--competition-surface); color:var(--competition-text-body); } .primary { border-color:var(--competition-primary); background:var(--competition-primary); color:var(--competition-text-inverse); } .primary:disabled { border-color:var(--competition-primary-disabled); background:var(--competition-primary-disabled); cursor:not-allowed; } .row-remove { border-color:var(--competition-danger-border); padding:7px 9px; background:var(--competition-danger-bg); color:var(--competition-danger); white-space:nowrap; }
+    .actions { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:12px; } .action-group,.footer { display:flex; gap:8px; align-items:center; } .hint { font-size:12px; color:var(--competition-text-muted); font-weight:800; } .message { margin-top:12px; padding:11px; border:1px solid var(--competition-border); border-radius:8px; display:none; font-weight:900; } .message.show { display:block; } .message.error { border-color:var(--competition-danger-border); background:var(--competition-danger-bg); color:var(--competition-danger); } .message.ok { border-color:var(--competition-ok-border); background:var(--competition-ok-bg); color:var(--competition-ok); }
+    .badge { display:inline-block; padding:2px 7px; border:1px solid var(--competition-border); border-radius:999px; background:var(--competition-surface-soft); color:var(--competition-text-body); font-size:12px; font-weight:900; } .preview-table { width:100%; border-collapse:collapse; font-size:13px; } .preview-table th,.preview-table td { padding:11px 10px; border-bottom:1px solid var(--competition-border); text-align:left; vertical-align:top; } .preview-table th { color:var(--competition-text-muted); font-weight:900; background:var(--competition-surface-soft); white-space:nowrap; } .row-error td { background:var(--competition-danger-bg); } .empty { text-align:center; padding:28px; color:var(--competition-text-muted); } .footer { justify-content:flex-end; margin-top:14px; }
+    @media (max-width:720px) { main { width:min(100%, 480px); margin:0 auto; padding:14px 12px 42px; } .card { padding:15px; margin-top:14px; } .steps,.actions { display:block; } .step { margin-bottom:7px; } .actions > * { margin-top:10px; } }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>클럽원 일괄 추가</h1>
+    <p>스프레드시트처럼 여러 명의 정보를 한 번에 입력하고, 등록 전에 내용을 확인합니다.</p>
+
+    <div class="steps"><div class="step active">1. 정보 입력</div><div class="step">2. 내용 확인</div><div class="step">3. 클럽원 등록</div></div>
+
+    <section class="card">
+      <h2>클럽원 정보 입력</h2>
+      <div class="notice"><strong>입력 안내</strong><ul><li><span class="required">이름과 성별은 필수</span>입니다.</li><li>스킬은 이 클럽에서 설정한 등급만 선택할 수 있으며, 선택하지 않으면 <b>미정</b>으로 등록됩니다.</li><li>역할이 관리자인 경우에만 관리자로 등록되고, 나머지는 클럽원으로 등록됩니다.</li><li>엑셀의 열을 복사한 뒤 <b>붙여넣기</b>를 누르면 행으로 추가할 수 있습니다.</li></ul></div>
+      <div class="grid-wrap">
+        <table class="member-grid">
+          <thead><tr><th>번호</th><th>이름 <span class="required">*</span></th><th>성별(남/여) <span class="required">*</span></th><th>역할(관리자/클럽원)</th><th>스킬 등급</th><th>비고</th><th>연락 메모</th><th></th></tr></thead>
+          <tbody id="memberRows"></tbody>
+        </table>
+      </div>
+      <div class="actions"><div class="action-group"><button class="secondary" id="addRowButton" type="button">+ 행 추가</button><button class="secondary" id="pasteButton" type="button">클립보드 붙여넣기</button></div><button class="primary" id="previewButton" type="button">입력 내용 확인</button></div>
+      <p class="hint">붙여넣기 열 순서: 이름, 성별(남/여), 역할(관리자), 스킬 등급명, 비고, 연락 메모</p>
+      <div class="message" id="message"></div>
+    </section>
+
+    <section class="card">
+      <h2>내용 확인 결과 <span id="count" class="badge">0명</span></h2>
+      <p class="hint" id="summary">입력한 클럽원을 확인한 뒤 등록합니다.</p>
+      <table class="preview-table"><thead><tr><th>번호</th><th>이름</th><th>성별</th><th>역할</th><th>스킬 등급</th><th>비고</th><th>연락 메모</th><th>확인</th></tr></thead><tbody id="preview"><tr><td colspan="8" class="empty">입력 내용을 확인해 주세요.</td></tr></tbody></table>
+      <div class="footer"><button class="secondary" type="button">취소</button><button class="primary" id="submitButton" disabled>0명 클럽원 등록</button></div>
+    </section>
+  </main>
+  <script>
+    const skillTiers = [{ id: 4, name: 'A조' }, { id: 3, name: 'B조' }, { id: 2, name: 'C조' }, { id: 1, name: 'D조' }];
+    const existingMembers = [{ name: '김민수', gender: 'MALE' }];
+    const rowsElement = document.querySelector('#memberRows');
+    const previewElement = document.querySelector('#preview');
+    const message = document.querySelector('#message');
+    const count = document.querySelector('#count');
+    const submit = document.querySelector('#submitButton');
+    const selectOptions = (items, selected) => items.map(([value, label]) => `<option value="${value}" ${value === selected ? 'selected' : ''}>${label}</option>`).join('');
+
+    function addRow(member = {}) {
+      const row = document.createElement('tr');
+      row.innerHTML = `<td class="row-number"></td><td><input data-field="name" value="${member.name || ''}" placeholder="이름"></td><td><select data-field="gender">${selectOptions([['MALE','남'],['FEMALE','여']], member.gender || 'MALE')}</select></td><td><select data-field="role">${selectOptions([['MEMBER','클럽원'],['ADMIN','관리자']], member.role || 'MEMBER')}</select></td><td><select data-field="skillTierId"><option value="">미정</option>${skillTiers.map(tier => `<option value="${tier.id}" ${String(tier.id) === String(member.skillTierId) ? 'selected' : ''}>${tier.name}</option>`).join('')}</select></td><td><input data-field="memo" value="${member.memo || ''}" placeholder="선택 입력"></td><td><input data-field="contactMemo" value="${member.contactMemo || ''}" placeholder="선택 입력"></td><td><button class="row-remove" type="button">삭제</button></td>`;
+      rowsElement.append(row); refreshNumbers();
+    }
+    function refreshNumbers() { [...rowsElement.rows].forEach((row, index) => row.querySelector('.row-number').textContent = index + 1); }
+    function value(row, field) { return row.querySelector(`[data-field="${field}"]`).value.trim(); }
+    function members() { return [...rowsElement.rows].map((row, index) => ({ index:index + 1, name:value(row,'name'), gender:value(row,'gender'), role:value(row,'role'), skillTierId:value(row,'skillTierId'), memo:value(row,'memo'), contactMemo:value(row,'contactMemo') })); }
+    function preview() {
+      const seen = new Set(); const mapped = members().filter(member => Object.values(member).some(Boolean)).map(member => {
+        const errors = []; if (!member.name) errors.push('이름 필수'); if (!member.gender) errors.push('성별 필수');
+        const key = `${member.name}|${member.gender}`; let status = '등록 예정';
+        if (!errors.length && seen.has(key)) status = '입력 데이터 중복 · 건너뜀';
+        else if (!errors.length && existingMembers.some(existing => existing.name === member.name && existing.gender === member.gender)) status = '이미 등록됨 · 건너뜀';
+        if (!errors.length) seen.add(key); return { ...member, errors, status };
+      });
+      const errors = mapped.filter(member => member.errors.length); const registrations = mapped.filter(member => !member.errors.length && member.status === '등록 예정');
+      count.textContent = `${mapped.length}명`; document.querySelector('#summary').textContent = `${mapped.length}명 입력 · ${registrations.length}명 등록 예정${errors.length ? ` · ${errors.length}명 입력 오류` : ''}`;
+      submit.textContent = `${registrations.length}명 클럽원 등록`; submit.disabled = !registrations.length || errors.length > 0;
+      previewElement.innerHTML = mapped.length ? mapped.map(member => `<tr class="${member.errors.length ? 'row-error' : ''}"><td>${member.index}</td><td>${member.name}</td><td>${member.gender === 'MALE' ? '남' : member.gender === 'FEMALE' ? '여' : ''}</td><td>${member.role === 'ADMIN' ? '관리자' : '클럽원'}</td><td>${skillTiers.find(tier => String(tier.id) === member.skillTierId)?.name || '미정'}</td><td>${member.memo}</td><td>${member.contactMemo}</td><td>${member.errors.length ? member.errors.join('<br>') : member.status}</td></tr>`).join('') : '<tr><td colspan="8" class="empty">입력된 클럽원이 없습니다.</td></tr>';
+      message.className = `message show ${errors.length ? 'error' : 'ok'}`; message.textContent = errors.length ? `${errors.length}명의 필수 입력값을 수정해 주세요.` : `${registrations.length}명의 클럽원을 등록할 수 있습니다.`;
+    }
+    rowsElement.addEventListener('click', event => { if (event.target.matches('.row-remove')) { event.target.closest('tr').remove(); refreshNumbers(); } });
+    document.querySelector('#addRowButton').addEventListener('click', () => addRow());
+    document.querySelector('#previewButton').addEventListener('click', preview);
+    document.querySelector('#pasteButton').addEventListener('click', async () => {
+      try { const text = await navigator.clipboard.readText(); text.split(/\r?\n/).filter(line => line.trim()).forEach(line => { const [name, gender, role, skillName, memo, contactMemo] = line.split('\t'); const tier = skillTiers.find(item => item.name === (skillName || '').trim()); addRow({ name, gender: gender === '남' ? 'MALE' : gender === '여' ? 'FEMALE' : '', role: role === '관리자' ? 'ADMIN' : 'MEMBER', skillTierId: tier?.id || '', memo, contactMemo }); }); } catch { message.className = 'message show error'; message.textContent = '클립보드 내용을 읽지 못했습니다. 브라우저 권한을 확인해 주세요.'; }
+    });
+    Array.from({ length: 5 }, () => addRow());
+  </script>
+</body>
+</html>
