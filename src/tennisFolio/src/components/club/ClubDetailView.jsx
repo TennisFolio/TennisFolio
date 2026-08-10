@@ -21,6 +21,7 @@ function ClubDetailView({
   onAddMeeting,
   onOpenMeeting,
   onAddMember,
+  onAddMembersBulk,
   onEditMember,
   onBackToClubs,
 }) {
@@ -115,13 +116,22 @@ function ClubDetailView({
           <div className="club-section-title">
             <h2>클럽원</h2>
             {isAdmin ? (
-              <button
-                className="club-button small accent"
-                type="button"
-                onClick={onAddMember}
-              >
-                클럽원 추가
-              </button>
+              <div className="club-member-add-actions">
+                <button
+                  className="club-button small"
+                  type="button"
+                  onClick={onAddMembersBulk}
+                >
+                  일괄 추가
+                </button>
+                <button
+                  className="club-button small accent"
+                  type="button"
+                  onClick={onAddMember}
+                >
+                  클럽원 추가
+                </button>
+              </div>
             ) : (
               <span>{members.length}명</span>
             )}

@@ -140,6 +140,9 @@ function ClubDetailPage({ currentUser }) {
             onAddMember={() =>
               navigate(`/clubs/${selectedClub.publicId}/members/new`)
             }
+            onAddMembersBulk={() =>
+              navigate(`/clubs/${selectedClub.publicId}/members/bulk`)
+            }
             onEditMember={(member) =>
               navigate(`/clubs/${selectedClub.publicId}/members/${member.id}/edit`)
             }

@@ -316,6 +316,42 @@
   padding: 10px;
 }
 
+.club-member-add-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.club-bulk-page {
+  width: min(100%, 1200px);
+  min-height: 100dvh;
+  margin: 48px auto;
+  padding: 0 24px 42px;
+  background: var(--competition-page-bg);
+}
+
+.club-bulk-page-head { margin-bottom: 14px; }
+.club-bulk-card { margin-top: 20px; border: 1px solid var(--competition-border); border-radius: 8px; background: var(--competition-surface); padding: 24px; }
+.club-bulk-card h2 { margin: 0 0 10px; color: var(--competition-text-strong); font-size: 17px; font-weight: 900; }
+.club-bulk-guide { margin-bottom: 12px; border: 1px solid var(--competition-border); border-radius: 8px; background: var(--competition-surface-accent); color: var(--competition-text-body); padding: 14px; font-size: 13px; font-weight: 800; line-height: 1.55; }
+.club-bulk-guide strong { display: block; color: var(--competition-text-strong); margin-bottom: 7px; }
+.club-bulk-guide ul { display: grid; gap: 5px; margin: 0; padding-left: 18px; }
+.club-bulk-grid-wrap { overflow: auto; border: 1px solid var(--competition-border); border-radius: 8px; }
+.club-bulk-grid, .club-bulk-preview { width: 100%; border-collapse: collapse; font-size: 13px; }
+.club-bulk-grid { min-width: 1020px; }
+.club-bulk-grid th, .club-bulk-grid td, .club-bulk-preview th, .club-bulk-preview td { border-bottom: 1px solid var(--competition-border); padding: 8px; text-align: left; vertical-align: middle; }
+.club-bulk-grid th, .club-bulk-preview th { background: var(--competition-surface-soft); color: var(--competition-text-muted); font-size: 12px; font-weight: 900; white-space: nowrap; }
+.club-bulk-grid tbody tr:last-child td, .club-bulk-preview tbody tr:last-child td { border-bottom: 0; }
+.club-bulk-grid input, .club-bulk-grid select { width: 100%; min-height: 38px; border: 1px solid var(--competition-border-control); border-radius: 7px; background: var(--competition-surface); color: var(--competition-text-strong); font: inherit; font-weight: 800; padding: 0 9px; }
+.club-bulk-number { width: 46px; color: var(--competition-text-muted); font-weight: 900; text-align: center !important; }
+.club-bulk-remove { border: 1px solid var(--competition-danger-border); border-radius: 7px; background: var(--competition-danger-bg); color: var(--competition-danger); cursor: pointer; font: inherit; font-size: 12px; font-weight: 900; padding: 7px 9px; }
+.club-bulk-actions, .club-bulk-footer { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 12px; }
+.club-bulk-preview-head { margin-bottom: 10px; }
+.club-bulk-preview-head h2 span { display: inline-block; border: 1px solid var(--competition-border); border-radius: 999px; background: var(--competition-surface-soft); color: var(--competition-text-body); padding: 2px 7px; font-size: 12px; }
+.club-bulk-preview-head p { margin: 0; color: var(--competition-text-muted); font-size: 12px; font-weight: 800; }
+.club-bulk-error-row td { background: var(--competition-danger-bg); color: var(--competition-danger); }
+.club-bulk-empty { padding: 28px !important; color: var(--competition-text-muted); text-align: center !important; }
+.club-bulk-footer { justify-content: flex-end; }
+
 .club-skill-tier-editor {
   display: grid;
   gap: 10px;
@@ -525,4 +561,34 @@
     grid-template-columns: 1fr;
   }
 
+}
+
+@media (max-width: 720px) {
+  .club-bulk-page {
+    width: min(100%, 480px);
+    margin: 0 auto;
+    padding: 14px 12px 42px;
+  }
+
+  .club-bulk-card {
+    margin-top: 14px;
+    padding: 15px;
+  }
+
+  .club-bulk-actions {
+    display: grid;
+  }
+
+  .club-bulk-actions {
+    align-items: stretch;
+  }
+
+  .club-bulk-actions .club-button,
+  .club-bulk-footer .club-button {
+    width: 100%;
+  }
+
+  .club-bulk-footer {
+    display: grid;
+  }
 }

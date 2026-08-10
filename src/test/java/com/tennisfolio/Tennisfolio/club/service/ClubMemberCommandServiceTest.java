@@ -1,6 +1,7 @@
 package com.tennisfolio.Tennisfolio.club.service;
 
 import com.tennisfolio.Tennisfolio.club.dto.ClubMemberCreateRequest;
+import com.tennisfolio.Tennisfolio.club.dto.ClubMemberBulkCreateRequest;
 import com.tennisfolio.Tennisfolio.club.dto.ClubMemberUpdateRequest;
 import com.tennisfolio.Tennisfolio.club.entity.Club;
 import com.tennisfolio.Tennisfolio.club.entity.ClubMember;
@@ -21,6 +22,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -167,6 +169,54 @@ class ClubMemberCommandServiceTest {
                 .extracting("statusCode")
                 .isEqualTo(HttpStatus.CONFLICT);
         verify(clubMemberRepository, never()).save(any());
+    }
+
+    @Test
+    void addMembers_savesAllMembersWhenWholeRequestIsValid() {
+        Club club = club();
+        ClubMember admin = member(club, 100L, 10L, "Alex Kim", ClubMemberRole.ADMIN);
+        when(clubRepository.findByPublicIdAndDeletedAtIsNull("club-public-id")).thenReturn(Optional.of(club));
+        when(clubMemberRepository.findByClubAndUserIdAndActiveTrue(club, 10L)).thenReturn(Optional.of(admin));
+        when(clubMemberRepository.existsByClubAndNameAndActiveTrue(club, "Jamie Lee")).thenReturn(false);
+        when(clubMemberRepository.existsByClubAndNameAndActiveTrue(club, "Morgan Park")).thenReturn(false);
+
+        service.addMembers(
+                "club-public-id",
+                new ClubMemberBulkCreateRequest(List.of(
+                        new ClubMemberCreateRequest("Jamie Lee", "FEMALE", "MEMBER", null, null, null),
+                        new ClubMemberCreateRequest("Morgan Park", "MALE", "ADMIN", null, null, null)
+                )),
+                10L
+        );
+
+        ArgumentCaptor<Iterable<ClubMember>> captor = ArgumentCaptor.forClass(Iterable.class);
+        verify(clubMemberRepository).saveAll(captor.capture());
+        assertThat(captor.getValue())
+                .extracting(ClubMember::getName)
+                .containsExactly("Jamie Lee", "Morgan Park");
+    }
+
+    @Test
+    void addMembers_rejectsDuplicateNamesWithinRequestWithoutSavingAnyMember() {
+        Club club = club();
+        ClubMember admin = member(club, 100L, 10L, "Alex Kim", ClubMemberRole.ADMIN);
+        when(clubRepository.findByPublicIdAndDeletedAtIsNull("club-public-id")).thenReturn(Optional.of(club));
+        when(clubMemberRepository.findByClubAndUserIdAndActiveTrue(club, 10L)).thenReturn(Optional.of(admin));
+        when(clubMemberRepository.existsByClubAndNameAndActiveTrue(club, "Jamie Lee")).thenReturn(false);
+
+        assertThatThrownBy(() -> service.addMembers(
+                "club-public-id",
+                new ClubMemberBulkCreateRequest(List.of(
+                        new ClubMemberCreateRequest("Jamie Lee", "FEMALE", "MEMBER", null, null, null),
+                        new ClubMemberCreateRequest(" Jamie Lee ", "MALE", "MEMBER", null, null, null)
+                )),
+                10L
+        ))
+                .isInstanceOf(ResponseStatusException.class)
+                .extracting("statusCode")
+                .isEqualTo(HttpStatus.CONFLICT);
+
+        verify(clubMemberRepository, never()).saveAll(any());
     }
 
     @Test
