@@ -15,19 +15,19 @@ class ClubDashboardResponseTest {
     @Test
     void response_exposesDashboardSectionsAsTheApiContract() {
         ClubDashboardResponse response = new ClubDashboardResponse(
-                new ClubDashboardResponse.Period(LocalDate.of(2026, 7, 13), LocalDate.of(2026, 8, 11)),
+                new ClubDashboardPeriod(LocalDate.of(2026, 7, 13), LocalDate.of(2026, 8, 11)),
                 42,
                 8,
                 1,
-                new ClubDashboardResponse.MemberParticipation(31, 73, 58, 11),
+                new ClubDashboardMemberParticipation(31, 73, 58, 11),
                 12,
                 8.8,
-                new ClubDashboardResponse.MemberComposition(
-                        List.of(new ClubDashboardResponse.GenderCount(Gender.MALE, 24)),
-                        List.of(new ClubDashboardResponse.SkillTierCount(1L, "Intermediate B", 2, 24)),
+                new ClubDashboardMemberComposition(
+                        List.of(new ClubDashboardGenderCount(Gender.MALE, 24)),
+                        List.of(new ClubDashboardSkillTierCount(1L, "Intermediate B", 2, 24)),
                         3
                 ),
-                List.of(new ClubDashboardResponse.RecentMeeting(
+                List.of(new ClubDashboardRecentMeeting(
                         "meeting-public-id",
                         LocalDateTime.of(2026, 8, 10, 9, 0),
                         "Sunday doubles",

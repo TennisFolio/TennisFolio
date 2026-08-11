@@ -5,6 +5,10 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.tennisfolio.Tennisfolio.club.dto.ClubDashboardData;
+import com.tennisfolio.Tennisfolio.club.dto.ClubDashboardGenderCount;
+import com.tennisfolio.Tennisfolio.club.dto.ClubDashboardRecentMeeting;
+import com.tennisfolio.Tennisfolio.club.dto.ClubDashboardSkillTierCount;
 import com.tennisfolio.Tennisfolio.club.entity.QClubMember;
 import com.tennisfolio.Tennisfolio.club.entity.QClubSkillTier;
 import com.tennisfolio.Tennisfolio.meeting.domain.AttendanceStatus;
@@ -13,8 +17,6 @@ import com.tennisfolio.Tennisfolio.meeting.domain.MeetingParticipantType;
 import com.tennisfolio.Tennisfolio.meeting.domain.MeetingStatus;
 import com.tennisfolio.Tennisfolio.meeting.entity.QMeeting;
 import com.tennisfolio.Tennisfolio.meeting.entity.QMeetingAttendance;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
@@ -33,19 +35,19 @@ public class ClubDashboardQueryRepository {
         this.queryFactory = queryFactory;
     }
 
-    public DashboardData findDashboardData(Long clubId, LocalDateTime from, LocalDateTime to) {
+    public ClubDashboardData findDashboardData(Long clubId, LocalDateTime from, LocalDateTime to) {
         long activeMemberCount = countActiveMembers(clubId);
-        List<GenderCount> genderCounts = findGenderCounts(clubId);
-        List<SkillTierCount> skillTierCounts = findSkillTierCounts(clubId);
+        List<ClubDashboardGenderCount> genderCounts = findGenderCounts(clubId);
+        List<ClubDashboardSkillTierCount> skillTierCounts = findSkillTierCounts(clubId);
         long unclassifiedSkillMemberCount = countUnclassifiedSkillMembers(clubId);
         long meetingCount = countMeetings(clubId, from, to, false);
         long cancelledMeetingCount = countMeetings(clubId, from, to, true);
         long memberAttendanceCount = countMemberAttendances(clubId, from, to);
         long guestAttendanceCount = countGuestAttendances(clubId, from, to);
         long participantCount = countParticipatingMembers(clubId, from, to);
-        List<RecentMeeting> recentMeetings = findRecentMeetings(clubId, from, to);
+        List<ClubDashboardRecentMeeting> recentMeetings = findRecentMeetings(clubId, from, to);
 
-        return new DashboardData(
+        return new ClubDashboardData(
                 activeMemberCount,
                 genderCounts,
                 skillTierCounts,
@@ -68,7 +70,7 @@ public class ClubDashboardQueryRepository {
                 .fetchOne());
     }
 
-    private List<GenderCount> findGenderCounts(Long clubId) {
+    private List<ClubDashboardGenderCount> findGenderCounts(Long clubId) {
         QClubMember clubMember = QClubMember.clubMember;
         List<Tuple> results = queryFactory
                 .select(clubMember.gender, clubMember.count())
@@ -83,12 +85,12 @@ public class ClubDashboardQueryRepository {
                 ));
 
         return List.of(
-                new GenderCount(Gender.MALE, countsByGender.getOrDefault(Gender.MALE, 0L)),
-                new GenderCount(Gender.FEMALE, countsByGender.getOrDefault(Gender.FEMALE, 0L))
+                new ClubDashboardGenderCount(Gender.MALE, countsByGender.getOrDefault(Gender.MALE, 0L)),
+                new ClubDashboardGenderCount(Gender.FEMALE, countsByGender.getOrDefault(Gender.FEMALE, 0L))
         );
     }
 
-    private List<SkillTierCount> findSkillTierCounts(Long clubId) {
+    private List<ClubDashboardSkillTierCount> findSkillTierCounts(Long clubId) {
         QClubSkillTier skillTier = QClubSkillTier.clubSkillTier;
         QClubMember clubMember = QClubMember.clubMember;
         List<Tuple> results = queryFactory
@@ -105,7 +107,7 @@ public class ClubDashboardQueryRepository {
                 .fetch();
 
         return results.stream()
-                .map(result -> new SkillTierCount(
+                .map(result -> new ClubDashboardSkillTierCount(
                         result.get(skillTier.id),
                         result.get(skillTier.name),
                         result.get(skillTier.level),
@@ -181,7 +183,7 @@ public class ClubDashboardQueryRepository {
                 .fetchOne());
     }
 
-    private List<RecentMeeting> findRecentMeetings(Long clubId, LocalDateTime from, LocalDateTime to) {
+    private List<ClubDashboardRecentMeeting> findRecentMeetings(Long clubId, LocalDateTime from, LocalDateTime to) {
         QMeeting meeting = QMeeting.meeting;
         QMeetingAttendance attendance = QMeetingAttendance.meetingAttendance;
         BooleanExpression memberAttendance = attendingCondition(attendance).and(memberAttendanceCondition(attendance));
@@ -208,9 +210,9 @@ public class ClubDashboardQueryRepository {
                 .limit(3)
                 .fetch();
 
-        List<RecentMeeting> recentMeetings = new ArrayList<>();
+        List<ClubDashboardRecentMeeting> recentMeetings = new ArrayList<>();
         for (Tuple result : results) {
-            recentMeetings.add(new RecentMeeting(
+            recentMeetings.add(new ClubDashboardRecentMeeting(
                     result.get(meeting.publicId),
                     result.get(meeting.startAt),
                     result.get(meeting.title),
@@ -256,45 +258,4 @@ public class ClubDashboardQueryRepository {
         return value == null ? 0L : value;
     }
 
-    @Getter
-    @RequiredArgsConstructor
-    public static class DashboardData {
-        private final long activeMemberCount;
-        private final List<GenderCount> genderCounts;
-        private final List<SkillTierCount> skillTierCounts;
-        private final long unclassifiedSkillMemberCount;
-        private final long meetingCount;
-        private final long cancelledMeetingCount;
-        private final long memberAttendanceCount;
-        private final long guestAttendanceCount;
-        private final long participantCount;
-        private final List<RecentMeeting> recentMeetings;
-    }
-
-    @Getter
-    @RequiredArgsConstructor
-    public static class GenderCount {
-        private final Gender gender;
-        private final long count;
-    }
-
-    @Getter
-    @RequiredArgsConstructor
-    public static class SkillTierCount {
-        private final Long skillTierId;
-        private final String name;
-        private final int level;
-        private final long count;
-    }
-
-    @Getter
-    @RequiredArgsConstructor
-    public static class RecentMeeting {
-        private final String publicId;
-        private final LocalDateTime startAt;
-        private final String title;
-        private final MeetingStatus status;
-        private final long memberAttendanceCount;
-        private final long guestAttendanceCount;
-    }
 }

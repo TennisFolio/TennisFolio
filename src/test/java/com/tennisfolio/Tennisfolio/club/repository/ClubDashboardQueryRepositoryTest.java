@@ -4,6 +4,10 @@ import com.tennisfolio.Tennisfolio.club.entity.Club;
 import com.tennisfolio.Tennisfolio.club.entity.ClubMember;
 import com.tennisfolio.Tennisfolio.club.entity.ClubMemberRole;
 import com.tennisfolio.Tennisfolio.club.entity.ClubSkillTier;
+import com.tennisfolio.Tennisfolio.club.dto.ClubDashboardData;
+import com.tennisfolio.Tennisfolio.club.dto.ClubDashboardGenderCount;
+import com.tennisfolio.Tennisfolio.club.dto.ClubDashboardRecentMeeting;
+import com.tennisfolio.Tennisfolio.club.dto.ClubDashboardSkillTierCount;
 import com.tennisfolio.Tennisfolio.config.QuerydslConfig;
 import com.tennisfolio.Tennisfolio.meeting.domain.AttendanceStatus;
 import com.tennisfolio.Tennisfolio.meeting.domain.Gender;
@@ -80,15 +84,15 @@ class ClubDashboardQueryRepositoryTest {
                 attendance(deletedMeeting, "Deleted guest", Gender.MALE, AttendanceStatus.ATTENDING)
         ));
 
-        ClubDashboardQueryRepository.DashboardData result =
+        ClubDashboardData result =
                 dashboardQueryRepository.findDashboardData(club.getId(), FROM, TO);
 
         assertThat(result.getActiveMemberCount()).isEqualTo(3);
         assertThat(result.getGenderCounts())
-                .extracting(ClubDashboardQueryRepository.GenderCount::getCount)
+                .extracting(ClubDashboardGenderCount::getCount)
                 .containsExactly(2L, 1L);
         assertThat(result.getSkillTierCounts())
-                .extracting(ClubDashboardQueryRepository.SkillTierCount::getName)
+                .extracting(ClubDashboardSkillTierCount::getName)
                 .containsExactly("Beginner", "Advanced");
         assertThat(result.getUnclassifiedSkillMemberCount()).isEqualTo(1);
         assertThat(result.getMeetingCount()).isEqualTo(2);
@@ -97,7 +101,7 @@ class ClubDashboardQueryRepositoryTest {
         assertThat(result.getGuestAttendanceCount()).isEqualTo(1);
         assertThat(result.getParticipantCount()).isEqualTo(2);
         assertThat(result.getRecentMeetings())
-                .extracting(ClubDashboardQueryRepository.RecentMeeting::getTitle)
+                .extracting(ClubDashboardRecentMeeting::getTitle)
                 .containsExactly("Second", "First");
         assertThat(result.getRecentMeetings().get(0).getMemberAttendanceCount()).isEqualTo(1);
         assertThat(result.getRecentMeetings().get(0).getGuestAttendanceCount()).isZero();
