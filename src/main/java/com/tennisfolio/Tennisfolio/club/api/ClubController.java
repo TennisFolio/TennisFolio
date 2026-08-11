@@ -2,6 +2,7 @@ package com.tennisfolio.Tennisfolio.club.api;
 
 import com.tennisfolio.Tennisfolio.club.dto.ClubCreateRequest;
 import com.tennisfolio.Tennisfolio.club.dto.ClubCreateResponse;
+import com.tennisfolio.Tennisfolio.club.dto.ClubDashboardResponse;
 import com.tennisfolio.Tennisfolio.club.dto.ClubDetailResponse;
 import com.tennisfolio.Tennisfolio.club.dto.ClubMemberCreateRequest;
 import com.tennisfolio.Tennisfolio.club.dto.ClubMemberBulkCreateRequest;
@@ -10,6 +11,7 @@ import com.tennisfolio.Tennisfolio.club.dto.ClubMemberUpdateRequest;
 import com.tennisfolio.Tennisfolio.club.dto.ClubSummaryResponse;
 import com.tennisfolio.Tennisfolio.club.dto.ClubUpdateRequest;
 import com.tennisfolio.Tennisfolio.club.service.ClubCommandService;
+import com.tennisfolio.Tennisfolio.club.service.ClubDashboardQueryService;
 import com.tennisfolio.Tennisfolio.club.service.ClubMemberCommandService;
 import com.tennisfolio.Tennisfolio.club.service.ClubQueryService;
 import com.tennisfolio.Tennisfolio.common.response.ResponseDTO;
@@ -34,15 +36,18 @@ public class ClubController {
     private final ClubCommandService clubCommandService;
     private final ClubQueryService clubQueryService;
     private final ClubMemberCommandService clubMemberCommandService;
+    private final ClubDashboardQueryService clubDashboardQueryService;
 
     public ClubController(
             ClubCommandService clubCommandService,
             ClubQueryService clubQueryService,
-            ClubMemberCommandService clubMemberCommandService
+            ClubMemberCommandService clubMemberCommandService,
+            ClubDashboardQueryService clubDashboardQueryService
     ) {
         this.clubCommandService = clubCommandService;
         this.clubQueryService = clubQueryService;
         this.clubMemberCommandService = clubMemberCommandService;
+        this.clubDashboardQueryService = clubDashboardQueryService;
     }
 
     @PostMapping("/clubs")
@@ -69,6 +74,16 @@ public class ClubController {
     ) {
         ClubDetailResponse response =
                 clubQueryService.getClub(clubPublicId, resolveAuthenticatedUserId(authentication));
+        return ResponseEntity.ok(ResponseDTO.success(response));
+    }
+
+    @GetMapping("/clubs/{clubPublicId}/dashboard")
+    public ResponseEntity<ResponseDTO<ClubDashboardResponse>> getDashboard(
+            Authentication authentication,
+            @PathVariable String clubPublicId
+    ) {
+        ClubDashboardResponse response =
+                clubDashboardQueryService.getDashboard(clubPublicId, resolveAuthenticatedUserId(authentication));
         return ResponseEntity.ok(ResponseDTO.success(response));
     }
 

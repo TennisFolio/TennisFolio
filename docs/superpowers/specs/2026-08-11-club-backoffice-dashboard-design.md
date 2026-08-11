@@ -67,7 +67,7 @@
 ## 구현 경계
 
 - API: `club/api`에 BackOffice 조회 엔드포인트와 응답 DTO를 둔다.
-- 애플리케이션: `ClubBackofficeQueryService`가 권한 확인, 기간 계산, 조회 결과 조립을 담당한다.
+- 애플리케이션: `ClubDashboardQueryService`가 권한 확인, 기간 계산, 조회 결과 조립을 담당한다.
 - 영속성: `ClubMemberRepository`, `MeetingRepository`, `MeetingAttendanceRepository`에 집계 전용 조회를 추가한다. 목록을 전부 메모리에서 순회하지 않고 DB 집계와 필요한 최근 모임 조회를 사용한다. 성능 이슈가 확인되기 전에는 별도 집계 테이블이나 캐시를 도입하지 않는다.
 - 프런트: `page/club`에 대시보드 페이지를 두고, 섹션 UI와 포맷팅은 `components/club/dashboard`로 분리한다. 기존 클럽 API 유틸리티에 대시보드 조회를 추가한다.
 - UI 스타일은 기존 Club 화면의 구조와 프로젝트 스타일 방식을 따른다. 목업의 숫자는 예시이며 API 응답으로 대체한다.
