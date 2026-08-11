@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>클럽 BackOffice 대시보드 목업</title>
+  <style>
+    *{box-sizing:border-box}body{margin:0;background:#eef2f6;color:#243044;font-family:system-ui,-apple-system,"Segoe UI",sans-serif}.app{display:grid;grid-template-columns:220px minmax(900px,1fr);min-height:100vh}.side{background:#182433;color:#dbe6f3;padding:28px 15px}.brand{font-size:19px;font-weight:800;color:#fff;margin:3px 10px 38px}.brand span{color:#71b7ff}.nav-label{font-size:11px;color:#8da1b7;margin:0 10px 10px}.nav{padding:13px 12px;border-radius:8px;margin:3px 0}.nav.active{background:#2d5c89;color:#fff;font-weight:700}.nav.muted{color:#93a6ba}.main{padding:0 34px 34px}.top{height:72px;display:flex;align-items:center;justify-content:space-between;background:#fff;margin:0 -34px;padding:0 34px;border-bottom:1px solid #e1e6ed}.club{border:1px solid #cbd5e1;border-radius:8px;padding:10px 13px;background:#fff;font-weight:700}.muted{color:#64748b}.head{display:flex;justify-content:space-between;align-items:end;margin:30px 0 22px}.head h1{margin:0;font-size:25px}.head p{margin:7px 0 0;color:#667085;font-size:14px}.tag{font-size:13px;color:#53657a;background:#e9eff6;padding:8px 11px;border-radius:7px}.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.card{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:18px}.label{font-size:12px;color:#64748b}.num{display:block;font-size:28px;margin:10px 0 5px}.sub{font-size:12px;color:#758397}.row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}.title{font-size:15px;margin:0 0 16px}.bars{display:grid;gap:12px}.bar{display:grid;grid-template-columns:92px 1fr 28px;gap:10px;align-items:center;font-size:12px}.track{height:10px;background:#edf1f5;border-radius:99px;overflow:hidden}.fill{height:100%;background:#4f86bd;border-radius:99px}.green{background:#76a89a}.gold{background:#c7a66b}.gray{background:#aab7c5}.activity{display:grid;grid-template-columns:55px 1fr 67px 110px;gap:10px;font-size:13px;padding:11px 0;border-bottom:1px solid #edf0f4}.activity:last-of-type{border:0}.status{color:#24704b}.cancel{color:#a93f3d}.mins{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.mini{background:#f7f9fb;border-radius:9px;padding:13px}.mini strong{display:block;font-size:21px;margin-top:5px}.note{font-size:12px;color:#68778b;margin:14px 0 0}@media(max-width:900px){.app{grid-template-columns:1fr;min-width:0}.side{display:none}.kpis,.row,.mins{grid-template-columns:1fr 1fr}.top,.main{margin:0;padding-left:18px;padding-right:18px}.head{align-items:start;gap:12px;flex-direction:column}.activity{grid-template-columns:48px 1fr}}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="side">
+      <div class="brand">Tennis<span>Folio</span></div>
+      <div class="nav-label">BACKOFFICE</div>
+      <div class="nav active">대시보드</div>
+      <div class="nav muted">멤버 현황 <small>준비 중</small></div>
+      <div class="nav muted">모임 활동 <small>준비 중</small></div>
+      <div class="nav muted">참여 현황 <small>준비 중</small></div>
+    </aside>
+    <main class="main">
+      <header class="top"><button class="club">우리 테니스 클럽　⌄</button><span class="muted">클럽 ADMIN · 김테니스</span></header>
+      <section class="head"><div><h1>최근 30일 운영 요약</h1><p>예시 기간 · 2026. 07. 13. ~ 2026. 08. 11.</p></div><span class="tag">기간 변경은 상세 화면에서 제공</span></section>
+      <section class="kpis">
+        <article class="card"><span class="label">활성 멤버</span><strong class="num">42명</strong><span class="sub">현재 기준 · 비활성 제외</span></article>
+        <article class="card"><span class="label">모임 수</span><strong class="num">8회</strong><span class="sub">취소 모임 1회 제외</span></article>
+        <article class="card"><span class="label">멤버 참여율</span><strong class="num">73%</strong><span class="sub">31명 / 활성 멤버 42명</span></article>
+        <article class="card"><span class="label">모임당 평균 참석</span><strong class="num">8.8명</strong><span class="sub">멤버·게스트 참석 합계 기준</span></article>
+      </section>
+      <section class="row">
+        <article class="card">
+          <h2 class="title">멤버 구성</h2>
+          <div class="bars"><div class="bar"><span>남성</span><div class="track"><div class="fill" style="width:57%"></div></div><strong>24</strong></div><div class="bar"><span>여성</span><div class="track"><div class="fill green" style="width:43%"></div></div><strong>18</strong></div></div>
+          <h2 class="title" style="margin-top:28px">실력 등급</h2>
+          <div class="bars"><div class="bar"><span>상급 A</span><div class="track"><div class="fill" style="width:17%"></div></div><strong>7</strong></div><div class="bar"><span>중급 B</span><div class="track"><div class="fill green" style="width:57%"></div></div><strong>24</strong></div><div class="bar"><span>초급 C</span><div class="track"><div class="fill gold" style="width:19%"></div></div><strong>8</strong></div><div class="bar"><span>미분류</span><div class="track"><div class="fill gray" style="width:7%"></div></div><strong>3</strong></div></div>
+          <p class="note">등급명과 표시 순서는 이 클럽의 등급 설정을 그대로 사용합니다.</p>
+        </article>
+        <article class="card"><h2 class="title">최근 활동</h2><div class="activity"><span>08.10</span><strong>일요 복식 정모</strong><span class="status">진행</span><span>멤버 14 · 게스트 2</span></div><div class="activity"><span>08.03</span><strong>토요 저녁 게임</strong><span class="status">마감</span><span>멤버 12 · 게스트 1</span></div><div class="activity"><span>07.27</span><strong>주말 친선 모임</strong><span class="cancel">취소</span><span>—</span></div><p class="note">최근 30일 내 모임 8회 · 취소 1회</p></article>
+      </section>
+      <section class="card" style="margin-top:14px"><h2 class="title">참여 요약</h2><div class="mins"><div class="mini"><span class="label">멤버 참석 건수</span><strong>58건</strong></div><div class="mini"><span class="label">게스트 참석 건수</span><strong>12건</strong></div><div class="mini"><span class="label">미참여 활성 멤버</span><strong>11명</strong></div></div><p class="note">멤버 참여율은 최근 30일에 한 번 이상 참석한 고유 멤버를 기준으로 계산합니다.</p></section>
+    </main>
+  </div>
+</body>
+</html>
