@@ -4,9 +4,15 @@ import com.querydsl.core.Tuple;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.NumberExpression;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.tennisfolio.Tennisfolio.club.dto.ClubDashboardData;
 import com.tennisfolio.Tennisfolio.club.dto.ClubDashboardGenderCount;
+import com.tennisfolio.Tennisfolio.club.dto.ClubDashboardMemberActivity;
+import com.tennisfolio.Tennisfolio.club.dto.ClubDashboardMemberFilter;
+import com.tennisfolio.Tennisfolio.club.dto.ClubDashboardMemberPage;
+import com.tennisfolio.Tennisfolio.club.dto.ClubDashboardMonthlyData;
+import com.tennisfolio.Tennisfolio.club.dto.ClubDashboardMonthlyMeeting;
 import com.tennisfolio.Tennisfolio.club.dto.ClubDashboardRecentMeeting;
 import com.tennisfolio.Tennisfolio.club.dto.ClubDashboardSkillTierCount;
 import com.tennisfolio.Tennisfolio.club.entity.QClubMember;
@@ -59,6 +65,121 @@ public class ClubDashboardQueryRepository {
                 participantCount,
                 recentMeetings
         );
+    }
+
+    public ClubDashboardMonthlyData findMonthlyDashboardData(
+            Long clubId,
+            LocalDateTime from,
+            LocalDateTime to,
+            ClubDashboardMemberFilter memberFilter,
+            int page,
+            int size
+    ) {
+        return new ClubDashboardMonthlyData(
+                countActiveMembers(clubId),
+                countMeetings(clubId, from, to, false),
+                countMemberAttendances(clubId, from, to),
+                countGuestAttendances(clubId, from, to),
+                countParticipatingMembers(clubId, from, to),
+                findMemberActivities(clubId, from, to, memberFilter, page, size),
+                findMonthlyMeetings(clubId, from, to)
+        );
+    }
+
+    private ClubDashboardMemberPage findMemberActivities(
+            Long clubId,
+            LocalDateTime from,
+            LocalDateTime to,
+            ClubDashboardMemberFilter memberFilter,
+            int page,
+            int size
+    ) {
+        int normalizedPage = Math.max(page, 0);
+        int normalizedSize = Math.max(size, 1);
+        QClubMember clubMember = QClubMember.clubMember;
+        QMeetingAttendance attendance = QMeetingAttendance.meetingAttendance;
+        QMeeting meeting = QMeeting.meeting;
+        List<Tuple> results = queryFactory
+                .select(clubMember.id, clubMember.name, attendance.count())
+                .from(clubMember)
+                .leftJoin(attendance).on(
+                        attendance.clubMemberId.eq(clubMember.id),
+                        attendingCondition(attendance),
+                        memberAttendanceCondition(attendance),
+                        attendance.meeting.id.in(
+                                JPAExpressions.select(meeting.id)
+                                        .from(meeting)
+                                        .where(eligibleNonCancelledMeetingCondition(meeting, clubId, from, to))
+                        )
+                )
+                .where(clubMember.club.id.eq(clubId), clubMember.active.isTrue())
+                .groupBy(clubMember.id, clubMember.name)
+                .orderBy(clubMember.name.asc(), clubMember.id.asc())
+                .fetch();
+
+        List<ClubDashboardMemberActivity> filteredMembers = results.stream()
+                .map(result -> new ClubDashboardMemberActivity(
+                        result.get(clubMember.id),
+                        result.get(clubMember.name),
+                        zeroIfNull(result.get(attendance.count()))
+                ))
+                .filter(member -> matchesMemberFilter(member, memberFilter))
+                .toList();
+        long totalElements = filteredMembers.size();
+        int totalPages = totalElements == 0 ? 0 : (int) Math.ceil((double) totalElements / normalizedSize);
+        int fromIndex = Math.min(normalizedPage * normalizedSize, filteredMembers.size());
+        int toIndex = Math.min(fromIndex + normalizedSize, filteredMembers.size());
+
+        return new ClubDashboardMemberPage(
+                filteredMembers.subList(fromIndex, toIndex),
+                normalizedPage,
+                normalizedSize,
+                totalElements,
+                totalPages
+        );
+    }
+
+    private boolean matchesMemberFilter(ClubDashboardMemberActivity member, ClubDashboardMemberFilter memberFilter) {
+        return switch (memberFilter) {
+            case ALL -> true;
+            case PARTICIPATED -> member.getAttendanceCount() > 0;
+            case NOT_PARTICIPATED -> member.getAttendanceCount() == 0;
+        };
+    }
+
+    private List<ClubDashboardMonthlyMeeting> findMonthlyMeetings(Long clubId, LocalDateTime from, LocalDateTime to) {
+        QMeeting meeting = QMeeting.meeting;
+        QMeetingAttendance attendance = QMeetingAttendance.meetingAttendance;
+        BooleanExpression memberAttendance = attendingCondition(attendance).and(memberAttendanceCondition(attendance));
+        BooleanExpression guestAttendance = attendingCondition(attendance).and(guestAttendanceCondition(attendance));
+        NumberExpression<Long> memberAttendanceCount = new CaseBuilder().when(memberAttendance).then(1L).otherwise(0L).sum();
+        NumberExpression<Long> guestAttendanceCount = new CaseBuilder().when(guestAttendance).then(1L).otherwise(0L).sum();
+
+        return queryFactory
+                .select(
+                        meeting.publicId,
+                        meeting.startAt,
+                        meeting.title,
+                        meeting.status,
+                        memberAttendanceCount,
+                        guestAttendanceCount
+                )
+                .from(meeting)
+                .leftJoin(attendance).on(attendance.meeting.eq(meeting), attendance.deletedAt.isNull())
+                .where(eligibleMeetingCondition(meeting, clubId, from, to))
+                .groupBy(meeting.id, meeting.publicId, meeting.startAt, meeting.title, meeting.status)
+                .orderBy(meeting.startAt.asc(), meeting.id.asc())
+                .fetch()
+                .stream()
+                .map(result -> new ClubDashboardMonthlyMeeting(
+                        result.get(meeting.publicId),
+                        result.get(meeting.startAt),
+                        result.get(meeting.title),
+                        result.get(meeting.status),
+                        zeroIfNull(result.get(memberAttendanceCount)),
+                        zeroIfNull(result.get(guestAttendanceCount))
+                ))
+                .toList();
     }
 
     private long countActiveMembers(Long clubId) {

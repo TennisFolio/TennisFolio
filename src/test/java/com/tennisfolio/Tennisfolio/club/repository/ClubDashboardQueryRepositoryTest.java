@@ -6,6 +6,10 @@ import com.tennisfolio.Tennisfolio.club.entity.ClubMemberRole;
 import com.tennisfolio.Tennisfolio.club.entity.ClubSkillTier;
 import com.tennisfolio.Tennisfolio.club.dto.ClubDashboardData;
 import com.tennisfolio.Tennisfolio.club.dto.ClubDashboardGenderCount;
+import com.tennisfolio.Tennisfolio.club.dto.ClubDashboardMemberActivity;
+import com.tennisfolio.Tennisfolio.club.dto.ClubDashboardMemberFilter;
+import com.tennisfolio.Tennisfolio.club.dto.ClubDashboardMonthlyData;
+import com.tennisfolio.Tennisfolio.club.dto.ClubDashboardMonthlyMeeting;
 import com.tennisfolio.Tennisfolio.club.dto.ClubDashboardRecentMeeting;
 import com.tennisfolio.Tennisfolio.club.dto.ClubDashboardSkillTierCount;
 import com.tennisfolio.Tennisfolio.config.QuerydslConfig;
@@ -105,6 +109,50 @@ class ClubDashboardQueryRepositoryTest {
                 .containsExactly("Second", "First");
         assertThat(result.getRecentMeetings().get(0).getMemberAttendanceCount()).isEqualTo(1);
         assertThat(result.getRecentMeetings().get(0).getGuestAttendanceCount()).isZero();
+    }
+
+    @Test
+    void findMonthlyDashboardData_returnsFilteredMemberPageAndAllMonthMeetings() {
+        Club club = clubRepository.saveAndFlush(new Club("Monthly dashboard club", "desc", 1L));
+        ClubMember alex = member(club, "Alex", Gender.MALE, null);
+        ClubMember jamie = member(club, "Jamie", Gender.FEMALE, null);
+        ClubMember robin = member(club, "Robin", Gender.MALE, null);
+        clubMemberRepository.saveAllAndFlush(List.of(alex, jamie, robin));
+
+        Meeting firstMeeting = meeting(club.getId(), "First", LocalDateTime.of(2026, 8, 2, 10, 0));
+        Meeting cancelledMeeting = meeting(club.getId(), "Cancelled", LocalDateTime.of(2026, 8, 9, 10, 0));
+        cancelledMeeting.updateStatus(MeetingStatus.CANCELLED);
+        Meeting secondMeeting = meeting(club.getId(), "Second", LocalDateTime.of(2026, 8, 16, 10, 0));
+        meetingRepository.saveAllAndFlush(List.of(firstMeeting, cancelledMeeting, secondMeeting));
+        meetingAttendanceRepository.saveAllAndFlush(List.of(
+                memberAttendance(firstMeeting, "Alex", Gender.MALE, AttendanceStatus.ATTENDING, alex.getId()),
+                attendance(firstMeeting, "Guest", Gender.FEMALE, AttendanceStatus.ATTENDING),
+                memberAttendance(secondMeeting, "Robin", Gender.MALE, AttendanceStatus.ATTENDING, robin.getId()),
+                attendance(cancelledMeeting, "Cancelled guest", Gender.FEMALE, AttendanceStatus.ATTENDING)
+        ));
+
+        ClubDashboardMonthlyData result = dashboardQueryRepository.findMonthlyDashboardData(
+                club.getId(),
+                LocalDateTime.of(2026, 8, 1, 0, 0),
+                LocalDateTime.of(2026, 8, 31, 23, 59, 59),
+                ClubDashboardMemberFilter.PARTICIPATED,
+                0,
+                1
+        );
+
+        assertThat(result.getActiveMemberCount()).isEqualTo(3);
+        assertThat(result.getMeetingCount()).isEqualTo(2);
+        assertThat(result.getMemberAttendanceCount()).isEqualTo(2);
+        assertThat(result.getGuestAttendanceCount()).isEqualTo(1);
+        assertThat(result.getParticipantCount()).isEqualTo(2);
+        assertThat(result.getMembers().getTotalElements()).isEqualTo(2);
+        assertThat(result.getMembers().getTotalPages()).isEqualTo(2);
+        assertThat(result.getMembers().getContent())
+                .extracting(ClubDashboardMemberActivity::getMemberName)
+                .containsExactly("Alex");
+        assertThat(result.getMeetings())
+                .extracting(ClubDashboardMonthlyMeeting::getTitle)
+                .containsExactly("First", "Cancelled", "Second");
     }
 
     private static ClubMember member(Club club, String name, Gender gender, ClubSkillTier skillTier) {
