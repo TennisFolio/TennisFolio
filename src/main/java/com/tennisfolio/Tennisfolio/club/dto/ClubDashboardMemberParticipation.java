@@ -9,6 +9,5 @@ public class ClubDashboardMemberParticipation {
 
     private final long participantCount;
     private final int rate;
-    private final long attendanceCount;
-    private final long inactiveParticipantCount;
+    private final ClubDashboardMemberPage members;
 }

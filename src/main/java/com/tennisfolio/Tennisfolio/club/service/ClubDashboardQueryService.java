@@ -1,9 +1,10 @@
 package com.tennisfolio.Tennisfolio.club.service;
 
 import com.tennisfolio.Tennisfolio.club.dto.ClubDashboardResponse;
-import com.tennisfolio.Tennisfolio.club.dto.ClubDashboardData;
+import com.tennisfolio.Tennisfolio.club.dto.ClubDashboardMemberFilter;
+import com.tennisfolio.Tennisfolio.club.dto.ClubDashboardMemberGuestRatio;
+import com.tennisfolio.Tennisfolio.club.dto.ClubDashboardMonthlyData;
 import com.tennisfolio.Tennisfolio.club.dto.ClubDashboardPeriod;
-import com.tennisfolio.Tennisfolio.club.dto.ClubDashboardMemberComposition;
 import com.tennisfolio.Tennisfolio.club.dto.ClubDashboardMemberParticipation;
 import com.tennisfolio.Tennisfolio.club.entity.Club;
 import com.tennisfolio.Tennisfolio.club.repository.ClubDashboardQueryRepository;
@@ -12,6 +13,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Clock;
 import java.time.LocalDate;
+import java.time.YearMonth;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class ClubDashboardQueryService {
@@ -31,50 +35,54 @@ public class ClubDashboardQueryService {
     }
 
     @Transactional(readOnly = true)
-    public ClubDashboardResponse getDashboard(String clubPublicId, Long currentUserId) {
+    public ClubDashboardResponse getDashboard(
+            String clubPublicId,
+            Long currentUserId,
+            YearMonth yearMonth,
+            ClubDashboardMemberFilter memberFilter,
+            int page
+    ) {
         Club club = clubAccessService.requireAdmin(clubPublicId, currentUserId);
-        ClubDashboardPeriod period = calculateDashboardPeriod();
-        ClubDashboardData dashboardData = dashboardQueryRepository.findDashboardData(
+        YearMonth requestedMonth = requireSelectableMonth(yearMonth);
+        ClubDashboardPeriod period = new ClubDashboardPeriod(requestedMonth);
+        ClubDashboardMonthlyData dashboardData = dashboardQueryRepository.findMonthlyDashboardData(
                 club.getId(),
                 period.getFromDateTime(),
-                period.getToDateTime()
+                period.getToDateTime(),
+                memberFilter,
+                page,
+                10
         );
         return toResponse(period, dashboardData);
     }
 
-    private ClubDashboardPeriod calculateDashboardPeriod() {
-        LocalDate to = LocalDate.now(clock);
-        LocalDate from = to.minusDays(29);
-        return new ClubDashboardPeriod(from, to);
+    private YearMonth requireSelectableMonth(YearMonth yearMonth) {
+        YearMonth currentMonth = YearMonth.from(LocalDate.now(clock));
+        if (yearMonth.isAfter(currentMonth)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "미래 월은 조회할 수 없습니다.");
+        }
+        return yearMonth;
     }
 
     private ClubDashboardResponse toResponse(
             ClubDashboardPeriod period,
-            ClubDashboardData dashboardData
+            ClubDashboardMonthlyData dashboardData
     ) {
         return new ClubDashboardResponse(
                 period,
                 dashboardData.getActiveMemberCount(),
                 dashboardData.getMeetingCount(),
-                dashboardData.getCancelledMeetingCount(),
                 new ClubDashboardMemberParticipation(
                         dashboardData.getParticipantCount(),
                         calculateParticipationRate(dashboardData),
-                        dashboardData.getMemberAttendanceCount(),
-                        calculateInactiveParticipantCount(dashboardData)
+                        dashboardData.getMembers()
                 ),
-                dashboardData.getGuestAttendanceCount(),
-                calculateAverageAttendancePerMeeting(dashboardData),
-                new ClubDashboardMemberComposition(
-                        dashboardData.getGenderCounts(),
-                        dashboardData.getSkillTierCounts(),
-                        dashboardData.getUnclassifiedSkillMemberCount()
-                ),
-                dashboardData.getRecentMeetings()
+                calculateMemberGuestRatio(dashboardData),
+                dashboardData.getMeetings()
         );
     }
 
-    private int calculateParticipationRate(ClubDashboardData dashboardData) {
+    private int calculateParticipationRate(ClubDashboardMonthlyData dashboardData) {
         if (dashboardData.getActiveMemberCount() == 0) {
             return 0;
         }
@@ -83,17 +91,16 @@ public class ClubDashboardQueryService {
         );
     }
 
-    private long calculateInactiveParticipantCount(ClubDashboardData dashboardData) {
-        return Math.max(0, dashboardData.getActiveMemberCount() - dashboardData.getParticipantCount());
-    }
-
-    private double calculateAverageAttendancePerMeeting(ClubDashboardData dashboardData) {
-        if (dashboardData.getMeetingCount() == 0) {
-            return 0;
-        }
-        double average = (double) (dashboardData.getMemberAttendanceCount() + dashboardData.getGuestAttendanceCount())
-                / dashboardData.getMeetingCount();
-        return Math.round(average * 10) / 10.0;
+    private ClubDashboardMemberGuestRatio calculateMemberGuestRatio(ClubDashboardMonthlyData dashboardData) {
+        long totalAttendanceCount = dashboardData.getMemberAttendanceCount() + dashboardData.getGuestAttendanceCount();
+        int memberRate = totalAttendanceCount == 0 ? 0
+                : (int) Math.round((double) dashboardData.getMemberAttendanceCount() / totalAttendanceCount * 100);
+        return new ClubDashboardMemberGuestRatio(
+                dashboardData.getMemberAttendanceCount(),
+                dashboardData.getGuestAttendanceCount(),
+                memberRate,
+                totalAttendanceCount == 0 ? 0 : 100 - memberRate
+        );
     }
 
 }

@@ -12,10 +12,7 @@ public class ClubDashboardResponse {
     private final ClubDashboardPeriod period;
     private final long activeMemberCount;
     private final long meetingCount;
-    private final long cancelledMeetingCount;
     private final ClubDashboardMemberParticipation memberParticipation;
-    private final long guestAttendanceCount;
-    private final double averageAttendancePerMeeting;
-    private final ClubDashboardMemberComposition memberComposition;
-    private final List<ClubDashboardRecentMeeting> recentMeetings;
+    private final ClubDashboardMemberGuestRatio memberGuestRatio;
+    private final List<ClubDashboardMonthlyMeeting> meetings;
 }

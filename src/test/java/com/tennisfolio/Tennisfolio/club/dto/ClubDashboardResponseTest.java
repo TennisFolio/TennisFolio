@@ -18,16 +18,9 @@ class ClubDashboardResponseTest {
                 new ClubDashboardPeriod(LocalDate.of(2026, 7, 13), LocalDate.of(2026, 8, 11)),
                 42,
                 8,
-                1,
-                new ClubDashboardMemberParticipation(31, 73, 58, 11),
-                12,
-                8.8,
-                new ClubDashboardMemberComposition(
-                        List.of(new ClubDashboardGenderCount(Gender.MALE, 24)),
-                        List.of(new ClubDashboardSkillTierCount(1L, "Intermediate B", 2, 24)),
-                        3
-                ),
-                List.of(new ClubDashboardRecentMeeting(
+                new ClubDashboardMemberParticipation(31, 73, new ClubDashboardMemberPage(List.of(), 0, 10, 0, 0)),
+                new ClubDashboardMemberGuestRatio(58, 12, 83, 17),
+                List.of(new ClubDashboardMonthlyMeeting(
                         "meeting-public-id",
                         LocalDateTime.of(2026, 8, 10, 9, 0),
                         "Sunday doubles",
@@ -39,7 +32,7 @@ class ClubDashboardResponseTest {
 
         assertThat(response.getPeriod().getFrom()).isEqualTo(LocalDate.of(2026, 7, 13));
         assertThat(response.getMemberParticipation().getRate()).isEqualTo(73);
-        assertThat(response.getMemberComposition().getSkillTierCounts().get(0).getName()).isEqualTo("Intermediate B");
-        assertThat(response.getRecentMeetings().get(0).getGuestAttendanceCount()).isEqualTo(2);
+        assertThat(response.getMemberGuestRatio().getGuestRate()).isEqualTo(17);
+        assertThat(response.getMeetings().get(0).getGuestAttendanceCount()).isEqualTo(2);
     }
 }
