@@ -2,6 +2,13 @@ package com.tennisfolio.Tennisfolio.club.api;
 
 import com.tennisfolio.Tennisfolio.club.dto.ClubCreateRequest;
 import com.tennisfolio.Tennisfolio.club.dto.ClubCreateResponse;
+import com.tennisfolio.Tennisfolio.club.dto.ClubDashboardResponse;
+import com.tennisfolio.Tennisfolio.club.dto.ClubDashboardMemberComposition;
+import com.tennisfolio.Tennisfolio.club.dto.ClubDashboardMemberParticipation;
+import com.tennisfolio.Tennisfolio.club.dto.ClubDashboardPeriod;
+import com.tennisfolio.Tennisfolio.club.dto.ClubDashboardMemberFilter;
+import com.tennisfolio.Tennisfolio.club.dto.ClubDashboardMemberGuestRatio;
+import com.tennisfolio.Tennisfolio.club.dto.ClubDashboardMemberPage;
 import com.tennisfolio.Tennisfolio.club.dto.ClubDetailResponse;
 import com.tennisfolio.Tennisfolio.club.dto.ClubMemberCreateRequest;
 import com.tennisfolio.Tennisfolio.club.dto.ClubMemberBulkCreateRequest;
@@ -10,6 +17,7 @@ import com.tennisfolio.Tennisfolio.club.dto.ClubMemberUpdateRequest;
 import com.tennisfolio.Tennisfolio.club.dto.ClubSummaryResponse;
 import com.tennisfolio.Tennisfolio.club.dto.ClubUpdateRequest;
 import com.tennisfolio.Tennisfolio.club.service.ClubCommandService;
+import com.tennisfolio.Tennisfolio.club.service.ClubDashboardQueryService;
 import com.tennisfolio.Tennisfolio.club.service.ClubMemberCommandService;
 import com.tennisfolio.Tennisfolio.club.service.ClubQueryService;
 import com.tennisfolio.Tennisfolio.common.response.ResponseDTO;
@@ -23,6 +31,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 
 import java.util.List;
+import java.time.LocalDate;
+import java.time.YearMonth;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
@@ -39,6 +49,9 @@ class ClubControllerTest {
 
     @Mock
     ClubMemberCommandService clubMemberCommandService;
+
+    @Mock
+    ClubDashboardQueryService clubDashboardQueryService;
 
     @InjectMocks
     ClubController clubController;
@@ -98,6 +111,26 @@ class ClubControllerTest {
         verify(clubQueryService).getClub("club-public-id", 10L);
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().getData().getAdmin()).isTrue();
+    }
+
+    @Test
+    void getDashboard_passesMonthFilterAndPageToDashboardQueryService() {
+        Authentication authentication = auth(10L);
+        when(clubDashboardQueryService.getDashboard(
+                "club-public-id", 10L, YearMonth.of(2026, 8), ClubDashboardMemberFilter.PARTICIPATED, 1
+        ))
+                .thenReturn(dashboardResponse());
+
+        ResponseEntity<ResponseDTO<ClubDashboardResponse>> response =
+                clubController.getDashboard(authentication, "club-public-id", 2026, 8,
+                        "participated", 1);
+
+        verify(clubDashboardQueryService).getDashboard(
+                "club-public-id", 10L, YearMonth.of(2026, 8), ClubDashboardMemberFilter.PARTICIPATED, 1
+        );
+        assertThat(response.getStatusCode().value()).isEqualTo(200);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getData().getActiveMemberCount()).isEqualTo(42);
     }
 
     @Test
@@ -199,5 +232,16 @@ class ClubControllerTest {
 
     private static Authentication auth(Long userId) {
         return new UsernamePasswordAuthenticationToken(userId, null, List.of());
+    }
+
+    private static ClubDashboardResponse dashboardResponse() {
+        return new ClubDashboardResponse(
+                new ClubDashboardPeriod(LocalDate.of(2026, 7, 13), LocalDate.of(2026, 8, 11)),
+                42,
+                8,
+                new ClubDashboardMemberParticipation(31, 73, new ClubDashboardMemberPage(List.of(), 0, 10, 0, 0)),
+                new ClubDashboardMemberGuestRatio(58, 12, 83, 17),
+                List.of()
+        );
     }
 }

@@ -2,6 +2,14 @@ import { apiRequestSilent } from './apiClient';
 
 export const getMyClubs = () => apiRequestSilent.get('/api/clubs');
 
+export const getClubDashboard = (publicId, { year, month, memberFilter = 'all', page = 0 }) =>
+  apiRequestSilent.get(`/api/clubs/${publicId}/dashboard`, {
+    year,
+    month,
+    memberFilter,
+    page,
+  });
+
 export const createClub = (club) => apiRequestSilent.post('/api/clubs', club);
 
 export const getClub = (publicId) => apiRequestSilent.get(`/api/clubs/${publicId}`);

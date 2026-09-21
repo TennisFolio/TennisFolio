@@ -2,6 +2,7 @@ package com.tennisfolio.Tennisfolio.club.api;
 
 import com.tennisfolio.Tennisfolio.club.dto.ClubCreateRequest;
 import com.tennisfolio.Tennisfolio.club.dto.ClubCreateResponse;
+import com.tennisfolio.Tennisfolio.club.dto.ClubDashboardResponse;
 import com.tennisfolio.Tennisfolio.club.dto.ClubDetailResponse;
 import com.tennisfolio.Tennisfolio.club.dto.ClubMemberCreateRequest;
 import com.tennisfolio.Tennisfolio.club.dto.ClubMemberBulkCreateRequest;
@@ -10,6 +11,7 @@ import com.tennisfolio.Tennisfolio.club.dto.ClubMemberUpdateRequest;
 import com.tennisfolio.Tennisfolio.club.dto.ClubSummaryResponse;
 import com.tennisfolio.Tennisfolio.club.dto.ClubUpdateRequest;
 import com.tennisfolio.Tennisfolio.club.service.ClubCommandService;
+import com.tennisfolio.Tennisfolio.club.service.ClubDashboardQueryService;
 import com.tennisfolio.Tennisfolio.club.service.ClubMemberCommandService;
 import com.tennisfolio.Tennisfolio.club.service.ClubQueryService;
 import com.tennisfolio.Tennisfolio.common.response.ResponseDTO;
@@ -26,6 +28,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.time.DateTimeException;
+import java.time.YearMonth;
+import com.tennisfolio.Tennisfolio.club.dto.ClubDashboardMemberFilter;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping("/api")
@@ -34,15 +41,18 @@ public class ClubController {
     private final ClubCommandService clubCommandService;
     private final ClubQueryService clubQueryService;
     private final ClubMemberCommandService clubMemberCommandService;
+    private final ClubDashboardQueryService clubDashboardQueryService;
 
     public ClubController(
             ClubCommandService clubCommandService,
             ClubQueryService clubQueryService,
-            ClubMemberCommandService clubMemberCommandService
+            ClubMemberCommandService clubMemberCommandService,
+            ClubDashboardQueryService clubDashboardQueryService
     ) {
         this.clubCommandService = clubCommandService;
         this.clubQueryService = clubQueryService;
         this.clubMemberCommandService = clubMemberCommandService;
+        this.clubDashboardQueryService = clubDashboardQueryService;
     }
 
     @PostMapping("/clubs")
@@ -70,6 +80,48 @@ public class ClubController {
         ClubDetailResponse response =
                 clubQueryService.getClub(clubPublicId, resolveAuthenticatedUserId(authentication));
         return ResponseEntity.ok(ResponseDTO.success(response));
+    }
+
+    @GetMapping("/clubs/{clubPublicId}/dashboard")
+    public ResponseEntity<ResponseDTO<ClubDashboardResponse>> getDashboard(
+            Authentication authentication,
+            @PathVariable String clubPublicId,
+            @RequestParam(required = false) Integer year,
+            @RequestParam(required = false) Integer month,
+            @RequestParam(defaultValue = "all") String memberFilter,
+            @RequestParam(defaultValue = "0") int page
+    ) {
+        ClubDashboardResponse response =
+                clubDashboardQueryService.getDashboard(
+                        clubPublicId,
+                        resolveAuthenticatedUserId(authentication),
+                        resolveDashboardMonth(year, month),
+                        parseMemberFilter(memberFilter),
+                        Math.max(page, 0)
+                );
+        return ResponseEntity.ok(ResponseDTO.success(response));
+    }
+
+    private YearMonth resolveDashboardMonth(Integer year, Integer month) {
+        if (year == null && month == null) {
+            return YearMonth.now();
+        }
+        if (year == null || month == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "year와 month를 함께 입력해주세요.");
+        }
+        try {
+            return YearMonth.of(year, month);
+        } catch (DateTimeException exception) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "월 값이 올바르지 않습니다.");
+        }
+    }
+
+    private ClubDashboardMemberFilter parseMemberFilter(String memberFilter) {
+        try {
+            return ClubDashboardMemberFilter.valueOf(memberFilter.toUpperCase().replace('-', '_'));
+        } catch (IllegalArgumentException exception) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "회원 참여 필터 값이 올바르지 않습니다.");
+        }
     }
 
     @PatchMapping("/clubs/{clubPublicId}")
