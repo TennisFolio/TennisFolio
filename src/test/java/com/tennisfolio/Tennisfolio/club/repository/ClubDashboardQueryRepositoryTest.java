@@ -126,6 +126,7 @@ class ClubDashboardQueryRepositoryTest {
         meetingRepository.saveAllAndFlush(List.of(firstMeeting, cancelledMeeting, secondMeeting));
         meetingAttendanceRepository.saveAllAndFlush(List.of(
                 memberAttendance(firstMeeting, "Alex", Gender.MALE, AttendanceStatus.ATTENDING, alex.getId()),
+                memberAttendance(firstMeeting, "Robin", Gender.MALE, AttendanceStatus.ATTENDING, robin.getId()),
                 attendance(firstMeeting, "Guest", Gender.FEMALE, AttendanceStatus.ATTENDING),
                 memberAttendance(secondMeeting, "Robin", Gender.MALE, AttendanceStatus.ATTENDING, robin.getId()),
                 attendance(cancelledMeeting, "Cancelled guest", Gender.FEMALE, AttendanceStatus.ATTENDING)
@@ -142,14 +143,14 @@ class ClubDashboardQueryRepositoryTest {
 
         assertThat(result.getActiveMemberCount()).isEqualTo(3);
         assertThat(result.getMeetingCount()).isEqualTo(2);
-        assertThat(result.getMemberAttendanceCount()).isEqualTo(2);
+        assertThat(result.getMemberAttendanceCount()).isEqualTo(3);
         assertThat(result.getGuestAttendanceCount()).isEqualTo(1);
         assertThat(result.getParticipantCount()).isEqualTo(2);
         assertThat(result.getMembers().getTotalElements()).isEqualTo(2);
         assertThat(result.getMembers().getTotalPages()).isEqualTo(2);
         assertThat(result.getMembers().getContent())
                 .extracting(ClubDashboardMemberActivity::getMemberName)
-                .containsExactly("Alex");
+                .containsExactly("Robin");
         assertThat(result.getMeetings())
                 .extracting(ClubDashboardMonthlyMeeting::getTitle)
                 .containsExactly("First", "Cancelled", "Second");

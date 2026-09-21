@@ -28,6 +28,7 @@ function getProfileInitial(user) {
 function Layout({ children, currentUser, onLogout }) {
   const navigate = useNavigate();
   const location = useLocation();
+  const isClubDashboard = /^\/clubs\/[^/]+\/dashboard$/.test(location.pathname);
   const [sheetMode, setSheetMode] = useState(null);
   const [isManageMenuOpen, setIsManageMenuOpen] = useState(false);
   const sheetRef = useRef(null);
@@ -125,8 +126,8 @@ function Layout({ children, currentUser, onLogout }) {
   };
 
   return (
-    <div className="layout">
-      <header className="header">
+    <div className={`layout${isClubDashboard ? ' layout-club-dashboard' : ''}`}>
+      <header className="header layout-club-dashboard-mobile-chrome">
         <div className="header-inner">
           <button
             type="button"
@@ -290,7 +291,9 @@ function Layout({ children, currentUser, onLogout }) {
         <section className="contents">{children}</section>
       </div>
 
-      <Footer />
+      <div className="layout-club-dashboard-mobile-chrome">
+        <Footer />
+      </div>
 
       <LoadingMask />
       <PlayerDetailModal />

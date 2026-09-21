@@ -28,6 +28,7 @@ import MeetingUpdate from './page/MeetingUpdate.jsx';
 import MeetingPublic from './page/MeetingPublic.jsx';
 import ClubCreatePage from './page/club/ClubCreatePage.jsx';
 import ClubDetailPage from './page/club/ClubDetailPage.jsx';
+import ClubDashboardPage from './page/club/ClubDashboardPage.jsx';
 import ClubEditPage from './page/club/ClubEditPage.jsx';
 import ClubListPage from './page/club/ClubListPage.jsx';
 import ClubMemberCreatePage from './page/club/ClubMemberCreatePage.jsx';
@@ -117,6 +118,10 @@ function App() {
           <Route
             path="/clubs/:publicId"
             element={<ClubDetailPage currentUser={currentUser} />}
+          />
+          <Route
+            path="/clubs/:clubPublicId/dashboard"
+            element={<ClubDashboardPage currentUser={currentUser} />}
           />
           <Route
             path="/clubs/:publicId/edit"

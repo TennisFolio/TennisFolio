@@ -114,7 +114,7 @@ public class ClubDashboardQueryRepository {
                 )
                 .where(clubMember.club.id.eq(clubId), clubMember.active.isTrue())
                 .groupBy(clubMember.id, clubMember.name)
-                .orderBy(clubMember.name.asc(), clubMember.id.asc())
+                .orderBy(attendance.count().desc(), clubMember.name.asc(), clubMember.id.asc())
                 .fetch();
 
         List<ClubDashboardMemberActivity> filteredMembers = results.stream()

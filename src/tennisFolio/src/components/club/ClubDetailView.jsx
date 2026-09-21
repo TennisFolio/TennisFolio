@@ -18,6 +18,7 @@ function ClubDetailView({
   onChangeTab,
   onChangeMemberQuery,
   onEditClub,
+  onOpenDashboard,
   onAddMeeting,
   onOpenMeeting,
   onAddMember,
@@ -35,6 +36,9 @@ function ClubDetailView({
         </div>
         {isAdmin && (
           <div className="club-page-actions">
+            <button className="club-button full accent" type="button" onClick={onOpenDashboard}>
+              대시보드
+            </button>
             <button className="club-button full" type="button" onClick={onEditClub}>
               클럽 정보 수정
             </button>

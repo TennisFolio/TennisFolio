@@ -472,3 +472,9 @@ body {
     align-items: center;
   }
 }
+
+@media (min-width: 721px) {
+  .layout-club-dashboard .layout-club-dashboard-mobile-chrome {
+    display: none;
+  }
+}

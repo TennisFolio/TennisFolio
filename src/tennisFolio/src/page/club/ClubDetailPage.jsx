@@ -127,6 +127,9 @@ function ClubDetailPage({ currentUser }) {
             onChangeTab={setActiveTab}
             onChangeMemberQuery={setMemberQuery}
             onEditClub={() => navigate(`/clubs/${selectedClub.publicId}/edit`)}
+            onOpenDashboard={() =>
+              navigate(`/clubs/${selectedClub.publicId}/dashboard`)
+            }
             onAddMeeting={() =>
               navigate(`/clubs/${selectedClub.publicId}/meetings/new`)
             }
