@@ -5,6 +5,7 @@ import com.tennisfolio.Tennisfolio.common.UserStatus;
 import com.tennisfolio.Tennisfolio.club.entity.Club;
 import com.tennisfolio.Tennisfolio.club.entity.ClubMember;
 import com.tennisfolio.Tennisfolio.club.entity.ClubMemberRole;
+import com.tennisfolio.Tennisfolio.club.entity.ClubMemberStatus;
 import com.tennisfolio.Tennisfolio.club.entity.ClubSkillTier;
 import com.tennisfolio.Tennisfolio.club.repository.ClubMemberRepository;
 import com.tennisfolio.Tennisfolio.club.repository.ClubRepository;
@@ -308,7 +309,7 @@ public class MeetingAttendanceCommandService {
         }
 
         Club club = findActiveClub(meeting.getClubId());
-        ClubMember member = clubMemberRepository.findByClubAndUserIdAndActiveTrue(club, currentUserId)
+        ClubMember member = clubMemberRepository.findByClubAndUserIdAndMemberStatus(club, currentUserId, ClubMemberStatus.ACTIVE)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN, "클럽 관리자만 참가자를 추가할 수 있습니다."));
         if (member.getRole() != ClubMemberRole.ADMIN) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "클럽 관리자만 참가자를 추가할 수 있습니다.");
@@ -332,7 +333,7 @@ public class MeetingAttendanceCommandService {
         }
 
         Club club = findActiveClub(meeting.getClubId());
-        if (clubMemberRepository.existsByClubAndNameAndActiveTrue(club, participant.name())) {
+        if (clubMemberRepository.existsByClubAndName(club, participant.name())) {
             throw new ResponseStatusException(
                     HttpStatus.CONFLICT,
                     "클럽원과 같은 이름의 게스트는 등록할 수 없습니다. 동명이인 게스트는 이름을 구분해서 입력해주세요."
@@ -404,10 +405,11 @@ public class MeetingAttendanceCommandService {
         }
 
         List<ClubMember> exactMatches =
-                clubMemberRepository.findByClubAndNameAndGenderAndActiveTrueOrderByIdAsc(
+                clubMemberRepository.findByClubAndNameAndGenderAndMemberStatusOrderByIdAsc(
                         club,
                         requestedName,
-                        requestedGender
+                        requestedGender,
+                        ClubMemberStatus.ACTIVE
                 );
         if (exactMatches.size() == 1) {
             return clubMemberResolution(exactMatches.get(0));
@@ -431,7 +433,7 @@ public class MeetingAttendanceCommandService {
         }
 
         Club club = findActiveClub(meeting.getClubId());
-        ClubMember member = clubMemberRepository.findByClubAndIdAndActiveTrue(club, request.getClubMemberId())
+        ClubMember member = clubMemberRepository.findByClubAndIdAndMemberStatus(club, request.getClubMemberId(), ClubMemberStatus.ACTIVE)
                 .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND));
         return clubMemberResolution(member);
     }
@@ -446,7 +448,7 @@ public class MeetingAttendanceCommandService {
             Club club = clubRepository.findByIdAndDeletedAtIsNull(meeting.getClubId()).orElse(null);
             if (club != null) {
                 Optional<ClubMember> currentMember =
-                        clubMemberRepository.findByClubAndUserIdAndActiveTrue(club, currentUserId);
+                        clubMemberRepository.findByClubAndUserIdAndMemberStatus(club, currentUserId, ClubMemberStatus.ACTIVE);
                 if (currentMember.isPresent()) {
                     return clubMemberResolution(currentMember.get());
                 }

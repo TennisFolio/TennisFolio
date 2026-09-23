@@ -6,6 +6,7 @@ import com.tennisfolio.Tennisfolio.club.dto.ClubSkillTierResponse;
 import com.tennisfolio.Tennisfolio.club.dto.ClubSummaryResponse;
 import com.tennisfolio.Tennisfolio.club.entity.Club;
 import com.tennisfolio.Tennisfolio.club.entity.ClubMember;
+import com.tennisfolio.Tennisfolio.club.entity.ClubMemberStatus;
 import com.tennisfolio.Tennisfolio.club.repository.ClubMemberRepository;
 import com.tennisfolio.Tennisfolio.club.repository.ClubSkillTierRepository;
 import org.springframework.stereotype.Service;
@@ -33,12 +34,12 @@ public class ClubQueryService {
     @Transactional(readOnly = true)
     public List<ClubSummaryResponse> getMyClubs(Long currentUserId) {
         clubAccessService.requireAuthenticated(currentUserId);
-        return clubMemberRepository.findByUserIdAndActiveTrueOrderByIdAsc(currentUserId)
+        return clubMemberRepository.findByUserIdAndMemberStatusOrderByIdAsc(currentUserId, ClubMemberStatus.ACTIVE)
                 .stream()
                 .filter(member -> member.getClub().getDeletedAt() == null)
                 .map(member -> ClubSummaryResponse.from(
                         member,
-                        clubMemberRepository.countByClubAndActiveTrue(member.getClub())
+                        clubMemberRepository.countByClubAndMemberStatus(member.getClub(), ClubMemberStatus.ACTIVE)
                 ))
                 .toList();
     }
@@ -50,7 +51,7 @@ public class ClubQueryService {
         return ClubDetailResponse.from(
                 club,
                 currentMember,
-                clubMemberRepository.countByClubAndActiveTrue(club),
+                clubMemberRepository.countByClubAndMemberStatus(club, ClubMemberStatus.ACTIVE),
                 clubSkillTierRepository.findByClubOrderByLevelDescIdAsc(club)
                         .stream()
                         .map(ClubSkillTierResponse::from)
@@ -70,11 +71,12 @@ public class ClubQueryService {
 
     private List<ClubMember> findMembers(Club club, String keyword) {
         if (keyword == null || keyword.isBlank()) {
-            return clubMemberRepository.findByClubAndActiveTrueOrderByNameAscIdAsc(club);
+            return clubMemberRepository.findByClubAndMemberStatusOrderByNameAscIdAsc(club, ClubMemberStatus.ACTIVE);
         }
-        return clubMemberRepository.findByClubAndNameContainingIgnoreCaseAndActiveTrueOrderByNameAscIdAsc(
+        return clubMemberRepository.findByClubAndNameContainingIgnoreCaseAndMemberStatusOrderByNameAscIdAsc(
                 club,
-                keyword.trim()
+                keyword.trim(),
+                ClubMemberStatus.ACTIVE
         );
     }
 }

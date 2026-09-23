@@ -17,6 +17,7 @@ import com.tennisfolio.Tennisfolio.club.dto.ClubDashboardRecentMeeting;
 import com.tennisfolio.Tennisfolio.club.dto.ClubDashboardSkillTierCount;
 import com.tennisfolio.Tennisfolio.club.entity.QClubMember;
 import com.tennisfolio.Tennisfolio.club.entity.QClubSkillTier;
+import com.tennisfolio.Tennisfolio.club.entity.ClubMemberStatus;
 import com.tennisfolio.Tennisfolio.meeting.domain.AttendanceStatus;
 import com.tennisfolio.Tennisfolio.meeting.domain.Gender;
 import com.tennisfolio.Tennisfolio.meeting.domain.MeetingParticipantType;
@@ -112,7 +113,7 @@ public class ClubDashboardQueryRepository {
                                         .where(eligibleNonCancelledMeetingCondition(meeting, clubId, from, to))
                         )
                 )
-                .where(clubMember.club.id.eq(clubId), clubMember.active.isTrue())
+                .where(clubMember.club.id.eq(clubId), clubMember.memberStatus.eq(ClubMemberStatus.ACTIVE))
                 .groupBy(clubMember.id, clubMember.name)
                 .orderBy(attendance.count().desc(), clubMember.name.asc(), clubMember.id.asc())
                 .fetch();
@@ -187,7 +188,7 @@ public class ClubDashboardQueryRepository {
         return zeroIfNull(queryFactory
                 .select(clubMember.count())
                 .from(clubMember)
-                .where(clubMember.club.id.eq(clubId), clubMember.active.isTrue())
+                .where(clubMember.club.id.eq(clubId), clubMember.memberStatus.eq(ClubMemberStatus.ACTIVE))
                 .fetchOne());
     }
 
@@ -196,7 +197,7 @@ public class ClubDashboardQueryRepository {
         List<Tuple> results = queryFactory
                 .select(clubMember.gender, clubMember.count())
                 .from(clubMember)
-                .where(clubMember.club.id.eq(clubId), clubMember.active.isTrue())
+                .where(clubMember.club.id.eq(clubId), clubMember.memberStatus.eq(ClubMemberStatus.ACTIVE))
                 .groupBy(clubMember.gender)
                 .fetch();
         Map<Gender, Long> countsByGender = results.stream()
@@ -219,7 +220,7 @@ public class ClubDashboardQueryRepository {
                 .from(skillTier)
                 .leftJoin(clubMember).on(
                         clubMember.club.id.eq(clubId),
-                        clubMember.active.isTrue(),
+                        clubMember.memberStatus.eq(ClubMemberStatus.ACTIVE),
                         clubMember.skillTier.eq(skillTier)
                 )
                 .where(skillTier.club.id.eq(clubId))
@@ -242,7 +243,7 @@ public class ClubDashboardQueryRepository {
         return zeroIfNull(queryFactory
                 .select(clubMember.count())
                 .from(clubMember)
-                .where(clubMember.club.id.eq(clubId), clubMember.active.isTrue(), clubMember.skillTier.isNull())
+                .where(clubMember.club.id.eq(clubId), clubMember.memberStatus.eq(ClubMemberStatus.ACTIVE), clubMember.skillTier.isNull())
                 .fetchOne());
     }
 

@@ -164,7 +164,7 @@ class MeetingQueryServiceTest {
         when(meetingRepository.findByPublicIdAndDeletedAtIsNull("meeting-public-id"))
                 .thenReturn(Optional.of(meeting));
         when(clubRepository.findByIdAndDeletedAtIsNull(50L)).thenReturn(Optional.of(club));
-        when(clubMemberRepository.findByClubAndUserIdAndActiveTrue(club, 10L))
+        when(clubMemberRepository.findByClubAndUserIdAndMemberStatus(club, 10L, com.tennisfolio.Tennisfolio.club.entity.ClubMemberStatus.ACTIVE))
                 .thenReturn(Optional.of(member));
         when(attendanceRepository.findByMeetingAndDeletedAtIsNullOrderByIdAsc(meeting))
                 .thenReturn(List.of());

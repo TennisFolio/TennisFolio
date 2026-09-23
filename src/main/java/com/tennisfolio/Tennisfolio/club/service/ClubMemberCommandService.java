@@ -6,6 +6,7 @@ import com.tennisfolio.Tennisfolio.club.dto.ClubMemberUpdateRequest;
 import com.tennisfolio.Tennisfolio.club.entity.Club;
 import com.tennisfolio.Tennisfolio.club.entity.ClubMember;
 import com.tennisfolio.Tennisfolio.club.entity.ClubMemberRole;
+import com.tennisfolio.Tennisfolio.club.entity.ClubMemberStatus;
 import com.tennisfolio.Tennisfolio.club.entity.ClubSkillTier;
 import com.tennisfolio.Tennisfolio.club.repository.ClubMemberRepository;
 import com.tennisfolio.Tennisfolio.club.repository.ClubSkillTierRepository;
@@ -18,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -87,11 +89,11 @@ public class ClubMemberCommandService {
         Club club = clubAccessService.requireAdmin(clubPublicId, currentUserId);
         ClubMember member = findActiveMember(club, memberId);
         ensureAdminCanChange(member, ClubMemberRole.MEMBER);
-        member.deactivate();
+        member.changeStatus(ClubMemberStatus.WITHDRAWN, LocalDate.now());
     }
 
     private ClubMember findActiveMember(Club club, Long memberId) {
-        return clubMemberRepository.findByClubAndIdAndActiveTrue(club, memberId)
+        return clubMemberRepository.findByClubAndIdAndMemberStatus(club, memberId, ClubMemberStatus.ACTIVE)
                 .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND));
     }
 
@@ -146,13 +148,13 @@ public class ClubMemberCommandService {
     }
 
     private void rejectDuplicateName(Club club, String name) {
-        if (clubMemberRepository.existsByClubAndNameAndActiveTrue(club, name)) {
+        if (clubMemberRepository.existsByClubAndName(club, name)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "이미 같은 이름의 클럽원이 있습니다.");
         }
     }
 
     private void rejectDuplicateNameExceptSelf(Club club, String name, Long memberId) {
-        if (clubMemberRepository.existsByClubAndNameAndActiveTrueAndIdNot(club, name, memberId)) {
+        if (clubMemberRepository.existsByClubAndNameAndIdNot(club, name, memberId)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "이미 같은 이름의 클럽원이 있습니다.");
         }
     }
@@ -161,9 +163,10 @@ public class ClubMemberCommandService {
         if (member.getRole() != ClubMemberRole.ADMIN || requestedRole == ClubMemberRole.ADMIN) {
             return;
         }
-        long activeAdminCount = clubMemberRepository.countByClubAndRoleAndActiveTrue(
+        long activeAdminCount = clubMemberRepository.countByClubAndRoleAndMemberStatus(
                 member.getClub(),
-                ClubMemberRole.ADMIN
+                ClubMemberRole.ADMIN,
+                ClubMemberStatus.ACTIVE
         );
         if (activeAdminCount <= 1) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "마지막 ADMIN은 삭제하거나 일반 멤버로 변경할 수 없습니다.");

@@ -113,7 +113,7 @@ class ClubCommandServiceTest {
                 .mapToObj(index -> new ClubSkillTierRequest(null, "등급" + index))
                 .toList();
         when(clubRepository.findByPublicIdAndDeletedAtIsNull("club-public-id")).thenReturn(Optional.of(club));
-        when(clubMemberRepository.findByClubAndUserIdAndActiveTrue(club, 10L)).thenReturn(Optional.of(admin));
+        when(clubMemberRepository.findByClubAndUserIdAndMemberStatus(club, 10L, com.tennisfolio.Tennisfolio.club.entity.ClubMemberStatus.ACTIVE)).thenReturn(Optional.of(admin));
 
         service.updateClub(
                 "club-public-id",
@@ -150,7 +150,7 @@ class ClubCommandServiceTest {
         Club club = club("club-public-id", "Morning Tennis", 10L);
         ClubMember admin = member(club, 100L, 10L, "Alex Kim", ClubMemberRole.ADMIN);
         when(clubRepository.findByPublicIdAndDeletedAtIsNull("club-public-id")).thenReturn(Optional.of(club));
-        when(clubMemberRepository.findByClubAndUserIdAndActiveTrue(club, 10L)).thenReturn(Optional.of(admin));
+        when(clubMemberRepository.findByClubAndUserIdAndMemberStatus(club, 10L, com.tennisfolio.Tennisfolio.club.entity.ClubMemberStatus.ACTIVE)).thenReturn(Optional.of(admin));
 
         service.updateClub("club-public-id", new ClubUpdateRequest("Evening Tennis", "Outdoor club"), 10L);
 
@@ -164,7 +164,7 @@ class ClubCommandServiceTest {
         Club club = club("club-public-id", "Morning Tennis", 10L);
         ClubMember member = member(club, 100L, 11L, "Jamie Lee", ClubMemberRole.MEMBER);
         when(clubRepository.findByPublicIdAndDeletedAtIsNull("club-public-id")).thenReturn(Optional.of(club));
-        when(clubMemberRepository.findByClubAndUserIdAndActiveTrue(club, 11L)).thenReturn(Optional.of(member));
+        when(clubMemberRepository.findByClubAndUserIdAndMemberStatus(club, 11L, com.tennisfolio.Tennisfolio.club.entity.ClubMemberStatus.ACTIVE)).thenReturn(Optional.of(member));
 
         assertThatThrownBy(() -> service.deleteClub("club-public-id", 11L))
                 .isInstanceOf(ResponseStatusException.class)

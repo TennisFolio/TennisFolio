@@ -51,8 +51,8 @@ class ClubQueryServiceTest {
     void getMyClubs_returnsActiveClubsLinkedToCurrentUser() {
         Club club = club("club-public-id", "Morning Tennis");
         ClubMember admin = member(club, 100L, 10L, "Alex Kim", ClubMemberRole.ADMIN);
-        when(clubMemberRepository.findByUserIdAndActiveTrueOrderByIdAsc(10L)).thenReturn(List.of(admin));
-        when(clubMemberRepository.countByClubAndActiveTrue(club)).thenReturn(3L);
+        when(clubMemberRepository.findByUserIdAndMemberStatusOrderByIdAsc(10L, com.tennisfolio.Tennisfolio.club.entity.ClubMemberStatus.ACTIVE)).thenReturn(List.of(admin));
+        when(clubMemberRepository.countByClubAndMemberStatus(club, com.tennisfolio.Tennisfolio.club.entity.ClubMemberStatus.ACTIVE)).thenReturn(3L);
 
         List<ClubSummaryResponse> response = service.getMyClubs(10L);
 
@@ -75,8 +75,8 @@ class ClubQueryServiceTest {
         Club club = club("club-public-id", "Morning Tennis");
         ClubMember member = member(club, 100L, 10L, "Alex Kim", ClubMemberRole.MEMBER);
         when(clubRepository.findByPublicIdAndDeletedAtIsNull("club-public-id")).thenReturn(Optional.of(club));
-        when(clubMemberRepository.findByClubAndUserIdAndActiveTrue(club, 10L)).thenReturn(Optional.of(member));
-        when(clubMemberRepository.countByClubAndActiveTrue(club)).thenReturn(2L);
+        when(clubMemberRepository.findByClubAndUserIdAndMemberStatus(club, 10L, com.tennisfolio.Tennisfolio.club.entity.ClubMemberStatus.ACTIVE)).thenReturn(Optional.of(member));
+        when(clubMemberRepository.countByClubAndMemberStatus(club, com.tennisfolio.Tennisfolio.club.entity.ClubMemberStatus.ACTIVE)).thenReturn(2L);
         when(clubSkillTierRepository.findByClubOrderByLevelDescIdAsc(club)).thenReturn(List.of());
 
         ClubDetailResponse response = service.getClub("club-public-id", 10L);
@@ -92,7 +92,7 @@ class ClubQueryServiceTest {
     void getClub_rejectsNonMember() {
         Club club = club("club-public-id", "Morning Tennis");
         when(clubRepository.findByPublicIdAndDeletedAtIsNull("club-public-id")).thenReturn(Optional.of(club));
-        when(clubMemberRepository.findByClubAndUserIdAndActiveTrue(club, 11L)).thenReturn(Optional.empty());
+        when(clubMemberRepository.findByClubAndUserIdAndMemberStatus(club, 11L, com.tennisfolio.Tennisfolio.club.entity.ClubMemberStatus.ACTIVE)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> service.getClub("club-public-id", 11L))
                 .isInstanceOf(ResponseStatusException.class)
@@ -106,8 +106,8 @@ class ClubQueryServiceTest {
         ClubMember admin = member(club, 100L, 10L, "Alex Kim", ClubMemberRole.ADMIN);
         ClubMember member = member(club, 101L, null, "Jamie Lee", ClubMemberRole.MEMBER);
         when(clubRepository.findByPublicIdAndDeletedAtIsNull("club-public-id")).thenReturn(Optional.of(club));
-        when(clubMemberRepository.findByClubAndUserIdAndActiveTrue(club, 10L)).thenReturn(Optional.of(admin));
-        when(clubMemberRepository.findByClubAndActiveTrueOrderByNameAscIdAsc(club))
+        when(clubMemberRepository.findByClubAndUserIdAndMemberStatus(club, 10L, com.tennisfolio.Tennisfolio.club.entity.ClubMemberStatus.ACTIVE)).thenReturn(Optional.of(admin));
+        when(clubMemberRepository.findByClubAndMemberStatusOrderByNameAscIdAsc(club, com.tennisfolio.Tennisfolio.club.entity.ClubMemberStatus.ACTIVE))
                 .thenReturn(List.of(admin, member));
 
         List<ClubMemberResponse> response = service.getMembers("club-public-id", null, 10L);
@@ -123,11 +123,11 @@ class ClubQueryServiceTest {
         ClubMember admin = member(club, 100L, 10L, "Alex Kim", ClubMemberRole.ADMIN);
         ClubMember member = member(club, 101L, null, "Jamie Lee", ClubMemberRole.MEMBER);
         when(clubRepository.findByPublicIdAndDeletedAtIsNull("club-public-id")).thenReturn(Optional.of(club));
-        when(clubMemberRepository.findByClubAndUserIdAndActiveTrue(club, 10L)).thenReturn(Optional.of(admin));
-        when(clubMemberRepository.findByClubAndNameContainingIgnoreCaseAndActiveTrueOrderByNameAscIdAsc(
+        when(clubMemberRepository.findByClubAndUserIdAndMemberStatus(club, 10L, com.tennisfolio.Tennisfolio.club.entity.ClubMemberStatus.ACTIVE)).thenReturn(Optional.of(admin));
+        when(clubMemberRepository.findByClubAndNameContainingIgnoreCaseAndMemberStatusOrderByNameAscIdAsc(
                 club,
                 "jamie"
-        )).thenReturn(List.of(member));
+        , com.tennisfolio.Tennisfolio.club.entity.ClubMemberStatus.ACTIVE)).thenReturn(List.of(member));
 
         List<ClubMemberResponse> response = service.getMembers("club-public-id", " jamie ", 10L);
 
@@ -145,8 +145,8 @@ class ClubQueryServiceTest {
         );
         ReflectionTestUtils.setField(member, "id", 101L);
         when(clubRepository.findByPublicIdAndDeletedAtIsNull("club-public-id")).thenReturn(Optional.of(club));
-        when(clubMemberRepository.findByClubAndUserIdAndActiveTrue(club, 10L)).thenReturn(Optional.of(admin));
-        when(clubMemberRepository.findByClubAndActiveTrueOrderByNameAscIdAsc(club)).thenReturn(List.of(member));
+        when(clubMemberRepository.findByClubAndUserIdAndMemberStatus(club, 10L, com.tennisfolio.Tennisfolio.club.entity.ClubMemberStatus.ACTIVE)).thenReturn(Optional.of(admin));
+        when(clubMemberRepository.findByClubAndMemberStatusOrderByNameAscIdAsc(club, com.tennisfolio.Tennisfolio.club.entity.ClubMemberStatus.ACTIVE)).thenReturn(List.of(member));
 
         ClubMemberResponse response = service.getMembers("club-public-id", null, 10L).get(0);
 

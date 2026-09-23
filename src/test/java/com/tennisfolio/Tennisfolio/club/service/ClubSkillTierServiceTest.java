@@ -152,7 +152,7 @@ class ClubSkillTierServiceTest {
         ClubMember inactiveMember = new ClubMember(
                 club, null, "Jamie Lee", Gender.FEMALE, ClubMemberRole.MEMBER, skillTier, null, null
         );
-        inactiveMember.deactivate();
+        inactiveMember.changeStatus(com.tennisfolio.Tennisfolio.club.entity.ClubMemberStatus.WITHDRAWN, java.time.LocalDate.now());
         when(clubSkillTierRepository.findByClubOrderByLevelDescIdAsc(club)).thenReturn(List.of(skillTier));
         when(clubMemberRepository.findBySkillTier(skillTier)).thenReturn(List.of(activeMember, inactiveMember));
 

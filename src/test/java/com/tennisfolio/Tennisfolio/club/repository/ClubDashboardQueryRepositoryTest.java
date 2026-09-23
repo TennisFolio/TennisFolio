@@ -66,7 +66,7 @@ class ClubDashboardQueryRepositoryTest {
         ClubMember attendingWoman = member(club, "Jamie", Gender.FEMALE, advanced);
         ClubMember unclassifiedMan = member(club, "Robin", Gender.MALE, null);
         ClubMember inactiveWoman = member(club, "Former", Gender.FEMALE, beginner);
-        inactiveWoman.deactivate();
+        inactiveWoman.changeStatus(com.tennisfolio.Tennisfolio.club.entity.ClubMemberStatus.WITHDRAWN, java.time.LocalDate.now());
         clubMemberRepository.saveAllAndFlush(List.of(attendingMan, attendingWoman, unclassifiedMan, inactiveWoman));
 
         Meeting firstMeeting = meeting(club.getId(), "First", LocalDateTime.of(2026, 7, 20, 10, 0));

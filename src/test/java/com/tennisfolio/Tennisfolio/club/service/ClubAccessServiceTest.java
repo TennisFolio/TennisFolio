@@ -40,7 +40,7 @@ class ClubAccessServiceTest {
         Club club = club();
         ClubMember member = new ClubMember(club, 10L, "Alex Kim", Gender.MALE, ClubMemberRole.MEMBER, null, null, null);
         when(clubRepository.findByPublicIdAndDeletedAtIsNull("club-public-id")).thenReturn(Optional.of(club));
-        when(clubMemberRepository.findByClubAndUserIdAndActiveTrue(club, 10L)).thenReturn(Optional.of(member));
+        when(clubMemberRepository.findByClubAndUserIdAndMemberStatus(club, 10L, com.tennisfolio.Tennisfolio.club.entity.ClubMemberStatus.ACTIVE)).thenReturn(Optional.of(member));
 
         Club response = service.requireActiveMemberClub("club-public-id", 10L);
 
@@ -50,7 +50,7 @@ class ClubAccessServiceTest {
     @Test
     void isActiveAdmin_returnsTrueForActiveAdmin() {
         ClubMember admin = clubMember(10L, ClubMemberRole.ADMIN);
-        when(clubMemberRepository.findByClubIdAndUserIdAndActiveTrue(100L, 10L))
+        when(clubMemberRepository.findByClubIdAndUserIdAndMemberStatus(100L, 10L, com.tennisfolio.Tennisfolio.club.entity.ClubMemberStatus.ACTIVE))
                 .thenReturn(Optional.of(admin));
 
         assertThat(service.isActiveAdmin(100L, 10L)).isTrue();
@@ -59,7 +59,7 @@ class ClubAccessServiceTest {
     @Test
     void isActiveAdmin_returnsFalseForMember() {
         ClubMember member = clubMember(10L, ClubMemberRole.MEMBER);
-        when(clubMemberRepository.findByClubIdAndUserIdAndActiveTrue(100L, 10L))
+        when(clubMemberRepository.findByClubIdAndUserIdAndMemberStatus(100L, 10L, com.tennisfolio.Tennisfolio.club.entity.ClubMemberStatus.ACTIVE))
                 .thenReturn(Optional.of(member));
 
         assertThat(service.isActiveAdmin(100L, 10L)).isFalse();
@@ -74,7 +74,7 @@ class ClubAccessServiceTest {
 
     @Test
     void isActiveAdmin_returnsFalseForInactiveMember() {
-        when(clubMemberRepository.findByClubIdAndUserIdAndActiveTrue(100L, 10L))
+        when(clubMemberRepository.findByClubIdAndUserIdAndMemberStatus(100L, 10L, com.tennisfolio.Tennisfolio.club.entity.ClubMemberStatus.ACTIVE))
                 .thenReturn(Optional.empty());
 
         assertThat(service.isActiveAdmin(100L, 10L)).isFalse();

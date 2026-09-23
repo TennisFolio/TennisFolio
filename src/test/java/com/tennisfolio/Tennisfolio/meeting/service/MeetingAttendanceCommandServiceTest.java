@@ -363,7 +363,7 @@ class MeetingAttendanceCommandServiceTest {
         when(meetingRepository.findByPublicIdAndDeletedAtIsNullForUpdate("meeting-public-id"))
                 .thenReturn(Optional.of(meeting));
         when(clubRepository.findByIdAndDeletedAtIsNull(50L)).thenReturn(Optional.of(club));
-        when(clubMemberRepository.findByClubAndUserIdAndActiveTrue(club, 10L))
+        when(clubMemberRepository.findByClubAndUserIdAndMemberStatus(club, 10L, com.tennisfolio.Tennisfolio.club.entity.ClubMemberStatus.ACTIVE))
                 .thenReturn(Optional.of(member));
         when(attendanceRepository.existsByMeetingAndParticipantNameAndDeletedAtIsNull(meeting, "Jamie Lee"))
                 .thenReturn(false);
@@ -397,11 +397,11 @@ class MeetingAttendanceCommandServiceTest {
         when(meetingRepository.findByPublicIdAndDeletedAtIsNullForUpdate("meeting-public-id"))
                 .thenReturn(Optional.of(meeting));
         when(clubRepository.findByIdAndDeletedAtIsNull(50L)).thenReturn(Optional.of(club));
-        when(clubMemberRepository.findByClubAndNameAndGenderAndActiveTrueOrderByIdAsc(
+        when(clubMemberRepository.findByClubAndNameAndGenderAndMemberStatusOrderByIdAsc(
                 club,
                 "Jamie Lee",
                 Gender.FEMALE
-        )).thenReturn(List.of(member));
+        , com.tennisfolio.Tennisfolio.club.entity.ClubMemberStatus.ACTIVE)).thenReturn(List.of(member));
         when(attendanceRepository.existsByMeetingAndParticipantNameAndDeletedAtIsNull(meeting, "Jamie Lee"))
                 .thenReturn(false);
         when(attendanceRepository.save(any(MeetingAttendance.class)))
@@ -425,11 +425,11 @@ class MeetingAttendanceCommandServiceTest {
         when(meetingRepository.findByPublicIdAndDeletedAtIsNullForUpdate("meeting-public-id"))
                 .thenReturn(Optional.of(meeting));
         when(clubRepository.findByIdAndDeletedAtIsNull(50L)).thenReturn(Optional.of(club));
-        when(clubMemberRepository.findByClubAndNameAndGenderAndActiveTrueOrderByIdAsc(
+        when(clubMemberRepository.findByClubAndNameAndGenderAndMemberStatusOrderByIdAsc(
                 club,
                 "Jamie Lee",
                 Gender.FEMALE
-        )).thenReturn(java.util.List.of(
+        , com.tennisfolio.Tennisfolio.club.entity.ClubMemberStatus.ACTIVE)).thenReturn(java.util.List.of(
                 clubMember(club, 100L, null, "Jamie Lee", Gender.FEMALE),
                 clubMember(club, 101L, null, "Jamie Lee", Gender.FEMALE)
         ));
@@ -482,8 +482,8 @@ class MeetingAttendanceCommandServiceTest {
         when(meetingRepository.findByPublicIdAndDeletedAtIsNullForUpdate("meeting-public-id"))
                 .thenReturn(Optional.of(meeting));
         when(clubRepository.findByIdAndDeletedAtIsNull(50L)).thenReturn(Optional.of(club));
-        when(clubMemberRepository.findByClubAndUserIdAndActiveTrue(club, 10L)).thenReturn(Optional.of(admin));
-        when(clubMemberRepository.findByClubAndIdAndActiveTrue(club, 100L)).thenReturn(Optional.of(member));
+        when(clubMemberRepository.findByClubAndUserIdAndMemberStatus(club, 10L, com.tennisfolio.Tennisfolio.club.entity.ClubMemberStatus.ACTIVE)).thenReturn(Optional.of(admin));
+        when(clubMemberRepository.findByClubAndIdAndMemberStatus(club, 100L, com.tennisfolio.Tennisfolio.club.entity.ClubMemberStatus.ACTIVE)).thenReturn(Optional.of(member));
         when(attendanceRepository.existsByMeetingAndParticipantNameAndDeletedAtIsNull(meeting, "김테니스"))
                 .thenReturn(false);
         when(attendanceRepository.save(any(MeetingAttendance.class)))
@@ -512,7 +512,7 @@ class MeetingAttendanceCommandServiceTest {
         when(meetingRepository.findByPublicIdAndDeletedAtIsNullForUpdate("meeting-public-id"))
                 .thenReturn(Optional.of(meeting));
         when(clubRepository.findByIdAndDeletedAtIsNull(50L)).thenReturn(Optional.of(club));
-        when(clubMemberRepository.findByClubAndUserIdAndActiveTrue(club, 10L)).thenReturn(Optional.of(admin));
+        when(clubMemberRepository.findByClubAndUserIdAndMemberStatus(club, 10L, com.tennisfolio.Tennisfolio.club.entity.ClubMemberStatus.ACTIVE)).thenReturn(Optional.of(admin));
         when(clubSkillTierRepository.findByIdAndClub(300L, club)).thenReturn(Optional.of(skillTier));
         when(attendanceRepository.existsByMeetingAndParticipantNameAndDeletedAtIsNull(meeting, "김테니스"))
                 .thenReturn(false);
@@ -538,8 +538,8 @@ class MeetingAttendanceCommandServiceTest {
         when(meetingRepository.findByPublicIdAndDeletedAtIsNullForUpdate("meeting-public-id"))
                 .thenReturn(Optional.of(meeting));
         when(clubRepository.findByIdAndDeletedAtIsNull(50L)).thenReturn(Optional.of(club));
-        when(clubMemberRepository.findByClubAndUserIdAndActiveTrue(club, 10L)).thenReturn(Optional.of(admin));
-        when(clubMemberRepository.existsByClubAndNameAndActiveTrue(club, "CC")).thenReturn(true);
+        when(clubMemberRepository.findByClubAndUserIdAndMemberStatus(club, 10L, com.tennisfolio.Tennisfolio.club.entity.ClubMemberStatus.ACTIVE)).thenReturn(Optional.of(admin));
+        when(clubMemberRepository.existsByClubAndName(club, "CC")).thenReturn(true);
 
         assertThatThrownBy(() -> service.addManagedParticipant(
                 "meeting-public-id",
@@ -576,7 +576,7 @@ class MeetingAttendanceCommandServiceTest {
         when(meetingRepository.findByPublicIdAndDeletedAtIsNullForUpdate("meeting-public-id"))
                 .thenReturn(Optional.of(meeting));
         when(clubRepository.findByIdAndDeletedAtIsNull(50L)).thenReturn(Optional.of(club));
-        when(clubMemberRepository.findByClubAndUserIdAndActiveTrue(club, 10L)).thenReturn(Optional.of(admin));
+        when(clubMemberRepository.findByClubAndUserIdAndMemberStatus(club, 10L, com.tennisfolio.Tennisfolio.club.entity.ClubMemberStatus.ACTIVE)).thenReturn(Optional.of(admin));
         when(clubSkillTierRepository.findByIdAndClub(300L, club)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> service.addManagedParticipant(
@@ -620,8 +620,8 @@ class MeetingAttendanceCommandServiceTest {
         when(meetingRepository.findByPublicIdAndDeletedAtIsNullForUpdate("meeting-public-id"))
                 .thenReturn(Optional.of(meeting));
         when(clubRepository.findByIdAndDeletedAtIsNull(50L)).thenReturn(Optional.of(club));
-        when(clubMemberRepository.findByClubAndUserIdAndActiveTrue(club, 10L)).thenReturn(Optional.of(admin));
-        when(clubMemberRepository.findByClubAndIdAndActiveTrue(club, 100L)).thenReturn(Optional.of(member));
+        when(clubMemberRepository.findByClubAndUserIdAndMemberStatus(club, 10L, com.tennisfolio.Tennisfolio.club.entity.ClubMemberStatus.ACTIVE)).thenReturn(Optional.of(admin));
+        when(clubMemberRepository.findByClubAndIdAndMemberStatus(club, 100L, com.tennisfolio.Tennisfolio.club.entity.ClubMemberStatus.ACTIVE)).thenReturn(Optional.of(member));
         when(attendanceRepository.findByMeetingAndParticipantNameAndGenderAndDeletedAtIsNull(
                 meeting,
                 "김테니스",
@@ -665,7 +665,7 @@ class MeetingAttendanceCommandServiceTest {
         when(meetingRepository.findByPublicIdAndDeletedAtIsNullForUpdate("meeting-public-id"))
                 .thenReturn(Optional.of(meeting));
         when(clubRepository.findByIdAndDeletedAtIsNull(50L)).thenReturn(Optional.of(club));
-        when(clubMemberRepository.findByClubAndUserIdAndActiveTrue(club, 20L)).thenReturn(Optional.of(member));
+        when(clubMemberRepository.findByClubAndUserIdAndMemberStatus(club, 20L, com.tennisfolio.Tennisfolio.club.entity.ClubMemberStatus.ACTIVE)).thenReturn(Optional.of(member));
 
         assertThatThrownBy(() -> service.addManagedParticipant(
                 "meeting-public-id",
@@ -686,8 +686,8 @@ class MeetingAttendanceCommandServiceTest {
         when(meetingRepository.findByPublicIdAndDeletedAtIsNullForUpdate("meeting-public-id"))
                 .thenReturn(Optional.of(meeting));
         when(clubRepository.findByIdAndDeletedAtIsNull(50L)).thenReturn(Optional.of(club));
-        when(clubMemberRepository.findByClubAndUserIdAndActiveTrue(club, 10L)).thenReturn(Optional.of(admin));
-        when(clubMemberRepository.findByClubAndIdAndActiveTrue(club, 100L)).thenReturn(Optional.empty());
+        when(clubMemberRepository.findByClubAndUserIdAndMemberStatus(club, 10L, com.tennisfolio.Tennisfolio.club.entity.ClubMemberStatus.ACTIVE)).thenReturn(Optional.of(admin));
+        when(clubMemberRepository.findByClubAndIdAndMemberStatus(club, 100L, com.tennisfolio.Tennisfolio.club.entity.ClubMemberStatus.ACTIVE)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> service.addManagedParticipant(
                 "meeting-public-id",
@@ -774,7 +774,7 @@ class MeetingAttendanceCommandServiceTest {
         when(meetingRepository.findByPublicIdAndDeletedAtIsNullForUpdate("meeting-public-id"))
                 .thenReturn(Optional.of(meeting));
         when(clubRepository.findByIdAndDeletedAtIsNull(50L)).thenReturn(Optional.of(club));
-        when(clubMemberRepository.findByClubAndUserIdAndActiveTrue(club, 10L)).thenReturn(Optional.of(admin));
+        when(clubMemberRepository.findByClubAndUserIdAndMemberStatus(club, 10L, com.tennisfolio.Tennisfolio.club.entity.ClubMemberStatus.ACTIVE)).thenReturn(Optional.of(admin));
         when(attendanceRepository.findByIdAndMeetingAndDeletedAtIsNull(100L, meeting))
                 .thenReturn(Optional.of(attendance));
 
@@ -799,10 +799,10 @@ class MeetingAttendanceCommandServiceTest {
         when(meetingRepository.findByPublicIdAndDeletedAtIsNullForUpdate("meeting-public-id"))
                 .thenReturn(Optional.of(meeting));
         when(clubRepository.findByIdAndDeletedAtIsNull(50L)).thenReturn(Optional.of(club));
-        when(clubMemberRepository.findByClubAndUserIdAndActiveTrue(club, 10L)).thenReturn(Optional.of(admin));
+        when(clubMemberRepository.findByClubAndUserIdAndMemberStatus(club, 10L, com.tennisfolio.Tennisfolio.club.entity.ClubMemberStatus.ACTIVE)).thenReturn(Optional.of(admin));
         when(attendanceRepository.findByIdAndMeetingAndDeletedAtIsNull(100L, meeting))
                 .thenReturn(Optional.of(attendance));
-        when(clubMemberRepository.existsByClubAndNameAndActiveTrue(club, "CC")).thenReturn(true);
+        when(clubMemberRepository.existsByClubAndName(club, "CC")).thenReturn(true);
 
         assertThatThrownBy(() -> service.updateManagedParticipant(
                 "meeting-public-id",
@@ -826,7 +826,7 @@ class MeetingAttendanceCommandServiceTest {
         when(meetingRepository.findByPublicIdAndDeletedAtIsNullForUpdate("meeting-public-id"))
                 .thenReturn(Optional.of(meeting));
         when(clubRepository.findByIdAndDeletedAtIsNull(50L)).thenReturn(Optional.of(club));
-        when(clubMemberRepository.findByClubAndUserIdAndActiveTrue(club, 10L)).thenReturn(Optional.of(admin));
+        when(clubMemberRepository.findByClubAndUserIdAndMemberStatus(club, 10L, com.tennisfolio.Tennisfolio.club.entity.ClubMemberStatus.ACTIVE)).thenReturn(Optional.of(admin));
         when(attendanceRepository.findByIdAndMeetingAndDeletedAtIsNull(100L, meeting))
                 .thenReturn(Optional.of(attendance));
 
@@ -852,7 +852,7 @@ class MeetingAttendanceCommandServiceTest {
         when(meetingRepository.findByPublicIdAndDeletedAtIsNullForUpdate("meeting-public-id"))
                 .thenReturn(Optional.of(meeting));
         when(clubRepository.findByIdAndDeletedAtIsNull(50L)).thenReturn(Optional.of(club));
-        when(clubMemberRepository.findByClubAndUserIdAndActiveTrue(club, 10L)).thenReturn(Optional.of(admin));
+        when(clubMemberRepository.findByClubAndUserIdAndMemberStatus(club, 10L, com.tennisfolio.Tennisfolio.club.entity.ClubMemberStatus.ACTIVE)).thenReturn(Optional.of(admin));
         when(attendanceRepository.findByIdAndMeetingAndDeletedAtIsNull(100L, meeting))
                 .thenReturn(Optional.of(attendance));
         when(attendanceRepository.existsByMeetingAndParticipantNameAndDeletedAtIsNullAndIdNot(
@@ -1031,7 +1031,7 @@ class MeetingAttendanceCommandServiceTest {
         when(meetingRepository.findByPublicIdAndDeletedAtIsNullForUpdate("meeting-public-id"))
                 .thenReturn(Optional.of(meeting));
         when(clubRepository.findByIdAndDeletedAtIsNull(50L)).thenReturn(Optional.of(club));
-        when(clubMemberRepository.findByClubAndUserIdAndActiveTrue(club, 10L)).thenReturn(Optional.of(admin));
+        when(clubMemberRepository.findByClubAndUserIdAndMemberStatus(club, 10L, com.tennisfolio.Tennisfolio.club.entity.ClubMemberStatus.ACTIVE)).thenReturn(Optional.of(admin));
         when(attendanceRepository.findByIdAndMeetingAndDeletedAtIsNull(100L, meeting))
                 .thenReturn(Optional.of(attendance));
 

@@ -3,6 +3,7 @@ package com.tennisfolio.Tennisfolio.club.service;
 import com.tennisfolio.Tennisfolio.club.entity.Club;
 import com.tennisfolio.Tennisfolio.club.entity.ClubMember;
 import com.tennisfolio.Tennisfolio.club.entity.ClubMemberRole;
+import com.tennisfolio.Tennisfolio.club.entity.ClubMemberStatus;
 import com.tennisfolio.Tennisfolio.club.repository.ClubMemberRepository;
 import com.tennisfolio.Tennisfolio.club.repository.ClubRepository;
 import com.tennisfolio.Tennisfolio.common.ExceptionCode;
@@ -52,7 +53,7 @@ public class ClubAccessService {
         if (clubId == null || currentUserId == null) {
             return false;
         }
-        return clubMemberRepository.findByClubIdAndUserIdAndActiveTrue(clubId, currentUserId)
+        return clubMemberRepository.findByClubIdAndUserIdAndMemberStatus(clubId, currentUserId, ClubMemberStatus.ACTIVE)
                 .map(member -> member.getRole() == ClubMemberRole.ADMIN)
                 .orElse(false);
     }
@@ -69,7 +70,7 @@ public class ClubAccessService {
     }
 
     private ClubMember findActiveMember(Club club, Long currentUserId) {
-        return clubMemberRepository.findByClubAndUserIdAndActiveTrue(club, currentUserId)
+        return clubMemberRepository.findByClubAndUserIdAndMemberStatus(club, currentUserId, ClubMemberStatus.ACTIVE)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN, "클럽 멤버만 사용할 수 있습니다."));
     }
 }

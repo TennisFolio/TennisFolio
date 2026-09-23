@@ -61,8 +61,8 @@ class ClubMemberCommandServiceTest {
         ClubMember admin = member(club, 100L, 10L, "Alex Kim", ClubMemberRole.ADMIN);
         ClubMember saved = member(club, 101L, null, "Jamie Lee", ClubMemberRole.MEMBER);
         when(clubRepository.findByPublicIdAndDeletedAtIsNull("club-public-id")).thenReturn(Optional.of(club));
-        when(clubMemberRepository.findByClubAndUserIdAndActiveTrue(club, 10L)).thenReturn(Optional.of(admin));
-        when(clubMemberRepository.existsByClubAndNameAndActiveTrue(club, "Jamie Lee")).thenReturn(false);
+        when(clubMemberRepository.findByClubAndUserIdAndMemberStatus(club, 10L, com.tennisfolio.Tennisfolio.club.entity.ClubMemberStatus.ACTIVE)).thenReturn(Optional.of(admin));
+        when(clubMemberRepository.existsByClubAndName(club, "Jamie Lee")).thenReturn(false);
         when(clubMemberRepository.save(any(ClubMember.class))).thenReturn(saved);
 
         service.addMember(
@@ -85,10 +85,10 @@ class ClubMemberCommandServiceTest {
     void addMember_assignsSkillTierFromSameClub() {
         Club club = club();
         ClubMember admin = member(club, 100L, 10L, "Alex Kim", ClubMemberRole.ADMIN);
-        ClubSkillTier skillTier = skillTier(club, 1L, "상급", 3);
+        ClubSkillTier skillTier = skillTier(club, 1L, "Intermediate", 3);
         when(clubRepository.findByPublicIdAndDeletedAtIsNull("club-public-id")).thenReturn(Optional.of(club));
-        when(clubMemberRepository.findByClubAndUserIdAndActiveTrue(club, 10L)).thenReturn(Optional.of(admin));
-        when(clubMemberRepository.existsByClubAndNameAndActiveTrue(club, "Jamie Lee")).thenReturn(false);
+        when(clubMemberRepository.findByClubAndUserIdAndMemberStatus(club, 10L, com.tennisfolio.Tennisfolio.club.entity.ClubMemberStatus.ACTIVE)).thenReturn(Optional.of(admin));
+        when(clubMemberRepository.existsByClubAndName(club, "Jamie Lee")).thenReturn(false);
         when(clubSkillTierRepository.findByIdAndClub(1L, club)).thenReturn(Optional.of(skillTier));
 
         service.addMember(
@@ -107,8 +107,8 @@ class ClubMemberCommandServiceTest {
         Club club = club();
         ClubMember admin = member(club, 100L, 10L, "Alex Kim", ClubMemberRole.ADMIN);
         when(clubRepository.findByPublicIdAndDeletedAtIsNull("club-public-id")).thenReturn(Optional.of(club));
-        when(clubMemberRepository.findByClubAndUserIdAndActiveTrue(club, 10L)).thenReturn(Optional.of(admin));
-        when(clubMemberRepository.existsByClubAndNameAndActiveTrue(club, "Jamie Lee")).thenReturn(false);
+        when(clubMemberRepository.findByClubAndUserIdAndMemberStatus(club, 10L, com.tennisfolio.Tennisfolio.club.entity.ClubMemberStatus.ACTIVE)).thenReturn(Optional.of(admin));
+        when(clubMemberRepository.existsByClubAndName(club, "Jamie Lee")).thenReturn(false);
         when(clubSkillTierRepository.findByIdAndClub(2L, club)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> service.addMember(
@@ -126,7 +126,7 @@ class ClubMemberCommandServiceTest {
     void updateMember_clearsSkillTierWhenSkillTierIdIsNull() {
         Club club = club();
         ClubMember admin = member(club, 100L, 10L, "Alex Kim", ClubMemberRole.ADMIN);
-        ClubSkillTier skillTier = skillTier(club, 1L, "상급", 3);
+        ClubSkillTier skillTier = skillTier(club, 1L, "Intermediate", 3);
         ClubMember member = new ClubMember(
                 club,
                 null,
@@ -139,8 +139,8 @@ class ClubMemberCommandServiceTest {
         );
         ReflectionTestUtils.setField(member, "id", 101L);
         when(clubRepository.findByPublicIdAndDeletedAtIsNull("club-public-id")).thenReturn(Optional.of(club));
-        when(clubMemberRepository.findByClubAndUserIdAndActiveTrue(club, 10L)).thenReturn(Optional.of(admin));
-        when(clubMemberRepository.findByClubAndIdAndActiveTrue(club, 101L)).thenReturn(Optional.of(member));
+        when(clubMemberRepository.findByClubAndUserIdAndMemberStatus(club, 10L, com.tennisfolio.Tennisfolio.club.entity.ClubMemberStatus.ACTIVE)).thenReturn(Optional.of(admin));
+        when(clubMemberRepository.findByClubAndIdAndMemberStatus(club, 101L, com.tennisfolio.Tennisfolio.club.entity.ClubMemberStatus.ACTIVE)).thenReturn(Optional.of(member));
 
         service.updateMember(
                 "club-public-id",
@@ -157,8 +157,8 @@ class ClubMemberCommandServiceTest {
         Club club = club();
         ClubMember admin = member(club, 100L, 10L, "Alex Kim", ClubMemberRole.ADMIN);
         when(clubRepository.findByPublicIdAndDeletedAtIsNull("club-public-id")).thenReturn(Optional.of(club));
-        when(clubMemberRepository.findByClubAndUserIdAndActiveTrue(club, 10L)).thenReturn(Optional.of(admin));
-        when(clubMemberRepository.existsByClubAndNameAndActiveTrue(club, "Jamie Lee")).thenReturn(true);
+        when(clubMemberRepository.findByClubAndUserIdAndMemberStatus(club, 10L, com.tennisfolio.Tennisfolio.club.entity.ClubMemberStatus.ACTIVE)).thenReturn(Optional.of(admin));
+        when(clubMemberRepository.existsByClubAndName(club, "Jamie Lee")).thenReturn(true);
 
         assertThatThrownBy(() -> service.addMember(
                 "club-public-id",
@@ -176,9 +176,9 @@ class ClubMemberCommandServiceTest {
         Club club = club();
         ClubMember admin = member(club, 100L, 10L, "Alex Kim", ClubMemberRole.ADMIN);
         when(clubRepository.findByPublicIdAndDeletedAtIsNull("club-public-id")).thenReturn(Optional.of(club));
-        when(clubMemberRepository.findByClubAndUserIdAndActiveTrue(club, 10L)).thenReturn(Optional.of(admin));
-        when(clubMemberRepository.existsByClubAndNameAndActiveTrue(club, "Jamie Lee")).thenReturn(false);
-        when(clubMemberRepository.existsByClubAndNameAndActiveTrue(club, "Morgan Park")).thenReturn(false);
+        when(clubMemberRepository.findByClubAndUserIdAndMemberStatus(club, 10L, com.tennisfolio.Tennisfolio.club.entity.ClubMemberStatus.ACTIVE)).thenReturn(Optional.of(admin));
+        when(clubMemberRepository.existsByClubAndName(club, "Jamie Lee")).thenReturn(false);
+        when(clubMemberRepository.existsByClubAndName(club, "Morgan Park")).thenReturn(false);
 
         service.addMembers(
                 "club-public-id",
@@ -201,8 +201,8 @@ class ClubMemberCommandServiceTest {
         Club club = club();
         ClubMember admin = member(club, 100L, 10L, "Alex Kim", ClubMemberRole.ADMIN);
         when(clubRepository.findByPublicIdAndDeletedAtIsNull("club-public-id")).thenReturn(Optional.of(club));
-        when(clubMemberRepository.findByClubAndUserIdAndActiveTrue(club, 10L)).thenReturn(Optional.of(admin));
-        when(clubMemberRepository.existsByClubAndNameAndActiveTrue(club, "Jamie Lee")).thenReturn(false);
+        when(clubMemberRepository.findByClubAndUserIdAndMemberStatus(club, 10L, com.tennisfolio.Tennisfolio.club.entity.ClubMemberStatus.ACTIVE)).thenReturn(Optional.of(admin));
+        when(clubMemberRepository.existsByClubAndName(club, "Jamie Lee")).thenReturn(false);
 
         assertThatThrownBy(() -> service.addMembers(
                 "club-public-id",
@@ -224,9 +224,9 @@ class ClubMemberCommandServiceTest {
         Club club = club();
         ClubMember admin = member(club, 100L, 10L, "Alex Kim", ClubMemberRole.ADMIN);
         when(clubRepository.findByPublicIdAndDeletedAtIsNull("club-public-id")).thenReturn(Optional.of(club));
-        when(clubMemberRepository.findByClubAndUserIdAndActiveTrue(club, 10L)).thenReturn(Optional.of(admin));
-        when(clubMemberRepository.findByClubAndIdAndActiveTrue(club, 100L)).thenReturn(Optional.of(admin));
-        when(clubMemberRepository.countByClubAndRoleAndActiveTrue(club, ClubMemberRole.ADMIN)).thenReturn(1L);
+        when(clubMemberRepository.findByClubAndUserIdAndMemberStatus(club, 10L, com.tennisfolio.Tennisfolio.club.entity.ClubMemberStatus.ACTIVE)).thenReturn(Optional.of(admin));
+        when(clubMemberRepository.findByClubAndIdAndMemberStatus(club, 100L, com.tennisfolio.Tennisfolio.club.entity.ClubMemberStatus.ACTIVE)).thenReturn(Optional.of(admin));
+        when(clubMemberRepository.countByClubAndRoleAndMemberStatus(club, ClubMemberRole.ADMIN, com.tennisfolio.Tennisfolio.club.entity.ClubMemberStatus.ACTIVE)).thenReturn(1L);
 
         assertThatThrownBy(() -> service.updateMember(
                 "club-public-id",
@@ -244,9 +244,9 @@ class ClubMemberCommandServiceTest {
         Club club = club();
         ClubMember admin = member(club, 100L, 10L, "Alex Kim", ClubMemberRole.ADMIN);
         when(clubRepository.findByPublicIdAndDeletedAtIsNull("club-public-id")).thenReturn(Optional.of(club));
-        when(clubMemberRepository.findByClubAndUserIdAndActiveTrue(club, 10L)).thenReturn(Optional.of(admin));
-        when(clubMemberRepository.findByClubAndIdAndActiveTrue(club, 100L)).thenReturn(Optional.of(admin));
-        when(clubMemberRepository.countByClubAndRoleAndActiveTrue(club, ClubMemberRole.ADMIN)).thenReturn(1L);
+        when(clubMemberRepository.findByClubAndUserIdAndMemberStatus(club, 10L, com.tennisfolio.Tennisfolio.club.entity.ClubMemberStatus.ACTIVE)).thenReturn(Optional.of(admin));
+        when(clubMemberRepository.findByClubAndIdAndMemberStatus(club, 100L, com.tennisfolio.Tennisfolio.club.entity.ClubMemberStatus.ACTIVE)).thenReturn(Optional.of(admin));
+        when(clubMemberRepository.countByClubAndRoleAndMemberStatus(club, ClubMemberRole.ADMIN, com.tennisfolio.Tennisfolio.club.entity.ClubMemberStatus.ACTIVE)).thenReturn(1L);
 
         assertThatThrownBy(() -> service.deleteMember("club-public-id", 100L, 10L))
                 .isInstanceOf(ResponseStatusException.class)
@@ -259,7 +259,7 @@ class ClubMemberCommandServiceTest {
         Club club = club();
         ClubMember manager = member(club, 101L, 11L, "Jamie Lee", ClubMemberRole.MEMBER);
         when(clubRepository.findByPublicIdAndDeletedAtIsNull("club-public-id")).thenReturn(Optional.of(club));
-        when(clubMemberRepository.findByClubAndUserIdAndActiveTrue(club, 11L)).thenReturn(Optional.of(manager));
+        when(clubMemberRepository.findByClubAndUserIdAndMemberStatus(club, 11L, com.tennisfolio.Tennisfolio.club.entity.ClubMemberStatus.ACTIVE)).thenReturn(Optional.of(manager));
 
         assertThatThrownBy(() -> service.updateMember(
                 "club-public-id",

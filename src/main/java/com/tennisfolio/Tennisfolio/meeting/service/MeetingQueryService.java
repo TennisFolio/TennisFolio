@@ -4,6 +4,7 @@ import com.tennisfolio.Tennisfolio.common.ExceptionCode;
 import com.tennisfolio.Tennisfolio.common.UserStatus;
 import com.tennisfolio.Tennisfolio.club.entity.Club;
 import com.tennisfolio.Tennisfolio.club.entity.ClubMember;
+import com.tennisfolio.Tennisfolio.club.entity.ClubMemberStatus;
 import com.tennisfolio.Tennisfolio.club.repository.ClubSkillTierRepository;
 import com.tennisfolio.Tennisfolio.club.repository.ClubMemberRepository;
 import com.tennisfolio.Tennisfolio.club.repository.ClubRepository;
@@ -119,7 +120,7 @@ public class MeetingQueryService {
             return null;
         }
 
-        return clubMemberRepository.findByClubAndUserIdAndActiveTrue(club, currentUserId)
+        return clubMemberRepository.findByClubAndUserIdAndMemberStatus(club, currentUserId, ClubMemberStatus.ACTIVE)
                 .orElse(null);
     }
 

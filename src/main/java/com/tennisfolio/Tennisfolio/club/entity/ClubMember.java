@@ -16,6 +16,8 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+
 @Entity
 @Table(name = "tb_club_member")
 @Getter
@@ -55,8 +57,21 @@ public class ClubMember extends BaseTimeEntity {
     @Column(name = "MEMO")
     private String memo;
 
-    @Column(name = "ACTIVE", nullable = false)
-    private boolean active = true;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "MEMBER_STATUS", nullable = false)
+    private ClubMemberStatus memberStatus = ClubMemberStatus.ACTIVE;
+
+    @Column(name = "JOINED_AT")
+    private LocalDate joinedAt;
+
+    @Column(name = "SUSPENDED_AT")
+    private LocalDate suspendedAt;
+
+    @Column(name = "LEFT_AT")
+    private LocalDate leftAt;
+
+    @Column(name = "BIRTH_YEAR")
+    private Integer birthYear;
 
     public ClubMember(
             Club club,
@@ -94,8 +109,21 @@ public class ClubMember extends BaseTimeEntity {
         this.memo = memo;
     }
 
-    public void deactivate() {
-        this.active = false;
+    public void changeStatus(ClubMemberStatus memberStatus, LocalDate statusDate) {
+        this.memberStatus = memberStatus;
+
+        if (memberStatus == ClubMemberStatus.ACTIVE) {
+            this.suspendedAt = null;
+            this.leftAt = null;
+            return;
+        }
+        if (memberStatus == ClubMemberStatus.SUSPENDED) {
+            this.suspendedAt = statusDate;
+            this.leftAt = null;
+            return;
+        }
+        this.suspendedAt = null;
+        this.leftAt = statusDate;
     }
 
     public void clearSkillTier() {

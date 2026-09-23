@@ -2,6 +2,8 @@ package com.tennisfolio.Tennisfolio.club.repository;
 
 import com.tennisfolio.Tennisfolio.club.entity.Club;
 import com.tennisfolio.Tennisfolio.club.entity.ClubMember;
+import com.tennisfolio.Tennisfolio.club.entity.ClubMemberRole;
+import com.tennisfolio.Tennisfolio.club.entity.ClubMemberStatus;
 import com.tennisfolio.Tennisfolio.club.entity.ClubSkillTier;
 import com.tennisfolio.Tennisfolio.meeting.domain.Gender;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -13,29 +15,30 @@ import java.util.Optional;
 @Repository
 public interface ClubMemberRepository extends JpaRepository<ClubMember, Long> {
 
-    boolean existsByClubAndNameAndActiveTrue(Club club, String name);
+    boolean existsByClubAndName(Club club, String name);
 
-    boolean existsByClubAndNameAndActiveTrueAndIdNot(Club club, String name, Long id);
+    boolean existsByClubAndNameAndIdNot(Club club, String name, Long id);
 
-    List<ClubMember> findByClubAndActiveTrueOrderByIdAsc(Club club);
+    List<ClubMember> findByClubAndMemberStatusOrderByIdAsc(Club club, ClubMemberStatus memberStatus);
 
-    List<ClubMember> findByClubAndActiveTrueOrderByNameAscIdAsc(Club club);
+    List<ClubMember> findByClubAndMemberStatusOrderByNameAscIdAsc(Club club, ClubMemberStatus memberStatus);
 
-    List<ClubMember> findByClubAndNameContainingIgnoreCaseAndActiveTrueOrderByNameAscIdAsc(Club club, String name);
+    List<ClubMember> findByClubAndNameContainingIgnoreCaseAndMemberStatusOrderByNameAscIdAsc(Club club, String name, ClubMemberStatus memberStatus);
 
-    List<ClubMember> findByUserIdAndActiveTrueOrderByIdAsc(Long userId);
+    List<ClubMember> findByUserIdAndMemberStatusOrderByIdAsc(Long userId, ClubMemberStatus memberStatus);
 
-    Optional<ClubMember> findByClubAndUserIdAndActiveTrue(Club club, Long userId);
+    Optional<ClubMember> findByClubAndUserIdAndMemberStatus(Club club, Long userId, ClubMemberStatus memberStatus);
 
-    Optional<ClubMember> findByClubIdAndUserIdAndActiveTrue(Long clubId, Long userId);
+    Optional<ClubMember> findByClubIdAndUserIdAndMemberStatus(Long clubId, Long userId, ClubMemberStatus memberStatus);
 
-    List<ClubMember> findByClubAndNameAndGenderAndActiveTrueOrderByIdAsc(Club club, String name, Gender gender);
+    List<ClubMember> findByClubAndNameAndGenderAndMemberStatusOrderByIdAsc(Club club, String name, Gender gender, ClubMemberStatus memberStatus);
 
-    Optional<ClubMember> findByClubAndIdAndActiveTrue(Club club, Long id);
+    Optional<ClubMember> findByClubAndIdAndMemberStatus(Club club, Long id, ClubMemberStatus memberStatus);
 
     List<ClubMember> findBySkillTier(ClubSkillTier skillTier);
 
-    long countByClubAndRoleAndActiveTrue(Club club, com.tennisfolio.Tennisfolio.club.entity.ClubMemberRole role);
+    long countByClubAndRoleAndMemberStatus(Club club, ClubMemberRole role, ClubMemberStatus memberStatus);
 
-    long countByClubAndActiveTrue(Club club);
+    long countByClubAndMemberStatus(Club club, ClubMemberStatus memberStatus);
+
 }

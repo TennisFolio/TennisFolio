@@ -71,7 +71,8 @@ class ClubRepositoryTest {
         assertThat(found.getSkillTier()).isNull();
         assertThat(found.getContactMemo()).isEqualTo("open chat");
         assertThat(found.getMemo()).isEqualTo("creator");
-        assertThat(found.isActive()).isTrue();
+        assertThat(found.getMemberStatus())
+                .isEqualTo(com.tennisfolio.Tennisfolio.club.entity.ClubMemberStatus.ACTIVE);
     }
 
     @Test
@@ -101,14 +102,14 @@ class ClubRepositoryTest {
                 null,
                 null
         ));
-        inactiveMember.deactivate();
+        inactiveMember.changeStatus(com.tennisfolio.Tennisfolio.club.entity.ClubMemberStatus.WITHDRAWN, java.time.LocalDate.now());
         clubMemberRepository.saveAndFlush(inactiveMember);
 
         List<ClubMember> activeMembers =
-                clubMemberRepository.findByClubAndActiveTrueOrderByIdAsc(club);
+                clubMemberRepository.findByClubAndMemberStatusOrderByIdAsc(club, com.tennisfolio.Tennisfolio.club.entity.ClubMemberStatus.ACTIVE);
 
-        assertThat(clubMemberRepository.existsByClubAndNameAndActiveTrue(club, "Park Member")).isTrue();
-        assertThat(clubMemberRepository.existsByClubAndNameAndActiveTrue(club, "Lee Former")).isFalse();
+        assertThat(clubMemberRepository.existsByClubAndName(club, "Park Member")).isTrue();
+        assertThat(clubMemberRepository.existsByClubAndName(club, "Lee Former")).isTrue();
         assertThat(activeMembers)
                 .extracting(ClubMember::getId)
                 .containsExactly(activeMember.getId());
