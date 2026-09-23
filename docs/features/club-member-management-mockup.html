@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>클럽 회원 관리 목업</title>
+    <style>
+      @import url("../../src/tennisFolio/src/styles/competition-theme.css");
+
+      * { box-sizing: border-box; }
+
+      body {
+        margin: 0;
+        background: var(--competition-page-bg);
+        color: var(--competition-text-strong);
+        font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      button, input { font: inherit; }
+      button { cursor: pointer; }
+
+      .member-dashboard {
+        display: grid;
+        grid-template-columns: 220px minmax(0, 1fr);
+        min-height: 100dvh;
+      }
+
+      .sidebar {
+        display: grid;
+        align-content: start;
+        gap: 4px;
+        padding: 28px 15px;
+        background: var(--competition-text-strong);
+        color: var(--competition-text-inverse);
+      }
+
+      .brand { margin: 3px 10px 38px; font-size: 19px; font-weight: 900; }
+      .brand span { color: var(--competition-text-inverse); }
+      .nav-label { margin: 0 10px 10px; color: var(--competition-text-muted); font-size: 11px; font-weight: 900; }
+
+      .nav-item {
+        border: 0;
+        border-radius: 8px;
+        background: transparent;
+        color: inherit;
+        padding: 13px 12px;
+        text-align: left;
+        font-weight: 800;
+      }
+
+      .nav-item.active { background: var(--competition-primary-muted); }
+      .nav-item.muted { color: var(--competition-text-muted); cursor: default; }
+      .nav-item small { font-size: 11px; }
+
+      .content { min-width: 0; padding: 0 34px 40px; }
+
+      .topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        min-height: 72px;
+        margin: 0 -34px;
+        border-bottom: 1px solid var(--competition-border);
+        background: var(--competition-surface);
+        padding: 0 34px;
+        color: var(--competition-text-muted);
+        font-size: 13px;
+        font-weight: 800;
+      }
+
+      .club-switcher {
+        position: relative;
+        width: 260px;
+        border: 1px solid var(--competition-border-control);
+        border-radius: 8px;
+        background: var(--competition-surface);
+        color: var(--competition-text-strong);
+        padding: 11px 38px 11px 13px;
+        text-align: left;
+      }
+
+      .club-switcher::after { content: "⌄"; position: absolute; right: 14px; color: var(--competition-text-body); }
+      .club-switcher strong { font-size: 15px; }
+
+      .page-heading {
+        display: flex;
+        align-items: end;
+        justify-content: space-between;
+        gap: 18px;
+        margin: 30px 0 22px;
+      }
+
+      h1, h2, p { margin: 0; }
+      h1 { font-size: 25px; }
+      .page-heading p { margin-top: 7px; color: var(--competition-text-muted); font-size: 13px; font-weight: 700; }
+
+      .button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 40px;
+        border: 1px solid var(--competition-border-strong);
+        border-radius: 8px;
+        background: var(--competition-surface);
+        color: var(--competition-text-body);
+        padding: 0 13px;
+        font-size: 13px;
+        font-weight: 900;
+      }
+
+      .button.primary { border-color: var(--competition-primary); background: var(--competition-primary); color: var(--competition-text-inverse); }
+      .button.primary:hover { background: var(--competition-primary-hover); }
+      .button.danger { border-color: var(--competition-danger-border); background: var(--competition-danger-bg); color: var(--competition-danger); }
+      .button.small { min-height: 32px; padding: 0 10px; font-size: 12px; }
+      .heading-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+
+      .summary-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+
+      .summary-card, .member-panel {
+        border: 1px solid var(--competition-border);
+        border-radius: 12px;
+        background: var(--competition-surface);
+        padding: 18px;
+      }
+
+      .summary-label { color: var(--competition-text-muted); font-size: 12px; font-weight: 800; }
+      .summary-number { display: block; margin: 10px 0 4px; font-size: 28px; line-height: 1.15; }
+      .summary-card.warning .summary-number { color: var(--competition-warning); }
+      .summary-card.danger .summary-number { color: var(--competition-danger); }
+
+      .management-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; margin-top: 14px; }
+      .member-panel { min-width: 0; }
+      .panel-head { display: flex; align-items: start; justify-content: space-between; gap: 14px; margin-bottom: 16px; }
+      .panel-head h2 { font-size: 17px; }
+      .panel-head p { margin-top: 5px; color: var(--competition-text-muted); font-size: 12px; font-weight: 700; line-height: 1.5; }
+
+      .filters { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; margin-bottom: 12px; }
+      .filter { min-height: 32px; border: 1px solid var(--competition-border-control); border-radius: 999px; background: var(--competition-surface); color: var(--competition-text-body); padding: 0 10px; font-size: 12px; font-weight: 900; }
+      .filter.active { border-color: var(--competition-primary); background: var(--competition-primary); color: var(--competition-text-inverse); }
+      .search { min-width: 210px; flex: 1; min-height: 36px; border: 1px solid var(--competition-border-control); border-radius: 8px; background: var(--competition-surface); color: var(--competition-text-strong); padding: 0 11px; }
+      .search::placeholder { color: var(--competition-text-disabled); }
+
+      .table-wrap { overflow-x: auto; }
+      table { width: 100%; border-collapse: collapse; white-space: nowrap; }
+      th, td { border-bottom: 1px solid var(--competition-border); padding: 13px 8px; text-align: left; }
+      th { color: var(--competition-text-muted); font-size: 11px; letter-spacing: .04em; }
+      td { color: var(--competition-text-body); font-size: 13px; font-weight: 700; }
+      td:first-child { color: var(--competition-text-strong); font-weight: 900; }
+      tr:last-child td { border-bottom: 0; }
+      .actions { display: flex; justify-content: flex-end; gap: 5px; }
+      .member-link { color: inherit; text-decoration: none; }
+      .member-link:hover { text-decoration: underline; }
+
+      .badge { display: inline-flex; align-items: center; min-height: 25px; border: 1px solid var(--competition-border); border-radius: 999px; padding: 0 8px; font-size: 11px; font-weight: 900; }
+      .badge.male { border-color: var(--competition-male-bg); background: var(--competition-male-bg); color: var(--competition-male); }
+      .badge.female { border-color: var(--competition-female-bg); background: var(--competition-female-bg); color: var(--competition-female); }
+      .badge.active { border-color: var(--competition-ok-border); background: var(--competition-ok-bg); color: var(--competition-ok); }
+      .badge.suspended { border-color: var(--competition-warning-border); background: var(--competition-warning-bg); color: var(--competition-warning); }
+      .badge.withdrawn { border-color: var(--competition-danger-border); background: var(--competition-danger-bg); color: var(--competition-danger); }
+
+      @media (max-width: 900px) {
+        .member-dashboard { display: block; }
+        .sidebar { display: none; }
+        .content { padding: 0 18px 32px; }
+        .topbar { margin: 0 -18px; padding: 0 18px; }
+        .topbar > span { display: none; }
+        .club-switcher { width: 100%; }
+        .page-heading { align-items: start; flex-direction: column; }
+        .summary-grid { grid-template-columns: 1fr; }
+      }
+
+      @media (max-width: 520px) {
+        .summary-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+        .summary-card { padding: 13px; }
+        .summary-number { font-size: 23px; }
+        .heading-actions { width: 100%; }
+        .heading-actions .button { flex: 1; }
+        .search { order: -1; width: 100%; flex-basis: 100%; }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="member-dashboard">
+      <aside class="sidebar" aria-label="대시보드 메뉴">
+        <div class="brand">Tennis<span>Folio</span></div>
+        <span class="nav-label">BACKOFFICE</span>
+        <button class="nav-item" type="button">대시보드</button>
+        <button class="nav-item active" type="button">회원 관리</button>
+        <span class="nav-item muted">모임 활동 <small>준비 중</small></span>
+        <span class="nav-item muted">참여 현황 <small>준비 중</small></span>
+      </aside>
+
+      <div class="content">
+        <header class="topbar">
+          <button class="club-switcher" type="button"><strong>테니스폴리오 일요 클럽</strong></button>
+          <span>클럽 ADMIN · 김테니스</span>
+        </header>
+
+        <header class="page-heading">
+          <div>
+            <h1>회원 관리</h1>
+            <p>회원 정보를 관리하고 활동 상태를 변경합니다.</p>
+          </div>
+          <div class="heading-actions">
+            <a class="button" href="club-member-bulk-paste-mockup.html">엑셀 붙여넣기 등록</a>
+            <button class="button primary" type="button">회원 추가</button>
+          </div>
+        </header>
+
+        <section class="summary-grid" aria-label="회원 상태 요약">
+          <article class="summary-card">
+            <span class="summary-label">활동 회원</span>
+            <strong class="summary-number">48명</strong>
+          </article>
+          <article class="summary-card warning">
+            <span class="summary-label">휴면 회원</span>
+            <strong class="summary-number">3명</strong>
+          </article>
+          <article class="summary-card danger">
+            <span class="summary-label">탈퇴 회원</span>
+            <strong class="summary-number">7명</strong>
+          </article>
+        </section>
+
+        <section class="management-grid">
+          <article class="member-panel">
+            <header class="panel-head">
+              <div>
+                <h2>회원 목록</h2>
+                <p>활동 회원 48명을 표시하고 있습니다.</p>
+              </div>
+            </header>
+
+            <div class="filters" aria-label="회원 상태 필터">
+              <input class="search" type="search" placeholder="이름으로 검색" />
+              <button class="filter" type="button">전체 58</button>
+              <button class="filter active" type="button">활동 48</button>
+              <button class="filter" type="button">휴면 3</button>
+              <button class="filter" type="button">탈퇴 7</button>
+            </div>
+
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>이름</th>
+                    <th>성별</th>
+                    <th>출생연도</th>
+                    <th>티어</th>
+                    <th>가입일</th>
+                    <th>역할</th>
+                    <th>상태</th>
+                    <th>상태 시작일</th>
+                    <th aria-label="작업"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><a class="member-link" href="club-member-detail-mockup.html">김테니스</a></td>
+                    <td><span class="badge male">남</span></td>
+                    <td>1988</td>
+                    <td>상급</td>
+                    <td>2023-03-12</td>
+                    <td>관리자</td>
+                    <td><span class="badge active">활동</span></td>
+                    <td>—</td>
+                    <td><div class="actions"><a class="button small" href="club-member-detail-mockup.html">수정</a></div></td>
+                  </tr>
+                  <tr>
+                    <td>박서브</td>
+                    <td><span class="badge female">여</span></td>
+                    <td>1994</td>
+                    <td>중상급</td>
+                    <td>2024-06-01</td>
+                    <td>회원</td>
+                    <td><span class="badge active">활동</span></td>
+                    <td>—</td>
+                    <td><div class="actions"><button class="button small" type="button">수정</button></div></td>
+                  </tr>
+                  <tr>
+                    <td>이포핸드</td>
+                    <td><span class="badge male">남</span></td>
+                    <td>1990</td>
+                    <td>중급</td>
+                    <td>—</td>
+                    <td>회원</td>
+                    <td><span class="badge active">활동</span></td>
+                    <td>—</td>
+                    <td><div class="actions"><button class="button small" type="button">수정</button></div></td>
+                  </tr>
+                  <tr>
+                    <td>최발리</td>
+                    <td><span class="badge female">여</span></td>
+                    <td>1985</td>
+                    <td>초급</td>
+                    <td>2022-09-18</td>
+                    <td>회원</td>
+                    <td><span class="badge suspended">휴면</span></td>
+                    <td>2026-06-01</td>
+                    <td><div class="actions"><button class="button small" type="button">수정</button></div></td>
+                  </tr>
+                  <tr>
+                    <td>정백핸드</td>
+                    <td><span class="badge male">남</span></td>
+                    <td>—</td>
+                    <td>중급</td>
+                    <td>2021-04-03</td>
+                    <td>회원</td>
+                    <td><span class="badge withdrawn">탈퇴</span></td>
+                    <td>2025-12-31</td>
+                    <td><div class="actions"><button class="button small" type="button">복구</button></div></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </article>
+
+        </section>
+      </div>
+    </main>
+  </body>
+</html>
