@@ -3,6 +3,7 @@ package com.tennisfolio.Tennisfolio.club.service;
 import com.tennisfolio.Tennisfolio.club.dto.ClubMemberCreateRequest;
 import com.tennisfolio.Tennisfolio.club.dto.ClubMemberBulkCreateRequest;
 import com.tennisfolio.Tennisfolio.club.dto.ClubMemberUpdateRequest;
+import com.tennisfolio.Tennisfolio.club.dto.ClubMemberStatusChangeRequest;
 import com.tennisfolio.Tennisfolio.club.entity.Club;
 import com.tennisfolio.Tennisfolio.club.entity.ClubMember;
 import com.tennisfolio.Tennisfolio.club.entity.ClubMemberRole;
@@ -92,9 +93,35 @@ public class ClubMemberCommandService {
         member.changeStatus(ClubMemberStatus.WITHDRAWN, LocalDate.now());
     }
 
+    @Transactional
+    public void changeMemberStatus(
+            String clubPublicId,
+            Long memberId,
+            ClubMemberStatusChangeRequest request,
+            Long currentUserId
+    ) {
+        Club club = clubAccessService.requireAdmin(clubPublicId, currentUserId);
+        ClubMember member = clubMemberRepository.findByClubAndId(club, memberId)
+                .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND));
+        ClubMemberStatus targetStatus;
+        try {
+            targetStatus = ClubMemberStatus.from(request.getMemberStatus());
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
+        ensureStatusChangeAllowed(member, targetStatus);
+        member.changeStatus(targetStatus, LocalDate.now());
+    }
+
     private ClubMember findActiveMember(Club club, Long memberId) {
         return clubMemberRepository.findByClubAndIdAndMemberStatus(club, memberId, ClubMemberStatus.ACTIVE)
                 .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND));
+    }
+
+    private void ensureStatusChangeAllowed(ClubMember member, ClubMemberStatus targetStatus) {
+        if (targetStatus != ClubMemberStatus.ACTIVE) {
+            ensureAdminCanChange(member, ClubMemberRole.MEMBER);
+        }
     }
 
     private List<ClubMember> createMembers(Club club, ClubMemberBulkCreateRequest request) {

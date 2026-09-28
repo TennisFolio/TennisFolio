@@ -8,6 +8,7 @@ import com.tennisfolio.Tennisfolio.club.dto.ClubMemberCreateRequest;
 import com.tennisfolio.Tennisfolio.club.dto.ClubMemberBulkCreateRequest;
 import com.tennisfolio.Tennisfolio.club.dto.ClubMemberResponse;
 import com.tennisfolio.Tennisfolio.club.dto.ClubMemberUpdateRequest;
+import com.tennisfolio.Tennisfolio.club.dto.ClubMemberStatusChangeRequest;
 import com.tennisfolio.Tennisfolio.club.dto.ClubSummaryResponse;
 import com.tennisfolio.Tennisfolio.club.dto.ClubUpdateRequest;
 import com.tennisfolio.Tennisfolio.club.service.ClubCommandService;
@@ -185,6 +186,22 @@ public class ClubController {
             @RequestBody ClubMemberUpdateRequest request
     ) {
         clubMemberCommandService.updateMember(
+                clubPublicId,
+                memberId,
+                request,
+                resolveAuthenticatedUserId(authentication)
+        );
+        return ResponseEntity.ok(ResponseDTO.success());
+    }
+
+    @PatchMapping("/clubs/{clubPublicId}/members/{memberId}/status")
+    public ResponseEntity<ResponseDTO<Void>> changeMemberStatus(
+            Authentication authentication,
+            @PathVariable String clubPublicId,
+            @PathVariable Long memberId,
+            @RequestBody ClubMemberStatusChangeRequest request
+    ) {
+        clubMemberCommandService.changeMemberStatus(
                 clubPublicId,
                 memberId,
                 request,

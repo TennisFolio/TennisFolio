@@ -14,6 +14,7 @@ import com.tennisfolio.Tennisfolio.club.dto.ClubMemberCreateRequest;
 import com.tennisfolio.Tennisfolio.club.dto.ClubMemberBulkCreateRequest;
 import com.tennisfolio.Tennisfolio.club.dto.ClubMemberResponse;
 import com.tennisfolio.Tennisfolio.club.dto.ClubMemberUpdateRequest;
+import com.tennisfolio.Tennisfolio.club.dto.ClubMemberStatusChangeRequest;
 import com.tennisfolio.Tennisfolio.club.dto.ClubSummaryResponse;
 import com.tennisfolio.Tennisfolio.club.dto.ClubUpdateRequest;
 import com.tennisfolio.Tennisfolio.club.service.ClubCommandService;
@@ -228,6 +229,18 @@ class ClubControllerTest {
 
         verify(clubMemberCommandService).deleteMember("club-public-id", 100L, 10L);
         assertThat(response.getStatusCode().value()).isEqualTo(204);
+    }
+
+    @Test
+    void changeMemberStatus_passesCurrentUserToCommandService() {
+        Authentication authentication = auth(10L);
+        ClubMemberStatusChangeRequest request = new ClubMemberStatusChangeRequest("SUSPENDED");
+
+        ResponseEntity<ResponseDTO<Void>> response =
+                clubController.changeMemberStatus(authentication, "club-public-id", 100L, request);
+
+        verify(clubMemberCommandService).changeMemberStatus("club-public-id", 100L, request, 10L);
+        assertThat(response.getStatusCode().value()).isEqualTo(200);
     }
 
     private static Authentication auth(Long userId) {
