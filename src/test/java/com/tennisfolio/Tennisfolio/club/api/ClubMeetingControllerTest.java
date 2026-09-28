@@ -17,8 +17,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -43,12 +41,12 @@ class ClubMeetingControllerTest {
 
     @Test
     void getClubMeetings_passesCurrentUserToQueryService() {
-        Authentication authentication = auth(10L);
+        Long userId = 10L;
         when(clubMeetingQueryService.getClubMeetings("club-public-id", 10L))
                 .thenReturn(List.of(summaryResponse()));
 
         ResponseEntity<ResponseDTO<List<MeetingSummaryResponse>>> response =
-                clubMeetingController.getClubMeetings(authentication, "club-public-id");
+                clubMeetingController.getClubMeetings(userId, "club-public-id");
 
         verify(clubMeetingQueryService).getClubMeetings("club-public-id", 10L);
         assertThat(response.getBody()).isNotNull();
@@ -57,13 +55,13 @@ class ClubMeetingControllerTest {
 
     @Test
     void createClubMeeting_passesCurrentUserToCommandService() {
-        Authentication authentication = auth(10L);
+        Long userId = 10L;
         MeetingCreateRequest request = createRequest();
         when(clubMeetingCommandService.createClubMeeting("club-public-id", request, 10L))
                 .thenReturn(new MeetingCreateResponse("meeting-public-id"));
 
         ResponseEntity<ResponseDTO<MeetingCreateResponse>> response =
-                clubMeetingController.createClubMeeting(authentication, "club-public-id", request);
+                clubMeetingController.createClubMeeting(userId, "club-public-id", request);
 
         verify(clubMeetingCommandService).createClubMeeting("club-public-id", request, 10L);
         assertThat(response.getBody()).isNotNull();
@@ -72,12 +70,12 @@ class ClubMeetingControllerTest {
 
     @Test
     void getClubMeeting_passesCurrentUserToQueryService() {
-        Authentication authentication = auth(20L);
+        Long userId = 20L;
         when(clubMeetingQueryService.getClubMeeting("club-public-id", "meeting-public-id", 20L))
                 .thenReturn(detailResponse(false));
 
         ResponseEntity<ResponseDTO<MeetingDetailResponse>> response =
-                clubMeetingController.getClubMeeting(authentication, "club-public-id", "meeting-public-id");
+                clubMeetingController.getClubMeeting(userId, "club-public-id", "meeting-public-id");
 
         verify(clubMeetingQueryService).getClubMeeting("club-public-id", "meeting-public-id", 20L);
         assertThat(response.getBody()).isNotNull();
@@ -86,14 +84,14 @@ class ClubMeetingControllerTest {
 
     @Test
     void updateClubMeeting_passesCurrentUserToCommandService() {
-        Authentication authentication = auth(20L);
+        Long userId = 20L;
         MeetingUpdateRequest request = updateRequest();
         when(clubMeetingCommandService.updateClubMeeting("club-public-id", "meeting-public-id", request, 20L))
                 .thenReturn(detailResponse(false));
 
         ResponseEntity<ResponseDTO<MeetingDetailResponse>> response =
                 clubMeetingController.updateClubMeeting(
-                        authentication,
+                        userId,
                         "club-public-id",
                         "meeting-public-id",
                         request
@@ -105,12 +103,12 @@ class ClubMeetingControllerTest {
 
     @Test
     void updateClubMeetingStatus_passesCurrentUserToCommandService() {
-        Authentication authentication = auth(20L);
+        Long userId = 20L;
         MeetingStatusUpdateRequest request = new MeetingStatusUpdateRequest("CLOSED");
         when(clubMeetingCommandService.updateClubMeetingStatus("club-public-id", "meeting-public-id", request, 20L))
                 .thenReturn(detailResponse(false));
 
-        clubMeetingController.updateClubMeetingStatus(authentication, "club-public-id", "meeting-public-id", request);
+        clubMeetingController.updateClubMeetingStatus(userId, "club-public-id", "meeting-public-id", request);
 
         verify(clubMeetingCommandService).updateClubMeetingStatus(
                 "club-public-id",
@@ -122,10 +120,10 @@ class ClubMeetingControllerTest {
 
     @Test
     void deleteClubMeeting_passesCurrentUserToCommandService() {
-        Authentication authentication = auth(20L);
+        Long userId = 20L;
 
         ResponseEntity<Void> response =
-                clubMeetingController.deleteClubMeeting(authentication, "club-public-id", "meeting-public-id");
+                clubMeetingController.deleteClubMeeting(userId, "club-public-id", "meeting-public-id");
 
         verify(clubMeetingCommandService).deleteClubMeeting("club-public-id", "meeting-public-id", 20L);
         assertThat(response.getStatusCode().value()).isEqualTo(204);
@@ -133,7 +131,7 @@ class ClubMeetingControllerTest {
 
     @Test
     void createClubMeetingCompetition_passesCurrentUserToCommandService() {
-        Authentication authentication = auth(20L);
+        Long userId = 20L;
         MeetingCompetitionCreateRequest request = new MeetingCompetitionCreateRequest(true);
         when(clubMeetingCommandService.createClubMeetingCompetition(
                 "club-public-id",
@@ -144,7 +142,7 @@ class ClubMeetingControllerTest {
 
         ResponseEntity<ResponseDTO<MeetingCompetitionCreateResponse>> response =
                 clubMeetingController.createClubMeetingCompetition(
-                        authentication,
+                        userId,
                         "club-public-id",
                         "meeting-public-id",
                         request
@@ -162,7 +160,7 @@ class ClubMeetingControllerTest {
 
     @Test
     void createClubMeetingCompetition_usesDefaultRequestWhenBodyIsMissing() {
-        Authentication authentication = auth(20L);
+        Long userId = 20L;
         when(clubMeetingCommandService.createClubMeetingCompetition(
                 eq("club-public-id"),
                 eq("meeting-public-id"),
@@ -171,7 +169,7 @@ class ClubMeetingControllerTest {
         )).thenReturn(new MeetingCompetitionCreateResponse("competition-public-id"));
 
         clubMeetingController.createClubMeetingCompetition(
-                authentication,
+                userId,
                 "club-public-id",
                 "meeting-public-id",
                 null
@@ -187,21 +185,17 @@ class ClubMeetingControllerTest {
 
     @Test
     void deleteClubMeetingCompetition_passesCurrentUserToCommandService() {
-        Authentication authentication = auth(20L);
+        Long userId = 20L;
 
         ResponseEntity<Void> response =
                 clubMeetingController.deleteClubMeetingCompetition(
-                        authentication,
+                        userId,
                         "club-public-id",
                         "meeting-public-id"
                 );
 
         verify(clubMeetingCommandService).deleteClubMeetingCompetition("club-public-id", "meeting-public-id", 20L);
         assertThat(response.getStatusCode().value()).isEqualTo(204);
-    }
-
-    private static Authentication auth(Long userId) {
-        return new UsernamePasswordAuthenticationToken(userId, null, List.of());
     }
 
     private static MeetingCreateRequest createRequest() {

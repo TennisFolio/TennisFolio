@@ -17,7 +17,7 @@ import com.tennisfolio.Tennisfolio.club.service.ClubMemberCommandService;
 import com.tennisfolio.Tennisfolio.club.service.ClubQueryService;
 import com.tennisfolio.Tennisfolio.common.response.ResponseDTO;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -58,34 +58,34 @@ public class ClubController {
 
     @PostMapping("/clubs")
     public ResponseEntity<ResponseDTO<ClubCreateResponse>> createClub(
-            Authentication authentication,
+            @AuthenticationPrincipal Long userId,
             @RequestBody ClubCreateRequest request
     ) {
         ClubCreateResponse response =
-                clubCommandService.createClub(request, resolveAuthenticatedUserId(authentication));
+                clubCommandService.createClub(request, userId);
         return ResponseEntity.ok(ResponseDTO.success(response));
     }
 
     @GetMapping("/clubs")
-    public ResponseEntity<ResponseDTO<List<ClubSummaryResponse>>> getMyClubs(Authentication authentication) {
+    public ResponseEntity<ResponseDTO<List<ClubSummaryResponse>>> getMyClubs(@AuthenticationPrincipal Long userId) {
         List<ClubSummaryResponse> response =
-                clubQueryService.getMyClubs(resolveAuthenticatedUserId(authentication));
+                clubQueryService.getMyClubs(userId);
         return ResponseEntity.ok(ResponseDTO.success(response));
     }
 
     @GetMapping("/clubs/{clubPublicId}")
     public ResponseEntity<ResponseDTO<ClubDetailResponse>> getClub(
-            Authentication authentication,
+            @AuthenticationPrincipal Long userId,
             @PathVariable String clubPublicId
     ) {
         ClubDetailResponse response =
-                clubQueryService.getClub(clubPublicId, resolveAuthenticatedUserId(authentication));
+                clubQueryService.getClub(clubPublicId, userId);
         return ResponseEntity.ok(ResponseDTO.success(response));
     }
 
     @GetMapping("/clubs/{clubPublicId}/dashboard")
     public ResponseEntity<ResponseDTO<ClubDashboardResponse>> getDashboard(
-            Authentication authentication,
+            @AuthenticationPrincipal Long userId,
             @PathVariable String clubPublicId,
             @RequestParam(required = false) Integer year,
             @RequestParam(required = false) Integer month,
@@ -95,7 +95,7 @@ public class ClubController {
         ClubDashboardResponse response =
                 clubDashboardQueryService.getDashboard(
                         clubPublicId,
-                        resolveAuthenticatedUserId(authentication),
+                        userId,
                         resolveDashboardMonth(year, month),
                         parseMemberFilter(memberFilter),
                         Math.max(page, 0)
@@ -127,60 +127,60 @@ public class ClubController {
 
     @PatchMapping("/clubs/{clubPublicId}")
     public ResponseEntity<ResponseDTO<Void>> updateClub(
-            Authentication authentication,
+            @AuthenticationPrincipal Long userId,
             @PathVariable String clubPublicId,
             @RequestBody ClubUpdateRequest request
     ) {
-        clubCommandService.updateClub(clubPublicId, request, resolveAuthenticatedUserId(authentication));
+        clubCommandService.updateClub(clubPublicId, request, userId);
         return ResponseEntity.ok(ResponseDTO.success());
     }
 
     @DeleteMapping("/clubs/{clubPublicId}")
     public ResponseEntity<Void> deleteClub(
-            Authentication authentication,
+            @AuthenticationPrincipal Long userId,
             @PathVariable String clubPublicId
     ) {
-        clubCommandService.deleteClub(clubPublicId, resolveAuthenticatedUserId(authentication));
+        clubCommandService.deleteClub(clubPublicId, userId);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/clubs/{clubPublicId}/members")
     public ResponseEntity<ResponseDTO<List<ClubMemberResponse>>> getMembers(
-            Authentication authentication,
+            @AuthenticationPrincipal Long userId,
             @PathVariable String clubPublicId,
             @RequestParam(required = false) String keyword
     ) {
         List<ClubMemberResponse> response = clubQueryService.getMembers(
                 clubPublicId,
                 keyword,
-                resolveAuthenticatedUserId(authentication)
+                userId
         );
         return ResponseEntity.ok(ResponseDTO.success(response));
     }
 
     @PostMapping("/clubs/{clubPublicId}/members")
     public ResponseEntity<ResponseDTO<Void>> addMember(
-            Authentication authentication,
+            @AuthenticationPrincipal Long userId,
             @PathVariable String clubPublicId,
             @RequestBody ClubMemberCreateRequest request
     ) {
-        clubMemberCommandService.addMember(clubPublicId, request, resolveAuthenticatedUserId(authentication));
+        clubMemberCommandService.addMember(clubPublicId, request, userId);
         return ResponseEntity.ok(ResponseDTO.success());
     }
 
     @PostMapping("/clubs/{clubPublicId}/members/bulk")
     public ResponseEntity<ResponseDTO<Void>> addMembers(
-            Authentication authentication,
+            @AuthenticationPrincipal Long userId,
             @PathVariable String clubPublicId,
             @RequestBody ClubMemberBulkCreateRequest request
     ) {
-        clubMemberCommandService.addMembers(clubPublicId, request, resolveAuthenticatedUserId(authentication));
+        clubMemberCommandService.addMembers(clubPublicId, request, userId);
         return ResponseEntity.ok(ResponseDTO.success());
     }
 
     @PatchMapping("/clubs/{clubPublicId}/members/{memberId}")
     public ResponseEntity<ResponseDTO<Void>> updateMember(
-            Authentication authentication,
+            @AuthenticationPrincipal Long userId,
             @PathVariable String clubPublicId,
             @PathVariable Long memberId,
             @RequestBody ClubMemberUpdateRequest request
@@ -189,14 +189,14 @@ public class ClubController {
                 clubPublicId,
                 memberId,
                 request,
-                resolveAuthenticatedUserId(authentication)
+                userId
         );
         return ResponseEntity.ok(ResponseDTO.success());
     }
 
     @PatchMapping("/clubs/{clubPublicId}/members/{memberId}/status")
     public ResponseEntity<ResponseDTO<Void>> changeMemberStatus(
-            Authentication authentication,
+            @AuthenticationPrincipal Long userId,
             @PathVariable String clubPublicId,
             @PathVariable Long memberId,
             @RequestBody ClubMemberStatusChangeRequest request
@@ -205,29 +205,19 @@ public class ClubController {
                 clubPublicId,
                 memberId,
                 request,
-                resolveAuthenticatedUserId(authentication)
+                userId
         );
         return ResponseEntity.ok(ResponseDTO.success());
     }
 
     @DeleteMapping("/clubs/{clubPublicId}/members/{memberId}")
     public ResponseEntity<Void> deleteMember(
-            Authentication authentication,
+            @AuthenticationPrincipal Long userId,
             @PathVariable String clubPublicId,
             @PathVariable Long memberId
     ) {
-        clubMemberCommandService.deleteMember(clubPublicId, memberId, resolveAuthenticatedUserId(authentication));
+        clubMemberCommandService.deleteMember(clubPublicId, memberId, userId);
         return ResponseEntity.noContent().build();
     }
 
-    private Long resolveAuthenticatedUserId(Authentication authentication) {
-        if (authentication == null || !authentication.isAuthenticated()) {
-            return null;
-        }
-        Object principal = authentication.getPrincipal();
-        if (principal instanceof Long userId) {
-            return userId;
-        }
-        return null;
-    }
 }
