@@ -2,6 +2,7 @@ package com.tennisfolio.Tennisfolio.club.service;
 
 import com.tennisfolio.Tennisfolio.club.dto.ClubDetailResponse;
 import com.tennisfolio.Tennisfolio.club.dto.ClubMemberResponse;
+import com.tennisfolio.Tennisfolio.club.dto.ClubMemberManagementResponse;
 import com.tennisfolio.Tennisfolio.club.dto.ClubSummaryResponse;
 import com.tennisfolio.Tennisfolio.club.entity.Club;
 import com.tennisfolio.Tennisfolio.club.entity.ClubMember;
@@ -26,6 +27,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class ClubQueryServiceTest {
@@ -153,6 +155,32 @@ class ClubQueryServiceTest {
         assertThat(response.getSkillTierId()).isEqualTo(1L);
         assertThat(response.getSkillTierName()).isEqualTo("상급");
         assertThat(response.getSkillTierLevel()).isEqualTo(3);
+    }
+
+    @Test
+    void getManagementMembers_usesStatusAndRoleOrderedRepositoryQuery() {
+        Club club = club("club-public-id", "Morning Tennis");
+        ClubMember admin = member(club, 100L, 10L, "Alex Kim", ClubMemberRole.ADMIN);
+        ClubMember member = member(club, 101L, null, "Jamie Lee", ClubMemberRole.MEMBER);
+        when(clubRepository.findByPublicIdAndDeletedAtIsNull("club-public-id")).thenReturn(Optional.of(club));
+        when(clubMemberRepository.findByClubAndUserIdAndMemberStatus(
+                club,
+                10L,
+                com.tennisfolio.Tennisfolio.club.entity.ClubMemberStatus.ACTIVE
+        )).thenReturn(Optional.of(admin));
+        when(clubMemberRepository.findManagementByClubOrderByStatusAndRole(club))
+                .thenReturn(List.of(admin, member));
+
+        List<ClubMemberManagementResponse> response = service.getManagementMembers(
+                "club-public-id",
+                null,
+                null,
+                10L
+        );
+
+        verify(clubMemberRepository).findManagementByClubOrderByStatusAndRole(club);
+        assertThat(response).extracting(ClubMemberManagementResponse::getName)
+                .containsExactly("Alex Kim", "Jamie Lee");
     }
 
     private static Club club(String publicId, String name) {

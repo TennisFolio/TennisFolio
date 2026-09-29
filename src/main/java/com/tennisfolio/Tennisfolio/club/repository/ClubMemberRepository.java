@@ -7,6 +7,8 @@ import com.tennisfolio.Tennisfolio.club.entity.ClubMemberStatus;
 import com.tennisfolio.Tennisfolio.club.entity.ClubSkillTier;
 import com.tennisfolio.Tennisfolio.meeting.domain.Gender;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -25,9 +27,45 @@ public interface ClubMemberRepository extends JpaRepository<ClubMember, Long> {
 
     List<ClubMember> findByClubAndNameContainingIgnoreCaseAndMemberStatusOrderByNameAscIdAsc(Club club, String name, ClubMemberStatus memberStatus);
 
-    List<ClubMember> findByClubOrderByNameAscIdAsc(Club club);
+    @Query("""
+            SELECT member
+            FROM ClubMember member
+            WHERE member.club = :club
+            ORDER BY CASE member.memberStatus
+                WHEN com.tennisfolio.Tennisfolio.club.entity.ClubMemberStatus.ACTIVE THEN 0
+                WHEN com.tennisfolio.Tennisfolio.club.entity.ClubMemberStatus.SUSPENDED THEN 1
+                ELSE 2
+            END,
+            CASE member.role
+                WHEN com.tennisfolio.Tennisfolio.club.entity.ClubMemberRole.ADMIN THEN 0
+                ELSE 1
+            END,
+            member.name ASC,
+            member.id ASC
+            """)
+    List<ClubMember> findManagementByClubOrderByStatusAndRole(@Param("club") Club club);
 
-    List<ClubMember> findByClubAndNameContainingIgnoreCaseOrderByNameAscIdAsc(Club club, String name);
+    @Query("""
+            SELECT member
+            FROM ClubMember member
+            WHERE member.club = :club
+              AND LOWER(member.name) LIKE LOWER(CONCAT('%', :name, '%'))
+            ORDER BY CASE member.memberStatus
+                WHEN com.tennisfolio.Tennisfolio.club.entity.ClubMemberStatus.ACTIVE THEN 0
+                WHEN com.tennisfolio.Tennisfolio.club.entity.ClubMemberStatus.SUSPENDED THEN 1
+                ELSE 2
+            END,
+            CASE member.role
+                WHEN com.tennisfolio.Tennisfolio.club.entity.ClubMemberRole.ADMIN THEN 0
+                ELSE 1
+            END,
+            member.name ASC,
+            member.id ASC
+            """)
+    List<ClubMember> findManagementByClubAndNameContainingIgnoreCaseOrderByStatusAndRole(
+            @Param("club") Club club,
+            @Param("name") String name
+    );
 
     List<ClubMember> findByUserIdAndMemberStatusOrderByIdAsc(Long userId, ClubMemberStatus memberStatus);
 

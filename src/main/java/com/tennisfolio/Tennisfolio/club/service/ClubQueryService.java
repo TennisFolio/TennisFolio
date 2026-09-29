@@ -128,9 +128,12 @@ public class ClubQueryService {
 
     private List<ClubMember> findMembersForAllStatuses(Club club, String keyword) {
         if (keyword == null || keyword.isBlank()) {
-            return clubMemberRepository.findByClubOrderByNameAscIdAsc(club);
+            return clubMemberRepository.findManagementByClubOrderByStatusAndRole(club);
         }
-        return clubMemberRepository.findByClubAndNameContainingIgnoreCaseOrderByNameAscIdAsc(club, keyword.trim());
+        return clubMemberRepository.findManagementByClubAndNameContainingIgnoreCaseOrderByStatusAndRole(
+                club,
+                keyword.trim()
+        );
     }
 
     private ClubMemberStatus parseMemberStatus(String memberStatus) {
