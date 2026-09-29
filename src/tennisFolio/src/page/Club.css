@@ -43,6 +43,23 @@
 .club-dashboard-table-wrap { overflow-x: auto; }.club-dashboard-table { width: 100%; border-collapse: collapse; }.club-dashboard-table th { color: var(--competition-text-muted); font-size: 11px; font-weight: 900; letter-spacing: .04em; text-align: left; }.club-dashboard-table th, .club-dashboard-table td { border-bottom: 1px solid var(--competition-border); padding: 12px 8px; }.club-dashboard-table tr:last-child td { border-bottom: 0; }.club-dashboard-table td { color: var(--competition-text-body); font-size: 14px; font-weight: 700; }.club-dashboard-table td:first-child, .club-dashboard-table td:nth-child(2) { color: var(--competition-text-strong); font-weight: 900; }.club-dashboard-member-panel th:not(:first-child), .club-dashboard-member-panel td:not(:first-child) { text-align: right; }.club-dashboard-table .attendance { color: var(--competition-ok); font-weight: 900; }.club-dashboard-table .not-attending { color: var(--competition-danger); font-weight: 900; }.club-dashboard-status { display: inline-block; border-radius: 999px; background: var(--competition-surface-accent); color: var(--competition-text-body); padding: 4px 7px; font-size: 11px; font-weight: 900; }.club-dashboard-status.cancelled { background: var(--competition-danger-bg); color: var(--competition-danger); }.club-dashboard-empty { padding: 18px 0; }
 .club-dashboard-member-paging { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 14px; color: var(--competition-text-muted); font-size: 11px; font-weight: 800; }.club-dashboard-member-paging nav { display: flex; gap: 4px; }.club-dashboard-member-paging button { min-width: 28px; height: 28px; border: 1px solid var(--competition-border-control); border-radius: 6px; background: var(--competition-surface); color: var(--competition-text-body); font-size: 12px; font-weight: 900; }.club-dashboard-member-paging button.active { border-color: var(--competition-primary); background: var(--competition-primary); color: var(--competition-text-inverse); }
 
+.club-member-management-heading { align-items: start; }
+.club-member-management-actions, .club-member-detail-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.club-member-status-summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.club-member-summary.suspended .club-dashboard-number { color: var(--competition-warning); }
+.club-member-summary.withdrawn .club-dashboard-number { color: var(--competition-danger); }
+.club-member-management-panel { margin-top: 14px; }
+.club-member-management-filters { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 14px; }
+.club-member-management-filters button { min-height: 32px; border: 1px solid var(--competition-border-control); border-radius: 999px; background: var(--competition-surface); color: var(--competition-text-body); padding: 0 10px; font: inherit; font-size: 12px; font-weight: 900; }
+.club-member-management-filters button.active { border-color: var(--competition-primary); background: var(--competition-primary); color: var(--competition-text-inverse); }
+.club-member-management-search { min-width: 210px; flex: 1; min-height: 36px; border: 1px solid var(--competition-border-control); border-radius: 8px; background: var(--competition-surface); color: var(--competition-text-strong); padding: 0 11px; font: inherit; font-weight: 800; }
+.club-member-management-table { min-width: 700px; }.club-member-management-table th:last-child, .club-member-management-table td:last-child { text-align: right; }
+.club-member-management-table th { font-size: 13px; }
+.club-member-management-table td { font-size: 15px; padding-top: 15px; padding-bottom: 15px; }
+.club-member-management-table .club-chip, .club-member-management-table .club-member-status { min-height: 28px; padding: 0 10px; font-size: 12px; }
+.club-member-status { display: inline-flex; min-height: 25px; align-items: center; border: 1px solid var(--competition-ok-border); border-radius: 999px; background: var(--competition-ok-bg); color: var(--competition-ok); padding: 0 8px; font-size: 11px; font-weight: 900; }.club-member-status.suspended { border-color: var(--competition-warning-border); background: var(--competition-warning-bg); color: var(--competition-warning); }.club-member-status.withdrawn { border-color: var(--competition-danger-border); background: var(--competition-danger-bg); color: var(--competition-danger); }
+.club-member-detail-form { display: grid; gap: 14px; width: min(100%, 760px); }.club-member-detail-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+
 .club-page-head {
   display: grid;
   gap: 10px;
@@ -629,4 +646,7 @@
   .club-bulk-footer {
     display: grid;
   }
+  .club-member-status-summary { grid-template-columns: 1fr; }
+  .club-member-management-actions { width: 100%; }.club-member-management-actions .club-button { flex: 1; }
+  .club-member-detail-grid { grid-template-columns: 1fr; }
 }
