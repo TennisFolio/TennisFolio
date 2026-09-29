@@ -81,7 +81,9 @@ public class ClubMemberCommandService {
                 requestedRole,
                 skillTier,
                 request.getContactMemo(),
-                request.getMemo()
+                request.getMemo(),
+                request.getJoinedAt(),
+                request.getBirthYear()
         );
     }
 
@@ -110,7 +112,7 @@ public class ClubMemberCommandService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         }
         ensureStatusChangeAllowed(member, targetStatus);
-        member.changeStatus(targetStatus, LocalDate.now());
+        member.changeStatus(targetStatus, resolveStatusDate(request));
     }
 
     private ClubMember findActiveMember(Club club, Long memberId) {
@@ -162,8 +164,14 @@ public class ClubMemberCommandService {
                 parseRole(request.getRole()),
                 skillTier,
                 request.getContactMemo(),
-                request.getMemo()
+                request.getMemo(),
+                request.getJoinedAt(),
+                request.getBirthYear()
         );
+    }
+
+    private LocalDate resolveStatusDate(ClubMemberStatusChangeRequest request) {
+        return request.getStatusDate() == null ? LocalDate.now() : request.getStatusDate();
     }
 
     private ClubSkillTier resolveSkillTier(Club club, Long skillTierId) {

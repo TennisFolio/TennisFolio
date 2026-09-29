@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 
+import java.time.LocalDate;
+
 @Getter
 public class ClubMemberCreateRequest {
     private final String name;
@@ -12,6 +14,8 @@ public class ClubMemberCreateRequest {
     private final Long skillTierId;
     private final String contactMemo;
     private final String memo;
+    private final LocalDate joinedAt;
+    private final Integer birthYear;
 
     @JsonCreator
     public ClubMemberCreateRequest(
@@ -20,7 +24,9 @@ public class ClubMemberCreateRequest {
             @JsonProperty("role") String role,
             @JsonProperty("skillTierId") Long skillTierId,
             @JsonProperty("contactMemo") String contactMemo,
-            @JsonProperty("memo") String memo
+            @JsonProperty("memo") String memo,
+            @JsonProperty("joinedAt") LocalDate joinedAt,
+            @JsonProperty("birthYear") Integer birthYear
     ) {
         this.name = name;
         this.gender = gender;
@@ -28,5 +34,18 @@ public class ClubMemberCreateRequest {
         this.skillTierId = skillTierId;
         this.contactMemo = contactMemo;
         this.memo = memo;
+        this.joinedAt = joinedAt;
+        this.birthYear = birthYear;
+    }
+
+    public ClubMemberCreateRequest(
+            String name,
+            String gender,
+            String role,
+            Long skillTierId,
+            String contactMemo,
+            String memo
+    ) {
+        this(name, gender, role, skillTierId, contactMemo, memo, null, null);
     }
 }

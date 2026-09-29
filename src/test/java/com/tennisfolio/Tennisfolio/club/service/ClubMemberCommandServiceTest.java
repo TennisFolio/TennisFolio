@@ -3,6 +3,7 @@ package com.tennisfolio.Tennisfolio.club.service;
 import com.tennisfolio.Tennisfolio.club.dto.ClubMemberCreateRequest;
 import com.tennisfolio.Tennisfolio.club.dto.ClubMemberBulkCreateRequest;
 import com.tennisfolio.Tennisfolio.club.dto.ClubMemberUpdateRequest;
+import com.tennisfolio.Tennisfolio.club.dto.ClubMemberStatusChangeRequest;
 import com.tennisfolio.Tennisfolio.club.entity.Club;
 import com.tennisfolio.Tennisfolio.club.entity.ClubMember;
 import com.tennisfolio.Tennisfolio.club.entity.ClubMemberRole;
@@ -23,6 +24,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
 import java.util.List;
+import java.time.LocalDate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -172,6 +174,47 @@ class ClubMemberCommandServiceTest {
     }
 
     @Test
+    void addMember_rejectsNameOfWithdrawnMember() {
+        Club club = club();
+        ClubMember admin = member(club, 100L, 10L, "Alex Kim", ClubMemberRole.ADMIN);
+        when(clubRepository.findByPublicIdAndDeletedAtIsNull("club-public-id")).thenReturn(Optional.of(club));
+        when(clubMemberRepository.findByClubAndUserIdAndMemberStatus(club, 10L, com.tennisfolio.Tennisfolio.club.entity.ClubMemberStatus.ACTIVE)).thenReturn(Optional.of(admin));
+        when(clubMemberRepository.existsByClubAndName(club, "Jamie Lee")).thenReturn(true);
+
+        assertThatThrownBy(() -> service.addMember(
+                "club-public-id",
+                new ClubMemberCreateRequest("Jamie Lee", "MALE", "MEMBER", null, null, null),
+                10L
+        ))
+                .isInstanceOf(ResponseStatusException.class)
+                .extracting("statusCode")
+                .isEqualTo(HttpStatus.CONFLICT);
+        verify(clubMemberRepository, never()).save(any());
+    }
+
+    @Test
+    void addMember_persistsJoinedAtAndBirthYear() {
+        Club club = club();
+        ClubMember admin = member(club, 100L, 10L, "Alex Kim", ClubMemberRole.ADMIN);
+        LocalDate joinedAt = LocalDate.of(2020, 3, 1);
+        when(clubRepository.findByPublicIdAndDeletedAtIsNull("club-public-id")).thenReturn(Optional.of(club));
+        when(clubMemberRepository.findByClubAndUserIdAndMemberStatus(club, 10L, com.tennisfolio.Tennisfolio.club.entity.ClubMemberStatus.ACTIVE)).thenReturn(Optional.of(admin));
+        when(clubMemberRepository.existsByClubAndName(club, "Jamie Lee")).thenReturn(false);
+
+        service.addMember(
+                "club-public-id",
+                new ClubMemberCreateRequest("Jamie Lee", "FEMALE", "MEMBER", null, null, null, joinedAt, 1994),
+                10L
+        );
+
+        ArgumentCaptor<ClubMember> captor = ArgumentCaptor.forClass(ClubMember.class);
+        verify(clubMemberRepository).save(captor.capture());
+        assertThat(captor.getValue().getMemberStatus()).isEqualTo(com.tennisfolio.Tennisfolio.club.entity.ClubMemberStatus.ACTIVE);
+        assertThat(captor.getValue().getJoinedAt()).isEqualTo(joinedAt);
+        assertThat(captor.getValue().getBirthYear()).isEqualTo(1994);
+    }
+
+    @Test
     void addMembers_savesAllMembersWhenWholeRequestIsValid() {
         Club club = club();
         ClubMember admin = member(club, 100L, 10L, "Alex Kim", ClubMemberRole.ADMIN);
@@ -217,6 +260,73 @@ class ClubMemberCommandServiceTest {
                 .isEqualTo(HttpStatus.CONFLICT);
 
         verify(clubMemberRepository, never()).saveAll(any());
+    }
+
+    @Test
+    void addMembers_doesNotSaveAnyMemberWhenARequestIsInvalid() {
+        Club club = club();
+        ClubMember admin = member(club, 100L, 10L, "Alex Kim", ClubMemberRole.ADMIN);
+        when(clubRepository.findByPublicIdAndDeletedAtIsNull("club-public-id")).thenReturn(Optional.of(club));
+        when(clubMemberRepository.findByClubAndUserIdAndMemberStatus(club, 10L, com.tennisfolio.Tennisfolio.club.entity.ClubMemberStatus.ACTIVE)).thenReturn(Optional.of(admin));
+        when(clubMemberRepository.existsByClubAndName(club, "Jamie Lee")).thenReturn(false);
+        when(clubMemberRepository.existsByClubAndName(club, "Morgan Park")).thenReturn(false);
+
+        assertThatThrownBy(() -> service.addMembers(
+                "club-public-id",
+                new ClubMemberBulkCreateRequest(List.of(
+                        new ClubMemberCreateRequest("Jamie Lee", "FEMALE", "MEMBER", null, null, null),
+                        new ClubMemberCreateRequest("Morgan Park", "INVALID", "MEMBER", null, null, null)
+                )),
+                10L
+        ))
+                .isInstanceOf(ResponseStatusException.class)
+                .extracting("statusCode")
+                .isEqualTo(HttpStatus.BAD_REQUEST);
+
+        verify(clubMemberRepository, never()).saveAll(any());
+    }
+
+    @Test
+    void changeMemberStatus_usesRequestedStatusDate() {
+        Club club = club();
+        ClubMember admin = member(club, 100L, 10L, "Alex Kim", ClubMemberRole.ADMIN);
+        ClubMember target = member(club, 101L, null, "Jamie Lee", ClubMemberRole.MEMBER);
+        LocalDate suspendedAt = LocalDate.of(2026, 9, 1);
+        when(clubRepository.findByPublicIdAndDeletedAtIsNull("club-public-id")).thenReturn(Optional.of(club));
+        when(clubMemberRepository.findByClubAndUserIdAndMemberStatus(club, 10L, com.tennisfolio.Tennisfolio.club.entity.ClubMemberStatus.ACTIVE)).thenReturn(Optional.of(admin));
+        when(clubMemberRepository.findByClubAndId(club, 101L)).thenReturn(Optional.of(target));
+
+        service.changeMemberStatus(
+                "club-public-id",
+                101L,
+                new ClubMemberStatusChangeRequest("SUSPENDED", suspendedAt),
+                10L
+        );
+
+        assertThat(target.getMemberStatus()).isEqualTo(com.tennisfolio.Tennisfolio.club.entity.ClubMemberStatus.SUSPENDED);
+        assertThat(target.getSuspendedAt()).isEqualTo(suspendedAt);
+    }
+
+    @Test
+    void updateMember_persistsJoinedAtAndBirthYear() {
+        Club club = club();
+        ClubMember admin = member(club, 100L, 10L, "Alex Kim", ClubMemberRole.ADMIN);
+        ClubMember target = member(club, 101L, null, "Jamie Lee", ClubMemberRole.MEMBER);
+        LocalDate joinedAt = LocalDate.of(2021, 4, 2);
+        when(clubRepository.findByPublicIdAndDeletedAtIsNull("club-public-id")).thenReturn(Optional.of(club));
+        when(clubMemberRepository.findByClubAndUserIdAndMemberStatus(club, 10L, com.tennisfolio.Tennisfolio.club.entity.ClubMemberStatus.ACTIVE)).thenReturn(Optional.of(admin));
+        when(clubMemberRepository.findByClubAndIdAndMemberStatus(club, 101L, com.tennisfolio.Tennisfolio.club.entity.ClubMemberStatus.ACTIVE)).thenReturn(Optional.of(target));
+        when(clubMemberRepository.existsByClubAndNameAndIdNot(club, "Jamie Lee", 101L)).thenReturn(false);
+
+        service.updateMember(
+                "club-public-id",
+                101L,
+                new ClubMemberUpdateRequest("Jamie Lee", "MALE", "MEMBER", null, null, null, joinedAt, 1991),
+                10L
+        );
+
+        assertThat(target.getJoinedAt()).isEqualTo(joinedAt);
+        assertThat(target.getBirthYear()).isEqualTo(1991);
     }
 
     @Test

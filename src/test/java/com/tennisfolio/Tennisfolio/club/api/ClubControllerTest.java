@@ -241,6 +241,31 @@ class ClubControllerTest {
         assertThat(response.getStatusCode().value()).isEqualTo(200);
     }
 
+    @Test
+    void getManagementMembers_passesFiltersAndCurrentUserToQueryService() {
+        Long userId = 10L;
+
+        ResponseEntity<?> response = clubController.getManagementMembers(
+                userId,
+                "club-public-id",
+                "SUSPENDED",
+                "jamie"
+        );
+
+        verify(clubQueryService).getManagementMembers("club-public-id", "SUSPENDED", "jamie", 10L);
+        assertThat(response.getStatusCode().value()).isEqualTo(200);
+    }
+
+    @Test
+    void getManagementMember_passesCurrentUserToQueryService() {
+        Long userId = 10L;
+
+        ResponseEntity<?> response = clubController.getManagementMember(userId, "club-public-id", 100L);
+
+        verify(clubQueryService).getManagementMember("club-public-id", 100L, 10L);
+        assertThat(response.getStatusCode().value()).isEqualTo(200);
+    }
+
     private static ClubDashboardResponse dashboardResponse() {
         return new ClubDashboardResponse(
                 new ClubDashboardPeriod(LocalDate.of(2026, 7, 13), LocalDate.of(2026, 8, 11)),

@@ -83,6 +83,21 @@ public class ClubMember extends BaseTimeEntity {
             String contactMemo,
             String memo
     ) {
+        this(club, userId, name, gender, role, skillTier, contactMemo, memo, null, null);
+    }
+
+    public ClubMember(
+            Club club,
+            Long userId,
+            String name,
+            Gender gender,
+            ClubMemberRole role,
+            ClubSkillTier skillTier,
+            String contactMemo,
+            String memo,
+            LocalDate joinedAt,
+            Integer birthYear
+    ) {
         this.club = club;
         this.userId = userId;
         this.name = name;
@@ -91,6 +106,9 @@ public class ClubMember extends BaseTimeEntity {
         this.skillTier = skillTier;
         this.contactMemo = contactMemo;
         this.memo = memo;
+        this.memberStatus = ClubMemberStatus.ACTIVE;
+        this.joinedAt = joinedAt;
+        this.birthYear = birthYear;
     }
 
     public void update(
@@ -99,7 +117,9 @@ public class ClubMember extends BaseTimeEntity {
             ClubMemberRole role,
             ClubSkillTier skillTier,
             String contactMemo,
-            String memo
+            String memo,
+            LocalDate joinedAt,
+            Integer birthYear
     ) {
         this.name = name;
         this.gender = gender;
@@ -107,6 +127,8 @@ public class ClubMember extends BaseTimeEntity {
         this.skillTier = skillTier;
         this.contactMemo = contactMemo;
         this.memo = memo;
+        this.joinedAt = joinedAt;
+        this.birthYear = birthYear;
     }
 
     public void changeStatus(ClubMemberStatus memberStatus, LocalDate statusDate) {

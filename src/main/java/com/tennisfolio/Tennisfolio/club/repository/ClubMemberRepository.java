@@ -25,6 +25,10 @@ public interface ClubMemberRepository extends JpaRepository<ClubMember, Long> {
 
     List<ClubMember> findByClubAndNameContainingIgnoreCaseAndMemberStatusOrderByNameAscIdAsc(Club club, String name, ClubMemberStatus memberStatus);
 
+    List<ClubMember> findByClubOrderByNameAscIdAsc(Club club);
+
+    List<ClubMember> findByClubAndNameContainingIgnoreCaseOrderByNameAscIdAsc(Club club, String name);
+
     List<ClubMember> findByUserIdAndMemberStatusOrderByIdAsc(Long userId, ClubMemberStatus memberStatus);
 
     Optional<ClubMember> findByClubAndUserIdAndMemberStatus(Club club, Long userId, ClubMemberStatus memberStatus);

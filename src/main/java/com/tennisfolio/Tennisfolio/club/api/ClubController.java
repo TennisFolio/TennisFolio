@@ -6,6 +6,7 @@ import com.tennisfolio.Tennisfolio.club.dto.ClubDashboardResponse;
 import com.tennisfolio.Tennisfolio.club.dto.ClubDetailResponse;
 import com.tennisfolio.Tennisfolio.club.dto.ClubMemberCreateRequest;
 import com.tennisfolio.Tennisfolio.club.dto.ClubMemberBulkCreateRequest;
+import com.tennisfolio.Tennisfolio.club.dto.ClubMemberManagementResponse;
 import com.tennisfolio.Tennisfolio.club.dto.ClubMemberResponse;
 import com.tennisfolio.Tennisfolio.club.dto.ClubMemberUpdateRequest;
 import com.tennisfolio.Tennisfolio.club.dto.ClubMemberStatusChangeRequest;
@@ -153,6 +154,36 @@ public class ClubController {
         List<ClubMemberResponse> response = clubQueryService.getMembers(
                 clubPublicId,
                 keyword,
+                userId
+        );
+        return ResponseEntity.ok(ResponseDTO.success(response));
+    }
+
+    @GetMapping("/clubs/{clubPublicId}/members/management")
+    public ResponseEntity<ResponseDTO<List<ClubMemberManagementResponse>>> getManagementMembers(
+            @AuthenticationPrincipal Long userId,
+            @PathVariable String clubPublicId,
+            @RequestParam(required = false) String memberStatus,
+            @RequestParam(required = false) String keyword
+    ) {
+        List<ClubMemberManagementResponse> response = clubQueryService.getManagementMembers(
+                clubPublicId,
+                memberStatus,
+                keyword,
+                userId
+        );
+        return ResponseEntity.ok(ResponseDTO.success(response));
+    }
+
+    @GetMapping("/clubs/{clubPublicId}/members/management/{memberId}")
+    public ResponseEntity<ResponseDTO<ClubMemberManagementResponse>> getManagementMember(
+            @AuthenticationPrincipal Long userId,
+            @PathVariable String clubPublicId,
+            @PathVariable Long memberId
+    ) {
+        ClubMemberManagementResponse response = clubQueryService.getManagementMember(
+                clubPublicId,
+                memberId,
                 userId
         );
         return ResponseEntity.ok(ResponseDTO.success(response));

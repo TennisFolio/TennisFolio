@@ -30,10 +30,11 @@
 
 ## 2. 관리 API와 원자적 등록
 
-- [ ] 생성·수정 response/request DTO에 `LocalDate` 가입일·출생연도·상태 날짜를 추가하고, 새 회원을 서버에서 `ACTIVE`로 만든다.
-- [ ] `GET /members/management`, `GET /members/management/{memberId}`, `PATCH /members/{memberId}/status`를 `ClubController`와 query/command service에 추가한다.
-- [ ] 모든 상태에서 동명이인을 막고, 탈퇴 회원은 상태 변경으로만 복구하도록 service와 repository를 변경한다.
-- [ ] `ClubControllerTest`에 API 경로와 principal 전달을, command service test에 일괄 요청 원자성·동명이인 규칙을 추가한다.
+- [x] 생성·수정 response/request DTO에 `LocalDate` 가입일·출생연도·상태 날짜를 추가하고, 새 회원을 서버에서 `ACTIVE`로 만든다.
+- [x] `GET /members/management`, `GET /members/management/{memberId}`를 `ClubController`와 query service에 추가한다.
+- [x] `PATCH /members/{memberId}/status`를 `ClubController`와 command service에 추가한다. (`7f96512`)
+- [x] 모든 상태에서 동명이인을 막고, 탈퇴 회원은 상태 변경으로만 복구하도록 service와 repository를 변경한다.
+- [x] `ClubControllerTest`에 API 경로와 principal 전달을, command service test에 일괄 요청 원자성·동명이인 규칙을 추가한다.
 - [ ] 검증: `./gradlew.bat test --tests com.tennisfolio.Tennisfolio.club.api.ClubControllerTest --tests com.tennisfolio.Tennisfolio.club.service.ClubMemberCommandServiceTest`
 
 ## 3. 대시보드 목록과 상세
