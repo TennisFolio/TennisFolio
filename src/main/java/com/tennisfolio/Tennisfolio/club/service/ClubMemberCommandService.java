@@ -82,8 +82,7 @@ public class ClubMemberCommandService {
                 skillTier,
                 request.getContactMemo(),
                 request.getMemo(),
-                request.getJoinedAt(),
-                request.getBirthYear()
+                request.getJoinedAt()
         );
     }
 
@@ -165,8 +164,7 @@ public class ClubMemberCommandService {
                 skillTier,
                 request.getContactMemo(),
                 request.getMemo(),
-                request.getJoinedAt(),
-                request.getBirthYear()
+                request.getJoinedAt()
         );
     }
 

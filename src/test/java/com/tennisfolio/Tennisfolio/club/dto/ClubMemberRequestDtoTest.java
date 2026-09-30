@@ -10,15 +10,17 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ClubMemberRequestDtoTest {
 
     @Test
-    void createRequest_exposesLifecycleFields() {
+    void createRequest_exposesJoinedAtWithoutBirthYear() {
         assertThat(fieldNames(ClubMemberCreateRequest.class))
-                .contains("joinedAt", "birthYear");
+                .contains("joinedAt")
+                .doesNotContain("birthYear");
     }
 
     @Test
-    void updateRequest_exposesLifecycleFields() {
+    void updateRequest_exposesJoinedAtWithoutBirthYear() {
         assertThat(fieldNames(ClubMemberUpdateRequest.class))
-                .contains("joinedAt", "birthYear");
+                .contains("joinedAt")
+                .doesNotContain("birthYear");
     }
 
     @Test

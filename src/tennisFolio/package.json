@@ -17,6 +17,7 @@
     "axios": "^1.9.0",
     "buffer": "^6.0.3",
     "dayjs": "^1.11.13",
+    "exceljs": "^4.4.0",
     "framer-motion": "^12.38.0",
     "global": "^4.4.0",
     "lottie-react": "^2.4.1",

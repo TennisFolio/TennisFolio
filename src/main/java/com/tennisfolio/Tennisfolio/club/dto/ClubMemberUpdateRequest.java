@@ -15,7 +15,6 @@ public class ClubMemberUpdateRequest {
     private final String contactMemo;
     private final String memo;
     private final LocalDate joinedAt;
-    private final Integer birthYear;
 
     @JsonCreator
     public ClubMemberUpdateRequest(
@@ -25,8 +24,7 @@ public class ClubMemberUpdateRequest {
             @JsonProperty("skillTierId") Long skillTierId,
             @JsonProperty("contactMemo") String contactMemo,
             @JsonProperty("memo") String memo,
-            @JsonProperty("joinedAt") LocalDate joinedAt,
-            @JsonProperty("birthYear") Integer birthYear
+            @JsonProperty("joinedAt") LocalDate joinedAt
     ) {
         this.name = name;
         this.gender = gender;
@@ -35,7 +33,6 @@ public class ClubMemberUpdateRequest {
         this.contactMemo = contactMemo;
         this.memo = memo;
         this.joinedAt = joinedAt;
-        this.birthYear = birthYear;
     }
 
     public ClubMemberUpdateRequest(
@@ -46,6 +43,6 @@ public class ClubMemberUpdateRequest {
             String contactMemo,
             String memo
     ) {
-        this(name, gender, role, skillTierId, contactMemo, memo, null, null);
+        this(name, gender, role, skillTierId, contactMemo, memo, null);
     }
 }

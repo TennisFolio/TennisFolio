@@ -10,7 +10,6 @@ export const emptyMemberForm = {
   role: 'MEMBER',
   skillTierId: null,
   joinedAt: '',
-  birthYear: '',
   contactMemo: '',
   memo: '',
 };
@@ -59,7 +58,6 @@ export function memberPayload(form, name) {
     role: form.role,
     skillTierId: form.skillTierId ? Number(form.skillTierId) : null,
     joinedAt: form.joinedAt || null,
-    birthYear: form.birthYear ? Number(form.birthYear) : null,
     contactMemo: form.contactMemo.trim() || null,
     memo: form.memo.trim() || null,
   };

@@ -6,7 +6,7 @@ const statusLabels = {
   WITHDRAWN: '탈퇴',
 };
 
-function MemberManagementList({ members, allMembers, memberStatus, keyword, isLoading, onStatusChange, onKeywordChange, onOpenMember }) {
+function MemberManagementList({ members, allMembers, memberStatus, keyword, isLoading, totalMemberCount, pageSize, currentPage, totalPages, onStatusChange, onKeywordChange, onPageChange, onOpenMember }) {
   const counts = allMembers.reduce((result, member) => ({
     ...result,
     [member.memberStatus]: (result[member.memberStatus] ?? 0) + 1,
@@ -72,6 +72,24 @@ function MemberManagementList({ members, allMembers, memberStatus, keyword, isLo
             </tbody>
           </table>
         </div>
+        {totalPages > 1 && (
+          <div className="club-dashboard-member-paging">
+            <span>{totalMemberCount}명 중 {currentPage * pageSize + 1}~{Math.min((currentPage + 1) * pageSize, totalMemberCount)}명</span>
+            <nav aria-label="회원 목록 페이지">
+              {Array.from({ length: totalPages }, (_, index) => (
+                <button
+                  aria-current={currentPage === index ? 'page' : undefined}
+                  className={currentPage === index ? 'active' : ''}
+                  key={index}
+                  type="button"
+                  onClick={() => onPageChange(index)}
+                >
+                  {index + 1}
+                </button>
+              ))}
+            </nav>
+          </div>
+        )}
       </section>
     </>
   );

@@ -44,7 +44,15 @@
       .section-heading p { margin-top: 5px; color: var(--competition-text-muted); font-size: 12px; font-weight: 700; line-height: 1.5; }
       .columns { display: flex; flex-wrap: wrap; gap: 6px; }
       .column { display: inline-flex; align-items: center; min-height: 27px; border: 1px solid var(--competition-border); border-radius: 999px; background: var(--competition-surface-soft); color: var(--competition-text-body); padding: 0 9px; font-size: 11px; font-weight: 900; }
-      textarea { width: 100%; min-height: 164px; resize: vertical; border: 1px solid var(--competition-border-control); border-radius: 8px; background: var(--competition-surface); color: var(--competition-text-strong); padding: 12px; font-size: 13px; line-height: 1.55; }
+      .paste-grid { overflow-x: auto; border: 1px solid var(--competition-border-control); border-radius: 8px; background: var(--competition-surface); }
+      .paste-grid table { min-width: 760px; }
+      .paste-grid th, .paste-grid td { padding: 0; border-right: 1px solid var(--competition-border); }
+      .paste-grid th:last-child, .paste-grid td:last-child { border-right: 0; }
+      .paste-grid th { padding: 10px 12px; background: var(--competition-surface-soft); }
+      .paste-grid td { height: 42px; }
+      .paste-grid [contenteditable="true"] { display: block; min-height: 42px; padding: 11px 12px; color: var(--competition-text-body); font-size: 13px; font-weight: 700; outline: 0; }
+      .paste-grid [contenteditable="true"]:focus { background: var(--competition-surface-accent); color: var(--competition-text-strong); }
+      .paste-grid .empty-cell { color: var(--competition-text-disabled); }
       .input-actions { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
       .input-actions span { color: var(--competition-text-muted); font-size: 12px; font-weight: 800; }
 
@@ -117,9 +125,46 @@
             <span class="column">가입일</span>
             <span class="column">출생연도</span>
           </div>
-          <textarea aria-label="엑셀 회원 데이터">김테니스	남	관리자	상급	2023-03-12	1988
-박서브	여	회원	중상급	2024-06-01	1994
-이포핸드	남	회원	중급		1990</textarea>
+          <div class="paste-grid" role="region" aria-label="엑셀 회원 데이터">
+            <table>
+              <thead>
+                <tr>
+                  <th>이름</th>
+                  <th>성별</th>
+                  <th>역할</th>
+                  <th>티어</th>
+                  <th>가입일</th>
+                  <th>출생연도</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><span contenteditable="true">김테니스</span></td>
+                  <td><span contenteditable="true">남</span></td>
+                  <td><span contenteditable="true">관리자</span></td>
+                  <td><span contenteditable="true">상급</span></td>
+                  <td><span contenteditable="true">2023-03-12</span></td>
+                  <td><span contenteditable="true">1988</span></td>
+                </tr>
+                <tr>
+                  <td><span contenteditable="true">박서브</span></td>
+                  <td><span contenteditable="true">여</span></td>
+                  <td><span contenteditable="true">회원</span></td>
+                  <td><span contenteditable="true">중상급</span></td>
+                  <td><span contenteditable="true">2024-06-01</span></td>
+                  <td><span contenteditable="true">1994</span></td>
+                </tr>
+                <tr>
+                  <td><span contenteditable="true">이포핸드</span></td>
+                  <td><span contenteditable="true">남</span></td>
+                  <td><span contenteditable="true">회원</span></td>
+                  <td><span contenteditable="true">중급</span></td>
+                  <td><span class="empty-cell" contenteditable="true">가입일</span></td>
+                  <td><span contenteditable="true">1990</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
           <div class="input-actions">
             <span>3행이 입력되었습니다.</span>
             <button class="button" type="button">입력 내용 확인</button>

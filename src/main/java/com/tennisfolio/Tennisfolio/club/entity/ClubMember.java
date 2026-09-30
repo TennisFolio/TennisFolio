@@ -70,9 +70,6 @@ public class ClubMember extends BaseTimeEntity {
     @Column(name = "LEFT_AT")
     private LocalDate leftAt;
 
-    @Column(name = "BIRTH_YEAR")
-    private Integer birthYear;
-
     public ClubMember(
             Club club,
             Long userId,
@@ -83,7 +80,7 @@ public class ClubMember extends BaseTimeEntity {
             String contactMemo,
             String memo
     ) {
-        this(club, userId, name, gender, role, skillTier, contactMemo, memo, null, null);
+        this(club, userId, name, gender, role, skillTier, contactMemo, memo, null);
     }
 
     public ClubMember(
@@ -95,8 +92,7 @@ public class ClubMember extends BaseTimeEntity {
             ClubSkillTier skillTier,
             String contactMemo,
             String memo,
-            LocalDate joinedAt,
-            Integer birthYear
+            LocalDate joinedAt
     ) {
         this.club = club;
         this.userId = userId;
@@ -108,7 +104,6 @@ public class ClubMember extends BaseTimeEntity {
         this.memo = memo;
         this.memberStatus = ClubMemberStatus.ACTIVE;
         this.joinedAt = joinedAt;
-        this.birthYear = birthYear;
     }
 
     public void update(
@@ -118,8 +113,7 @@ public class ClubMember extends BaseTimeEntity {
             ClubSkillTier skillTier,
             String contactMemo,
             String memo,
-            LocalDate joinedAt,
-            Integer birthYear
+            LocalDate joinedAt
     ) {
         this.name = name;
         this.gender = gender;
@@ -128,7 +122,6 @@ public class ClubMember extends BaseTimeEntity {
         this.contactMemo = contactMemo;
         this.memo = memo;
         this.joinedAt = joinedAt;
-        this.birthYear = birthYear;
     }
 
     public void changeStatus(ClubMemberStatus memberStatus, LocalDate statusDate) {

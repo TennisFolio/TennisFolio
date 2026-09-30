@@ -1,93 +1,82 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import ExcelJS from 'exceljs';
 import ClubMemberBulkAddView from '../../components/club/bulk/ClubMemberBulkAddView';
 import { bulkMemberPayload, createBulkMemberRow, createBulkMemberRows, parseBulkMemberRows, validateBulkMembers } from '../../components/club/bulk/bulkMemberUtils';
-import ClubMessage from '../../components/club/ClubMessage';
-import ClubState from '../../components/club/ClubState';
-import { addClubMembers, getClub, getClubMembers } from '../../utils/clubApi';
+import ClubDashboardLayout from '../../components/club/dashboard/ClubDashboardLayout';
 import ClubAuthRequired from './ClubAuthRequired';
+import { addClubMembers, getClub, getClubManagementMembers } from '../../utils/clubApi';
 import { errorMessage, normalizeClub, unwrapData } from './clubPageUtils';
 import '../Club.css';
 
 function ClubMemberBulkAddPage({ currentUser }) {
-  const navigate = useNavigate();
-  const { publicId } = useParams();
-  const [club, setClub] = useState(null);
-  const [existingMembers, setExistingMembers] = useState([]);
-  const [rows, setRows] = useState(() => createBulkMemberRows());
-  const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-  const isAdmin = club?.admin === true || club?.role === 'ADMIN';
-  const validationRows = useMemo(() => validateBulkMembers(rows, existingMembers), [rows, existingMembers]);
-  const backToMembers = () => navigate(club ? `/clubs/${club.publicId}` : '/clubs', { state: { activeTab: 'members' } });
+  const navigate = useNavigate(); const { clubPublicId, publicId } = useParams(); const selectedPublicId = clubPublicId ?? publicId;
+  const [club, setClub] = useState(null); const [existingMembers, setExistingMembers] = useState([]); const [rows, setRows] = useState(() => createBulkMemberRows()); const [pasteText, setPasteText] = useState(''); const [error, setError] = useState(''); const [isLoading, setIsLoading] = useState(false); const [isSaving, setIsSaving] = useState(false);
+  const isAdmin = club?.admin === true || club?.role === 'ADMIN'; const validationRows = useMemo(() => validateBulkMembers(rows, existingMembers), [rows, existingMembers]); const backToMembers = () => navigate(`/clubs/${selectedPublicId}/dashboard/members`);
+  useEffect(() => { if (!currentUser || !selectedPublicId) return undefined; let cancelled = false; setIsLoading(true); setError(''); Promise.all([getClub(selectedPublicId), getClubManagementMembers(selectedPublicId)]).then(([clubResponse, memberResponse]) => { if (!cancelled) { setClub(normalizeClub(unwrapData(clubResponse, null))); setExistingMembers(unwrapData(memberResponse, [])); } }).catch((requestError) => !cancelled && setError(errorMessage(requestError, '회원 정보를 불러오지 못했습니다.'))).finally(() => !cancelled && setIsLoading(false)); return () => { cancelled = true; }; }, [currentUser, selectedPublicId]);
+  const changeRow = (rowId, changes) => setRows((currentRows) => currentRows.map((row) => (
+    row.rowId === rowId ? { ...row, ...changes, invalidColumnCount: false } : row
+  )));
+  const changePasteText = (text) => { setPasteText(text); setRows(text.trim() ? parseBulkMemberRows(text, club?.skillTiers ?? []) : createBulkMemberRows()); };
+  const downloadTemplate = async () => {
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('회원 등록');
+    const tierNames = (club?.skillTiers ?? []).map((tier) => tier.name).filter(Boolean);
 
-  useEffect(() => {
-    if (!currentUser || !publicId) return undefined;
-    let cancelled = false;
-    setIsLoading(true);
-    setError('');
-    Promise.all([getClub(publicId), getClubMembers(publicId)])
-      .then(([clubResponse, memberResponse]) => {
-        if (!cancelled) {
-          setClub(normalizeClub(unwrapData(clubResponse, null)));
-          setExistingMembers(unwrapData(memberResponse, []));
-        }
-      })
-      .catch((requestError) => !cancelled && setError(errorMessage(requestError, '클럽 정보를 불러오지 못했습니다.')))
-      .finally(() => !cancelled && setIsLoading(false));
-    return () => { cancelled = true; };
-  }, [currentUser, publicId]);
+    worksheet.columns = [
+      { header: '이름', key: 'name', width: 16 },
+      { header: '성별', key: 'gender', width: 10 },
+      { header: '역할', key: 'role', width: 12 },
+      { header: '티어', key: 'tier', width: 16 },
+      { header: '가입일', key: 'joinedAt', width: 14 },
+    ];
+    worksheet.getRow(1).font = { bold: true };
+    worksheet.addRow(['예시 회원', '남', '회원', tierNames[0] ?? '클럽 티어명', new Date(2025, 0, 15)]);
 
-  const changeRow = (rowId, changes) => setRows((currentRows) => currentRows.map((row) => row.rowId === rowId ? { ...row, ...changes } : row));
-  const handlePaste = (event) => {
-    const text = event.clipboardData?.getData('text');
-    if (!text) return;
-    event.preventDefault();
-    setRows((currentRows) => [...currentRows.filter((row) => row.name.trim()), ...parseBulkMemberRows(text, club?.skillTiers ?? [])]);
-  };
-  const handleSubmit = async () => {
-    const members = validationRows.filter((row) => row.name);
-    if (!club || members.some((row) => row.errors.length)) return;
-    setIsSaving(true);
-    setError('');
-    try {
-      await addClubMembers(club.publicId, bulkMemberPayload(members));
-      backToMembers();
-    } catch (requestError) {
-      if (requestError?.response?.status === 409) {
-        try {
-          const response = await getClubMembers(club.publicId);
-          setExistingMembers(unwrapData(response, []));
-          setError('등록 중 같은 이름의 클럽원이 추가되었습니다. 표시된 행을 수정해 주세요.');
-        } catch {
-          setError(errorMessage(requestError, '클럽원을 일괄 등록하지 못했습니다.'));
-        }
-      } else {
-        setError(errorMessage(requestError, '클럽원을 일괄 등록하지 못했습니다.'));
-      }
-    } finally {
-      setIsSaving(false);
+    for (let row = 2; row <= 101; row += 1) {
+      worksheet.getCell(`B${row}`).dataValidation = {
+        type: 'list',
+        allowBlank: false,
+        formulae: ['"남,여"'],
+        showErrorMessage: true,
+        errorTitle: '성별 선택',
+        error: '성별은 남 또는 여만 선택할 수 있습니다.',
+      };
+      worksheet.getCell(`C${row}`).dataValidation = {
+        type: 'list',
+        allowBlank: false,
+        formulae: ['"회원,관리자"'],
+        showErrorMessage: true,
+        errorTitle: '역할 선택',
+        error: '역할은 회원 또는 관리자만 선택할 수 있습니다.',
+      };
+      worksheet.getCell(`E${row}`).numFmt = 'yyyy-mm-dd';
     }
+
+    const guideWorksheet = workbook.addWorksheet('작성 안내');
+    guideWorksheet.columns = [{ width: 14 }, { width: 56 }];
+    guideWorksheet.addRows([
+      ['항목', '입력 방법'],
+      ['성별', '드롭다운에서 남 또는 여를 선택'],
+      ['역할', '드롭다운에서 회원 또는 관리자를 선택'],
+      ['티어', tierNames.length ? `현재 사용 가능한 티어: ${tierNames.join(', ')}` : '현재 설정된 티어가 없습니다. 빈칸으로 두세요.'],
+      ['가입일', 'YYYY-MM-DD 형식, 예: 2026-09-01 (비워도 됨)'],
+      ['예시 행', '두 번째 행은 예시이므로 삭제하거나 실제 회원 정보로 바꾼 뒤 사용'],
+    ]);
+    guideWorksheet.getRow(1).font = { bold: true };
+
+    const fileData = await workbook.xlsx.writeBuffer();
+    const fileUrl = URL.createObjectURL(new Blob([fileData], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    }));
+    const link = document.createElement('a');
+    link.href = fileUrl;
+    link.download = '클럽회원-일괄등록-양식.xlsx';
+    link.click();
+    URL.revokeObjectURL(fileUrl);
   };
-
+  const handleSubmit = async () => { const members = validationRows.filter((row) => row.name); if (!club || members.some((row) => row.errors.length)) return; setIsSaving(true); setError(''); try { await addClubMembers(club.publicId, bulkMemberPayload(members)); backToMembers(); } catch (requestError) { const status = requestError?.response?.status; if (status === 409) { try { const response = await getClubManagementMembers(selectedPublicId); setExistingMembers(unwrapData(response, [])); setError('등록 중 같은 이름의 회원이 추가되었습니다. 최신 명단으로 충돌 행을 표시했으니 수정해 주세요.'); } catch { setError('동시 등록 충돌이 발생했습니다. 잠시 후 다시 시도해 주세요.'); } } else if (status === 400) { setError(errorMessage(requestError, '입력 형식을 다시 확인해 주세요. 등록된 회원은 없습니다.')); } else if (status === 401) { setError('로그인이 만료되었습니다. 다시 로그인해 주세요.'); } else if (status === 403) { setError('관리자만 회원을 일괄 등록할 수 있습니다.'); } else { setError('회원 일괄 등록에 실패했습니다. 등록된 회원은 없습니다.'); } } finally { setIsSaving(false); } };
   if (!currentUser) return <ClubAuthRequired />;
-  if (isLoading) return <main className="club-bulk-page"><p className="club-notice static">클럽 정보를 불러오는 중입니다.</p></main>;
-  if (!club) return <main className="club-bulk-page"><ClubState eyebrow="CLUB MEMBER" title="클럽을 찾을 수 없습니다"><ClubMessage error={error} /><button className="club-button full" type="button" onClick={() => navigate('/clubs')}>클럽 목록</button></ClubState></main>;
-  if (!isAdmin) return <main className="club-bulk-page"><ClubState eyebrow={club.name} title="관리자만 사용할 수 있습니다" description="클럽원 추가는 클럽 관리자에게만 열려 있습니다." actionLabel="클럽원 목록" onAction={backToMembers} /></main>;
-
-  return (
-    <main className="club-bulk-page">
-      <ClubMessage error={error} />
-      <ClubMemberBulkAddView
-        rows={rows} skillTiers={club.skillTiers ?? []} validationRows={validationRows} isSaving={isSaving}
-        onChangeRow={changeRow} onAddRow={() => setRows((currentRows) => [...currentRows, createBulkMemberRow()])}
-        onRemoveRow={(rowId) => setRows((currentRows) => currentRows.filter((row) => row.rowId !== rowId))}
-        onPaste={handlePaste}
-        onSubmit={handleSubmit} onBack={backToMembers}
-      />
-    </main>
-  );
+  return <ClubDashboardLayout clubPublicId={selectedPublicId} currentUser={currentUser} activeMenu="members">{isLoading && <p className="club-notice static">회원 정보를 불러오는 중입니다.</p>}{!isLoading && error && <p className="club-notice danger">{error}</p>}{!isLoading && !club && <button className="club-button" type="button" onClick={() => navigate('/clubs')}>클럽 목록</button>}{!isLoading && club && !isAdmin && <p className="club-notice danger">관리자만 사용할 수 있습니다.</p>}{!isLoading && club && isAdmin && <ClubMemberBulkAddView rows={rows} pasteText={pasteText} skillTiers={club.skillTiers ?? []} validationRows={validationRows} isSaving={isSaving} onPasteTextChange={changePasteText} onDownloadTemplate={downloadTemplate} onChangeRow={changeRow} onAddRow={() => setRows((currentRows) => [...currentRows, createBulkMemberRow()])} onRemoveRow={(rowId) => setRows((currentRows) => currentRows.filter((row) => row.rowId !== rowId))} onSubmit={handleSubmit} onBack={backToMembers} />}</ClubDashboardLayout>;
 }
-
 export default ClubMemberBulkAddPage;

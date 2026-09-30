@@ -8,7 +8,7 @@ import { emptyMemberForm, errorMessage, memberPayload, normalizeClub, unwrapData
 import '../Club.css';
 
 function memberForm(member) {
-  return { ...emptyMemberForm, ...member, skillTierId: member.skillTierId ?? null, joinedAt: member.joinedAt ?? '', birthYear: member.birthYear ?? '', contactMemo: member.contactMemo ?? '', memo: member.memo ?? '' };
+  return { ...emptyMemberForm, ...member, skillTierId: member.skillTierId ?? null, joinedAt: member.joinedAt ?? '', contactMemo: member.contactMemo ?? '', memo: member.memo ?? '' };
 }
 
 function ClubMemberDetailPage({ currentUser }) {

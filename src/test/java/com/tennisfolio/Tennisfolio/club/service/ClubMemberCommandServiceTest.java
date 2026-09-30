@@ -193,7 +193,7 @@ class ClubMemberCommandServiceTest {
     }
 
     @Test
-    void addMember_persistsJoinedAtAndBirthYear() {
+    void addMember_persistsJoinedAt() {
         Club club = club();
         ClubMember admin = member(club, 100L, 10L, "Alex Kim", ClubMemberRole.ADMIN);
         LocalDate joinedAt = LocalDate.of(2020, 3, 1);
@@ -203,7 +203,7 @@ class ClubMemberCommandServiceTest {
 
         service.addMember(
                 "club-public-id",
-                new ClubMemberCreateRequest("Jamie Lee", "FEMALE", "MEMBER", null, null, null, joinedAt, 1994),
+                new ClubMemberCreateRequest("Jamie Lee", "FEMALE", "MEMBER", null, null, null, joinedAt),
                 10L
         );
 
@@ -211,7 +211,6 @@ class ClubMemberCommandServiceTest {
         verify(clubMemberRepository).save(captor.capture());
         assertThat(captor.getValue().getMemberStatus()).isEqualTo(com.tennisfolio.Tennisfolio.club.entity.ClubMemberStatus.ACTIVE);
         assertThat(captor.getValue().getJoinedAt()).isEqualTo(joinedAt);
-        assertThat(captor.getValue().getBirthYear()).isEqualTo(1994);
     }
 
     @Test
@@ -308,7 +307,7 @@ class ClubMemberCommandServiceTest {
     }
 
     @Test
-    void updateMember_persistsJoinedAtAndBirthYear() {
+    void updateMember_persistsJoinedAt() {
         Club club = club();
         ClubMember admin = member(club, 100L, 10L, "Alex Kim", ClubMemberRole.ADMIN);
         ClubMember target = member(club, 101L, null, "Jamie Lee", ClubMemberRole.MEMBER);
@@ -321,12 +320,11 @@ class ClubMemberCommandServiceTest {
         service.updateMember(
                 "club-public-id",
                 101L,
-                new ClubMemberUpdateRequest("Jamie Lee", "MALE", "MEMBER", null, null, null, joinedAt, 1991),
+                new ClubMemberUpdateRequest("Jamie Lee", "MALE", "MEMBER", null, null, null, joinedAt),
                 10L
         );
 
         assertThat(target.getJoinedAt()).isEqualTo(joinedAt);
-        assertThat(target.getBirthYear()).isEqualTo(1991);
     }
 
     @Test

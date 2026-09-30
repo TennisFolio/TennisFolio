@@ -128,6 +128,10 @@ function App() {
             element={<ClubMemberManagementPage currentUser={currentUser} />}
           />
           <Route
+            path="/clubs/:clubPublicId/dashboard/members/paste"
+            element={<ClubMemberBulkAddPage currentUser={currentUser} />}
+          />
+          <Route
             path="/clubs/:clubPublicId/dashboard/members/:memberId"
             element={<ClubMemberDetailPage currentUser={currentUser} />}
           />

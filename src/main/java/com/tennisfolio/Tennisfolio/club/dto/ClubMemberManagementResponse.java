@@ -22,7 +22,6 @@ public class ClubMemberManagementResponse {
     private LocalDate joinedAt;
     private LocalDate suspendedAt;
     private LocalDate leftAt;
-    private Integer birthYear;
     private String contactMemo;
     private String memo;
 
@@ -41,7 +40,6 @@ public class ClubMemberManagementResponse {
                 member.getJoinedAt(),
                 member.getSuspendedAt(),
                 member.getLeftAt(),
-                member.getBirthYear(),
                 member.getContactMemo(),
                 member.getMemo()
         );

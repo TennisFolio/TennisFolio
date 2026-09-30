@@ -22,15 +22,16 @@
 
 ## 1. 상태 모델과 데이터 이관
 
-- [ ] `ClubMemberStatus`를 만들고 `ClubMember`에 상태·가입일·휴면일·탈퇴일·출생연도를 추가한다.
+- [ ] `ClubMemberStatus`를 만들고 `ClubMember`에 상태·가입일·휴면일·탈퇴일을 추가한다.
 - [ ] `club-member-status.sql`에 열 추가, 기존 `ACTIVE=true → ACTIVE`, `ACTIVE=false → WITHDRAWN`, `ACTIVE` 열 제거 순서의 수동 이관 SQL을 작성한다.
+- [x] 출생연도 입력·응답·엔티티를 제거하고 `club-member-drop-birth-year.sql`에 `BIRTH_YEAR` 삭제 DDL을 작성한다.
 - [ ] `ClubMemberRepository`, `ClubAccessService`, dashboard/meeting의 활성 회원 조회를 `memberStatus=ACTIVE`로 교체한다.
 - [ ] `ClubMemberCommandServiceTest`에 휴면·탈퇴·복구 날짜 및 마지막 활동 관리자 차단을 작성한다.
 - [ ] 검증: `./gradlew.bat test --tests com.tennisfolio.Tennisfolio.club.service.ClubMemberCommandServiceTest --tests com.tennisfolio.Tennisfolio.club.repository.ClubDashboardQueryRepositoryTest`
 
 ## 2. 관리 API와 원자적 등록
 
-- [x] 생성·수정 response/request DTO에 `LocalDate` 가입일·출생연도·상태 날짜를 추가하고, 새 회원을 서버에서 `ACTIVE`로 만든다.
+- [x] 생성·수정 response/request DTO에 `LocalDate` 가입일·상태 날짜를 추가하고, 새 회원을 서버에서 `ACTIVE`로 만든다.
 - [x] `GET /members/management`, `GET /members/management/{memberId}`를 `ClubController`와 query service에 추가한다.
 - [x] `PATCH /members/{memberId}/status`를 `ClubController`와 command service에 추가한다. (`7f96512`)
 - [x] 모든 상태에서 동명이인을 막고, 탈퇴 회원은 상태 변경으로만 복구하도록 service와 repository를 변경한다.
@@ -47,9 +48,9 @@
 
 ## 4. 엑셀 붙여넣기 등록과 실패 표시
 
-- [ ] `bulkMemberUtils.js`와 bulk view/page를 6개 열 TSV, ISO 날짜·출생연도 검증, 행별 오류 미리보기로 변경한다.
-- [ ] `/dashboard/members/paste` 경로에서 붙여넣기 입력과 미리보기·등록을 구현한다.
-- [ ] 409 시 최신 관리 목록을 다시 받아 충돌 행을 표시하며 입력과 미리보기를 보존한다. 400/401/403/5xx는 각각 적절한 오류 메시지를 표시하고 부분 등록하지 않는다.
+- [x] `bulkMemberUtils.js`와 bulk view/page를 5개 열 TSV, ISO 날짜 검증, 행별 오류 미리보기로 변경한다.
+- [x] `/dashboard/members/paste` 경로에서 붙여넣기 입력과 미리보기·등록을 구현한다.
+- [x] 409 시 최신 관리 목록을 다시 받아 충돌 행을 표시하며 입력과 미리보기를 보존한다. 400/401/403/5xx는 각각 적절한 오류 메시지를 표시하고 부분 등록하지 않는다.
 - [ ] 프런트엔드 테스트·빌드는 실행하지 않는다. 정상 등록, 날짜 오류, 입력 중복, 동시 등록 409, 권한 오류를 브라우저에서 수동 확인한다.
 
 ## 논리적 커밋 단위
