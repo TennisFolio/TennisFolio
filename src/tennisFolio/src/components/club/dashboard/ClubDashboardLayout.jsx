@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getMyClubs } from '../../../utils/clubApi';
+import { isClubOperator } from '../clubUtils';
 import { errorMessage, normalizeClub, unwrapData } from '../../../page/club/clubPageUtils';
 
 function ClubDashboardLayout({ clubPublicId, currentUser, activeMenu, children }) {
@@ -28,7 +29,7 @@ function ClubDashboardLayout({ clubPublicId, currentUser, activeMenu, children }
           setClubs(
             unwrapData(response, [])
               .map(normalizeClub)
-              .filter((club) => club?.admin === true || club?.role === 'ADMIN'),
+              .filter(isClubOperator),
           );
         }
       })

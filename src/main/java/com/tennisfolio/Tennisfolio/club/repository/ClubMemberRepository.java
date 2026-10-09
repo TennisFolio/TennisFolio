@@ -2,7 +2,6 @@ package com.tennisfolio.Tennisfolio.club.repository;
 
 import com.tennisfolio.Tennisfolio.club.entity.Club;
 import com.tennisfolio.Tennisfolio.club.entity.ClubMember;
-import com.tennisfolio.Tennisfolio.club.entity.ClubMemberRole;
 import com.tennisfolio.Tennisfolio.club.entity.ClubMemberStatus;
 import com.tennisfolio.Tennisfolio.club.entity.ClubSkillTier;
 import com.tennisfolio.Tennisfolio.meeting.domain.Gender;
@@ -36,14 +35,10 @@ public interface ClubMemberRepository extends JpaRepository<ClubMember, Long> {
                 WHEN com.tennisfolio.Tennisfolio.club.entity.ClubMemberStatus.SUSPENDED THEN 1
                 ELSE 2
             END,
-            CASE member.role
-                WHEN com.tennisfolio.Tennisfolio.club.entity.ClubMemberRole.ADMIN THEN 0
-                ELSE 1
-            END,
             member.name ASC,
             member.id ASC
             """)
-    List<ClubMember> findManagementByClubOrderByStatusAndRole(@Param("club") Club club);
+    List<ClubMember> findManagementByClubOrderByStatus(@Param("club") Club club);
 
     @Query("""
             SELECT member
@@ -55,23 +50,13 @@ public interface ClubMemberRepository extends JpaRepository<ClubMember, Long> {
                 WHEN com.tennisfolio.Tennisfolio.club.entity.ClubMemberStatus.SUSPENDED THEN 1
                 ELSE 2
             END,
-            CASE member.role
-                WHEN com.tennisfolio.Tennisfolio.club.entity.ClubMemberRole.ADMIN THEN 0
-                ELSE 1
-            END,
             member.name ASC,
             member.id ASC
             """)
-    List<ClubMember> findManagementByClubAndNameContainingIgnoreCaseOrderByStatusAndRole(
+    List<ClubMember> findManagementByClubAndNameContainingIgnoreCaseOrderByStatus(
             @Param("club") Club club,
             @Param("name") String name
     );
-
-    List<ClubMember> findByUserIdAndMemberStatusOrderByIdAsc(Long userId, ClubMemberStatus memberStatus);
-
-    Optional<ClubMember> findByClubAndUserIdAndMemberStatus(Club club, Long userId, ClubMemberStatus memberStatus);
-
-    Optional<ClubMember> findByClubIdAndUserIdAndMemberStatus(Long clubId, Long userId, ClubMemberStatus memberStatus);
 
     List<ClubMember> findByClubAndNameAndGenderAndMemberStatusOrderByIdAsc(Club club, String name, Gender gender, ClubMemberStatus memberStatus);
 
@@ -80,8 +65,6 @@ public interface ClubMemberRepository extends JpaRepository<ClubMember, Long> {
     Optional<ClubMember> findByClubAndId(Club club, Long id);
 
     List<ClubMember> findBySkillTier(ClubSkillTier skillTier);
-
-    long countByClubAndRoleAndMemberStatus(Club club, ClubMemberRole role, ClubMemberStatus memberStatus);
 
     long countByClubAndMemberStatus(Club club, ClubMemberStatus memberStatus);
 

@@ -10,7 +10,6 @@ import java.time.LocalDate;
 public class ClubMemberCreateRequest {
     private final String name;
     private final String gender;
-    private final String role;
     private final Long skillTierId;
     private final String contactMemo;
     private final String memo;
@@ -20,7 +19,6 @@ public class ClubMemberCreateRequest {
     public ClubMemberCreateRequest(
             @JsonProperty("name") String name,
             @JsonProperty("gender") String gender,
-            @JsonProperty("role") String role,
             @JsonProperty("skillTierId") Long skillTierId,
             @JsonProperty("contactMemo") String contactMemo,
             @JsonProperty("memo") String memo,
@@ -28,21 +26,9 @@ public class ClubMemberCreateRequest {
     ) {
         this.name = name;
         this.gender = gender;
-        this.role = role;
         this.skillTierId = skillTierId;
         this.contactMemo = contactMemo;
         this.memo = memo;
         this.joinedAt = joinedAt;
-    }
-
-    public ClubMemberCreateRequest(
-            String name,
-            String gender,
-            String role,
-            Long skillTierId,
-            String contactMemo,
-            String memo
-    ) {
-        this(name, gender, role, skillTierId, contactMemo, memo, null);
     }
 }

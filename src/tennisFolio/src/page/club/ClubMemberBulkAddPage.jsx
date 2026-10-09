@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import ExcelJS from 'exceljs';
 import ClubMemberBulkAddView from '../../components/club/bulk/ClubMemberBulkAddView';
+import { isClubOperator } from '../../components/club/clubUtils';
 import { bulkMemberPayload, createBulkMemberRow, createBulkMemberRows, parseBulkMemberRows, validateBulkMembers } from '../../components/club/bulk/bulkMemberUtils';
 import ClubDashboardLayout from '../../components/club/dashboard/ClubDashboardLayout';
 import ClubAuthRequired from './ClubAuthRequired';
@@ -12,7 +13,7 @@ import '../Club.css';
 function ClubMemberBulkAddPage({ currentUser }) {
   const navigate = useNavigate(); const { clubPublicId, publicId } = useParams(); const selectedPublicId = clubPublicId ?? publicId;
   const [club, setClub] = useState(null); const [existingMembers, setExistingMembers] = useState([]); const [rows, setRows] = useState(() => createBulkMemberRows()); const [pasteText, setPasteText] = useState(''); const [error, setError] = useState(''); const [isLoading, setIsLoading] = useState(false); const [isSaving, setIsSaving] = useState(false);
-  const isAdmin = club?.admin === true || club?.role === 'ADMIN'; const validationRows = useMemo(() => validateBulkMembers(rows, existingMembers), [rows, existingMembers]); const backToMembers = () => navigate(`/clubs/${selectedPublicId}/dashboard/members`);
+  const isAdmin = isClubOperator(club); const validationRows = useMemo(() => validateBulkMembers(rows, existingMembers), [rows, existingMembers]); const backToMembers = () => navigate(`/clubs/${selectedPublicId}/dashboard/members`);
   useEffect(() => { if (!currentUser || !selectedPublicId) return undefined; let cancelled = false; setIsLoading(true); setError(''); Promise.all([getClub(selectedPublicId), getClubManagementMembers(selectedPublicId)]).then(([clubResponse, memberResponse]) => { if (!cancelled) { setClub(normalizeClub(unwrapData(clubResponse, null))); setExistingMembers(unwrapData(memberResponse, [])); } }).catch((requestError) => !cancelled && setError(errorMessage(requestError, '회원 정보를 불러오지 못했습니다.'))).finally(() => !cancelled && setIsLoading(false)); return () => { cancelled = true; }; }, [currentUser, selectedPublicId]);
   const changeRow = (rowId, changes) => setRows((currentRows) => currentRows.map((row) => (
     row.rowId === rowId ? { ...row, ...changes, invalidColumnCount: false } : row
@@ -26,12 +27,11 @@ function ClubMemberBulkAddPage({ currentUser }) {
     worksheet.columns = [
       { header: '이름', key: 'name', width: 16 },
       { header: '성별', key: 'gender', width: 10 },
-      { header: '역할', key: 'role', width: 12 },
       { header: '티어', key: 'tier', width: 16 },
       { header: '가입일', key: 'joinedAt', width: 14 },
     ];
     worksheet.getRow(1).font = { bold: true };
-    worksheet.addRow(['예시 회원', '남', '회원', tierNames[0] ?? '클럽 티어명', new Date(2025, 0, 15)]);
+    worksheet.addRow(['예시 회원', '남', tierNames[0] ?? '클럽 티어명', new Date(2025, 0, 15)]);
 
     for (let row = 2; row <= 101; row += 1) {
       worksheet.getCell(`B${row}`).dataValidation = {
@@ -42,15 +42,7 @@ function ClubMemberBulkAddPage({ currentUser }) {
         errorTitle: '성별 선택',
         error: '성별은 남 또는 여만 선택할 수 있습니다.',
       };
-      worksheet.getCell(`C${row}`).dataValidation = {
-        type: 'list',
-        allowBlank: false,
-        formulae: ['"회원,관리자"'],
-        showErrorMessage: true,
-        errorTitle: '역할 선택',
-        error: '역할은 회원 또는 관리자만 선택할 수 있습니다.',
-      };
-      worksheet.getCell(`E${row}`).numFmt = 'yyyy-mm-dd';
+      worksheet.getCell(`D${row}`).numFmt = 'yyyy-mm-dd';
     }
 
     const guideWorksheet = workbook.addWorksheet('작성 안내');
@@ -58,7 +50,6 @@ function ClubMemberBulkAddPage({ currentUser }) {
     guideWorksheet.addRows([
       ['항목', '입력 방법'],
       ['성별', '드롭다운에서 남 또는 여를 선택'],
-      ['역할', '드롭다운에서 회원 또는 관리자를 선택'],
       ['티어', tierNames.length ? `현재 사용 가능한 티어: ${tierNames.join(', ')}` : '현재 설정된 티어가 없습니다. 빈칸으로 두세요.'],
       ['가입일', 'YYYY-MM-DD 형식, 예: 2026-09-01 (비워도 됨)'],
       ['예시 행', '두 번째 행은 예시이므로 삭제하거나 실제 회원 정보로 바꾼 뒤 사용'],

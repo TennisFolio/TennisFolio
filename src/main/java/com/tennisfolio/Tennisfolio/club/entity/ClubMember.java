@@ -23,101 +23,41 @@ import java.time.LocalDate;
 @Getter
 @NoArgsConstructor
 public class ClubMember extends BaseTimeEntity {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "CLUB_MEMBER_ID")
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY) @Column(name = "CLUB_MEMBER_ID")
     private Long id;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "CLUB_ID", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "CLUB_ID", nullable = false)
     private Club club;
-
-    @Column(name = "USER_ID")
-    private Long userId;
-
     @Column(name = "NAME", nullable = false)
     private String name;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "GENDER", nullable = false)
+    @Enumerated(EnumType.STRING) @Column(name = "GENDER", nullable = false)
     private Gender gender;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "ROLE", nullable = false)
-    private ClubMemberRole role;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "SKILL_TIER_ID")
+    @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "SKILL_TIER_ID")
     private ClubSkillTier skillTier;
-
-    @Column(name = "CONTACT_MEMO")
-    private String contactMemo;
-
-    @Column(name = "MEMO")
-    private String memo;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "MEMBER_STATUS", nullable = false)
+    @Column(name = "CONTACT_MEMO") private String contactMemo;
+    @Column(name = "MEMO") private String memo;
+    @Enumerated(EnumType.STRING) @Column(name = "MEMBER_STATUS", nullable = false)
     private ClubMemberStatus memberStatus = ClubMemberStatus.ACTIVE;
+    @Column(name = "JOINED_AT") private LocalDate joinedAt;
+    @Column(name = "SUSPENDED_AT") private LocalDate suspendedAt;
+    @Column(name = "LEFT_AT") private LocalDate leftAt;
 
-    @Column(name = "JOINED_AT")
-    private LocalDate joinedAt;
-
-    @Column(name = "SUSPENDED_AT")
-    private LocalDate suspendedAt;
-
-    @Column(name = "LEFT_AT")
-    private LocalDate leftAt;
-
-    public ClubMember(
-            Club club,
-            Long userId,
-            String name,
-            Gender gender,
-            ClubMemberRole role,
-            ClubSkillTier skillTier,
-            String contactMemo,
-            String memo
-    ) {
-        this(club, userId, name, gender, role, skillTier, contactMemo, memo, null);
+    public ClubMember(Club club, String name, Gender gender, ClubSkillTier skillTier, String contactMemo, String memo) {
+        this(club, name, gender, skillTier, contactMemo, memo, null);
     }
 
-    public ClubMember(
-            Club club,
-            Long userId,
-            String name,
-            Gender gender,
-            ClubMemberRole role,
-            ClubSkillTier skillTier,
-            String contactMemo,
-            String memo,
-            LocalDate joinedAt
-    ) {
+    public ClubMember(Club club, String name, Gender gender, ClubSkillTier skillTier, String contactMemo, String memo, LocalDate joinedAt) {
         this.club = club;
-        this.userId = userId;
         this.name = name;
         this.gender = gender;
-        this.role = role;
         this.skillTier = skillTier;
         this.contactMemo = contactMemo;
         this.memo = memo;
-        this.memberStatus = ClubMemberStatus.ACTIVE;
         this.joinedAt = joinedAt;
     }
 
-    public void update(
-            String name,
-            Gender gender,
-            ClubMemberRole role,
-            ClubSkillTier skillTier,
-            String contactMemo,
-            String memo,
-            LocalDate joinedAt
-    ) {
+    public void update(String name, Gender gender, ClubSkillTier skillTier, String contactMemo, String memo, LocalDate joinedAt) {
         this.name = name;
         this.gender = gender;
-        this.role = role;
         this.skillTier = skillTier;
         this.contactMemo = contactMemo;
         this.memo = memo;
@@ -126,22 +66,14 @@ public class ClubMember extends BaseTimeEntity {
 
     public void changeStatus(ClubMemberStatus memberStatus, LocalDate statusDate) {
         this.memberStatus = memberStatus;
-
         if (memberStatus == ClubMemberStatus.ACTIVE) {
-            this.suspendedAt = null;
-            this.leftAt = null;
-            return;
+            suspendedAt = null; leftAt = null;
+        } else if (memberStatus == ClubMemberStatus.SUSPENDED) {
+            suspendedAt = statusDate; leftAt = null;
+        } else {
+            suspendedAt = null; leftAt = statusDate;
         }
-        if (memberStatus == ClubMemberStatus.SUSPENDED) {
-            this.suspendedAt = statusDate;
-            this.leftAt = null;
-            return;
-        }
-        this.suspendedAt = null;
-        this.leftAt = statusDate;
     }
 
-    public void clearSkillTier() {
-        this.skillTier = null;
-    }
+    public void clearSkillTier() { this.skillTier = null; }
 }

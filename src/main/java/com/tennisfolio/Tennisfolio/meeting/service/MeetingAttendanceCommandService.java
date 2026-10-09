@@ -4,12 +4,12 @@ import com.tennisfolio.Tennisfolio.common.ExceptionCode;
 import com.tennisfolio.Tennisfolio.common.UserStatus;
 import com.tennisfolio.Tennisfolio.club.entity.Club;
 import com.tennisfolio.Tennisfolio.club.entity.ClubMember;
-import com.tennisfolio.Tennisfolio.club.entity.ClubMemberRole;
 import com.tennisfolio.Tennisfolio.club.entity.ClubMemberStatus;
 import com.tennisfolio.Tennisfolio.club.entity.ClubSkillTier;
 import com.tennisfolio.Tennisfolio.club.repository.ClubMemberRepository;
 import com.tennisfolio.Tennisfolio.club.repository.ClubRepository;
 import com.tennisfolio.Tennisfolio.club.repository.ClubSkillTierRepository;
+import com.tennisfolio.Tennisfolio.club.service.ClubAccessService;
 import com.tennisfolio.Tennisfolio.exception.NotFoundException;
 import com.tennisfolio.Tennisfolio.meeting.domain.AttendanceStatus;
 import com.tennisfolio.Tennisfolio.meeting.domain.Gender;
@@ -45,6 +45,7 @@ public class MeetingAttendanceCommandService {
     private final ClubRepository clubRepository;
     private final ClubMemberRepository clubMemberRepository;
     private final ClubSkillTierRepository clubSkillTierRepository;
+    private final ClubAccessService clubAccessService;
 
     public MeetingAttendanceCommandService(
             MeetingRepository meetingRepository,
@@ -52,7 +53,8 @@ public class MeetingAttendanceCommandService {
             UserRepository userRepository,
             ClubRepository clubRepository,
             ClubMemberRepository clubMemberRepository,
-            ClubSkillTierRepository clubSkillTierRepository
+            ClubSkillTierRepository clubSkillTierRepository,
+            ClubAccessService clubAccessService
     ) {
         this.meetingRepository = meetingRepository;
         this.attendanceRepository = attendanceRepository;
@@ -60,6 +62,7 @@ public class MeetingAttendanceCommandService {
         this.clubRepository = clubRepository;
         this.clubMemberRepository = clubMemberRepository;
         this.clubSkillTierRepository = clubSkillTierRepository;
+        this.clubAccessService = clubAccessService;
     }
 
     @Transactional
@@ -69,6 +72,7 @@ public class MeetingAttendanceCommandService {
             Long currentUserId
     ) {
         Meeting meeting = findActiveMeetingForAttendanceUpdate(publicId);
+        requireClubOperatorForAttendance(meeting, currentUserId);
         ensureAttendanceEditable(meeting);
         AttendanceStatus status = parseAttendanceStatus(request.getAttendanceStatus());
         Optional<MeetingAttendance> currentUserAttendance = findCurrentUserAttendance(meeting, currentUserId);
@@ -308,11 +312,14 @@ public class MeetingAttendanceCommandService {
             return;
         }
 
-        Club club = findActiveClub(meeting.getClubId());
-        ClubMember member = clubMemberRepository.findByClubAndUserIdAndMemberStatus(club, currentUserId, ClubMemberStatus.ACTIVE)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN, "클럽 관리자만 참가자를 추가할 수 있습니다."));
-        if (member.getRole() != ClubMemberRole.ADMIN) {
+        if (!clubAccessService.isOperator(meeting.getClubId(), currentUserId)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "클럽 관리자만 참가자를 추가할 수 있습니다.");
+        }
+    }
+
+    private void requireClubOperatorForAttendance(Meeting meeting, Long currentUserId) {
+        if (meeting.isClubMeeting() && !clubAccessService.isOperator(meeting.getClubId(), currentUserId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "클럽 운영진만 클럽 모임 참석자를 관리할 수 있습니다.");
         }
     }
 
@@ -444,17 +451,6 @@ public class MeetingAttendanceCommandService {
     }
 
     private ParticipantResolution resolveAuthenticatedParticipant(Meeting meeting, Long currentUserId) {
-        if (meeting.isClubMeeting()) {
-            Club club = clubRepository.findByIdAndDeletedAtIsNull(meeting.getClubId()).orElse(null);
-            if (club != null) {
-                Optional<ClubMember> currentMember =
-                        clubMemberRepository.findByClubAndUserIdAndMemberStatus(club, currentUserId, ClubMemberStatus.ACTIVE);
-                if (currentMember.isPresent()) {
-                    return clubMemberResolution(currentMember.get());
-                }
-            }
-        }
-
         User user = userRepository.findByIdAndStatus(currentUserId, UserStatus.ACTIVE)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "로그인이 필요합니다."));
 

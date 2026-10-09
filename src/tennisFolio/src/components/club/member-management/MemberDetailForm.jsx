@@ -10,7 +10,6 @@ function MemberDetailForm({ form, skillTiers, isNew, isSaving, onChange, onSubmi
         <label className="club-field"><span>성별</span><select value={form.gender} onChange={(event) => setField('gender', event.target.value)}><option value="MALE">남성</option><option value="FEMALE">여성</option></select></label>
         <label className="club-field"><span>가입일</span><input type="date" value={form.joinedAt} onChange={(event) => setField('joinedAt', event.target.value)} /></label>
         <label className="club-field"><span>티어</span><select value={form.skillTierId ?? ''} onChange={(event) => setField('skillTierId', event.target.value || null)}><option value="">미정</option>{skillTiers.map((tier) => <option key={tier.id} value={tier.id}>{tier.name}</option>)}</select></label>
-        <label className="club-field"><span>역할</span><select value={form.role} onChange={(event) => setField('role', event.target.value)}><option value="MEMBER">회원</option><option value="ADMIN">관리자</option></select></label>
         {!isNew && <><label className="club-field"><span>상태</span><select value={form.memberStatus} onChange={(event) => setField('memberStatus', event.target.value)}><option value="ACTIVE">활동</option><option value="SUSPENDED">휴면</option><option value="WITHDRAWN">탈퇴</option></select></label>
           {form.memberStatus !== 'ACTIVE' && <label className="club-field"><span>상태 변경일</span><input type="date" value={statusDate ?? ''} onChange={(event) => setField(form.memberStatus === 'SUSPENDED' ? 'suspendedAt' : 'leftAt', event.target.value)} /></label>}</>}
       </div>

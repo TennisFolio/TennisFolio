@@ -7,14 +7,11 @@ import lombok.Getter;
 
 import java.time.LocalDate;
 
-@Getter
-@AllArgsConstructor
+@Getter @AllArgsConstructor
 public class ClubMemberManagementResponse {
     private Long id;
-    private Long userId;
     private String name;
     private String gender;
-    private String role;
     private String memberStatus;
     private Long skillTierId;
     private String skillTierName;
@@ -26,22 +23,10 @@ public class ClubMemberManagementResponse {
     private String memo;
 
     public static ClubMemberManagementResponse from(ClubMember member) {
-        ClubSkillTier skillTier = member.getSkillTier();
-        return new ClubMemberManagementResponse(
-                member.getId(),
-                member.getUserId(),
-                member.getName(),
-                member.getGender().name(),
-                member.getRole().name(),
-                member.getMemberStatus().name(),
-                skillTier == null ? null : skillTier.getId(),
-                skillTier == null ? null : skillTier.getName(),
-                skillTier == null ? null : skillTier.getLevel(),
-                member.getJoinedAt(),
-                member.getSuspendedAt(),
-                member.getLeftAt(),
-                member.getContactMemo(),
-                member.getMemo()
-        );
+        ClubSkillTier tier = member.getSkillTier();
+        return new ClubMemberManagementResponse(member.getId(), member.getName(), member.getGender().name(),
+                member.getMemberStatus().name(), tier == null ? null : tier.getId(),
+                tier == null ? null : tier.getName(), tier == null ? null : tier.getLevel(),
+                member.getJoinedAt(), member.getSuspendedAt(), member.getLeftAt(), member.getContactMemo(), member.getMemo());
     }
 }

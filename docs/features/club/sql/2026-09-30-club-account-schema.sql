@@ -1,0 +1,39 @@
+-- ClubAccount 권한 분리 및 기존 클럽 데이터 초기화
+-- 실행 전: 운영 DB 백업을 완료하고, 실제 FK 이름은 INFORMATION_SCHEMA로 확인한다.
+-- 독립 Meeting과 Competition 테이블은 이 스크립트의 대상이 아니다.
+
+START TRANSACTION;
+
+-- 1. 클럽 소속 Meeting의 참석자를 먼저 지운다. 실제 테이블/컬럼명은 배포 전 확인한다.
+DELETE attendance
+FROM tb_meeting_attendance attendance
+JOIN tb_meeting meeting ON meeting.MEETING_ID = attendance.MEETING_ID
+WHERE meeting.CLUB_ID IS NOT NULL;
+
+-- 2. 클럽 소속 Meeting과 기존 클럽 명단/등급/클럽을 초기화한다.
+DELETE FROM tb_meeting WHERE CLUB_ID IS NOT NULL;
+DELETE FROM tb_club_member;
+DELETE FROM tb_club_skill_tier;
+DELETE FROM tb_club;
+
+-- 3. 이전 ClubMember의 Account/역할 컬럼을 제거한다.
+ALTER TABLE tb_club_member DROP COLUMN USER_ID;
+ALTER TABLE tb_club_member DROP COLUMN ROLE;
+
+-- 4. 새 Account-Club 연결 테이블을 만든다.
+CREATE TABLE tb_club_account (
+    CLUB_ACCOUNT_ID BIGINT NOT NULL AUTO_INCREMENT,
+    CLUB_ID BIGINT NOT NULL,
+    ACCOUNT_ID BIGINT NOT NULL,
+    DISPLAY_NAME VARCHAR(50) NOT NULL,
+    ROLE VARCHAR(20) NOT NULL,
+    CRT_DT DATETIME NULL,
+    UPD_DT DATETIME NULL,
+    PRIMARY KEY (CLUB_ACCOUNT_ID),
+    CONSTRAINT UK_CLUB_ACCOUNT_CLUB_ACCOUNT UNIQUE (CLUB_ID, ACCOUNT_ID),
+    CONSTRAINT CK_CLUB_ACCOUNT_ROLE CHECK (ROLE IN ('OWNER', 'ADMIN')),
+    CONSTRAINT FK_CLUB_ACCOUNT_CLUB FOREIGN KEY (CLUB_ID) REFERENCES tb_club (CLUB_ID),
+    CONSTRAINT FK_CLUB_ACCOUNT_USER FOREIGN KEY (ACCOUNT_ID) REFERENCES tb_user (USER_ID)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+COMMIT;

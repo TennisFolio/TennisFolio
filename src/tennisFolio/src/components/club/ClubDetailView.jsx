@@ -2,7 +2,6 @@ import {
   formatMeetingDate,
   genderLabel,
   meetingStateLabel,
-  roleLabel,
 } from './clubUtils';
 
 function ClubDetailView({
@@ -166,11 +165,6 @@ function ClubDetailView({
                     }`}
                   >
                     {genderLabel(member.gender)}
-                  </span>
-                  <span
-                    className={`club-chip ${member.role === 'ADMIN' ? 'admin' : ''}`}
-                  >
-                    {roleLabel(member.role)}
                   </span>
                 </div>
               ))}

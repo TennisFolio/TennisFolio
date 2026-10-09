@@ -160,10 +160,8 @@ class ClubControllerTest {
         when(clubQueryService.getMembers("club-public-id", "jamie", 10L))
                 .thenReturn(List.of(new ClubMemberResponse(
                         100L,
-                        null,
                         "Jamie Lee",
                         "FEMALE",
-                        "MEMBER",
                         1L,
                         "상급",
                         3,
@@ -183,7 +181,7 @@ class ClubControllerTest {
     void addMember_passesCurrentUserToCommandService() {
         Long userId = 10L;
         ClubMemberCreateRequest request =
-                new ClubMemberCreateRequest("Jamie Lee", "FEMALE", "MEMBER", null, null, null);
+                new ClubMemberCreateRequest("Jamie Lee", "FEMALE", null, null, null, null);
 
         ResponseEntity<ResponseDTO<Void>> response =
                 clubController.addMember(userId, "club-public-id", request);
@@ -196,7 +194,7 @@ class ClubControllerTest {
     void addMembers_passesCurrentUserToCommandService() {
         Long userId = 10L;
         ClubMemberBulkCreateRequest request = new ClubMemberBulkCreateRequest(List.of(
-                new ClubMemberCreateRequest("Jamie Lee", "FEMALE", "MEMBER", null, null, null)
+                new ClubMemberCreateRequest("Jamie Lee", "FEMALE", null, null, null, null)
         ));
 
         ResponseEntity<ResponseDTO<Void>> response =
@@ -210,7 +208,7 @@ class ClubControllerTest {
     void updateMember_passesCurrentUserToCommandService() {
         Long userId = 10L;
         ClubMemberUpdateRequest request =
-                new ClubMemberUpdateRequest("Jamie Lee", "FEMALE", "MEMBER", null, null, null);
+                new ClubMemberUpdateRequest("Jamie Lee", "FEMALE", null, null, null, null);
 
         ResponseEntity<ResponseDTO<Void>> response =
                 clubController.updateMember(userId, "club-public-id", 100L, request);

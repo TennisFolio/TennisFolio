@@ -43,13 +43,13 @@ class ClubMeetingCommandServiceTest {
     void createClubMeeting_checksAdminAndCreatesMeetingForClub() {
         Club club = club(100L);
         MeetingCreateRequest request = createRequest();
-        when(clubAccessService.requireAdmin("club-public-id", 10L)).thenReturn(club);
+        when(clubAccessService.requireOperator("club-public-id", 10L)).thenReturn(club);
         when(meetingCommandService.createClubMeeting(request, 10L, 100L))
                 .thenReturn(new MeetingCreateResponse("meeting-public-id"));
 
         MeetingCreateResponse response = service.createClubMeeting("club-public-id", request, 10L);
 
-        verify(clubAccessService).requireAdmin("club-public-id", 10L);
+        verify(clubAccessService).requireOperator("club-public-id", 10L);
         verify(meetingCommandService).createClubMeeting(request, 10L, 100L);
         assertThat(response.getPublicId()).isEqualTo("meeting-public-id");
     }
@@ -58,7 +58,7 @@ class ClubMeetingCommandServiceTest {
     void updateClubMeeting_checksAdminAndUpdatesMeetingForClub() {
         Club club = club(100L);
         MeetingUpdateRequest request = updateRequest();
-        when(clubAccessService.requireAdmin("club-public-id", 20L)).thenReturn(club);
+        when(clubAccessService.requireOperator("club-public-id", 20L)).thenReturn(club);
         when(meetingCommandService.updateClubMeeting("meeting-public-id", 100L, request, 20L))
                 .thenReturn(detailResponse(false));
 
@@ -77,7 +77,7 @@ class ClubMeetingCommandServiceTest {
     void updateClubMeetingStatus_checksAdminAndUpdatesStatusForClub() {
         Club club = club(100L);
         MeetingStatusUpdateRequest request = new MeetingStatusUpdateRequest("CLOSED");
-        when(clubAccessService.requireAdmin("club-public-id", 20L)).thenReturn(club);
+        when(clubAccessService.requireOperator("club-public-id", 20L)).thenReturn(club);
         when(meetingCommandService.updateClubMeetingStatus("meeting-public-id", 100L, request, 20L))
                 .thenReturn(detailResponse(false));
 
@@ -89,7 +89,7 @@ class ClubMeetingCommandServiceTest {
     @Test
     void deleteClubMeeting_checksAdminAndDeletesMeetingForClub() {
         Club club = club(100L);
-        when(clubAccessService.requireAdmin("club-public-id", 20L)).thenReturn(club);
+        when(clubAccessService.requireOperator("club-public-id", 20L)).thenReturn(club);
 
         service.deleteClubMeeting("club-public-id", "meeting-public-id", 20L);
 
@@ -100,7 +100,7 @@ class ClubMeetingCommandServiceTest {
     void createClubMeetingCompetition_checksAdminAndCreatesCompetitionForClubMeeting() {
         Club club = club(100L);
         MeetingCompetitionCreateRequest request = new MeetingCompetitionCreateRequest(true);
-        when(clubAccessService.requireAdmin("club-public-id", 20L)).thenReturn(club);
+        when(clubAccessService.requireOperator("club-public-id", 20L)).thenReturn(club);
         when(meetingCompetitionCreateService.createClubMeetingCompetition(
                 "meeting-public-id",
                 100L,
@@ -115,7 +115,7 @@ class ClubMeetingCommandServiceTest {
                 20L
         );
 
-        verify(clubAccessService).requireAdmin("club-public-id", 20L);
+        verify(clubAccessService).requireOperator("club-public-id", 20L);
         verify(meetingCompetitionCreateService).createClubMeetingCompetition(
                 "meeting-public-id",
                 100L,
@@ -128,11 +128,11 @@ class ClubMeetingCommandServiceTest {
     @Test
     void deleteClubMeetingCompetition_checksAdminAndDeletesCompetitionForClubMeeting() {
         Club club = club(100L);
-        when(clubAccessService.requireAdmin("club-public-id", 20L)).thenReturn(club);
+        when(clubAccessService.requireOperator("club-public-id", 20L)).thenReturn(club);
 
         service.deleteClubMeetingCompetition("club-public-id", "meeting-public-id", 20L);
 
-        verify(clubAccessService).requireAdmin("club-public-id", 20L);
+        verify(clubAccessService).requireOperator("club-public-id", 20L);
         verify(meetingCompetitionCreateService).deleteClubMeetingCompetition("meeting-public-id", 100L);
     }
 

@@ -3,11 +3,9 @@ package com.tennisfolio.Tennisfolio.meeting.service;
 import com.tennisfolio.Tennisfolio.common.ExceptionCode;
 import com.tennisfolio.Tennisfolio.common.UserStatus;
 import com.tennisfolio.Tennisfolio.club.entity.Club;
-import com.tennisfolio.Tennisfolio.club.entity.ClubMember;
-import com.tennisfolio.Tennisfolio.club.entity.ClubMemberStatus;
 import com.tennisfolio.Tennisfolio.club.repository.ClubSkillTierRepository;
-import com.tennisfolio.Tennisfolio.club.repository.ClubMemberRepository;
 import com.tennisfolio.Tennisfolio.club.repository.ClubRepository;
+import com.tennisfolio.Tennisfolio.club.service.ClubAccessService;
 import com.tennisfolio.Tennisfolio.exception.NotFoundException;
 import com.tennisfolio.Tennisfolio.matching.repository.CompetitionRepository;
 import com.tennisfolio.Tennisfolio.meeting.domain.AttendanceStatus;
@@ -37,8 +35,8 @@ public class MeetingQueryService {
     private final CompetitionRepository competitionRepository;
     private final UserRepository userRepository;
     private final ClubRepository clubRepository;
-    private final ClubMemberRepository clubMemberRepository;
     private final ClubSkillTierRepository clubSkillTierRepository;
+    private final ClubAccessService clubAccessService;
 
     public MeetingQueryService(
             MeetingRepository meetingRepository,
@@ -46,27 +44,27 @@ public class MeetingQueryService {
             CompetitionRepository competitionRepository,
             UserRepository userRepository,
             ClubRepository clubRepository,
-            ClubMemberRepository clubMemberRepository,
-            ClubSkillTierRepository clubSkillTierRepository
+            ClubSkillTierRepository clubSkillTierRepository,
+            ClubAccessService clubAccessService
     ) {
         this.meetingRepository = meetingRepository;
         this.attendanceRepository = attendanceRepository;
         this.competitionRepository = competitionRepository;
         this.userRepository = userRepository;
         this.clubRepository = clubRepository;
-        this.clubMemberRepository = clubMemberRepository;
         this.clubSkillTierRepository = clubSkillTierRepository;
+        this.clubAccessService = clubAccessService;
     }
 
     @Transactional(readOnly = true)
     public MeetingDetailResponse getMeeting(String publicId, Long currentUserId) {
         Meeting meeting = findActiveMeeting(publicId);
+        requireClubOperatorForMeeting(meeting, currentUserId);
         return toDetailResponse(meeting, currentUserId);
     }
 
     @Transactional(readOnly = true)
     public MeetingDetailResponse toDetailResponse(Meeting meeting, Long currentUserId) {
-        ClubMember currentClubMember = findCurrentClubMember(meeting, currentUserId);
         List<MeetingAttendance> attendances =
                 attendanceRepository.findByMeetingAndDeletedAtIsNullOrderByIdAsc(meeting);
         return MeetingDetailResponse.from(
@@ -75,9 +73,9 @@ public class MeetingQueryService {
                 findCompetitionPublicId(meeting),
                 findOwnerNickName(meeting),
                 findClubName(meeting),
-                currentClubMember == null ? null : currentClubMember.getId(),
-                currentClubMember == null ? null : currentClubMember.getName(),
-                currentClubMember == null ? null : currentClubMember.getGender().name(),
+                null,
+                null,
+                null,
                 attendances,
                 findSkillTierNames(attendances)
         );
@@ -93,6 +91,12 @@ public class MeetingQueryService {
                 .orElse(null);
     }
 
+    private void requireClubOperatorForMeeting(Meeting meeting, Long currentUserId) {
+        if (meeting.isClubMeeting() && !clubAccessService.isOperator(meeting.getClubId(), currentUserId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "클럽 운영진만 클럽 모임을 조회할 수 있습니다.");
+        }
+    }
+
     private String findOwnerNickName(Meeting meeting) {
         return userRepository.findByIdAndStatus(meeting.getOwnerUserId(), UserStatus.ACTIVE)
                 .map(user -> user.getNickName())
@@ -106,21 +110,6 @@ public class MeetingQueryService {
 
         return clubRepository.findByIdAndDeletedAtIsNull(meeting.getClubId())
                 .map(club -> club.getName())
-                .orElse(null);
-    }
-
-    private ClubMember findCurrentClubMember(Meeting meeting, Long currentUserId) {
-        if (meeting.getClubId() == null || currentUserId == null) {
-            return null;
-        }
-
-        Club club = clubRepository.findByIdAndDeletedAtIsNull(meeting.getClubId())
-                .orElse(null);
-        if (club == null) {
-            return null;
-        }
-
-        return clubMemberRepository.findByClubAndUserIdAndMemberStatus(club, currentUserId, ClubMemberStatus.ACTIVE)
                 .orElse(null);
     }
 

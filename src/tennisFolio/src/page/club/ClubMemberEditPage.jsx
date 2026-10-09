@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import ClubMemberEditorView from '../../components/club/ClubMemberEditorView';
+import { isClubOperator } from '../../components/club/clubUtils';
 import {
   deleteClubMember,
   getClub,
@@ -30,7 +31,7 @@ function ClubMemberEditPage({ currentUser }) {
   const [isMembersLoading, setIsMembersLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
-  const isAdmin = selectedClub?.admin === true || selectedClub?.role === 'ADMIN';
+  const isAdmin = isClubOperator(selectedClub);
   const editingMember = useMemo(
     () => members.find((member) => String(member.id) === String(memberId)) ?? null,
     [memberId, members],
@@ -110,7 +111,6 @@ function ClubMemberEditPage({ currentUser }) {
     setMemberForm({
       name: editingMember.name ?? '',
       gender: editingMember.gender ?? 'MALE',
-      role: editingMember.role ?? 'MEMBER',
       skillTierId: editingMember.skillTierId ?? null,
       contactMemo: editingMember.contactMemo ?? '',
       memo: editingMember.memo ?? '',

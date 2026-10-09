@@ -35,10 +35,8 @@ class ClubMemberTest {
     private ClubMember createMember() {
         return new ClubMember(
                 null,
-                null,
                 "테니스 회원",
                 Gender.MALE,
-                ClubMemberRole.MEMBER,
                 null,
                 null,
                 null

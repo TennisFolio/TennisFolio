@@ -1,11 +1,10 @@
 let nextRowId = 1;
 
 const GENDER_BY_LABEL = { 남: 'MALE', 남성: 'MALE', MALE: 'MALE', 여: 'FEMALE', 여성: 'FEMALE', FEMALE: 'FEMALE' };
-const ROLE_BY_LABEL = { 관리자: 'ADMIN', ADMIN: 'ADMIN', 회원: 'MEMBER', 일반: 'MEMBER', MEMBER: 'MEMBER' };
-const PASTE_HEADERS = ['이름', '성별', '역할', '티어', '가입일'];
+const PASTE_HEADERS = ['이름', '성별', '티어', '가입일'];
 
 export function createBulkMemberRow(member = {}) {
-  return { rowId: nextRowId++, name: member.name ?? '', gender: member.gender ?? 'MALE', role: member.role ?? 'MEMBER', skillTierId: member.skillTierId ?? null, joinedAt: member.joinedAt ?? '', invalidGender: member.invalidGender ?? false, invalidRole: member.invalidRole ?? false, invalidSkillTier: member.invalidSkillTier ?? false, invalidJoinedAt: member.invalidJoinedAt ?? false, invalidColumnCount: member.invalidColumnCount ?? false };
+  return { rowId: nextRowId++, name: member.name ?? '', gender: member.gender ?? 'MALE', skillTierId: member.skillTierId ?? null, joinedAt: member.joinedAt ?? '', invalidGender: member.invalidGender ?? false, invalidSkillTier: member.invalidSkillTier ?? false, invalidJoinedAt: member.invalidJoinedAt ?? false, invalidColumnCount: member.invalidColumnCount ?? false };
 }
 
 export function createBulkMemberRows(count = 1) { return Array.from({ length: count }, () => createBulkMemberRow()); }
@@ -15,11 +14,10 @@ export function parseBulkMemberRows(text, skillTiers) {
   const dataLines = isHeaderRow(lines[0]) ? lines.slice(1) : lines;
   return dataLines.map((line) => {
     const cells = line.split('\t');
-    const [name = '', genderLabel = '', roleLabel = '', tierName = '', joinedAt = ''] = cells.map((cell) => cell.trim());
+    const [name = '', genderLabel = '', tierName = '', joinedAt = ''] = cells.map((cell) => cell.trim());
     const gender = GENDER_BY_LABEL[genderLabel];
-    const role = ROLE_BY_LABEL[roleLabel || '회원'];
     const skillTier = skillTiers.find((tier) => tier.name.trim() === tierName);
-    return createBulkMemberRow({ name, gender: gender ?? 'MALE', role: role ?? 'MEMBER', skillTierId: skillTier?.id ?? null, joinedAt, invalidGender: !gender, invalidRole: !role, invalidSkillTier: Boolean(tierName) && !skillTier, invalidJoinedAt: Boolean(joinedAt) && !isIsoDate(joinedAt), invalidColumnCount: cells.length !== 5 });
+    return createBulkMemberRow({ name, gender: gender ?? 'MALE', skillTierId: skillTier?.id ?? null, joinedAt, invalidGender: !gender, invalidSkillTier: Boolean(tierName) && !skillTier, invalidJoinedAt: Boolean(joinedAt) && !isIsoDate(joinedAt), invalidColumnCount: cells.length !== 4 });
   });
 }
 
@@ -29,11 +27,10 @@ export function validateBulkMembers(rows, existingMembers) {
   return rows.map((row) => {
     const name = row.name.trim();
     const errors = [];
-    const hasInput = Boolean(name || row.skillTierId || row.joinedAt || row.role !== 'MEMBER' || row.gender !== 'MALE' || row.invalidGender || row.invalidRole || row.invalidSkillTier || row.invalidJoinedAt || row.invalidColumnCount);
+    const hasInput = Boolean(name || row.skillTierId || row.joinedAt || row.gender !== 'MALE' || row.invalidGender || row.invalidSkillTier || row.invalidJoinedAt || row.invalidColumnCount);
     if (hasInput && !name) errors.push('이름은 필수입니다.');
-    if (row.invalidColumnCount) errors.push('열은 이름, 성별, 역할, 티어, 가입일 순서로 5개여야 합니다.');
+    if (row.invalidColumnCount) errors.push('열은 이름, 성별, 티어, 가입일 순서로 4개여야 합니다.');
     if (row.invalidGender) errors.push('성별은 남 또는 여로 입력해 주세요.');
-    if (row.invalidRole) errors.push('역할은 관리자 또는 회원으로 입력해 주세요.');
     if (row.invalidSkillTier) errors.push('등록되지 않은 티어입니다.');
     if (row.invalidJoinedAt) errors.push('가입일은 YYYY-MM-DD 형식이어야 합니다.');
     if (name && inputNames.has(name)) errors.push('입력 명단에 같은 이름이 있습니다.');
@@ -44,7 +41,7 @@ export function validateBulkMembers(rows, existingMembers) {
 }
 
 export function bulkMemberPayload(rows) {
-  return rows.map((row) => ({ name: row.name.trim(), gender: row.gender, role: row.role, skillTierId: row.skillTierId ? Number(row.skillTierId) : null, joinedAt: row.joinedAt || null, memo: null, contactMemo: null }));
+  return rows.map((row) => ({ name: row.name.trim(), gender: row.gender, skillTierId: row.skillTierId ? Number(row.skillTierId) : null, joinedAt: row.joinedAt || null, memo: null, contactMemo: null }));
 }
 
 function isHeaderRow(line) {

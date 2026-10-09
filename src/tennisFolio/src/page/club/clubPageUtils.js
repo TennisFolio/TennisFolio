@@ -7,7 +7,6 @@ export const emptyClubForm = {
 export const emptyMemberForm = {
   name: '',
   gender: 'MALE',
-  role: 'MEMBER',
   skillTierId: null,
   joinedAt: '',
   contactMemo: '',
@@ -55,7 +54,6 @@ export function memberPayload(form, name) {
   return {
     name,
     gender: form.gender,
-    role: form.role,
     skillTierId: form.skillTierId ? Number(form.skillTierId) : null,
     joinedAt: form.joinedAt || null,
     contactMemo: form.contactMemo.trim() || null,

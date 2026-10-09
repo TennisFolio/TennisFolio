@@ -2,7 +2,6 @@ package com.tennisfolio.Tennisfolio.club.repository;
 
 import com.tennisfolio.Tennisfolio.club.entity.Club;
 import com.tennisfolio.Tennisfolio.club.entity.ClubMember;
-import com.tennisfolio.Tennisfolio.club.entity.ClubMemberRole;
 import com.tennisfolio.Tennisfolio.club.entity.ClubSkillTier;
 import com.tennisfolio.Tennisfolio.club.dto.ClubDashboardData;
 import com.tennisfolio.Tennisfolio.club.dto.ClubDashboardGenderCount;
@@ -157,7 +156,7 @@ class ClubDashboardQueryRepositoryTest {
     }
 
     private static ClubMember member(Club club, String name, Gender gender, ClubSkillTier skillTier) {
-        return new ClubMember(club, null, name, gender, ClubMemberRole.MEMBER, skillTier, null, null);
+        return new ClubMember(club, name, gender, skillTier, null, null);
     }
 
     private static Meeting meeting(Long clubId, String title, LocalDateTime startAt) {

@@ -1,4 +1,4 @@
-import { genderLabel, roleLabel } from '../clubUtils';
+import { genderLabel } from '../clubUtils';
 
 const statusLabels = {
   ACTIVE: '활동',
@@ -55,16 +55,15 @@ function MemberManagementList({ members, allMembers, memberStatus, keyword, isLo
         </div>
         <div className="club-dashboard-table-wrap">
           <table className="club-dashboard-table club-member-management-table">
-            <thead><tr><th>이름</th><th>성별</th><th>티어</th><th>역할</th><th>상태</th><th aria-label="작업" /></tr></thead>
+            <thead><tr><th>이름</th><th>성별</th><th>티어</th><th>상태</th><th aria-label="작업" /></tr></thead>
             <tbody>
-              {isLoading && <tr><td colSpan="6">회원 목록을 불러오는 중입니다.</td></tr>}
-              {!isLoading && members.length === 0 && <tr><td colSpan="6">표시할 회원이 없습니다.</td></tr>}
+              {isLoading && <tr><td colSpan="5">회원 목록을 불러오는 중입니다.</td></tr>}
+              {!isLoading && members.length === 0 && <tr><td colSpan="5">표시할 회원이 없습니다.</td></tr>}
               {!isLoading && members.map((member) => (
                 <tr key={member.id}>
                   <td>{member.name}</td>
                   <td><span className={`club-chip ${member.gender === 'FEMALE' ? 'female' : 'male'}`}>{genderLabel(member.gender)}</span></td>
                   <td>{member.skillTierName ?? '미정'}</td>
-                  <td>{roleLabel(member.role)}</td>
                   <td><span className={`club-member-status ${member.memberStatus.toLowerCase()}`}>{statusLabels[member.memberStatus]}</span></td>
                   <td><button className="club-button small" type="button" onClick={() => onOpenMember(member.id)}>{member.memberStatus === 'WITHDRAWN' ? '복구' : '수정'}</button></td>
                 </tr>
