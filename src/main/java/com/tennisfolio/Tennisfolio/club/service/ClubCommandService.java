@@ -8,6 +8,9 @@ import com.tennisfolio.Tennisfolio.club.entity.ClubAccount;
 import com.tennisfolio.Tennisfolio.club.entity.ClubAccountRole;
 import com.tennisfolio.Tennisfolio.club.repository.ClubAccountRepository;
 import com.tennisfolio.Tennisfolio.club.repository.ClubRepository;
+import com.tennisfolio.Tennisfolio.meeting.entity.Meeting;
+import com.tennisfolio.Tennisfolio.meeting.repository.MeetingAttendanceRepository;
+import com.tennisfolio.Tennisfolio.meeting.repository.MeetingRepository;
 import com.tennisfolio.Tennisfolio.common.UserStatus;
 import com.tennisfolio.Tennisfolio.user.domain.User;
 import com.tennisfolio.Tennisfolio.user.repository.UserRepository;
@@ -26,19 +29,25 @@ public class ClubCommandService {
     private final UserRepository userRepository;
     private final ClubAccessService clubAccessService;
     private final ClubSkillTierService clubSkillTierService;
+    private final MeetingRepository meetingRepository;
+    private final MeetingAttendanceRepository meetingAttendanceRepository;
 
     public ClubCommandService(
             ClubRepository clubRepository,
             ClubAccountRepository clubAccountRepository,
             UserRepository userRepository,
             ClubAccessService clubAccessService,
-            ClubSkillTierService clubSkillTierService
+            ClubSkillTierService clubSkillTierService,
+            MeetingRepository meetingRepository,
+            MeetingAttendanceRepository meetingAttendanceRepository
     ) {
         this.clubRepository = clubRepository;
         this.clubAccountRepository = clubAccountRepository;
         this.userRepository = userRepository;
         this.clubAccessService = clubAccessService;
         this.clubSkillTierService = clubSkillTierService;
+        this.meetingRepository = meetingRepository;
+        this.meetingAttendanceRepository = meetingAttendanceRepository;
     }
 
     @Transactional
@@ -69,7 +78,17 @@ public class ClubCommandService {
     @Transactional
     public void deleteClub(String clubPublicId, Long currentUserId) {
         Club club = clubAccessService.requireOwner(clubPublicId, currentUserId);
-        club.delete(LocalDateTime.now());
+        LocalDateTime deletedAt = LocalDateTime.now();
+        deleteClubMeetings(club.getId(), deletedAt);
+        club.delete(deletedAt);
+    }
+
+    private void deleteClubMeetings(Long clubId, LocalDateTime deletedAt) {
+        for (Meeting meeting : meetingRepository.findByClubIdAndDeletedAtIsNullOrderByStartAtDescIdDesc(clubId)) {
+            meetingAttendanceRepository.findByMeetingAndDeletedAtIsNullOrderByIdAsc(meeting)
+                    .forEach(attendance -> attendance.delete(deletedAt));
+            meeting.delete(deletedAt);
+        }
     }
 
     private String requireName(String name) {

@@ -68,7 +68,7 @@ ADMIN -> 클럽 계정 -> 표시 이름 수정 또는 클럽 탈퇴
   - 테스트 설명: 3시간 만료, 재발급 무효화, 수동 종료, 다수 수락, 같은 Account 재수락의 역할 보존, 공백 표시 이름 `400`, OWNER/ADMIN 권한 경계를 검증한다.
   - 검증 기준: `./gradlew.bat test --tests com.tennisfolio.Tennisfolio.club.service.ClubAccountInvitationServiceTest --tests com.tennisfolio.Tennisfolio.club.api.ClubAccountInvitationControllerTest --tests com.tennisfolio.Tennisfolio.config.ClubSecurityConfigTest`
 
-- [ ] `fix: restrict club meetings to club accounts`
+- [x] `fix: restrict club meetings to club accounts` - done, verified
   - 구현: `ClubMeetingQueryService`, `ClubMeetingCommandService`, `MeetingQueryService`, `MeetingAttendanceCommandService`, `MeetingController`, `SecurityConfig`을 갱신한다. 클럽 모임의 상세·참석자 공개 조회/응답을 차단하고 OWNER/ADMIN만 허용하며, 독립 Meeting의 기존 공개 API와 Competition URL은 유지한다. Club 삭제 시 클럽 모임·참석자를 soft delete 처리한다.
   - 테스트 설명: OWNER/ADMIN의 클럽 모임 관리 성공, 비운영진·비로그인 클럽 모임 접근 거부, 독립 Meeting 공개 조회/참석과 Competition 공개 조회 회귀 없음을 검증한다.
   - 검증 기준: `./gradlew.bat test --tests com.tennisfolio.Tennisfolio.club.service.ClubMeetingCommandServiceTest --tests com.tennisfolio.Tennisfolio.club.service.ClubMeetingQueryServiceTest --tests com.tennisfolio.Tennisfolio.meeting.service.MeetingQueryServiceTest --tests com.tennisfolio.Tennisfolio.meeting.service.MeetingAttendanceCommandServiceTest --tests com.tennisfolio.Tennisfolio.config.MeetingSecurityConfigTest`
