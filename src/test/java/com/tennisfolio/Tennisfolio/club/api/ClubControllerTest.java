@@ -3,6 +3,7 @@ package com.tennisfolio.Tennisfolio.club.api;
 import com.tennisfolio.Tennisfolio.club.dto.ClubCreateRequest;
 import com.tennisfolio.Tennisfolio.club.dto.ClubCreateResponse;
 import com.tennisfolio.Tennisfolio.club.dto.ClubAccountUpdateRequest;
+import com.tennisfolio.Tennisfolio.club.dto.ClubAccountInvitationIssueResponse;
 import com.tennisfolio.Tennisfolio.club.dto.ClubDashboardResponse;
 import com.tennisfolio.Tennisfolio.club.dto.ClubDashboardMemberComposition;
 import com.tennisfolio.Tennisfolio.club.dto.ClubDashboardMemberParticipation;
@@ -21,6 +22,7 @@ import com.tennisfolio.Tennisfolio.club.dto.ClubUpdateRequest;
 import com.tennisfolio.Tennisfolio.club.service.ClubCommandService;
 import com.tennisfolio.Tennisfolio.club.service.ClubAccountCommandService;
 import com.tennisfolio.Tennisfolio.club.service.ClubAccountQueryService;
+import com.tennisfolio.Tennisfolio.club.service.ClubAccountInvitationService;
 import com.tennisfolio.Tennisfolio.club.service.ClubDashboardQueryService;
 import com.tennisfolio.Tennisfolio.club.service.ClubMemberCommandService;
 import com.tennisfolio.Tennisfolio.club.service.ClubQueryService;
@@ -35,6 +37,7 @@ import org.springframework.http.ResponseEntity;
 import java.util.List;
 import java.time.LocalDate;
 import java.time.YearMonth;
+import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
@@ -60,6 +63,9 @@ class ClubControllerTest {
 
     @Mock
     ClubAccountQueryService clubAccountQueryService;
+
+    @Mock
+    ClubAccountInvitationService clubAccountInvitationService;
 
     @InjectMocks
     ClubController clubController;
@@ -282,6 +288,17 @@ class ClubControllerTest {
                 clubController.updateMyAccount(userId, "club-public-id", request);
 
         verify(clubAccountCommandService).updateMyAccount("club-public-id", request, 10L);
+        assertThat(response.getStatusCode().value()).isEqualTo(200);
+    }
+
+    @Test
+    void issueAccountInvitation_passesCurrentUserToInvitationService() {
+        when(clubAccountInvitationService.issueInvitation("club-public-id", 10L))
+                .thenReturn(new ClubAccountInvitationIssueResponse("token", LocalDateTime.now().plusHours(3)));
+
+        ResponseEntity<?> response = clubController.issueAccountInvitation(10L, "club-public-id");
+
+        verify(clubAccountInvitationService).issueInvitation("club-public-id", 10L);
         assertThat(response.getStatusCode().value()).isEqualTo(200);
     }
 

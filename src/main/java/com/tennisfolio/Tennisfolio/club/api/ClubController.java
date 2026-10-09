@@ -2,6 +2,8 @@ package com.tennisfolio.Tennisfolio.club.api;
 
 import com.tennisfolio.Tennisfolio.club.dto.ClubCreateRequest;
 import com.tennisfolio.Tennisfolio.club.dto.ClubCreateResponse;
+import com.tennisfolio.Tennisfolio.club.dto.ClubAccountInvitationIssueResponse;
+import com.tennisfolio.Tennisfolio.club.dto.ClubAccountInvitationStatusResponse;
 import com.tennisfolio.Tennisfolio.club.dto.ClubAccountResponse;
 import com.tennisfolio.Tennisfolio.club.dto.ClubAccountRoleUpdateRequest;
 import com.tennisfolio.Tennisfolio.club.dto.ClubAccountUpdateRequest;
@@ -17,6 +19,7 @@ import com.tennisfolio.Tennisfolio.club.dto.ClubSummaryResponse;
 import com.tennisfolio.Tennisfolio.club.dto.ClubUpdateRequest;
 import com.tennisfolio.Tennisfolio.club.service.ClubCommandService;
 import com.tennisfolio.Tennisfolio.club.service.ClubAccountCommandService;
+import com.tennisfolio.Tennisfolio.club.service.ClubAccountInvitationService;
 import com.tennisfolio.Tennisfolio.club.service.ClubAccountQueryService;
 import com.tennisfolio.Tennisfolio.club.service.ClubDashboardQueryService;
 import com.tennisfolio.Tennisfolio.club.service.ClubMemberCommandService;
@@ -51,6 +54,7 @@ public class ClubController {
     private final ClubDashboardQueryService clubDashboardQueryService;
     private final ClubAccountCommandService clubAccountCommandService;
     private final ClubAccountQueryService clubAccountQueryService;
+    private final ClubAccountInvitationService clubAccountInvitationService;
 
     public ClubController(
             ClubCommandService clubCommandService,
@@ -58,7 +62,8 @@ public class ClubController {
             ClubMemberCommandService clubMemberCommandService,
             ClubDashboardQueryService clubDashboardQueryService,
             ClubAccountCommandService clubAccountCommandService,
-            ClubAccountQueryService clubAccountQueryService
+            ClubAccountQueryService clubAccountQueryService,
+            ClubAccountInvitationService clubAccountInvitationService
     ) {
         this.clubCommandService = clubCommandService;
         this.clubQueryService = clubQueryService;
@@ -66,6 +71,7 @@ public class ClubController {
         this.clubDashboardQueryService = clubDashboardQueryService;
         this.clubAccountCommandService = clubAccountCommandService;
         this.clubAccountQueryService = clubAccountQueryService;
+        this.clubAccountInvitationService = clubAccountInvitationService;
     }
 
     @PostMapping("/clubs")
@@ -220,6 +226,35 @@ public class ClubController {
             @PathVariable String clubPublicId
     ) {
         clubAccountCommandService.leaveMyAccount(clubPublicId, userId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/clubs/{clubPublicId}/account-invitation")
+    public ResponseEntity<ResponseDTO<ClubAccountInvitationStatusResponse>> getAccountInvitation(
+            @AuthenticationPrincipal Long userId,
+            @PathVariable String clubPublicId
+    ) {
+        return ResponseEntity.ok(ResponseDTO.success(
+                clubAccountInvitationService.getInvitationStatus(clubPublicId, userId)
+        ));
+    }
+
+    @PostMapping("/clubs/{clubPublicId}/account-invitation")
+    public ResponseEntity<ResponseDTO<ClubAccountInvitationIssueResponse>> issueAccountInvitation(
+            @AuthenticationPrincipal Long userId,
+            @PathVariable String clubPublicId
+    ) {
+        return ResponseEntity.ok(ResponseDTO.success(
+                clubAccountInvitationService.issueInvitation(clubPublicId, userId)
+        ));
+    }
+
+    @DeleteMapping("/clubs/{clubPublicId}/account-invitation")
+    public ResponseEntity<Void> closeAccountInvitation(
+            @AuthenticationPrincipal Long userId,
+            @PathVariable String clubPublicId
+    ) {
+        clubAccountInvitationService.closeInvitation(clubPublicId, userId);
         return ResponseEntity.noContent().build();
     }
 
