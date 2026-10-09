@@ -58,7 +58,7 @@ ADMIN -> 클럽 계정 -> 표시 이름 수정 또는 클럽 탈퇴
   - 테스트 설명: 생성자가 OWNER로 생성되고 ClubMember는 생성되지 않음, 한 Account의 다중 클럽 역할, OWNER/ADMIN 공통 운영 권한, 비운영진 거부를 service/repository 테스트로 검증한다.
   - 검증 기준: `./gradlew.bat test --tests com.tennisfolio.Tennisfolio.club.service.ClubAccessServiceTest --tests com.tennisfolio.Tennisfolio.club.service.ClubCommandServiceTest --tests com.tennisfolio.Tennisfolio.club.service.ClubQueryServiceTest --tests com.tennisfolio.Tennisfolio.matching.service.CompetitionAdminAuthorizationServiceTest`
 
-- [ ] `feat: add owner club account management api`
+- [x] `feat: add owner club account management api` - done, verified
   - 구현: `ClubAccountCommandService`와 `ClubAccountQueryService`, request/response DTO를 추가한다. `ClubController`에 OWNER 목록, 대상 상세, 역할 PATCH, 대상 DELETE, 본인 GET/PATCH/DELETE를 연결하고 마지막 OWNER 변경을 `409`으로 처리한다.
   - 테스트 설명: OWNER의 목록·역할 변경·ADMIN 제거, ADMIN의 본인 이름 수정/탈퇴, 다른 Account 이름 수정 거부, ADMIN의 OWNER API `403`, 마지막 OWNER 보호 `409`를 검증한다.
   - 검증 기준: `./gradlew.bat test --tests com.tennisfolio.Tennisfolio.club.service.ClubAccountCommandServiceTest --tests com.tennisfolio.Tennisfolio.club.service.ClubAccountQueryServiceTest --tests com.tennisfolio.Tennisfolio.club.api.ClubControllerTest`

@@ -16,6 +16,10 @@ public interface ClubAccountRepository extends JpaRepository<ClubAccount, Long> 
 
     Optional<ClubAccount> findByClubIdAndAccountId(Long clubId, Long accountId);
 
+    Optional<ClubAccount> findByIdAndClub(Long id, Club club);
+
+    List<ClubAccount> findByClubOrderByIdAsc(Club club);
+
     List<ClubAccount> findByAccountIdOrderByIdAsc(Long accountId);
 
     long countByClubAndRole(Club club, ClubAccountRole role);

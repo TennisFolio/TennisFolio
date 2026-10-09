@@ -2,6 +2,7 @@ package com.tennisfolio.Tennisfolio.club.api;
 
 import com.tennisfolio.Tennisfolio.club.dto.ClubCreateRequest;
 import com.tennisfolio.Tennisfolio.club.dto.ClubCreateResponse;
+import com.tennisfolio.Tennisfolio.club.dto.ClubAccountUpdateRequest;
 import com.tennisfolio.Tennisfolio.club.dto.ClubDashboardResponse;
 import com.tennisfolio.Tennisfolio.club.dto.ClubDashboardMemberComposition;
 import com.tennisfolio.Tennisfolio.club.dto.ClubDashboardMemberParticipation;
@@ -18,6 +19,8 @@ import com.tennisfolio.Tennisfolio.club.dto.ClubMemberStatusChangeRequest;
 import com.tennisfolio.Tennisfolio.club.dto.ClubSummaryResponse;
 import com.tennisfolio.Tennisfolio.club.dto.ClubUpdateRequest;
 import com.tennisfolio.Tennisfolio.club.service.ClubCommandService;
+import com.tennisfolio.Tennisfolio.club.service.ClubAccountCommandService;
+import com.tennisfolio.Tennisfolio.club.service.ClubAccountQueryService;
 import com.tennisfolio.Tennisfolio.club.service.ClubDashboardQueryService;
 import com.tennisfolio.Tennisfolio.club.service.ClubMemberCommandService;
 import com.tennisfolio.Tennisfolio.club.service.ClubQueryService;
@@ -51,6 +54,12 @@ class ClubControllerTest {
 
     @Mock
     ClubDashboardQueryService clubDashboardQueryService;
+
+    @Mock
+    ClubAccountCommandService clubAccountCommandService;
+
+    @Mock
+    ClubAccountQueryService clubAccountQueryService;
 
     @InjectMocks
     ClubController clubController;
@@ -261,6 +270,18 @@ class ClubControllerTest {
         ResponseEntity<?> response = clubController.getManagementMember(userId, "club-public-id", 100L);
 
         verify(clubQueryService).getManagementMember("club-public-id", 100L, 10L);
+        assertThat(response.getStatusCode().value()).isEqualTo(200);
+    }
+
+    @Test
+    void updateMyAccount_passesCurrentUserToAccountCommandService() {
+        Long userId = 10L;
+        ClubAccountUpdateRequest request = new ClubAccountUpdateRequest("Alex");
+
+        ResponseEntity<ResponseDTO<Void>> response =
+                clubController.updateMyAccount(userId, "club-public-id", request);
+
+        verify(clubAccountCommandService).updateMyAccount("club-public-id", request, 10L);
         assertThat(response.getStatusCode().value()).isEqualTo(200);
     }
 

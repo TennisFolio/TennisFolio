@@ -2,6 +2,9 @@ package com.tennisfolio.Tennisfolio.club.api;
 
 import com.tennisfolio.Tennisfolio.club.dto.ClubCreateRequest;
 import com.tennisfolio.Tennisfolio.club.dto.ClubCreateResponse;
+import com.tennisfolio.Tennisfolio.club.dto.ClubAccountResponse;
+import com.tennisfolio.Tennisfolio.club.dto.ClubAccountRoleUpdateRequest;
+import com.tennisfolio.Tennisfolio.club.dto.ClubAccountUpdateRequest;
 import com.tennisfolio.Tennisfolio.club.dto.ClubDashboardResponse;
 import com.tennisfolio.Tennisfolio.club.dto.ClubDetailResponse;
 import com.tennisfolio.Tennisfolio.club.dto.ClubMemberCreateRequest;
@@ -13,6 +16,8 @@ import com.tennisfolio.Tennisfolio.club.dto.ClubMemberStatusChangeRequest;
 import com.tennisfolio.Tennisfolio.club.dto.ClubSummaryResponse;
 import com.tennisfolio.Tennisfolio.club.dto.ClubUpdateRequest;
 import com.tennisfolio.Tennisfolio.club.service.ClubCommandService;
+import com.tennisfolio.Tennisfolio.club.service.ClubAccountCommandService;
+import com.tennisfolio.Tennisfolio.club.service.ClubAccountQueryService;
 import com.tennisfolio.Tennisfolio.club.service.ClubDashboardQueryService;
 import com.tennisfolio.Tennisfolio.club.service.ClubMemberCommandService;
 import com.tennisfolio.Tennisfolio.club.service.ClubQueryService;
@@ -44,17 +49,23 @@ public class ClubController {
     private final ClubQueryService clubQueryService;
     private final ClubMemberCommandService clubMemberCommandService;
     private final ClubDashboardQueryService clubDashboardQueryService;
+    private final ClubAccountCommandService clubAccountCommandService;
+    private final ClubAccountQueryService clubAccountQueryService;
 
     public ClubController(
             ClubCommandService clubCommandService,
             ClubQueryService clubQueryService,
             ClubMemberCommandService clubMemberCommandService,
-            ClubDashboardQueryService clubDashboardQueryService
+            ClubDashboardQueryService clubDashboardQueryService,
+            ClubAccountCommandService clubAccountCommandService,
+            ClubAccountQueryService clubAccountQueryService
     ) {
         this.clubCommandService = clubCommandService;
         this.clubQueryService = clubQueryService;
         this.clubMemberCommandService = clubMemberCommandService;
         this.clubDashboardQueryService = clubDashboardQueryService;
+        this.clubAccountCommandService = clubAccountCommandService;
+        this.clubAccountQueryService = clubAccountQueryService;
     }
 
     @PostMapping("/clubs")
@@ -142,6 +153,73 @@ public class ClubController {
             @PathVariable String clubPublicId
     ) {
         clubCommandService.deleteClub(clubPublicId, userId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/clubs/{clubPublicId}/accounts")
+    public ResponseEntity<ResponseDTO<List<ClubAccountResponse>>> getAccounts(
+            @AuthenticationPrincipal Long userId,
+            @PathVariable String clubPublicId
+    ) {
+        return ResponseEntity.ok(ResponseDTO.success(clubAccountQueryService.getAccounts(clubPublicId, userId)));
+    }
+
+    @GetMapping("/clubs/{clubPublicId}/accounts/{clubAccountId}")
+    public ResponseEntity<ResponseDTO<ClubAccountResponse>> getAccount(
+            @AuthenticationPrincipal Long userId,
+            @PathVariable String clubPublicId,
+            @PathVariable Long clubAccountId
+    ) {
+        return ResponseEntity.ok(ResponseDTO.success(
+                clubAccountQueryService.getAccount(clubPublicId, clubAccountId, userId)
+        ));
+    }
+
+    @PatchMapping("/clubs/{clubPublicId}/accounts/{clubAccountId}/role")
+    public ResponseEntity<ResponseDTO<Void>> changeAccountRole(
+            @AuthenticationPrincipal Long userId,
+            @PathVariable String clubPublicId,
+            @PathVariable Long clubAccountId,
+            @RequestBody ClubAccountRoleUpdateRequest request
+    ) {
+        clubAccountCommandService.changeRole(clubPublicId, clubAccountId, request, userId);
+        return ResponseEntity.ok(ResponseDTO.success());
+    }
+
+    @DeleteMapping("/clubs/{clubPublicId}/accounts/{clubAccountId}")
+    public ResponseEntity<Void> removeAccount(
+            @AuthenticationPrincipal Long userId,
+            @PathVariable String clubPublicId,
+            @PathVariable Long clubAccountId
+    ) {
+        clubAccountCommandService.removeAccount(clubPublicId, clubAccountId, userId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/clubs/{clubPublicId}/account")
+    public ResponseEntity<ResponseDTO<ClubAccountResponse>> getMyAccount(
+            @AuthenticationPrincipal Long userId,
+            @PathVariable String clubPublicId
+    ) {
+        return ResponseEntity.ok(ResponseDTO.success(clubAccountQueryService.getMyAccount(clubPublicId, userId)));
+    }
+
+    @PatchMapping("/clubs/{clubPublicId}/account")
+    public ResponseEntity<ResponseDTO<Void>> updateMyAccount(
+            @AuthenticationPrincipal Long userId,
+            @PathVariable String clubPublicId,
+            @RequestBody ClubAccountUpdateRequest request
+    ) {
+        clubAccountCommandService.updateMyAccount(clubPublicId, request, userId);
+        return ResponseEntity.ok(ResponseDTO.success());
+    }
+
+    @DeleteMapping("/clubs/{clubPublicId}/account")
+    public ResponseEntity<Void> leaveMyAccount(
+            @AuthenticationPrincipal Long userId,
+            @PathVariable String clubPublicId
+    ) {
+        clubAccountCommandService.leaveMyAccount(clubPublicId, userId);
         return ResponseEntity.noContent().build();
     }
 
