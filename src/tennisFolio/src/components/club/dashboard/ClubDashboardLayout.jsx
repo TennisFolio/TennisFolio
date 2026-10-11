@@ -188,7 +188,7 @@ function ClubDashboardLayout({ clubPublicId, currentUser, activeMenu, children }
           <aside className="club-dashboard-desktop-notice" role="status">
             <div>
               <strong>PC 사용을 권장합니다.</strong>
-              <p>모바일에서도 조회할 수 있지만, 회원 관리와 일괄 등록은 PC에서 더 편리합니다.</p>
+              <p>대시보드는 PC에서 더 편리합니다.</p>
             </div>
             <button
               type="button"
