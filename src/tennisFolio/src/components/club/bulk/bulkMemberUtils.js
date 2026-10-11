@@ -14,10 +14,11 @@ export function parseBulkMemberRows(text, skillTiers) {
   const dataLines = isHeaderRow(lines[0]) ? lines.slice(1) : lines;
   return dataLines.map((line) => {
     const cells = line.split('\t');
-    const [name = '', genderLabel = '', tierName = '', joinedAt = ''] = cells.map((cell) => cell.trim());
+    const [name = '', genderLabel = '', tierName = '', joinedAtInput = ''] = cells.map((cell) => cell.trim());
     const gender = GENDER_BY_LABEL[genderLabel];
     const skillTier = skillTiers.find((tier) => tier.name.trim() === tierName);
-    return createBulkMemberRow({ name, gender: gender ?? 'MALE', skillTierId: skillTier?.id ?? null, joinedAt, invalidGender: !gender, invalidSkillTier: Boolean(tierName) && !skillTier, invalidJoinedAt: Boolean(joinedAt) && !isIsoDate(joinedAt), invalidColumnCount: cells.length !== 4 });
+    const joinedAt = normalizeJoinedAt(joinedAtInput);
+    return createBulkMemberRow({ name, gender: gender ?? 'MALE', skillTierId: skillTier?.id ?? null, joinedAt: joinedAt ?? joinedAtInput, invalidGender: !gender, invalidSkillTier: Boolean(tierName) && !skillTier, invalidJoinedAt: Boolean(joinedAtInput) && !joinedAt, invalidColumnCount: cells.length < 3 || cells.length > 4 });
   });
 }
 
@@ -50,4 +51,14 @@ function isHeaderRow(line) {
     .map((cell) => cell.trim().replace(/^\uFEFF/, ''))
     .every((cell, index) => cell === PASTE_HEADERS[index]);
 }
+
+function normalizeJoinedAt(value) {
+  if (!value) return '';
+  const matched = value.match(/^(\d{4})\s*(?:-|\.|\/)\s*(\d{1,2})\s*(?:-|\.|\/)\s*(\d{1,2})\.?$/)
+    ?? value.match(/^(\d{4})년\s*(\d{1,2})월\s*(\d{1,2})일$/);
+  if (!matched) return null;
+  const normalized = `${matched[1]}-${matched[2].padStart(2, '0')}-${matched[3].padStart(2, '0')}`;
+  return isIsoDate(normalized) ? normalized : null;
+}
+
 function isIsoDate(value) { if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false; const date = new Date(`${value}T00:00:00Z`); return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value; }
