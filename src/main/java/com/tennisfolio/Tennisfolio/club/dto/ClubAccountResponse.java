@@ -1,6 +1,7 @@
 package com.tennisfolio.Tennisfolio.club.dto;
 
 import com.tennisfolio.Tennisfolio.club.entity.ClubAccount;
+import com.tennisfolio.Tennisfolio.user.domain.User;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -12,11 +13,11 @@ public class ClubAccountResponse {
     private String displayName;
     private String role;
 
-    public static ClubAccountResponse from(ClubAccount account) {
+    public static ClubAccountResponse from(ClubAccount account, User user) {
         return new ClubAccountResponse(
                 account.getId(),
                 account.getAccountId(),
-                account.getDisplayName(),
+                user.getNickName(),
                 account.getRole().name()
         );
     }

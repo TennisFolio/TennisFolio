@@ -1,6 +1,6 @@
 package com.tennisfolio.Tennisfolio.club.api;
 
-import com.tennisfolio.Tennisfolio.club.dto.ClubAccountInvitationAcceptRequest;
+import com.tennisfolio.Tennisfolio.club.dto.ClubAccountInvitationPreviewResponse;
 import com.tennisfolio.Tennisfolio.club.dto.ClubAccountResponse;
 import com.tennisfolio.Tennisfolio.club.service.ClubAccountInvitationService;
 import com.tennisfolio.Tennisfolio.common.response.ResponseDTO;
@@ -22,14 +22,24 @@ class ClubAccountInvitationControllerTest {
     @InjectMocks ClubAccountInvitationController controller;
 
     @Test
-    void acceptInvitation_passesTokenRequestAndCurrentUserToService() {
-        ClubAccountInvitationAcceptRequest request = new ClubAccountInvitationAcceptRequest("Jamie");
-        when(clubAccountInvitationService.acceptInvitation("token", request, 20L))
+    void acceptInvitation_passesTokenAndCurrentUserToService() {
+        when(clubAccountInvitationService.acceptInvitation("token", 20L))
                 .thenReturn(new ClubAccountResponse(2L, 20L, "Jamie", "ADMIN"));
 
-        ResponseEntity<ResponseDTO<ClubAccountResponse>> response = controller.acceptInvitation(20L, "token", request);
+        ResponseEntity<ResponseDTO<ClubAccountResponse>> response = controller.acceptInvitation(20L, "token");
 
-        verify(clubAccountInvitationService).acceptInvitation("token", request, 20L);
+        verify(clubAccountInvitationService).acceptInvitation("token", 20L);
+        assertThat(response.getStatusCode().value()).isEqualTo(200);
+    }
+
+    @Test
+    void previewInvitation_passesTokenToService() {
+        when(clubAccountInvitationService.previewInvitation("token"))
+                .thenReturn(new ClubAccountInvitationPreviewResponse("Morning Tennis", "club"));
+
+        ResponseEntity<ResponseDTO<ClubAccountInvitationPreviewResponse>> response = controller.previewInvitation("token");
+
+        verify(clubAccountInvitationService).previewInvitation("token");
         assertThat(response.getStatusCode().value()).isEqualTo(200);
     }
 }

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import DashboardKpiCards from '../../components/club/dashboard/DashboardKpiCards';
 import MemberParticipationPanel from '../../components/club/dashboard/MemberParticipationPanel';
@@ -36,16 +36,16 @@ function ClubDashboardPage({ currentUser }) {
   const [searchParams, setSearchParams] = useSearchParams();
   const [dashboard, setDashboard] = useState(null);
   const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [memberFilter, setMemberFilter] = useState('all');
   const [memberPage, setMemberPage] = useState(0);
   const selectedMonth = parseMonthValue(searchParams.get('month')) ?? parseMonthValue(currentMonthValue());
   const currentMonth = currentMonthValue();
   const isNextMonthDisabled = selectedMonth.value >= currentMonth;
 
-  useEffect(() => {
+  const loadDashboard = useCallback(() => {
     if (!currentUser || !clubPublicId) {
-      return undefined;
+      return () => {};
     }
 
     let cancelled = false;
@@ -80,6 +80,8 @@ function ClubDashboardPage({ currentUser }) {
     };
   }, [clubPublicId, currentUser, memberFilter, memberPage, selectedMonth.month, selectedMonth.year]);
 
+  useEffect(() => loadDashboard(), [loadDashboard]);
+
   if (!currentUser) {
     return <ClubAuthRequired />;
   }
@@ -97,23 +99,27 @@ function ClubDashboardPage({ currentUser }) {
     }
   };
 
-  if (!isLoading && !dashboard) {
-    return (
-      <main className="club-dashboard-page">
-        <ClubState eyebrow="BACKOFFICE" title="대시보드를 불러올 수 없습니다">
-          <ClubMessage error={error} />
-          <button className="club-button full" type="button" onClick={() => navigate('/clubs')}>
-            클럽 목록
-          </button>
-        </ClubState>
-      </main>
-    );
-  }
-
   return (
     <ClubDashboardLayout clubPublicId={clubPublicId} currentUser={currentUser} activeMenu="dashboard">
         {isLoading ? (
           <p className="club-notice static">대시보드를 불러오는 중입니다.</p>
+        ) : !dashboard ? (
+          <div className="club-dashboard-error-state">
+            <ClubState
+              eyebrow="BACKOFFICE"
+              title="대시보드를 불러올 수 없습니다"
+              description={error || '잠시 후 다시 시도해 주세요.'}
+            >
+              <div className="club-dashboard-error-actions">
+                <button className="club-button primary" type="button" onClick={loadDashboard}>
+                  다시 시도
+                </button>
+                <button className="club-button" type="button" onClick={() => navigate('/clubs')}>
+                  클럽 목록
+                </button>
+              </div>
+            </ClubState>
+          </div>
         ) : (
           <>
             <header className="club-dashboard-heading">

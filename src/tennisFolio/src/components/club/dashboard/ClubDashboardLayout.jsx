@@ -16,6 +16,11 @@ function ClubDashboardLayout({ clubPublicId, currentUser, activeMenu, children }
     () => clubs.find((club) => club.publicId === clubPublicId),
     [clubPublicId, clubs],
   );
+  const isOwner = selectedClub?.role === 'OWNER';
+  const accountMenuPath = isOwner
+    ? `/clubs/${clubPublicId}/dashboard/accounts`
+    : `/clubs/${clubPublicId}/dashboard/account`;
+  const accountMenuLabel = isOwner ? '클럽 계정 관리' : '클럽 계정';
 
   useEffect(() => {
     if (!currentUser) {
@@ -74,6 +79,13 @@ function ClubDashboardLayout({ clubPublicId, currentUser, activeMenu, children }
         >
           회원 관리
         </button>
+        <button
+          className={`club-dashboard-nav ${['accounts', 'account'].includes(activeMenu) ? 'active' : ''}`}
+          type="button"
+          onClick={() => navigate(accountMenuPath)}
+        >
+          {accountMenuLabel}
+        </button>
         <span className="club-dashboard-nav muted">모임 활동 <small>준비 중</small></span>
         <span className="club-dashboard-nav muted">참여 현황 <small>준비 중</small></span>
       </aside>
@@ -111,7 +123,14 @@ function ClubDashboardLayout({ clubPublicId, currentUser, activeMenu, children }
                     aria-selected={club.publicId === clubPublicId}
                     onClick={() => {
                       setIsClubSwitcherOpen(false);
-                      navigate(`/clubs/${club.publicId}/dashboard/${activeMenu === 'members' ? 'members' : ''}`.replace(/\/$/, ''));
+                      const menuPath = activeMenu === 'members'
+                        ? 'members'
+                        : activeMenu === 'accounts' && club.role === 'OWNER'
+                          ? 'accounts'
+                          : activeMenu === 'account' || club.role !== 'OWNER'
+                            ? 'account'
+                            : '';
+                      navigate(`/clubs/${club.publicId}/dashboard/${menuPath}`.replace(/\/$/, ''));
                     }}
                   >
                     {club.name}
@@ -120,7 +139,7 @@ function ClubDashboardLayout({ clubPublicId, currentUser, activeMenu, children }
               </div>
             )}
           </div>
-          <span>클럽 ADMIN · {currentUser?.nickname ?? currentUser?.name ?? '운영자'}</span>
+          <span>클럽 {selectedClub?.role ?? '계정'} · {currentUser?.nickname ?? currentUser?.nickName ?? currentUser?.name ?? '운영자'}</span>
         </header>
         {isMobileMenuOpen && (
           <div className="club-dashboard-mobile-menu-backdrop" onClick={() => setIsMobileMenuOpen(false)}>
@@ -149,6 +168,16 @@ function ClubDashboardLayout({ clubPublicId, currentUser, activeMenu, children }
                 }}
               >
                 회원 관리
+              </button>
+              <button
+                className={['accounts', 'account'].includes(activeMenu) ? 'active' : ''}
+                type="button"
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  navigate(accountMenuPath);
+                }}
+              >
+                {accountMenuLabel}
               </button>
               <span className="muted">모임 활동 <small>준비 중</small></span>
               <span className="muted">참여 현황 <small>준비 중</small></span>

@@ -40,7 +40,7 @@ class ClubAccessServiceTest {
         Club club = club();
         when(clubRepository.findByPublicIdAndDeletedAtIsNull("club-public-id")).thenReturn(Optional.of(club));
         when(clubAccountRepository.findByClubAndAccountId(club, 10L))
-                .thenReturn(Optional.of(new ClubAccount(club, 10L, "Alex", ClubAccountRole.OWNER)));
+                .thenReturn(Optional.of(new ClubAccount(club, 10L, ClubAccountRole.OWNER)));
 
         assertThat(service.requireOperator("club-public-id", 10L)).isSameAs(club);
     }
@@ -50,7 +50,7 @@ class ClubAccessServiceTest {
         Club club = club();
         when(clubRepository.findByPublicIdAndDeletedAtIsNull("club-public-id")).thenReturn(Optional.of(club));
         when(clubAccountRepository.findByClubAndAccountId(club, 10L))
-                .thenReturn(Optional.of(new ClubAccount(club, 10L, "Alex", ClubAccountRole.ADMIN)));
+                .thenReturn(Optional.of(new ClubAccount(club, 10L, ClubAccountRole.ADMIN)));
 
         assertThatThrownBy(() -> service.requireOwner("club-public-id", 10L))
                 .isInstanceOf(ResponseStatusException.class)

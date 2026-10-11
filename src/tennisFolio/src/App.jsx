@@ -34,6 +34,10 @@ import ClubListPage from './page/club/ClubListPage.jsx';
 import ClubMemberBulkAddPage from './page/club/ClubMemberBulkAddPage.jsx';
 import ClubMemberManagementPage from './page/club/ClubMemberManagementPage.jsx';
 import ClubMemberDetailPage from './page/club/ClubMemberDetailPage.jsx';
+import ClubAccountManagementPage from './page/club/ClubAccountManagementPage.jsx';
+import ClubAccountDetailPage from './page/club/ClubAccountDetailPage.jsx';
+import ClubAccountPage from './page/club/ClubAccountPage.jsx';
+import ClubInvitationAcceptPage from './page/club/ClubInvitationAcceptPage.jsx';
 import Schedule from './page/Schedule.jsx';
 import NotFound from './page/NotFound.jsx';
 import { initializeAnalytics, trackPageView } from './utils/analytics';
@@ -134,6 +138,22 @@ function App() {
           <Route
             path="/clubs/:clubPublicId/dashboard/members/:memberId"
             element={<ClubMemberDetailPage currentUser={currentUser} />}
+          />
+          <Route
+            path="/clubs/:clubPublicId/dashboard/accounts"
+            element={<ClubAccountManagementPage currentUser={currentUser} />}
+          />
+          <Route
+            path="/clubs/:clubPublicId/dashboard/accounts/:clubAccountId"
+            element={<ClubAccountDetailPage currentUser={currentUser} />}
+          />
+          <Route
+            path="/clubs/:clubPublicId/dashboard/account"
+            element={<ClubAccountPage currentUser={currentUser} />}
+          />
+          <Route
+            path="/club-account-invitations/:token"
+            element={<ClubInvitationAcceptPage currentUser={currentUser} />}
           />
           <Route
             path="/clubs/:publicId/edit"

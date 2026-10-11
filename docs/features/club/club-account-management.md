@@ -10,18 +10,18 @@
 Account -> 클럽 생성 -> ClubAccount(OWNER) 생성
 OWNER -> ADMIN 초대 링크 발급 -> 로그인 Account 수락 -> ClubAccount(ADMIN) 생성
 OWNER -> 클럽 계정 관리 -> 계정 상세 -> 역할 변경 또는 클럽에서 탈퇴시키기
-ADMIN -> 클럽 계정 -> 표시 이름 수정 또는 클럽 탈퇴
+ADMIN -> 클럽 계정 -> Account 이름 확인 또는 클럽 탈퇴
 운영진 -> 클럽 모임/참석자 관리 -> Competition 공개 URL로 대진표 조회
 ```
 
 ## 3. Spec
 
-- `ClubAccount(clubId, accountId, displayName, role)`만 로그인 Account와 Club을 연결한다. 역할은 `OWNER`, `ADMIN`이며 한 Account는 여러 클럽에 연결될 수 있다.
+- `ClubAccount(clubId, accountId, role)`만 로그인 Account와 Club을 연결한다. 역할은 `OWNER`, `ADMIN`이며 한 Account는 여러 클럽에 연결될 수 있다. 계정 이름은 항상 전역 `User.nickName`을 조회해 표시하며 클럽별로 수정하거나 저장하지 않는다.
 - `ClubMember`에서는 `userId`, `role`, `ClubMemberRole`을 제거한다. ClubMember와 Account를 연결하거나 MEMBER 역할을 만들지 않는다.
 - OWNER/ADMIN은 회원, 클럽 모임·참석자, 대진표·결과, 통계, 클럽 정보를 공통 관리한다. OWNER만 계정 목록·초대·역할 변경·계정 제거·클럽 삭제를 수행한다.
 - OWNER는 여러 명일 수 있지만 역할 변경, 계정 제거, 자진 탈퇴로 OWNER가 0명이 되는 요청은 `409`으로 거부한다.
 - 초대는 `ClubAccountInvitation` 한 행으로 클럽당 하나의 재사용 가능한 링크를 관리한다. 3시간 유효, 인원 제한 없음, 새 링크 발급 시 기존 토큰 무효화, 수동 종료 가능, DB에는 토큰 해시만 저장한다.
-- 초대 수락은 로그인 필수이며 전역 `User.nickName`을 `displayName` 기본값으로 제시하고 사용자가 수정할 수 있다. 기존 ClubAccount가 있으면 역할을 보존하고 성공 응답한다.
+- 초대 수락은 로그인 필수이며 입력 없이 전역 `User.nickName`으로 참여한다. 기존 ClubAccount가 있으면 역할을 보존하고 성공 응답한다.
 - 클럽 소속 Meeting과 참석자 정보는 OWNER/ADMIN만 조회·변경한다. 공개 Meeting 상세/참석 응답은 독립 Meeting에만 유지한다. Competition 공개 URL과 결과 조회는 유지한다.
 - 기존 클럽, 클럽 소속 모임·참석 데이터는 배포 전 백업 뒤 초기화하고 이전하지 않는다. 독립 Meeting과 Competition은 보존한다.
 - OWNER 메뉴는 `클럽 계정 관리`(`/dashboard/accounts`), ADMIN 메뉴는 `클럽 계정`(`/dashboard/account`)이다. ADMIN은 본인 수정 화면 외 계정 관리 API와 화면을 볼 수 없다.
@@ -34,7 +34,7 @@ ADMIN -> 클럽 계정 -> 표시 이름 수정 또는 클럽 탈퇴
 
 - Domain·Persistence: `club/entity/ClubAccount*`, `ClubAccountInvitation`, `ClubMember`; 각 Repository와 실제 DB 초기화 SQL.
 - Authorization: `ClubAccessService`가 ClubAccount만으로 `requireOperator`, `requireOwner`, `isOperator`를 제공한다.
-- API: 기존 `ClubController`에 `GET/POST/DELETE /clubs/{clubPublicId}/account-invitation`을 추가하고, 수락용 `ClubAccountInvitationController`에 `POST /club-account-invitations/{token}/accept`를 분리한다.
+- API: 기존 `ClubController`에 `GET/POST/DELETE /clubs/{clubPublicId}/account-invitation`을 추가하고, 수락용 `ClubAccountInvitationController`에 `GET /club-account-invitations/{token}` 미리보기와 `POST /club-account-invitations/{token}/accept`를 분리한다.
 - Application: `ClubAccountCommandService`, `ClubAccountQueryService`, `ClubAccountInvitationService`로 계정·초대 흐름을 분리한다.
 - Meeting: `ClubMeeting*Service`, `Meeting*Service`, `CompetitionAdminAuthorizationService`가 ClubMember가 아닌 ClubAccount 권한을 사용한다.
 - Frontend: `clubApi.js`, `ClubDashboardLayout`, 계정 목록/상세/수락 page·section 컴포넌트, `App.jsx` route를 추가한다.
@@ -42,6 +42,7 @@ ADMIN -> 클럽 계정 -> 표시 이름 수정 또는 클럽 탈퇴
 ### Decisions
 
 - `ClubAccountInvitation`은 클럽당 한 행을 갱신한다. 수락 이력 테이블이나 초대 비밀번호는 만들지 않는다.
+- 클럽 계정 응답의 `displayName`은 호환성을 위해 유지하되, 저장된 ClubAccount 값이 아닌 현재 `User.nickName`으로 만든다.
 - 계정 제거와 자진 탈퇴는 ClubAccount 행을 삭제한다. ClubMember 또는 과거 MeetingAttendance는 Account와 연결하지 않으므로 수정하지 않는다.
 - 데이터 초기화 SQL은 애플리케이션 시작 시 자동 실행하지 않는다. FK 순서 검토와 백업 확인 뒤 운영자가 별도 실행한다.
 - OAuth 로그인 뒤 초대 URL 복귀는 허용 목록 기반 `returnUrl`만 사용해 open redirect를 막는다.
@@ -73,10 +74,15 @@ ADMIN -> 클럽 계정 -> 표시 이름 수정 또는 클럽 탈퇴
   - 테스트 설명: OWNER/ADMIN의 클럽 모임 관리 성공, 비운영진·비로그인 클럽 모임 접근 거부, 독립 Meeting 공개 조회/참석과 Competition 공개 조회 회귀 없음을 검증한다.
   - 검증 기준: `./gradlew.bat test --tests com.tennisfolio.Tennisfolio.club.service.ClubMeetingCommandServiceTest --tests com.tennisfolio.Tennisfolio.club.service.ClubMeetingQueryServiceTest --tests com.tennisfolio.Tennisfolio.meeting.service.MeetingQueryServiceTest --tests com.tennisfolio.Tennisfolio.meeting.service.MeetingAttendanceCommandServiceTest --tests com.tennisfolio.Tennisfolio.config.MeetingSecurityConfigTest`
 
-- [ ] `feat: add club account management screens`
-  - 구현: `clubApi.js`에 계정·초대 호출을 추가하고 `ClubDashboardLayout`의 데스크톱/모바일 메뉴를 역할별로 분기한다. `ClubAccountManagementPage`, `ClubAccountDetailPage`, `ClubAccountPage`, `ClubInvitationAcceptPage`와 필요한 page-role section을 추가하고 `App.jsx`에 `/dashboard/accounts`, `/dashboard/accounts/:clubAccountId`, `/dashboard/account`, `/club-account-invitations/:token` route를 등록한다.
+- [x] `feat: add club account management screens` - implemented, verification pending
+  - 구현: `clubApi.js`에 계정·초대 호출을 추가하고 `ClubDashboardLayout`의 데스크톱/모바일 메뉴를 역할별로 분기한다. `ClubAccountManagementPage`, `ClubAccountDetailPage`, `ClubAccountPage`, `ClubInvitationAcceptPage`와 필요한 page-role section을 추가하고 `App.jsx`에 `/dashboard/accounts`, `/dashboard/accounts/:clubAccountId`, `/dashboard/account`, `/club-account-invitations/:token` route를 등록한다. 초대 수락 화면의 클럽명 표시를 위해 `GET /club-account-invitations/{token}` 미리보기를 함께 제공한다.
   - 테스트 설명: OWNER의 링크 발급/복사/종료·목록 수정 진입·상세 역할 변경/탈퇴시키기, ADMIN의 본인 이름 수정/탈퇴만 노출, 로그인 후 초대 수락 복귀와 만료 안내를 수동 검증한다.
   - 검증 기준: 브라우저에서 목업 네 화면과 동일한 메뉴·권한·오류 메시지를 확인한다. 프런트엔드 테스트와 npm build는 별도 허가가 있을 때만 실행한다.
+
+- [x] `fix: use account names for club accounts` - implemented, verification pending
+  - 구현: `ClubAccount.DISPLAY_NAME`과 이름 수정 API·UI를 제거하고, 계정 목록·상세·초대 수락 응답은 현재 `User.nickName`을 표시한다.
+  - 테스트 설명: 초대 수락 시 입력한 클럽별 이름 없이 ADMIN이 생성되고, Account 이름 변경 후 조회 응답이 최신 이름을 반환하는지 검증한다.
+  - 검증 기준: `./gradlew.bat test --tests com.tennisfolio.Tennisfolio.club.service.ClubAccountQueryServiceTest --tests com.tennisfolio.Tennisfolio.club.service.ClubAccountInvitationServiceTest --tests com.tennisfolio.Tennisfolio.club.api.ClubAccountInvitationControllerTest`
 
 - [ ] `docs: record club account verification`
   - 구현: 실제 API 응답, 초기화 실행 결과, 테스트·수동 검증 결과를 이 문서의 Development Validation과 Change Log에 기록하고 상세 설계와 차이가 있으면 함께 갱신한다.

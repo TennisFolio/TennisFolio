@@ -1,7 +1,7 @@
 package com.tennisfolio.Tennisfolio.club.service;
 
-import com.tennisfolio.Tennisfolio.club.dto.ClubAccountInvitationAcceptRequest;
 import com.tennisfolio.Tennisfolio.club.dto.ClubAccountInvitationIssueResponse;
+import com.tennisfolio.Tennisfolio.club.dto.ClubAccountInvitationPreviewResponse;
 import com.tennisfolio.Tennisfolio.club.entity.Club;
 import com.tennisfolio.Tennisfolio.club.entity.ClubAccount;
 import com.tennisfolio.Tennisfolio.club.entity.ClubAccountInvitation;
@@ -72,7 +72,7 @@ class ClubAccountInvitationServiceTest {
     }
 
     @Test
-    void acceptInvitation_createsAdminAccountWithSubmittedDisplayName() {
+    void acceptInvitation_createsAdminAccountUsingAccountsNickname() {
         Club club = club();
         String tokenId = "token-id";
         String secret = "very-long-secret";
@@ -82,12 +82,11 @@ class ClubAccountInvitationServiceTest {
         when(userRepository.findByIdAndStatus(20L, UserStatus.ACTIVE)).thenReturn(Optional.of(user(20L, "Jamie")));
         when(clubAccountRepository.save(any(ClubAccount.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        service.acceptInvitation(tokenId + "." + secret, new ClubAccountInvitationAcceptRequest("  Club Jamie  "), 20L);
+        service.acceptInvitation(tokenId + "." + secret, 20L);
 
         ArgumentCaptor<ClubAccount> accountCaptor = ArgumentCaptor.forClass(ClubAccount.class);
         verify(clubAccountRepository).save(accountCaptor.capture());
         assertThat(accountCaptor.getValue().getRole()).isEqualTo(ClubAccountRole.ADMIN);
-        assertThat(accountCaptor.getValue().getDisplayName()).isEqualTo("Club Jamie");
     }
 
     @Test
@@ -96,7 +95,7 @@ class ClubAccountInvitationServiceTest {
         when(invitationRepository.findByTokenId("token-id")).thenReturn(Optional.of(invitation));
 
         assertThatThrownBy(() -> service.acceptInvitation(
-                "token-id.secret", new ClubAccountInvitationAcceptRequest("Jamie"), 20L
+                "token-id.secret", 20L
         )).isInstanceOfSatisfying(ResponseStatusException.class, error ->
                 assertThat(error.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND)
         );
@@ -108,23 +107,32 @@ class ClubAccountInvitationServiceTest {
         String tokenId = "token-id";
         String secret = "secret";
         ClubAccountInvitation invitation = invitation(club, tokenId, passwordEncoder.encode(secret), LocalDateTime.now().plusHours(3));
-        ClubAccount owner = new ClubAccount(club, 20L, "Jamie", ClubAccountRole.OWNER);
+        ClubAccount owner = new ClubAccount(club, 20L, ClubAccountRole.OWNER);
         when(invitationRepository.findByTokenId(tokenId)).thenReturn(Optional.of(invitation));
         when(clubAccountRepository.findByClubAndAccountId(club, 20L)).thenReturn(Optional.of(owner));
 
-        service.acceptInvitation(tokenId + "." + secret, new ClubAccountInvitationAcceptRequest("New name"), 20L);
+        when(userRepository.findByIdAndStatus(20L, UserStatus.ACTIVE)).thenReturn(Optional.of(user(20L, "Jamie")));
+
+        service.acceptInvitation(tokenId + "." + secret, 20L);
 
         assertThat(owner.getRole()).isEqualTo(ClubAccountRole.OWNER);
-        assertThat(owner.getDisplayName()).isEqualTo("Jamie");
     }
 
     @Test
-    void acceptInvitation_rejectsBlankDisplayNameEvenForExistingAccount() {
-        assertThatThrownBy(() -> service.acceptInvitation(
-                "token-id.secret", new ClubAccountInvitationAcceptRequest(" "), 20L
-        )).isInstanceOfSatisfying(ResponseStatusException.class, error ->
-                assertThat(error.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST)
+    void previewInvitation_returnsClubNameForActiveLink() {
+        Club club = club();
+        ClubAccountInvitation invitation = invitation(
+                club,
+                "token-id",
+                passwordEncoder.encode("secret"),
+                LocalDateTime.now().plusHours(3)
         );
+        when(invitationRepository.findByTokenId("token-id")).thenReturn(Optional.of(invitation));
+
+        ClubAccountInvitationPreviewResponse response = service.previewInvitation("token-id.secret");
+
+        assertThat(response.getClubName()).isEqualTo("Morning Tennis");
+        assertThat(response.getClubPublicId()).isEqualTo(club.getPublicId());
     }
 
     private static Club club() {

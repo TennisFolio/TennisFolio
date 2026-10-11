@@ -1,7 +1,7 @@
 package com.tennisfolio.Tennisfolio.club.service;
 
-import com.tennisfolio.Tennisfolio.club.dto.ClubAccountInvitationAcceptRequest;
 import com.tennisfolio.Tennisfolio.club.dto.ClubAccountInvitationIssueResponse;
+import com.tennisfolio.Tennisfolio.club.dto.ClubAccountInvitationPreviewResponse;
 import com.tennisfolio.Tennisfolio.club.dto.ClubAccountInvitationStatusResponse;
 import com.tennisfolio.Tennisfolio.club.dto.ClubAccountResponse;
 import com.tennisfolio.Tennisfolio.club.entity.Club;
@@ -13,6 +13,7 @@ import com.tennisfolio.Tennisfolio.club.repository.ClubAccountRepository;
 import com.tennisfolio.Tennisfolio.common.ExceptionCode;
 import com.tennisfolio.Tennisfolio.common.UserStatus;
 import com.tennisfolio.Tennisfolio.exception.NotFoundException;
+import com.tennisfolio.Tennisfolio.user.domain.User;
 import com.tennisfolio.Tennisfolio.user.repository.UserRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -64,16 +65,25 @@ public class ClubAccountInvitationService {
 
     public ClubAccountResponse acceptInvitation(
             String rawToken,
-            ClubAccountInvitationAcceptRequest request,
             Long currentUserId
     ) {
         clubAccessService.requireAuthenticated(currentUserId);
-        String displayName = requireDisplayName(request.getDisplayName());
         InvitationToken token = parseToken(rawToken);
         ClubAccountInvitation invitation = findActiveInvitation(token);
+        User user = findActiveUser(currentUserId);
         return clubAccountRepository.findByClubAndAccountId(invitation.getClub(), currentUserId)
-                .map(ClubAccountResponse::from)
-                .orElseGet(() -> createAdminAccount(invitation.getClub(), currentUserId, displayName));
+                .map(account -> ClubAccountResponse.from(account, user))
+                .orElseGet(() -> createAdminAccount(invitation.getClub(), user));
+    }
+
+    @Transactional(readOnly = true)
+    public ClubAccountInvitationPreviewResponse previewInvitation(String rawToken) {
+        InvitationToken token = parseToken(rawToken);
+        ClubAccountInvitation invitation = findActiveInvitation(token);
+        return new ClubAccountInvitationPreviewResponse(
+                invitation.getClub().getName(),
+                invitation.getClub().getPublicId()
+        );
     }
 
     public void closeInvitation(String clubPublicId, Long currentUserId) {
@@ -108,20 +118,13 @@ public class ClubAccountInvitationService {
         return invitation;
     }
 
-    private ClubAccountResponse createAdminAccount(
-            Club club,
-            Long currentUserId,
-            String displayName
-    ) {
-        userRepository.findByIdAndStatus(currentUserId, UserStatus.ACTIVE)
-                .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND));
+    private ClubAccountResponse createAdminAccount(Club club, User user) {
         ClubAccount account = new ClubAccount(
                 club,
-                currentUserId,
-                displayName,
+                user.getUserId(),
                 ClubAccountRole.ADMIN
         );
-        return ClubAccountResponse.from(clubAccountRepository.save(account));
+        return ClubAccountResponse.from(clubAccountRepository.save(account), user);
     }
 
     private InvitationToken generateToken() {
@@ -144,11 +147,9 @@ public class ClubAccountInvitationService {
         return new InvitationToken(parts[0], parts[1]);
     }
 
-    private String requireDisplayName(String displayName) {
-        if (displayName == null || displayName.trim().isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "표시 이름을 입력해주세요.");
-        }
-        return displayName.trim();
+    private User findActiveUser(Long userId) {
+        return userRepository.findByIdAndStatus(userId, UserStatus.ACTIVE)
+                .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND));
     }
 
     private ResponseStatusException invitationNotFound() {

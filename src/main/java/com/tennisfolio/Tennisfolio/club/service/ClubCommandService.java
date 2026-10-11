@@ -61,7 +61,6 @@ public class ClubCommandService {
         clubAccountRepository.save(new ClubAccount(
                 club,
                 currentUserId,
-                requireName(creator.getNickName()),
                 ClubAccountRole.OWNER
         ));
         clubSkillTierService.replaceSkillTiers(club, request.getSkillTiers());

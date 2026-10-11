@@ -37,22 +37,14 @@ public class ClubAccount extends BaseTimeEntity {
     @Column(name = "ACCOUNT_ID", nullable = false)
     private Long accountId;
 
-    @Column(name = "DISPLAY_NAME", nullable = false, length = 50)
-    private String displayName;
-
     @Enumerated(EnumType.STRING)
     @Column(name = "ROLE", nullable = false, length = 20)
     private ClubAccountRole role;
 
-    public ClubAccount(Club club, Long accountId, String displayName, ClubAccountRole role) {
+    public ClubAccount(Club club, Long accountId, ClubAccountRole role) {
         this.club = club;
         this.accountId = accountId;
-        this.displayName = displayName;
         this.role = role;
-    }
-
-    public void updateDisplayName(String displayName) {
-        this.displayName = displayName;
     }
 
     public void changeRole(ClubAccountRole role) {

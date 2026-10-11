@@ -1,7 +1,6 @@
 package com.tennisfolio.Tennisfolio.club.service;
 
 import com.tennisfolio.Tennisfolio.club.dto.ClubAccountRoleUpdateRequest;
-import com.tennisfolio.Tennisfolio.club.dto.ClubAccountUpdateRequest;
 import com.tennisfolio.Tennisfolio.club.entity.Club;
 import com.tennisfolio.Tennisfolio.club.entity.ClubAccount;
 import com.tennisfolio.Tennisfolio.club.entity.ClubAccountRole;
@@ -47,11 +46,6 @@ public class ClubAccountCommandService {
         clubAccountRepository.delete(account);
     }
 
-    public void updateMyAccount(String clubPublicId, ClubAccountUpdateRequest request, Long currentUserId) {
-        ClubAccount account = clubAccessService.requireClubAccount(clubPublicId, currentUserId);
-        account.updateDisplayName(requireDisplayName(request.getDisplayName()));
-    }
-
     public void leaveMyAccount(String clubPublicId, Long currentUserId) {
         ClubAccount account = clubAccessService.requireClubAccount(clubPublicId, currentUserId);
         preventRemovingLastOwner(account);
@@ -69,13 +63,6 @@ public class ClubAccountCommandService {
         } catch (IllegalArgumentException | NullPointerException exception) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "클럽 계정 역할 값이 올바르지 않습니다.");
         }
-    }
-
-    private String requireDisplayName(String displayName) {
-        if (displayName == null || displayName.trim().isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "표시 이름을 입력해주세요.");
-        }
-        return displayName.trim();
     }
 
     private void preventRemovingLastOwner(ClubAccount account, ClubAccountRole nextRole) {

@@ -6,7 +6,6 @@ import com.tennisfolio.Tennisfolio.club.dto.ClubAccountInvitationIssueResponse;
 import com.tennisfolio.Tennisfolio.club.dto.ClubAccountInvitationStatusResponse;
 import com.tennisfolio.Tennisfolio.club.dto.ClubAccountResponse;
 import com.tennisfolio.Tennisfolio.club.dto.ClubAccountRoleUpdateRequest;
-import com.tennisfolio.Tennisfolio.club.dto.ClubAccountUpdateRequest;
 import com.tennisfolio.Tennisfolio.club.dto.ClubDashboardResponse;
 import com.tennisfolio.Tennisfolio.club.dto.ClubDetailResponse;
 import com.tennisfolio.Tennisfolio.club.dto.ClubMemberCreateRequest;
@@ -208,16 +207,6 @@ public class ClubController {
             @PathVariable String clubPublicId
     ) {
         return ResponseEntity.ok(ResponseDTO.success(clubAccountQueryService.getMyAccount(clubPublicId, userId)));
-    }
-
-    @PatchMapping("/clubs/{clubPublicId}/account")
-    public ResponseEntity<ResponseDTO<Void>> updateMyAccount(
-            @AuthenticationPrincipal Long userId,
-            @PathVariable String clubPublicId,
-            @RequestBody ClubAccountUpdateRequest request
-    ) {
-        clubAccountCommandService.updateMyAccount(clubPublicId, request, userId);
-        return ResponseEntity.ok(ResponseDTO.success());
     }
 
     @DeleteMapping("/clubs/{clubPublicId}/account")

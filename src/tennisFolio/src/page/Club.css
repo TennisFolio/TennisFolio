@@ -17,6 +17,9 @@
 .club-dashboard-nav small { font-size: 11px; }
 .club-dashboard-content { min-width: 0; padding: 0 34px 34px; }
 .club-dashboard-topbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 72px; margin: 0 -34px; border-bottom: 1px solid var(--competition-border); background: var(--competition-surface); padding: 0 34px; color: var(--competition-text-muted); font-size: 13px; font-weight: 800; }
+.club-dashboard-error-state { display: grid; min-height: calc(100dvh - 72px); place-items: center; padding: 32px 0; }
+.club-dashboard-error-state .club-state { width: min(100%, 560px); gap: 14px; border-radius: 12px; padding: 28px; text-align: center; }
+.club-dashboard-error-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
 .club-dashboard-desktop-notice { display: none; }
 .club-dashboard-mobile-menu-trigger, .club-dashboard-mobile-menu, .club-dashboard-mobile-menu-backdrop { display: none; }
 .club-dashboard-club-switcher { position: relative; min-width: 250px; }
@@ -659,4 +662,44 @@
   .club-member-status-summary { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .club-member-management-actions { width: 100%; }.club-member-management-actions .club-button { flex: 1; }
   .club-member-detail-grid { grid-template-columns: 1fr; }
+}
+
+.club-dashboard-eyebrow { display: block; margin-bottom: 7px; color: var(--competition-text-muted); font-size: 11px; font-weight: 900; letter-spacing: .08em; }
+.club-account-count, .club-account-role { display: inline-flex; align-items: center; justify-content: center; min-height: 28px; border: 1px solid var(--competition-border); border-radius: 999px; background: var(--competition-surface-soft); color: var(--competition-text-body); padding: 0 10px; font-size: 12px; font-weight: 900; }
+.club-account-role.owner { border-color: var(--competition-primary); background: var(--competition-primary-muted); color: var(--competition-primary); }
+.club-account-role.admin { border-color: var(--competition-warning-border); background: var(--competition-warning-bg); color: var(--competition-warning); }
+.club-account-section { margin-top: 22px; }
+.club-invitation-card, .club-invitation-empty { display: flex; align-items: center; justify-content: space-between; gap: 18px; }
+.club-invitation-card h3, .club-invitation-empty h3 { margin: 0; color: var(--competition-text-strong); font-size: 15px; font-weight: 900; }
+.club-invitation-card strong { display: block; margin-top: 11px; color: var(--competition-text-body); font-size: 12px; }
+.club-account-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.club-account-note { margin: 10px 0 0; color: var(--competition-text-muted); font-size: 12px; font-weight: 700; line-height: 1.45; }
+.club-account-list { padding: 0; overflow: hidden; }
+.club-account-row { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 12px; border-top: 1px solid var(--competition-border); padding: 14px 18px; }
+.club-account-row:first-child { border-top: 0; }
+.club-account-person, .club-account-profile { display: flex; min-width: 0; align-items: center; gap: 10px; color: var(--competition-text-strong); font-size: 15px; font-weight: 900; }
+.club-account-avatar { display: inline-grid; flex: 0 0 auto; place-items: center; width: 36px; height: 36px; border-radius: 50%; background: var(--competition-primary-muted); color: var(--competition-primary); font-size: 14px; font-weight: 900; }
+.club-account-detail-card { display: grid; gap: 18px; width: min(100%, 620px); }
+.club-account-detail-card header h1 { margin: 10px 0 0; color: var(--competition-text-strong); font-size: 22px; font-weight: 900; }
+.club-account-form { display: grid; gap: 13px; }
+.club-field small { color: var(--competition-text-muted); font-size: 12px; font-weight: 700; line-height: 1.45; }
+.club-account-readonly { min-height: 44px; display: flex; align-items: center; border: 1px solid var(--competition-border); border-radius: 8px; background: var(--competition-surface-soft); color: var(--competition-text-body); padding: 0 11px; font-size: 14px; font-weight: 800; }
+.club-account-danger-zone { display: grid; gap: 8px; border-top: 1px solid var(--competition-border); padding-top: 16px; }
+.club-account-danger-zone strong { color: var(--competition-text-strong); font-size: 14px; }
+.club-account-danger-zone p { margin: 0; }
+.club-invitation-page { width: min(100%, 560px); min-height: calc(100dvh - 72px); display: grid; place-content: center; margin: 0 auto; padding: 24px 16px 48px; background: var(--competition-page-bg); }
+.club-invitation-accept-card { display: grid; gap: 16px; }
+.club-invitation-mark { display: grid; place-items: center; width: 42px; height: 42px; border-radius: 12px; background: var(--competition-primary); color: var(--competition-text-inverse); font-weight: 900; }
+.club-invitation-accept-card h1 { margin: 0; color: var(--competition-text-strong); font-size: 24px; font-weight: 900; }
+.club-invitation-accept-card > p { margin: -7px 0 0; color: var(--competition-text-muted); font-size: 14px; font-weight: 700; line-height: 1.5; }
+.club-invitation-summary { display: grid; gap: 4px; border: 1px solid var(--competition-border); border-radius: 8px; background: var(--competition-surface-soft); padding: 13px; }
+.club-invitation-summary strong { color: var(--competition-text-strong); font-size: 15px; }
+.club-invitation-summary span { color: var(--competition-text-muted); font-size: 13px; font-weight: 700; }
+
+@media (max-width: 720px) {
+  .club-invitation-card, .club-invitation-empty { align-items: stretch; flex-direction: column; }
+  .club-account-actions { width: 100%; }
+  .club-account-actions .club-button { flex: 1; }
+  .club-account-row { grid-template-columns: minmax(0, 1fr) auto; }
+  .club-account-row .club-button { grid-column: 1 / -1; width: 100%; }
 }

@@ -29,7 +29,7 @@ class ClubQueryServiceTest {
     void getMyClubs_returnsOwnerRoleFromClubAccount() {
         Club club = new Club("Morning", null, 10L);
         when(clubAccountRepository.findByAccountIdOrderByIdAsc(10L))
-                .thenReturn(List.of(new ClubAccount(club, 10L, "Alex", ClubAccountRole.OWNER)));
+                .thenReturn(List.of(new ClubAccount(club, 10L, ClubAccountRole.OWNER)));
         when(clubMemberRepository.countByClubAndMemberStatus(org.mockito.ArgumentMatchers.eq(club), org.mockito.ArgumentMatchers.any()))
                 .thenReturn(2L);
 

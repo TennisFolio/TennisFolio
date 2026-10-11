@@ -72,7 +72,6 @@ class ClubCommandServiceTest {
         verify(clubAccountRepository).save(accountCaptor.capture());
         assertThat(accountCaptor.getValue().getClub()).isSameAs(savedClub);
         assertThat(accountCaptor.getValue().getAccountId()).isEqualTo(10L);
-        assertThat(accountCaptor.getValue().getDisplayName()).isEqualTo("Alex");
         assertThat(accountCaptor.getValue().getRole()).isEqualTo(ClubAccountRole.OWNER);
     }
 
