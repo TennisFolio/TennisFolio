@@ -2,6 +2,7 @@ package com.tennisfolio.Tennisfolio.club.api;
 
 import com.tennisfolio.Tennisfolio.club.dto.ClubCreateRequest;
 import com.tennisfolio.Tennisfolio.club.dto.ClubCreateResponse;
+import com.tennisfolio.Tennisfolio.club.dto.ClubAccountInvitationIssueResponse;
 import com.tennisfolio.Tennisfolio.club.dto.ClubDashboardResponse;
 import com.tennisfolio.Tennisfolio.club.dto.ClubDashboardMemberComposition;
 import com.tennisfolio.Tennisfolio.club.dto.ClubDashboardMemberParticipation;
@@ -14,9 +15,13 @@ import com.tennisfolio.Tennisfolio.club.dto.ClubMemberCreateRequest;
 import com.tennisfolio.Tennisfolio.club.dto.ClubMemberBulkCreateRequest;
 import com.tennisfolio.Tennisfolio.club.dto.ClubMemberResponse;
 import com.tennisfolio.Tennisfolio.club.dto.ClubMemberUpdateRequest;
+import com.tennisfolio.Tennisfolio.club.dto.ClubMemberStatusChangeRequest;
 import com.tennisfolio.Tennisfolio.club.dto.ClubSummaryResponse;
 import com.tennisfolio.Tennisfolio.club.dto.ClubUpdateRequest;
 import com.tennisfolio.Tennisfolio.club.service.ClubCommandService;
+import com.tennisfolio.Tennisfolio.club.service.ClubAccountCommandService;
+import com.tennisfolio.Tennisfolio.club.service.ClubAccountQueryService;
+import com.tennisfolio.Tennisfolio.club.service.ClubAccountInvitationService;
 import com.tennisfolio.Tennisfolio.club.service.ClubDashboardQueryService;
 import com.tennisfolio.Tennisfolio.club.service.ClubMemberCommandService;
 import com.tennisfolio.Tennisfolio.club.service.ClubQueryService;
@@ -27,12 +32,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 
 import java.util.List;
 import java.time.LocalDate;
 import java.time.YearMonth;
+import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
@@ -53,18 +57,27 @@ class ClubControllerTest {
     @Mock
     ClubDashboardQueryService clubDashboardQueryService;
 
+    @Mock
+    ClubAccountCommandService clubAccountCommandService;
+
+    @Mock
+    ClubAccountQueryService clubAccountQueryService;
+
+    @Mock
+    ClubAccountInvitationService clubAccountInvitationService;
+
     @InjectMocks
     ClubController clubController;
 
     @Test
     void createClub_passesCurrentUserToCommandService() {
-        Authentication authentication = auth(10L);
+        Long userId = 10L;
         ClubCreateRequest request = new ClubCreateRequest("Morning Tennis", "Indoor club");
         when(clubCommandService.createClub(request, 10L))
                 .thenReturn(new ClubCreateResponse("club-public-id"));
 
         ResponseEntity<ResponseDTO<ClubCreateResponse>> response =
-                clubController.createClub(authentication, request);
+                clubController.createClub(userId, request);
 
         verify(clubCommandService).createClub(request, 10L);
         assertThat(response.getStatusCode().value()).isEqualTo(200);
@@ -74,7 +87,7 @@ class ClubControllerTest {
 
     @Test
     void getMyClubs_passesCurrentUserToQueryService() {
-        Authentication authentication = auth(10L);
+        Long userId = 10L;
         when(clubQueryService.getMyClubs(10L))
                 .thenReturn(List.of(new ClubSummaryResponse(
                         "club-public-id",
@@ -85,7 +98,7 @@ class ClubControllerTest {
                 )));
 
         ResponseEntity<ResponseDTO<List<ClubSummaryResponse>>> response =
-                clubController.getMyClubs(authentication);
+                clubController.getMyClubs(userId);
 
         verify(clubQueryService).getMyClubs(10L);
         assertThat(response.getBody()).isNotNull();
@@ -94,7 +107,7 @@ class ClubControllerTest {
 
     @Test
     void getClub_passesCurrentUserToQueryService() {
-        Authentication authentication = auth(10L);
+        Long userId = 10L;
         when(clubQueryService.getClub("club-public-id", 10L))
                 .thenReturn(new ClubDetailResponse(
                         "club-public-id",
@@ -106,7 +119,7 @@ class ClubControllerTest {
                 ));
 
         ResponseEntity<ResponseDTO<ClubDetailResponse>> response =
-                clubController.getClub(authentication, "club-public-id");
+                clubController.getClub(userId, "club-public-id");
 
         verify(clubQueryService).getClub("club-public-id", 10L);
         assertThat(response.getBody()).isNotNull();
@@ -115,14 +128,14 @@ class ClubControllerTest {
 
     @Test
     void getDashboard_passesMonthFilterAndPageToDashboardQueryService() {
-        Authentication authentication = auth(10L);
+        Long userId = 10L;
         when(clubDashboardQueryService.getDashboard(
                 "club-public-id", 10L, YearMonth.of(2026, 8), ClubDashboardMemberFilter.PARTICIPATED, 1
         ))
                 .thenReturn(dashboardResponse());
 
         ResponseEntity<ResponseDTO<ClubDashboardResponse>> response =
-                clubController.getDashboard(authentication, "club-public-id", 2026, 8,
+                clubController.getDashboard(userId, "club-public-id", 2026, 8,
                         "participated", 1);
 
         verify(clubDashboardQueryService).getDashboard(
@@ -135,11 +148,11 @@ class ClubControllerTest {
 
     @Test
     void updateClub_passesCurrentUserToCommandService() {
-        Authentication authentication = auth(10L);
+        Long userId = 10L;
         ClubUpdateRequest request = new ClubUpdateRequest("Evening Tennis", "Outdoor club");
 
         ResponseEntity<ResponseDTO<Void>> response =
-                clubController.updateClub(authentication, "club-public-id", request);
+                clubController.updateClub(userId, "club-public-id", request);
 
         verify(clubCommandService).updateClub("club-public-id", request, 10L);
         assertThat(response.getStatusCode().value()).isEqualTo(200);
@@ -147,9 +160,9 @@ class ClubControllerTest {
 
     @Test
     void deleteClub_passesCurrentUserToCommandService() {
-        Authentication authentication = auth(10L);
+        Long userId = 10L;
 
-        ResponseEntity<Void> response = clubController.deleteClub(authentication, "club-public-id");
+        ResponseEntity<Void> response = clubController.deleteClub(userId, "club-public-id");
 
         verify(clubCommandService).deleteClub("club-public-id", 10L);
         assertThat(response.getStatusCode().value()).isEqualTo(204);
@@ -157,14 +170,12 @@ class ClubControllerTest {
 
     @Test
     void getMembers_passesKeywordAndCurrentUserToQueryService() {
-        Authentication authentication = auth(10L);
+        Long userId = 10L;
         when(clubQueryService.getMembers("club-public-id", "jamie", 10L))
                 .thenReturn(List.of(new ClubMemberResponse(
                         100L,
-                        null,
                         "Jamie Lee",
                         "FEMALE",
-                        "MEMBER",
                         1L,
                         "상급",
                         3,
@@ -173,7 +184,7 @@ class ClubControllerTest {
                 )));
 
         ResponseEntity<ResponseDTO<List<ClubMemberResponse>>> response =
-                clubController.getMembers(authentication, "club-public-id", "jamie");
+                clubController.getMembers(userId, "club-public-id", "jamie");
 
         verify(clubQueryService).getMembers("club-public-id", "jamie", 10L);
         assertThat(response.getBody()).isNotNull();
@@ -182,12 +193,12 @@ class ClubControllerTest {
 
     @Test
     void addMember_passesCurrentUserToCommandService() {
-        Authentication authentication = auth(10L);
+        Long userId = 10L;
         ClubMemberCreateRequest request =
-                new ClubMemberCreateRequest("Jamie Lee", "FEMALE", "MEMBER", null, null, null);
+                new ClubMemberCreateRequest("Jamie Lee", "FEMALE", null, null, null, null);
 
         ResponseEntity<ResponseDTO<Void>> response =
-                clubController.addMember(authentication, "club-public-id", request);
+                clubController.addMember(userId, "club-public-id", request);
 
         verify(clubMemberCommandService).addMember("club-public-id", request, 10L);
         assertThat(response.getStatusCode().value()).isEqualTo(200);
@@ -195,13 +206,13 @@ class ClubControllerTest {
 
     @Test
     void addMembers_passesCurrentUserToCommandService() {
-        Authentication authentication = auth(10L);
+        Long userId = 10L;
         ClubMemberBulkCreateRequest request = new ClubMemberBulkCreateRequest(List.of(
-                new ClubMemberCreateRequest("Jamie Lee", "FEMALE", "MEMBER", null, null, null)
+                new ClubMemberCreateRequest("Jamie Lee", "FEMALE", null, null, null, null)
         ));
 
         ResponseEntity<ResponseDTO<Void>> response =
-                clubController.addMembers(authentication, "club-public-id", request);
+                clubController.addMembers(userId, "club-public-id", request);
 
         verify(clubMemberCommandService).addMembers("club-public-id", request, 10L);
         assertThat(response.getStatusCode().value()).isEqualTo(200);
@@ -209,12 +220,12 @@ class ClubControllerTest {
 
     @Test
     void updateMember_passesCurrentUserToCommandService() {
-        Authentication authentication = auth(10L);
+        Long userId = 10L;
         ClubMemberUpdateRequest request =
-                new ClubMemberUpdateRequest("Jamie Lee", "FEMALE", "MEMBER", null, null, null);
+                new ClubMemberUpdateRequest("Jamie Lee", "FEMALE", null, null, null, null);
 
         ResponseEntity<ResponseDTO<Void>> response =
-                clubController.updateMember(authentication, "club-public-id", 100L, request);
+                clubController.updateMember(userId, "club-public-id", 100L, request);
 
         verify(clubMemberCommandService).updateMember("club-public-id", 100L, request, 10L);
         assertThat(response.getStatusCode().value()).isEqualTo(200);
@@ -222,16 +233,60 @@ class ClubControllerTest {
 
     @Test
     void deleteMember_passesCurrentUserToCommandService() {
-        Authentication authentication = auth(10L);
+        Long userId = 10L;
 
-        ResponseEntity<Void> response = clubController.deleteMember(authentication, "club-public-id", 100L);
+        ResponseEntity<Void> response = clubController.deleteMember(userId, "club-public-id", 100L);
 
         verify(clubMemberCommandService).deleteMember("club-public-id", 100L, 10L);
         assertThat(response.getStatusCode().value()).isEqualTo(204);
     }
 
-    private static Authentication auth(Long userId) {
-        return new UsernamePasswordAuthenticationToken(userId, null, List.of());
+    @Test
+    void changeMemberStatus_passesCurrentUserToCommandService() {
+        Long userId = 10L;
+        ClubMemberStatusChangeRequest request = new ClubMemberStatusChangeRequest("SUSPENDED");
+
+        ResponseEntity<ResponseDTO<Void>> response =
+                clubController.changeMemberStatus(userId, "club-public-id", 100L, request);
+
+        verify(clubMemberCommandService).changeMemberStatus("club-public-id", 100L, request, 10L);
+        assertThat(response.getStatusCode().value()).isEqualTo(200);
+    }
+
+    @Test
+    void getManagementMembers_passesFiltersAndCurrentUserToQueryService() {
+        Long userId = 10L;
+
+        ResponseEntity<?> response = clubController.getManagementMembers(
+                userId,
+                "club-public-id",
+                "SUSPENDED",
+                "jamie"
+        );
+
+        verify(clubQueryService).getManagementMembers("club-public-id", "SUSPENDED", "jamie", 10L);
+        assertThat(response.getStatusCode().value()).isEqualTo(200);
+    }
+
+    @Test
+    void getManagementMember_passesCurrentUserToQueryService() {
+        Long userId = 10L;
+
+        ResponseEntity<?> response = clubController.getManagementMember(userId, "club-public-id", 100L);
+
+        verify(clubQueryService).getManagementMember("club-public-id", 100L, 10L);
+        assertThat(response.getStatusCode().value()).isEqualTo(200);
+    }
+
+    @Test
+    void issueAccountInvitation_passesCurrentUserToInvitationService() {
+        when(clubAccountInvitationService.issueInvitation("club-public-id", 10L))
+                .thenReturn(new ClubAccountInvitationIssueResponse("token", LocalDateTime.now().plusHours(3)));
+
+        ResponseEntity<?> response = clubController.issueAccountInvitation(10L, "club-public-id");
+
+        verify(clubAccountInvitationService).issueInvitation("club-public-id", 10L);
+        assertThat(response.getStatusCode().value()).isEqualTo(200);
     }
 
     private static ClubDashboardResponse dashboardResponse() {

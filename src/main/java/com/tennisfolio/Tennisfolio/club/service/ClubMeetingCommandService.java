@@ -36,7 +36,7 @@ public class ClubMeetingCommandService {
             MeetingCreateRequest request,
             Long currentUserId
     ) {
-        Club club = clubAccessService.requireAdmin(clubPublicId, currentUserId);
+        Club club = clubAccessService.requireOperator(clubPublicId, currentUserId);
         return meetingCommandService.createClubMeeting(request, currentUserId, club.getId());
     }
 
@@ -47,7 +47,7 @@ public class ClubMeetingCommandService {
             MeetingUpdateRequest request,
             Long currentUserId
     ) {
-        Club club = clubAccessService.requireAdmin(clubPublicId, currentUserId);
+        Club club = clubAccessService.requireOperator(clubPublicId, currentUserId);
         return meetingCommandService.updateClubMeeting(meetingPublicId, club.getId(), request, currentUserId);
     }
 
@@ -58,13 +58,13 @@ public class ClubMeetingCommandService {
             MeetingStatusUpdateRequest request,
             Long currentUserId
     ) {
-        Club club = clubAccessService.requireAdmin(clubPublicId, currentUserId);
+        Club club = clubAccessService.requireOperator(clubPublicId, currentUserId);
         return meetingCommandService.updateClubMeetingStatus(meetingPublicId, club.getId(), request, currentUserId);
     }
 
     @Transactional
     public void deleteClubMeeting(String clubPublicId, String meetingPublicId, Long currentUserId) {
-        Club club = clubAccessService.requireAdmin(clubPublicId, currentUserId);
+        Club club = clubAccessService.requireOperator(clubPublicId, currentUserId);
         meetingCommandService.deleteClubMeeting(meetingPublicId, club.getId());
     }
 
@@ -75,7 +75,7 @@ public class ClubMeetingCommandService {
             MeetingCompetitionCreateRequest request,
             Long currentUserId
     ) {
-        Club club = clubAccessService.requireAdmin(clubPublicId, currentUserId);
+        Club club = clubAccessService.requireOperator(clubPublicId, currentUserId);
         return meetingCompetitionCreateService.createClubMeetingCompetition(
                 meetingPublicId,
                 club.getId(),
@@ -86,7 +86,7 @@ public class ClubMeetingCommandService {
 
     @Transactional
     public void deleteClubMeetingCompetition(String clubPublicId, String meetingPublicId, Long currentUserId) {
-        Club club = clubAccessService.requireAdmin(clubPublicId, currentUserId);
+        Club club = clubAccessService.requireOperator(clubPublicId, currentUserId);
         meetingCompetitionCreateService.deleteClubMeetingCompetition(meetingPublicId, club.getId());
     }
 }

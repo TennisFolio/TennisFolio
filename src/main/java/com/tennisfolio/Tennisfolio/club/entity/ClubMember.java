@@ -16,89 +16,64 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+
 @Entity
 @Table(name = "tb_club_member")
 @Getter
 @NoArgsConstructor
 public class ClubMember extends BaseTimeEntity {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "CLUB_MEMBER_ID")
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY) @Column(name = "CLUB_MEMBER_ID")
     private Long id;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "CLUB_ID", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "CLUB_ID", nullable = false)
     private Club club;
-
-    @Column(name = "USER_ID")
-    private Long userId;
-
     @Column(name = "NAME", nullable = false)
     private String name;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "GENDER", nullable = false)
+    @Enumerated(EnumType.STRING) @Column(name = "GENDER", nullable = false)
     private Gender gender;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "ROLE", nullable = false)
-    private ClubMemberRole role;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "SKILL_TIER_ID")
+    @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "SKILL_TIER_ID")
     private ClubSkillTier skillTier;
+    @Column(name = "CONTACT_MEMO") private String contactMemo;
+    @Column(name = "MEMO") private String memo;
+    @Enumerated(EnumType.STRING) @Column(name = "MEMBER_STATUS", nullable = false)
+    private ClubMemberStatus memberStatus = ClubMemberStatus.ACTIVE;
+    @Column(name = "JOINED_AT") private LocalDate joinedAt;
+    @Column(name = "SUSPENDED_AT") private LocalDate suspendedAt;
+    @Column(name = "LEFT_AT") private LocalDate leftAt;
 
-    @Column(name = "CONTACT_MEMO")
-    private String contactMemo;
+    public ClubMember(Club club, String name, Gender gender, ClubSkillTier skillTier, String contactMemo, String memo) {
+        this(club, name, gender, skillTier, contactMemo, memo, null);
+    }
 
-    @Column(name = "MEMO")
-    private String memo;
-
-    @Column(name = "ACTIVE", nullable = false)
-    private boolean active = true;
-
-    public ClubMember(
-            Club club,
-            Long userId,
-            String name,
-            Gender gender,
-            ClubMemberRole role,
-            ClubSkillTier skillTier,
-            String contactMemo,
-            String memo
-    ) {
+    public ClubMember(Club club, String name, Gender gender, ClubSkillTier skillTier, String contactMemo, String memo, LocalDate joinedAt) {
         this.club = club;
-        this.userId = userId;
         this.name = name;
         this.gender = gender;
-        this.role = role;
         this.skillTier = skillTier;
         this.contactMemo = contactMemo;
         this.memo = memo;
+        this.joinedAt = joinedAt;
     }
 
-    public void update(
-            String name,
-            Gender gender,
-            ClubMemberRole role,
-            ClubSkillTier skillTier,
-            String contactMemo,
-            String memo
-    ) {
+    public void update(String name, Gender gender, ClubSkillTier skillTier, String contactMemo, String memo, LocalDate joinedAt) {
         this.name = name;
         this.gender = gender;
-        this.role = role;
         this.skillTier = skillTier;
         this.contactMemo = contactMemo;
         this.memo = memo;
+        this.joinedAt = joinedAt;
     }
 
-    public void deactivate() {
-        this.active = false;
+    public void changeStatus(ClubMemberStatus memberStatus, LocalDate statusDate) {
+        this.memberStatus = memberStatus;
+        if (memberStatus == ClubMemberStatus.ACTIVE) {
+            suspendedAt = null; leftAt = null;
+        } else if (memberStatus == ClubMemberStatus.SUSPENDED) {
+            suspendedAt = statusDate; leftAt = null;
+        } else {
+            suspendedAt = null; leftAt = statusDate;
+        }
     }
 
-    public void clearSkillTier() {
-        this.skillTier = null;
-    }
+    public void clearSkillTier() { this.skillTier = null; }
 }

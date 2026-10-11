@@ -45,7 +45,7 @@ class ClubDashboardQueryServiceTest {
         ClubDashboardMonthlyData data = new ClubDashboardMonthlyData(
                 10, 4, 7, 5, 7, new ClubDashboardMemberPage(List.of(), 0, 10, 10, 1), List.of()
         );
-        when(clubAccessService.requireAdmin("club-public-id", 10L)).thenReturn(club());
+        when(clubAccessService.requireOperator("club-public-id", 10L)).thenReturn(club());
         when(dashboardQueryRepository.findMonthlyDashboardData(
                 eq(100L), eq(LocalDateTime.of(2026, 8, 1, 0, 0)),
                 eq(LocalDateTime.of(2026, 8, 31, 23, 59, 59, 999_999_999)),
@@ -59,12 +59,12 @@ class ClubDashboardQueryServiceTest {
         assertThat(response.getPeriod().getMonth()).isEqualTo(8);
         assertThat(response.getMemberParticipation().getRate()).isEqualTo(70);
         assertThat(response.getMemberGuestRatio().getMemberRate()).isEqualTo(58);
-        verify(clubAccessService).requireAdmin("club-public-id", 10L);
+        verify(clubAccessService).requireOperator("club-public-id", 10L);
     }
 
     @Test
     void getDashboard_rejectsFutureMonth() {
-        when(clubAccessService.requireAdmin("club-public-id", 10L)).thenReturn(club());
+        when(clubAccessService.requireOperator("club-public-id", 10L)).thenReturn(club());
 
         assertThatThrownBy(() -> service.getDashboard("club-public-id", 10L, YearMonth.of(2026, 9),
                 ClubDashboardMemberFilter.ALL, 0))

@@ -12,7 +12,7 @@ import com.tennisfolio.Tennisfolio.meeting.dto.MeetingStatusUpdateRequest;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingSummaryResponse;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingUpdateRequest;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -41,47 +41,47 @@ public class ClubMeetingController {
 
     @GetMapping
     public ResponseEntity<ResponseDTO<List<MeetingSummaryResponse>>> getClubMeetings(
-            Authentication authentication,
+            @AuthenticationPrincipal Long userId,
             @PathVariable String clubPublicId
     ) {
         List<MeetingSummaryResponse> response = clubMeetingQueryService.getClubMeetings(
                 clubPublicId,
-                resolveAuthenticatedUserId(authentication)
+                userId
         );
         return ResponseEntity.ok(ResponseDTO.success(response));
     }
 
     @PostMapping
     public ResponseEntity<ResponseDTO<MeetingCreateResponse>> createClubMeeting(
-            Authentication authentication,
+            @AuthenticationPrincipal Long userId,
             @PathVariable String clubPublicId,
             @RequestBody MeetingCreateRequest request
     ) {
         MeetingCreateResponse response = clubMeetingCommandService.createClubMeeting(
                 clubPublicId,
                 request,
-                resolveAuthenticatedUserId(authentication)
+                userId
         );
         return ResponseEntity.ok(ResponseDTO.success(response));
     }
 
     @GetMapping("/{meetingPublicId}")
     public ResponseEntity<ResponseDTO<MeetingDetailResponse>> getClubMeeting(
-            Authentication authentication,
+            @AuthenticationPrincipal Long userId,
             @PathVariable String clubPublicId,
             @PathVariable String meetingPublicId
     ) {
         MeetingDetailResponse response = clubMeetingQueryService.getClubMeeting(
                 clubPublicId,
                 meetingPublicId,
-                resolveAuthenticatedUserId(authentication)
+                userId
         );
         return ResponseEntity.ok(ResponseDTO.success(response));
     }
 
     @PatchMapping("/{meetingPublicId}")
     public ResponseEntity<ResponseDTO<MeetingDetailResponse>> updateClubMeeting(
-            Authentication authentication,
+            @AuthenticationPrincipal Long userId,
             @PathVariable String clubPublicId,
             @PathVariable String meetingPublicId,
             @RequestBody MeetingUpdateRequest request
@@ -90,14 +90,14 @@ public class ClubMeetingController {
                 clubPublicId,
                 meetingPublicId,
                 request,
-                resolveAuthenticatedUserId(authentication)
+                userId
         );
         return ResponseEntity.ok(ResponseDTO.success(response));
     }
 
     @PatchMapping("/{meetingPublicId}/status")
     public ResponseEntity<ResponseDTO<MeetingDetailResponse>> updateClubMeetingStatus(
-            Authentication authentication,
+            @AuthenticationPrincipal Long userId,
             @PathVariable String clubPublicId,
             @PathVariable String meetingPublicId,
             @RequestBody MeetingStatusUpdateRequest request
@@ -106,28 +106,28 @@ public class ClubMeetingController {
                 clubPublicId,
                 meetingPublicId,
                 request,
-                resolveAuthenticatedUserId(authentication)
+                userId
         );
         return ResponseEntity.ok(ResponseDTO.success(response));
     }
 
     @DeleteMapping("/{meetingPublicId}")
     public ResponseEntity<Void> deleteClubMeeting(
-            Authentication authentication,
+            @AuthenticationPrincipal Long userId,
             @PathVariable String clubPublicId,
             @PathVariable String meetingPublicId
     ) {
         clubMeetingCommandService.deleteClubMeeting(
                 clubPublicId,
                 meetingPublicId,
-                resolveAuthenticatedUserId(authentication)
+                userId
         );
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/{meetingPublicId}/competition")
     public ResponseEntity<ResponseDTO<MeetingCompetitionCreateResponse>> createClubMeetingCompetition(
-            Authentication authentication,
+            @AuthenticationPrincipal Long userId,
             @PathVariable String clubPublicId,
             @PathVariable String meetingPublicId,
             @RequestBody(required = false) MeetingCompetitionCreateRequest request
@@ -136,33 +136,23 @@ public class ClubMeetingController {
                 clubPublicId,
                 meetingPublicId,
                 request == null ? MeetingCompetitionCreateRequest.defaults() : request,
-                resolveAuthenticatedUserId(authentication)
+                userId
         );
         return ResponseEntity.ok(ResponseDTO.success(response));
     }
 
     @DeleteMapping("/{meetingPublicId}/competition")
     public ResponseEntity<Void> deleteClubMeetingCompetition(
-            Authentication authentication,
+            @AuthenticationPrincipal Long userId,
             @PathVariable String clubPublicId,
             @PathVariable String meetingPublicId
     ) {
         clubMeetingCommandService.deleteClubMeetingCompetition(
                 clubPublicId,
                 meetingPublicId,
-                resolveAuthenticatedUserId(authentication)
+                userId
         );
         return ResponseEntity.noContent().build();
     }
 
-    private Long resolveAuthenticatedUserId(Authentication authentication) {
-        if (authentication == null || !authentication.isAuthenticated()) {
-            return null;
-        }
-        Object principal = authentication.getPrincipal();
-        if (principal instanceof Long userId) {
-            return userId;
-        }
-        return null;
-    }
 }

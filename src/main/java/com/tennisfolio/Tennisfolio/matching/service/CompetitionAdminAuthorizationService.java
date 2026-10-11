@@ -93,7 +93,7 @@ public class CompetitionAdminAuthorizationService {
         }
         return meetingRepository.findByCompetitionIdAndDeletedAtIsNull(competition.getId())
                 .filter(meeting -> meeting.getClubId() != null)
-                .map(meeting -> clubAccessService.isActiveAdmin(meeting.getClubId(), currentUserId))
+                .map(meeting -> clubAccessService.isOperator(meeting.getClubId(), currentUserId))
                 .orElse(false);
     }
 

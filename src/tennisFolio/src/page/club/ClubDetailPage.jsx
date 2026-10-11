@@ -3,7 +3,7 @@ import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import ClubDetailView from '../../components/club/ClubDetailView';
 import ClubMessage from '../../components/club/ClubMessage';
 import ClubState from '../../components/club/ClubState';
-import { sortClubMembers } from '../../components/club/clubUtils';
+import { isClubOperator, sortClubMembers } from '../../components/club/clubUtils';
 import { getClub, getClubMeetings, getClubMembers } from '../../utils/clubApi';
 import ClubAuthRequired from './ClubAuthRequired';
 import { errorMessage, normalizeClub, unwrapData } from './clubPageUtils';
@@ -23,7 +23,7 @@ function ClubDetailPage({ currentUser }) {
   const [isMembersLoading, setIsMembersLoading] = useState(false);
   const [isMeetingsLoading, setIsMeetingsLoading] = useState(false);
 
-  const isAdmin = selectedClub?.admin === true || selectedClub?.role === 'ADMIN';
+  const isAdmin = isClubOperator(selectedClub);
   const sortedMembers = useMemo(() => sortClubMembers(members), [members]);
 
   useEffect(() => {
@@ -140,14 +140,8 @@ function ClubDetailPage({ currentUser }) {
                   : `/meetings/${meeting.publicId}`,
               )
             }
-            onAddMember={() =>
-              navigate(`/clubs/${selectedClub.publicId}/members/new`)
-            }
-            onAddMembersBulk={() =>
-              navigate(`/clubs/${selectedClub.publicId}/members/bulk`)
-            }
-            onEditMember={(member) =>
-              navigate(`/clubs/${selectedClub.publicId}/members/${member.id}/edit`)
+            onOpenMemberManagement={() =>
+              navigate(`/clubs/${selectedClub.publicId}/dashboard/members`)
             }
             onBackToClubs={() => navigate('/clubs')}
           />

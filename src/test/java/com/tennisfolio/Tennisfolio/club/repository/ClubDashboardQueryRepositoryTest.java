@@ -2,7 +2,6 @@ package com.tennisfolio.Tennisfolio.club.repository;
 
 import com.tennisfolio.Tennisfolio.club.entity.Club;
 import com.tennisfolio.Tennisfolio.club.entity.ClubMember;
-import com.tennisfolio.Tennisfolio.club.entity.ClubMemberRole;
 import com.tennisfolio.Tennisfolio.club.entity.ClubSkillTier;
 import com.tennisfolio.Tennisfolio.club.dto.ClubDashboardData;
 import com.tennisfolio.Tennisfolio.club.dto.ClubDashboardGenderCount;
@@ -66,7 +65,7 @@ class ClubDashboardQueryRepositoryTest {
         ClubMember attendingWoman = member(club, "Jamie", Gender.FEMALE, advanced);
         ClubMember unclassifiedMan = member(club, "Robin", Gender.MALE, null);
         ClubMember inactiveWoman = member(club, "Former", Gender.FEMALE, beginner);
-        inactiveWoman.deactivate();
+        inactiveWoman.changeStatus(com.tennisfolio.Tennisfolio.club.entity.ClubMemberStatus.WITHDRAWN, java.time.LocalDate.now());
         clubMemberRepository.saveAllAndFlush(List.of(attendingMan, attendingWoman, unclassifiedMan, inactiveWoman));
 
         Meeting firstMeeting = meeting(club.getId(), "First", LocalDateTime.of(2026, 7, 20, 10, 0));
@@ -157,7 +156,7 @@ class ClubDashboardQueryRepositoryTest {
     }
 
     private static ClubMember member(Club club, String name, Gender gender, ClubSkillTier skillTier) {
-        return new ClubMember(club, null, name, gender, ClubMemberRole.MEMBER, skillTier, null, null);
+        return new ClubMember(club, name, gender, skillTier, null, null);
     }
 
     private static Meeting meeting(Long clubId, String title, LocalDateTime startAt) {

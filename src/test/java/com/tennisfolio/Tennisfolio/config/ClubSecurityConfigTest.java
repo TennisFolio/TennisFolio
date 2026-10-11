@@ -1,6 +1,9 @@
 package com.tennisfolio.Tennisfolio.config;
 
 import com.tennisfolio.Tennisfolio.club.api.ClubController;
+import com.tennisfolio.Tennisfolio.club.service.ClubAccountCommandService;
+import com.tennisfolio.Tennisfolio.club.service.ClubAccountInvitationService;
+import com.tennisfolio.Tennisfolio.club.service.ClubAccountQueryService;
 import com.tennisfolio.Tennisfolio.club.service.ClubCommandService;
 import com.tennisfolio.Tennisfolio.club.service.ClubDashboardQueryService;
 import com.tennisfolio.Tennisfolio.club.service.ClubMemberCommandService;
@@ -37,6 +40,15 @@ class ClubSecurityConfigTest {
 
     @MockitoBean
     ClubCommandService clubCommandService;
+
+    @MockitoBean
+    ClubAccountCommandService clubAccountCommandService;
+
+    @MockitoBean
+    ClubAccountQueryService clubAccountQueryService;
+
+    @MockitoBean
+    ClubAccountInvitationService clubAccountInvitationService;
 
     @MockitoBean
     ClubQueryService clubQueryService;

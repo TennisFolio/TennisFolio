@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>클럽 회원 상세 목업</title>
+    <style>
+      @import url("../../src/tennisFolio/src/styles/competition-theme.css");
+      * { box-sizing: border-box; }
+      body { margin: 0; background: var(--competition-page-bg); color: var(--competition-text-strong); font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+      button, input, select { font: inherit; }
+      button { cursor: pointer; }
+      h1, h2, p { margin: 0; }
+
+      .dashboard { display: grid; grid-template-columns: 220px minmax(0, 1fr); min-height: 100dvh; }
+      .sidebar { display: grid; align-content: start; gap: 4px; padding: 28px 15px; background: var(--competition-text-strong); color: var(--competition-text-inverse); }
+      .brand { margin: 3px 10px 38px; font-size: 19px; font-weight: 900; }
+      .nav-label { margin: 0 10px 10px; color: var(--competition-text-muted); font-size: 11px; font-weight: 900; }
+      .nav-item { border: 0; border-radius: 8px; background: transparent; color: inherit; padding: 13px 12px; text-align: left; font-weight: 800; }
+      .nav-item.active { background: var(--competition-primary-muted); }
+      .nav-item.muted { color: var(--competition-text-muted); cursor: default; }
+      .nav-item small { font-size: 11px; }
+
+      .content { min-width: 0; padding: 0 34px 40px; }
+      .topbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 72px; margin: 0 -34px; border-bottom: 1px solid var(--competition-border); background: var(--competition-surface); padding: 0 34px; color: var(--competition-text-muted); font-size: 13px; font-weight: 800; }
+      .club-switcher { position: relative; width: 260px; border: 1px solid var(--competition-border-control); border-radius: 8px; background: var(--competition-surface); color: var(--competition-text-strong); padding: 11px 38px 11px 13px; text-align: left; }
+      .club-switcher::after { content: "⌄"; position: absolute; right: 14px; color: var(--competition-text-body); }
+      .club-switcher strong { font-size: 15px; }
+
+      .breadcrumb { display: inline-flex; margin-top: 27px; color: var(--competition-text-muted); font-size: 13px; font-weight: 800; text-decoration: none; }
+      .breadcrumb:hover { color: var(--competition-text-body); text-decoration: underline; }
+      .page-heading { display: flex; align-items: end; justify-content: space-between; gap: 18px; margin: 13px 0 22px; }
+      h1 { font-size: 25px; }
+      .page-heading p { margin-top: 7px; color: var(--competition-text-muted); font-size: 13px; font-weight: 700; }
+      .heading-title { display: flex; align-items: center; gap: 10px; }
+
+      .button { display: inline-flex; align-items: center; justify-content: center; min-height: 40px; border: 1px solid var(--competition-border-strong); border-radius: 8px; background: var(--competition-surface); color: var(--competition-text-body); padding: 0 13px; text-decoration: none; font-size: 13px; font-weight: 900; }
+      .button.primary { border-color: var(--competition-primary); background: var(--competition-primary); color: var(--competition-text-inverse); }
+      .button.primary:hover { background: var(--competition-primary-hover); }
+      .button.danger { border-color: var(--competition-danger-border); background: var(--competition-danger-bg); color: var(--competition-danger); }
+      .button.small { min-height: 33px; padding: 0 10px; font-size: 12px; }
+      .heading-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+
+      .layout { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 14px; }
+      .card { border: 1px solid var(--competition-border); border-radius: 12px; background: var(--competition-surface); padding: 18px; }
+      .card h2 { font-size: 17px; }
+      .card > p { margin-top: 5px; color: var(--competition-text-muted); font-size: 12px; font-weight: 700; line-height: 1.5; }
+      .form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-top: 18px; }
+      .field { display: grid; gap: 7px; color: var(--competition-text-body); font-size: 12px; font-weight: 900; }
+      .field input, .field select { width: 100%; min-height: 42px; border: 1px solid var(--competition-border-control); border-radius: 8px; background: var(--competition-surface); color: var(--competition-text-strong); padding: 0 11px; }
+      .form-footer { display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px; border-top: 1px solid var(--competition-border); padding-top: 16px; }
+
+      .status-card { display: grid; align-content: start; gap: 16px; }
+      .status-options { display: grid; gap: 7px; }
+      .status-option { display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%; min-height: 44px; border: 1px solid var(--competition-border-control); border-radius: 8px; background: var(--competition-surface); color: var(--competition-text-body); padding: 0 11px; text-align: left; font-size: 13px; font-weight: 900; }
+      .status-option.selected { border-color: var(--competition-primary); background: var(--competition-surface-accent); color: var(--competition-text-strong); }
+      .status-option.withdrawn { border-color: var(--competition-danger-border); color: var(--competition-danger); }
+      .status-date { display: grid; gap: 12px; border-top: 1px solid var(--competition-border); padding-top: 16px; }
+      .status-date label { display: grid; gap: 7px; color: var(--competition-text-body); font-size: 12px; font-weight: 900; }
+      .status-date input { min-height: 40px; border: 1px solid var(--competition-border-control); border-radius: 8px; padding: 0 11px; }
+
+      .badge { display: inline-flex; align-items: center; min-height: 25px; border: 1px solid var(--competition-ok-border); border-radius: 999px; background: var(--competition-ok-bg); color: var(--competition-ok); padding: 0 8px; font-size: 11px; font-weight: 900; }
+
+      @media (max-width: 900px) {
+        .dashboard { display: block; }
+        .sidebar { display: none; }
+        .content { padding: 0 18px 32px; }
+        .topbar { margin: 0 -18px; padding: 0 18px; }
+        .topbar > span { display: none; }
+        .club-switcher { width: 100%; }
+        .page-heading { align-items: start; flex-direction: column; }
+        .layout { grid-template-columns: 1fr; }
+      }
+
+      @media (max-width: 520px) {
+        .form-grid { grid-template-columns: 1fr; }
+        .heading-actions { width: 100%; }
+        .heading-actions .button { flex: 1; }
+        .form-footer .button { flex: 1; }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="dashboard">
+      <aside class="sidebar" aria-label="대시보드 메뉴">
+        <div class="brand">Tennis<span>Folio</span></div>
+        <span class="nav-label">BACKOFFICE</span>
+        <button class="nav-item" type="button">대시보드</button>
+        <button class="nav-item active" type="button">회원 관리</button>
+        <span class="nav-item muted">모임 활동 <small>준비 중</small></span>
+        <span class="nav-item muted">참여 현황 <small>준비 중</small></span>
+      </aside>
+
+      <div class="content">
+        <header class="topbar">
+          <button class="club-switcher" type="button"><strong>테니스폴리오 일요 클럽</strong></button>
+          <span>클럽 ADMIN · 김테니스</span>
+        </header>
+
+        <a class="breadcrumb" href="club-member-management-mockup.html">← 회원 관리로 돌아가기</a>
+        <header class="page-heading">
+          <div>
+            <div class="heading-title"><h1>김테니스</h1><span class="badge">활동</span></div>
+            <p>회원 기본 정보와 활동 상태를 관리합니다.</p>
+          </div>
+          <div class="heading-actions">
+            <a class="button" href="club-member-management-mockup.html">취소</a>
+            <button class="button primary" type="button">변경사항 저장</button>
+          </div>
+        </header>
+
+        <section class="layout">
+          <article class="card">
+            <h2>기본 정보</h2>
+            <form class="form-grid">
+              <label class="field">이름<input value="김테니스" /></label>
+              <label class="field">성별<select><option>남</option><option>여</option></select></label>
+              <label class="field">출생연도<input inputmode="numeric" value="1988" /></label>
+              <label class="field">티어<select><option>상급</option><option>중상급</option><option>중급</option><option>초급</option></select></label>
+              <label class="field">역할<select><option>관리자</option><option>회원</option></select></label>
+              <label class="field">가입일<input type="date" value="2023-03-12" /></label>
+            </form>
+            <div class="form-footer">
+              <a class="button" href="club-member-management-mockup.html">취소</a>
+              <button class="button primary" type="button">변경사항 저장</button>
+            </div>
+          </article>
+
+          <aside class="card status-card">
+            <div>
+              <h2>회원 상태</h2>
+            </div>
+            <div class="status-options" aria-label="회원 상태 선택">
+              <button class="status-option selected" type="button">활동</button>
+              <button class="status-option" type="button">휴면</button>
+              <button class="status-option withdrawn" type="button">탈퇴</button>
+            </div>
+            <div class="status-date">
+              <label>휴면 시작일<input type="date" disabled /></label>
+              <label>탈퇴일<input type="date" disabled /></label>
+            </div>
+          </aside>
+        </section>
+      </div>
+    </main>
+  </body>
+</html>

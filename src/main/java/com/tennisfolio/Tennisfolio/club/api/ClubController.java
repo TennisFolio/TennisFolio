@@ -2,21 +2,30 @@ package com.tennisfolio.Tennisfolio.club.api;
 
 import com.tennisfolio.Tennisfolio.club.dto.ClubCreateRequest;
 import com.tennisfolio.Tennisfolio.club.dto.ClubCreateResponse;
+import com.tennisfolio.Tennisfolio.club.dto.ClubAccountInvitationIssueResponse;
+import com.tennisfolio.Tennisfolio.club.dto.ClubAccountInvitationStatusResponse;
+import com.tennisfolio.Tennisfolio.club.dto.ClubAccountResponse;
+import com.tennisfolio.Tennisfolio.club.dto.ClubAccountRoleUpdateRequest;
 import com.tennisfolio.Tennisfolio.club.dto.ClubDashboardResponse;
 import com.tennisfolio.Tennisfolio.club.dto.ClubDetailResponse;
 import com.tennisfolio.Tennisfolio.club.dto.ClubMemberCreateRequest;
 import com.tennisfolio.Tennisfolio.club.dto.ClubMemberBulkCreateRequest;
+import com.tennisfolio.Tennisfolio.club.dto.ClubMemberManagementResponse;
 import com.tennisfolio.Tennisfolio.club.dto.ClubMemberResponse;
 import com.tennisfolio.Tennisfolio.club.dto.ClubMemberUpdateRequest;
+import com.tennisfolio.Tennisfolio.club.dto.ClubMemberStatusChangeRequest;
 import com.tennisfolio.Tennisfolio.club.dto.ClubSummaryResponse;
 import com.tennisfolio.Tennisfolio.club.dto.ClubUpdateRequest;
 import com.tennisfolio.Tennisfolio.club.service.ClubCommandService;
+import com.tennisfolio.Tennisfolio.club.service.ClubAccountCommandService;
+import com.tennisfolio.Tennisfolio.club.service.ClubAccountInvitationService;
+import com.tennisfolio.Tennisfolio.club.service.ClubAccountQueryService;
 import com.tennisfolio.Tennisfolio.club.service.ClubDashboardQueryService;
 import com.tennisfolio.Tennisfolio.club.service.ClubMemberCommandService;
 import com.tennisfolio.Tennisfolio.club.service.ClubQueryService;
 import com.tennisfolio.Tennisfolio.common.response.ResponseDTO;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -42,49 +51,58 @@ public class ClubController {
     private final ClubQueryService clubQueryService;
     private final ClubMemberCommandService clubMemberCommandService;
     private final ClubDashboardQueryService clubDashboardQueryService;
+    private final ClubAccountCommandService clubAccountCommandService;
+    private final ClubAccountQueryService clubAccountQueryService;
+    private final ClubAccountInvitationService clubAccountInvitationService;
 
     public ClubController(
             ClubCommandService clubCommandService,
             ClubQueryService clubQueryService,
             ClubMemberCommandService clubMemberCommandService,
-            ClubDashboardQueryService clubDashboardQueryService
+            ClubDashboardQueryService clubDashboardQueryService,
+            ClubAccountCommandService clubAccountCommandService,
+            ClubAccountQueryService clubAccountQueryService,
+            ClubAccountInvitationService clubAccountInvitationService
     ) {
         this.clubCommandService = clubCommandService;
         this.clubQueryService = clubQueryService;
         this.clubMemberCommandService = clubMemberCommandService;
         this.clubDashboardQueryService = clubDashboardQueryService;
+        this.clubAccountCommandService = clubAccountCommandService;
+        this.clubAccountQueryService = clubAccountQueryService;
+        this.clubAccountInvitationService = clubAccountInvitationService;
     }
 
     @PostMapping("/clubs")
     public ResponseEntity<ResponseDTO<ClubCreateResponse>> createClub(
-            Authentication authentication,
+            @AuthenticationPrincipal Long userId,
             @RequestBody ClubCreateRequest request
     ) {
         ClubCreateResponse response =
-                clubCommandService.createClub(request, resolveAuthenticatedUserId(authentication));
+                clubCommandService.createClub(request, userId);
         return ResponseEntity.ok(ResponseDTO.success(response));
     }
 
     @GetMapping("/clubs")
-    public ResponseEntity<ResponseDTO<List<ClubSummaryResponse>>> getMyClubs(Authentication authentication) {
+    public ResponseEntity<ResponseDTO<List<ClubSummaryResponse>>> getMyClubs(@AuthenticationPrincipal Long userId) {
         List<ClubSummaryResponse> response =
-                clubQueryService.getMyClubs(resolveAuthenticatedUserId(authentication));
+                clubQueryService.getMyClubs(userId);
         return ResponseEntity.ok(ResponseDTO.success(response));
     }
 
     @GetMapping("/clubs/{clubPublicId}")
     public ResponseEntity<ResponseDTO<ClubDetailResponse>> getClub(
-            Authentication authentication,
+            @AuthenticationPrincipal Long userId,
             @PathVariable String clubPublicId
     ) {
         ClubDetailResponse response =
-                clubQueryService.getClub(clubPublicId, resolveAuthenticatedUserId(authentication));
+                clubQueryService.getClub(clubPublicId, userId);
         return ResponseEntity.ok(ResponseDTO.success(response));
     }
 
     @GetMapping("/clubs/{clubPublicId}/dashboard")
     public ResponseEntity<ResponseDTO<ClubDashboardResponse>> getDashboard(
-            Authentication authentication,
+            @AuthenticationPrincipal Long userId,
             @PathVariable String clubPublicId,
             @RequestParam(required = false) Integer year,
             @RequestParam(required = false) Integer month,
@@ -94,7 +112,7 @@ public class ClubController {
         ClubDashboardResponse response =
                 clubDashboardQueryService.getDashboard(
                         clubPublicId,
-                        resolveAuthenticatedUserId(authentication),
+                        userId,
                         resolveDashboardMonth(year, month),
                         parseMemberFilter(memberFilter),
                         Math.max(page, 0)
@@ -126,60 +144,176 @@ public class ClubController {
 
     @PatchMapping("/clubs/{clubPublicId}")
     public ResponseEntity<ResponseDTO<Void>> updateClub(
-            Authentication authentication,
+            @AuthenticationPrincipal Long userId,
             @PathVariable String clubPublicId,
             @RequestBody ClubUpdateRequest request
     ) {
-        clubCommandService.updateClub(clubPublicId, request, resolveAuthenticatedUserId(authentication));
+        clubCommandService.updateClub(clubPublicId, request, userId);
         return ResponseEntity.ok(ResponseDTO.success());
     }
 
     @DeleteMapping("/clubs/{clubPublicId}")
     public ResponseEntity<Void> deleteClub(
-            Authentication authentication,
+            @AuthenticationPrincipal Long userId,
             @PathVariable String clubPublicId
     ) {
-        clubCommandService.deleteClub(clubPublicId, resolveAuthenticatedUserId(authentication));
+        clubCommandService.deleteClub(clubPublicId, userId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/clubs/{clubPublicId}/accounts")
+    public ResponseEntity<ResponseDTO<List<ClubAccountResponse>>> getAccounts(
+            @AuthenticationPrincipal Long userId,
+            @PathVariable String clubPublicId
+    ) {
+        return ResponseEntity.ok(ResponseDTO.success(clubAccountQueryService.getAccounts(clubPublicId, userId)));
+    }
+
+    @GetMapping("/clubs/{clubPublicId}/accounts/{clubAccountId}")
+    public ResponseEntity<ResponseDTO<ClubAccountResponse>> getAccount(
+            @AuthenticationPrincipal Long userId,
+            @PathVariable String clubPublicId,
+            @PathVariable Long clubAccountId
+    ) {
+        return ResponseEntity.ok(ResponseDTO.success(
+                clubAccountQueryService.getAccount(clubPublicId, clubAccountId, userId)
+        ));
+    }
+
+    @PatchMapping("/clubs/{clubPublicId}/accounts/{clubAccountId}/role")
+    public ResponseEntity<ResponseDTO<Void>> changeAccountRole(
+            @AuthenticationPrincipal Long userId,
+            @PathVariable String clubPublicId,
+            @PathVariable Long clubAccountId,
+            @RequestBody ClubAccountRoleUpdateRequest request
+    ) {
+        clubAccountCommandService.changeRole(clubPublicId, clubAccountId, request, userId);
+        return ResponseEntity.ok(ResponseDTO.success());
+    }
+
+    @DeleteMapping("/clubs/{clubPublicId}/accounts/{clubAccountId}")
+    public ResponseEntity<Void> removeAccount(
+            @AuthenticationPrincipal Long userId,
+            @PathVariable String clubPublicId,
+            @PathVariable Long clubAccountId
+    ) {
+        clubAccountCommandService.removeAccount(clubPublicId, clubAccountId, userId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/clubs/{clubPublicId}/account")
+    public ResponseEntity<ResponseDTO<ClubAccountResponse>> getMyAccount(
+            @AuthenticationPrincipal Long userId,
+            @PathVariable String clubPublicId
+    ) {
+        return ResponseEntity.ok(ResponseDTO.success(clubAccountQueryService.getMyAccount(clubPublicId, userId)));
+    }
+
+    @DeleteMapping("/clubs/{clubPublicId}/account")
+    public ResponseEntity<Void> leaveMyAccount(
+            @AuthenticationPrincipal Long userId,
+            @PathVariable String clubPublicId
+    ) {
+        clubAccountCommandService.leaveMyAccount(clubPublicId, userId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/clubs/{clubPublicId}/account-invitation")
+    public ResponseEntity<ResponseDTO<ClubAccountInvitationStatusResponse>> getAccountInvitation(
+            @AuthenticationPrincipal Long userId,
+            @PathVariable String clubPublicId
+    ) {
+        return ResponseEntity.ok(ResponseDTO.success(
+                clubAccountInvitationService.getInvitationStatus(clubPublicId, userId)
+        ));
+    }
+
+    @PostMapping("/clubs/{clubPublicId}/account-invitation")
+    public ResponseEntity<ResponseDTO<ClubAccountInvitationIssueResponse>> issueAccountInvitation(
+            @AuthenticationPrincipal Long userId,
+            @PathVariable String clubPublicId
+    ) {
+        return ResponseEntity.ok(ResponseDTO.success(
+                clubAccountInvitationService.issueInvitation(clubPublicId, userId)
+        ));
+    }
+
+    @DeleteMapping("/clubs/{clubPublicId}/account-invitation")
+    public ResponseEntity<Void> closeAccountInvitation(
+            @AuthenticationPrincipal Long userId,
+            @PathVariable String clubPublicId
+    ) {
+        clubAccountInvitationService.closeInvitation(clubPublicId, userId);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/clubs/{clubPublicId}/members")
     public ResponseEntity<ResponseDTO<List<ClubMemberResponse>>> getMembers(
-            Authentication authentication,
+            @AuthenticationPrincipal Long userId,
             @PathVariable String clubPublicId,
             @RequestParam(required = false) String keyword
     ) {
         List<ClubMemberResponse> response = clubQueryService.getMembers(
                 clubPublicId,
                 keyword,
-                resolveAuthenticatedUserId(authentication)
+                userId
+        );
+        return ResponseEntity.ok(ResponseDTO.success(response));
+    }
+
+    @GetMapping("/clubs/{clubPublicId}/members/management")
+    public ResponseEntity<ResponseDTO<List<ClubMemberManagementResponse>>> getManagementMembers(
+            @AuthenticationPrincipal Long userId,
+            @PathVariable String clubPublicId,
+            @RequestParam(required = false) String memberStatus,
+            @RequestParam(required = false) String keyword
+    ) {
+        List<ClubMemberManagementResponse> response = clubQueryService.getManagementMembers(
+                clubPublicId,
+                memberStatus,
+                keyword,
+                userId
+        );
+        return ResponseEntity.ok(ResponseDTO.success(response));
+    }
+
+    @GetMapping("/clubs/{clubPublicId}/members/management/{memberId}")
+    public ResponseEntity<ResponseDTO<ClubMemberManagementResponse>> getManagementMember(
+            @AuthenticationPrincipal Long userId,
+            @PathVariable String clubPublicId,
+            @PathVariable Long memberId
+    ) {
+        ClubMemberManagementResponse response = clubQueryService.getManagementMember(
+                clubPublicId,
+                memberId,
+                userId
         );
         return ResponseEntity.ok(ResponseDTO.success(response));
     }
 
     @PostMapping("/clubs/{clubPublicId}/members")
     public ResponseEntity<ResponseDTO<Void>> addMember(
-            Authentication authentication,
+            @AuthenticationPrincipal Long userId,
             @PathVariable String clubPublicId,
             @RequestBody ClubMemberCreateRequest request
     ) {
-        clubMemberCommandService.addMember(clubPublicId, request, resolveAuthenticatedUserId(authentication));
+        clubMemberCommandService.addMember(clubPublicId, request, userId);
         return ResponseEntity.ok(ResponseDTO.success());
     }
 
     @PostMapping("/clubs/{clubPublicId}/members/bulk")
     public ResponseEntity<ResponseDTO<Void>> addMembers(
-            Authentication authentication,
+            @AuthenticationPrincipal Long userId,
             @PathVariable String clubPublicId,
             @RequestBody ClubMemberBulkCreateRequest request
     ) {
-        clubMemberCommandService.addMembers(clubPublicId, request, resolveAuthenticatedUserId(authentication));
+        clubMemberCommandService.addMembers(clubPublicId, request, userId);
         return ResponseEntity.ok(ResponseDTO.success());
     }
 
     @PatchMapping("/clubs/{clubPublicId}/members/{memberId}")
     public ResponseEntity<ResponseDTO<Void>> updateMember(
-            Authentication authentication,
+            @AuthenticationPrincipal Long userId,
             @PathVariable String clubPublicId,
             @PathVariable Long memberId,
             @RequestBody ClubMemberUpdateRequest request
@@ -188,29 +322,35 @@ public class ClubController {
                 clubPublicId,
                 memberId,
                 request,
-                resolveAuthenticatedUserId(authentication)
+                userId
+        );
+        return ResponseEntity.ok(ResponseDTO.success());
+    }
+
+    @PatchMapping("/clubs/{clubPublicId}/members/{memberId}/status")
+    public ResponseEntity<ResponseDTO<Void>> changeMemberStatus(
+            @AuthenticationPrincipal Long userId,
+            @PathVariable String clubPublicId,
+            @PathVariable Long memberId,
+            @RequestBody ClubMemberStatusChangeRequest request
+    ) {
+        clubMemberCommandService.changeMemberStatus(
+                clubPublicId,
+                memberId,
+                request,
+                userId
         );
         return ResponseEntity.ok(ResponseDTO.success());
     }
 
     @DeleteMapping("/clubs/{clubPublicId}/members/{memberId}")
     public ResponseEntity<Void> deleteMember(
-            Authentication authentication,
+            @AuthenticationPrincipal Long userId,
             @PathVariable String clubPublicId,
             @PathVariable Long memberId
     ) {
-        clubMemberCommandService.deleteMember(clubPublicId, memberId, resolveAuthenticatedUserId(authentication));
+        clubMemberCommandService.deleteMember(clubPublicId, memberId, userId);
         return ResponseEntity.noContent().build();
     }
 
-    private Long resolveAuthenticatedUserId(Authentication authentication) {
-        if (authentication == null || !authentication.isAuthenticated()) {
-            return null;
-        }
-        Object principal = authentication.getPrincipal();
-        if (principal instanceof Long userId) {
-            return userId;
-        }
-        return null;
-    }
 }

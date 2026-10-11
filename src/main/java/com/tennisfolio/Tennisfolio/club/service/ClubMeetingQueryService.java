@@ -26,7 +26,7 @@ public class ClubMeetingQueryService {
 
     @Transactional(readOnly = true)
     public List<MeetingSummaryResponse> getClubMeetings(String clubPublicId, Long currentUserId) {
-        Club club = clubAccessService.requireActiveMemberClub(clubPublicId, currentUserId);
+        Club club = clubAccessService.requireOperator(clubPublicId, currentUserId);
         return meetingQueryService.getClubMeetings(club.getId());
     }
 
@@ -36,7 +36,7 @@ public class ClubMeetingQueryService {
             String meetingPublicId,
             Long currentUserId
     ) {
-        Club club = clubAccessService.requireActiveMemberClub(clubPublicId, currentUserId);
+        Club club = clubAccessService.requireOperator(clubPublicId, currentUserId);
         Meeting meeting = meetingQueryService.findActiveClubMeeting(meetingPublicId, club.getId());
         return meetingQueryService.toDetailResponse(meeting, currentUserId);
     }

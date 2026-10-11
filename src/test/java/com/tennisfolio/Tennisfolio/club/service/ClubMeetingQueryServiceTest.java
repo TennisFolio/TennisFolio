@@ -34,12 +34,12 @@ class ClubMeetingQueryServiceTest {
     @Test
     void getClubMeetings_checksMemberAndReturnsClubMeetingSummaries() {
         Club club = club(100L);
-        when(clubAccessService.requireActiveMemberClub("club-public-id", 10L)).thenReturn(club);
+        when(clubAccessService.requireOperator("club-public-id", 10L)).thenReturn(club);
         when(meetingQueryService.getClubMeetings(100L)).thenReturn(List.of(summaryResponse()));
 
         List<MeetingSummaryResponse> response = service.getClubMeetings("club-public-id", 10L);
 
-        verify(clubAccessService).requireActiveMemberClub("club-public-id", 10L);
+        verify(clubAccessService).requireOperator("club-public-id", 10L);
         verify(meetingQueryService).getClubMeetings(100L);
         assertThat(response).hasSize(1);
     }
@@ -49,13 +49,13 @@ class ClubMeetingQueryServiceTest {
         Club club = club(100L);
         Meeting meeting = meeting();
         MeetingDetailResponse detail = detailResponse(false);
-        when(clubAccessService.requireActiveMemberClub("club-public-id", 20L)).thenReturn(club);
+        when(clubAccessService.requireOperator("club-public-id", 20L)).thenReturn(club);
         when(meetingQueryService.findActiveClubMeeting("meeting-public-id", 100L)).thenReturn(meeting);
         when(meetingQueryService.toDetailResponse(meeting, 20L)).thenReturn(detail);
 
         MeetingDetailResponse response = service.getClubMeeting("club-public-id", "meeting-public-id", 20L);
 
-        verify(clubAccessService).requireActiveMemberClub("club-public-id", 20L);
+        verify(clubAccessService).requireOperator("club-public-id", 20L);
         verify(meetingQueryService).findActiveClubMeeting("meeting-public-id", 100L);
         verify(meetingQueryService).toDetailResponse(meeting, 20L);
         assertThat(response.getPublicId()).isEqualTo("meeting-public-id");

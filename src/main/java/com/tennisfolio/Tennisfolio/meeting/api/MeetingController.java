@@ -18,7 +18,7 @@ import com.tennisfolio.Tennisfolio.meeting.service.MeetingCommandService;
 import com.tennisfolio.Tennisfolio.meeting.service.MeetingCompetitionCreateService;
 import com.tennisfolio.Tennisfolio.meeting.service.MeetingQueryService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -53,101 +53,101 @@ public class MeetingController {
 
     @PostMapping("/meetings")
     public ResponseEntity<ResponseDTO<MeetingCreateResponse>> createMeeting(
-            Authentication authentication,
+            @AuthenticationPrincipal Long userId,
             @RequestBody MeetingCreateRequest request
     ) {
         MeetingCreateResponse response =
-                meetingCommandService.createMeeting(request, resolveAuthenticatedUserId(authentication));
+                meetingCommandService.createMeeting(request, userId);
         return ResponseEntity.ok(ResponseDTO.success(response));
     }
 
     @GetMapping("/meetings/{publicId}")
     public ResponseEntity<ResponseDTO<MeetingDetailResponse>> getMeeting(
-            Authentication authentication,
+            @AuthenticationPrincipal Long userId,
             @PathVariable String publicId
     ) {
         MeetingDetailResponse response =
-                meetingQueryService.getMeeting(publicId, resolveAuthenticatedUserId(authentication));
+                meetingQueryService.getMeeting(publicId, userId);
         return ResponseEntity.ok(ResponseDTO.success(response));
     }
 
     @GetMapping("/me/meetings")
     public ResponseEntity<ResponseDTO<List<MeetingSummaryResponse>>> getMyMeetings(
-            Authentication authentication
+            @AuthenticationPrincipal Long userId
     ) {
         List<MeetingSummaryResponse> response =
-                meetingQueryService.getOwnedMeetings(resolveAuthenticatedUserId(authentication));
+                meetingQueryService.getOwnedMeetings(userId);
         return ResponseEntity.ok(ResponseDTO.success(response));
     }
 
     @PatchMapping("/meetings/{publicId}")
     public ResponseEntity<ResponseDTO<MeetingDetailResponse>> updateMeeting(
-            Authentication authentication,
+            @AuthenticationPrincipal Long userId,
             @PathVariable String publicId,
             @RequestBody MeetingUpdateRequest request
     ) {
         MeetingDetailResponse response = meetingCommandService.updateMeeting(
                 publicId,
                 request,
-                resolveAuthenticatedUserId(authentication)
+                userId
         );
         return ResponseEntity.ok(ResponseDTO.success(response));
     }
 
     @PatchMapping("/meetings/{publicId}/status")
     public ResponseEntity<ResponseDTO<MeetingDetailResponse>> updateMeetingStatus(
-            Authentication authentication,
+            @AuthenticationPrincipal Long userId,
             @PathVariable String publicId,
             @RequestBody MeetingStatusUpdateRequest request
     ) {
         MeetingDetailResponse response = meetingCommandService.updateStatus(
                 publicId,
                 request,
-                resolveAuthenticatedUserId(authentication)
+                userId
         );
         return ResponseEntity.ok(ResponseDTO.success(response));
     }
 
     @DeleteMapping("/meetings/{publicId}")
     public ResponseEntity<Void> deleteMeeting(
-            Authentication authentication,
+            @AuthenticationPrincipal Long userId,
             @PathVariable String publicId
     ) {
-        meetingCommandService.deleteMeeting(publicId, resolveAuthenticatedUserId(authentication));
+        meetingCommandService.deleteMeeting(publicId, userId);
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/meetings/{publicId}/attendances")
     public ResponseEntity<ResponseDTO<MeetingAttendanceResponse>> upsertAttendance(
-            Authentication authentication,
+            @AuthenticationPrincipal Long userId,
             @PathVariable String publicId,
             @RequestBody MeetingAttendanceUpsertRequest request
     ) {
         MeetingAttendanceResponse response = attendanceCommandService.upsertAttendance(
                 publicId,
                 request,
-                resolveAuthenticatedUserId(authentication)
+                userId
         );
         return ResponseEntity.ok(ResponseDTO.success(response));
     }
 
     @PostMapping("/meetings/{publicId}/participants")
     public ResponseEntity<ResponseDTO<MeetingAttendanceResponse>> addManagedParticipant(
-            Authentication authentication,
+            @AuthenticationPrincipal Long userId,
             @PathVariable String publicId,
             @RequestBody ManagedMeetingParticipantCreateRequest request
     ) {
         MeetingAttendanceResponse response = attendanceCommandService.addManagedParticipant(
                 publicId,
                 request,
-                resolveAuthenticatedUserId(authentication)
+                userId
         );
         return ResponseEntity.ok(ResponseDTO.success(response));
     }
 
     @PatchMapping("/meetings/{publicId}/participants/{attendanceId}")
     public ResponseEntity<ResponseDTO<MeetingAttendanceResponse>> updateManagedParticipant(
-            Authentication authentication,
+            @AuthenticationPrincipal Long userId,
             @PathVariable String publicId,
             @PathVariable Long attendanceId,
             @RequestBody ManagedMeetingParticipantUpdateRequest request
@@ -156,14 +156,14 @@ public class MeetingController {
                 publicId,
                 attendanceId,
                 request,
-                resolveAuthenticatedUserId(authentication)
+                userId
         );
         return ResponseEntity.ok(ResponseDTO.success(response));
     }
 
     @PatchMapping("/meetings/{publicId}/attendances/{attendanceId}")
     public ResponseEntity<ResponseDTO<MeetingAttendanceResponse>> updateAttendance(
-            Authentication authentication,
+            @AuthenticationPrincipal Long userId,
             @PathVariable String publicId,
             @PathVariable Long attendanceId,
             @RequestBody MeetingAttendanceUpsertRequest request
@@ -172,34 +172,34 @@ public class MeetingController {
                 publicId,
                 attendanceId,
                 request,
-                resolveAuthenticatedUserId(authentication)
+                userId
         );
         return ResponseEntity.ok(ResponseDTO.success(response));
     }
 
     @DeleteMapping("/meetings/{publicId}/attendances/{attendanceId}")
     public ResponseEntity<Void> deleteAttendance(
-            Authentication authentication,
+            @AuthenticationPrincipal Long userId,
             @PathVariable String publicId,
             @PathVariable Long attendanceId
     ) {
         attendanceCommandService.deleteAttendance(
                 publicId,
                 attendanceId,
-                resolveAuthenticatedUserId(authentication)
+                userId
         );
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/meetings/{publicId}/competition")
     public ResponseEntity<ResponseDTO<MeetingCompetitionCreateResponse>> createCompetition(
-            Authentication authentication,
+            @AuthenticationPrincipal Long userId,
             @PathVariable String publicId,
             @RequestBody(required = false) MeetingCompetitionCreateRequest request
     ) {
         MeetingCompetitionCreateResponse response = competitionCreateService.createCompetition(
                 publicId,
-                resolveAuthenticatedUserId(authentication),
+                userId,
                 request == null ? MeetingCompetitionCreateRequest.defaults() : request
         );
         return ResponseEntity.ok(ResponseDTO.success(response));
@@ -207,21 +207,11 @@ public class MeetingController {
 
     @DeleteMapping("/meetings/{publicId}/competition")
     public ResponseEntity<Void> deleteCompetition(
-            Authentication authentication,
+            @AuthenticationPrincipal Long userId,
             @PathVariable String publicId
     ) {
-        competitionCreateService.deleteCompetition(publicId, resolveAuthenticatedUserId(authentication));
+        competitionCreateService.deleteCompetition(publicId, userId);
         return ResponseEntity.noContent().build();
     }
 
-    private Long resolveAuthenticatedUserId(Authentication authentication) {
-        if (authentication == null || !authentication.isAuthenticated()) {
-            return null;
-        }
-        Object principal = authentication.getPrincipal();
-        if (principal instanceof Long userId) {
-            return userId;
-        }
-        return null;
-    }
 }

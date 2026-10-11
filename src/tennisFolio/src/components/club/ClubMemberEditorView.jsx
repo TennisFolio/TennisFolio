@@ -47,8 +47,8 @@ function ClubMemberEditorView({
             <h1>{isEdit ? '클럽원 수정' : '클럽원 추가'}</h1>
             <p>
               {isEdit
-                ? '클럽원 이름, 성별, 역할과 운영 메모를 수정합니다.'
-                : '관리자가 직접 운영 명단을 추가합니다. userId는 없어도 됩니다.'}
+                ? '클럽원 이름, 성별과 운영 메모를 수정합니다.'
+                : '운영진이 직접 클럽 명단을 추가합니다.'}
             </p>
           </header>
           <ClubMessage notice={notice} error={error} />

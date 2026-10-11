@@ -1,8 +1,7 @@
 package com.tennisfolio.Tennisfolio.club.dto;
 
 import com.tennisfolio.Tennisfolio.club.entity.Club;
-import com.tennisfolio.Tennisfolio.club.entity.ClubMember;
-import com.tennisfolio.Tennisfolio.club.entity.ClubMemberRole;
+import com.tennisfolio.Tennisfolio.club.entity.ClubAccount;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -32,7 +31,7 @@ public class ClubDetailResponse {
 
     public static ClubDetailResponse from(
             Club club,
-            ClubMember currentMember,
+            ClubAccount currentAccount,
             long memberCount,
             List<ClubSkillTierResponse> skillTiers
     ) {
@@ -40,8 +39,8 @@ public class ClubDetailResponse {
                 club.getPublicId(),
                 club.getName(),
                 club.getDescription(),
-                currentMember.getRole().name(),
-                currentMember.getRole() == ClubMemberRole.ADMIN,
+                currentAccount.getRole().name(),
+                true,
                 memberCount,
                 skillTiers
         );

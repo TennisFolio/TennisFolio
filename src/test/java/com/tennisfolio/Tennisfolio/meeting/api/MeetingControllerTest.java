@@ -19,8 +19,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -49,13 +47,13 @@ class MeetingControllerTest {
 
     @Test
     void createMeeting_passesCurrentUserToCommandService() {
-        Authentication authentication = new UsernamePasswordAuthenticationToken(10L, null, List.of());
+        Long userId = 10L;
         MeetingCreateRequest request = createRequest();
         when(meetingCommandService.createMeeting(request, 10L))
                 .thenReturn(new MeetingCreateResponse("meeting-public-id"));
 
         ResponseEntity<ResponseDTO<MeetingCreateResponse>> response =
-                meetingController.createMeeting(authentication, request);
+                meetingController.createMeeting(userId, request);
 
         verify(meetingCommandService).createMeeting(request, 10L);
         assertThat(response.getStatusCode().value()).isEqualTo(200);
@@ -78,7 +76,7 @@ class MeetingControllerTest {
 
     @Test
     void getMyMeetings_returnsCurrentUsersMeetings() {
-        Authentication authentication = new UsernamePasswordAuthenticationToken(10L, null, List.of());
+        Long userId = 10L;
         when(meetingQueryService.getOwnedMeetings(10L))
                 .thenReturn(List.of(new MeetingSummaryResponse(
                         "meeting-public-id",
@@ -95,7 +93,7 @@ class MeetingControllerTest {
                 )));
 
         ResponseEntity<ResponseDTO<List<MeetingSummaryResponse>>> response =
-                meetingController.getMyMeetings(authentication);
+                meetingController.getMyMeetings(userId);
 
         verify(meetingQueryService).getOwnedMeetings(10L);
         assertThat(response.getBody()).isNotNull();
@@ -104,13 +102,13 @@ class MeetingControllerTest {
 
     @Test
     void updateMeeting_passesOwnerUserIdToCommandService() {
-        Authentication authentication = new UsernamePasswordAuthenticationToken(10L, null, List.of());
+        Long userId = 10L;
         MeetingUpdateRequest request = updateRequest();
         MeetingDetailResponse detail = detailResponse("meeting-public-id", true);
         when(meetingCommandService.updateMeeting("meeting-public-id", request, 10L)).thenReturn(detail);
 
         ResponseEntity<ResponseDTO<MeetingDetailResponse>> response =
-                meetingController.updateMeeting(authentication, "meeting-public-id", request);
+                meetingController.updateMeeting(userId, "meeting-public-id", request);
 
         verify(meetingCommandService).updateMeeting("meeting-public-id", request, 10L);
         assertThat(response.getBody()).isNotNull();
@@ -119,22 +117,22 @@ class MeetingControllerTest {
 
     @Test
     void updateMeetingStatus_passesOwnerUserIdToCommandService() {
-        Authentication authentication = new UsernamePasswordAuthenticationToken(10L, null, List.of());
+        Long userId = 10L;
         MeetingStatusUpdateRequest request = new MeetingStatusUpdateRequest("CLOSED");
         when(meetingCommandService.updateStatus("meeting-public-id", request, 10L))
                 .thenReturn(detailResponse("meeting-public-id", true));
 
-        meetingController.updateMeetingStatus(authentication, "meeting-public-id", request);
+        meetingController.updateMeetingStatus(userId, "meeting-public-id", request);
 
         verify(meetingCommandService).updateStatus("meeting-public-id", request, 10L);
     }
 
     @Test
     void deleteMeeting_passesOwnerUserIdToCommandService() {
-        Authentication authentication = new UsernamePasswordAuthenticationToken(10L, null, List.of());
+        Long userId = 10L;
 
         ResponseEntity<Void> response =
-                meetingController.deleteMeeting(authentication, "meeting-public-id");
+                meetingController.deleteMeeting(userId, "meeting-public-id");
 
         verify(meetingCommandService).deleteMeeting("meeting-public-id", 10L);
         assertThat(response.getStatusCode().value()).isEqualTo(204);
@@ -142,13 +140,13 @@ class MeetingControllerTest {
 
     @Test
     void createCompetition_passesOwnerUserIdToCompetitionCreateService() {
-        Authentication authentication = new UsernamePasswordAuthenticationToken(10L, null, List.of());
+        Long userId = 10L;
         MeetingCompetitionCreateRequest request = new MeetingCompetitionCreateRequest(true);
         when(competitionCreateService.createCompetition("meeting-public-id", 10L, request))
                 .thenReturn(new MeetingCompetitionCreateResponse("competition-public-id"));
 
         ResponseEntity<ResponseDTO<MeetingCompetitionCreateResponse>> response =
-                meetingController.createCompetition(authentication, "meeting-public-id", request);
+                meetingController.createCompetition(userId, "meeting-public-id", request);
 
         verify(competitionCreateService).createCompetition("meeting-public-id", 10L, request);
         assertThat(response.getBody()).isNotNull();
@@ -157,10 +155,10 @@ class MeetingControllerTest {
 
     @Test
     void deleteCompetition_passesOwnerUserIdToCompetitionCreateService() {
-        Authentication authentication = new UsernamePasswordAuthenticationToken(10L, null, List.of());
+        Long userId = 10L;
 
         ResponseEntity<Void> response =
-                meetingController.deleteCompetition(authentication, "meeting-public-id");
+                meetingController.deleteCompetition(userId, "meeting-public-id");
 
         verify(competitionCreateService).deleteCompetition("meeting-public-id", 10L);
         assertThat(response.getStatusCode().value()).isEqualTo(204);

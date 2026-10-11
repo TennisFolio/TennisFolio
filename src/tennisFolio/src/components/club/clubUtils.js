@@ -1,5 +1,11 @@
 export function roleLabel(role) {
-  return role === 'ADMIN' ? '관리자' : '클럽원';
+  if (role === 'OWNER') return 'OWNER';
+  if (role === 'ADMIN') return 'ADMIN';
+  return '클럽원';
+}
+
+export function isClubOperator(club) {
+  return club?.admin === true || ['OWNER', 'ADMIN'].includes(club?.role);
 }
 
 export function genderLabel(gender) {
@@ -29,37 +35,5 @@ export function meetingStateLabel(meeting) {
 }
 
 export function sortClubMembers(members = []) {
-  const creator = members
-    .filter((member) => member.role === 'ADMIN')
-    .sort((first, second) => {
-      const firstHasUser = first.userId == null ? 1 : 0;
-      const secondHasUser = second.userId == null ? 1 : 0;
-
-      if (firstHasUser !== secondHasUser) {
-        return firstHasUser - secondHasUser;
-      }
-
-      return Number(first.id ?? 0) - Number(second.id ?? 0);
-    })[0];
-
-  const creatorId = creator?.id;
-
-  return [...members].sort((first, second) => {
-    if (first.id === creatorId && second.id !== creatorId) {
-      return -1;
-    }
-    if (second.id === creatorId && first.id !== creatorId) {
-      return 1;
-    }
-
-    const roleRank = { ADMIN: 0, MEMBER: 1 };
-    const firstRank = roleRank[first.role] ?? 2;
-    const secondRank = roleRank[second.role] ?? 2;
-
-    if (firstRank !== secondRank) {
-      return firstRank - secondRank;
-    }
-
-    return Number(first.id ?? 0) - Number(second.id ?? 0);
-  });
+  return [...members].sort((first, second) => Number(first.id ?? 0) - Number(second.id ?? 0));
 }

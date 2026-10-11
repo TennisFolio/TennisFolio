@@ -2,7 +2,6 @@ import {
   formatMeetingDate,
   genderLabel,
   meetingStateLabel,
-  roleLabel,
 } from './clubUtils';
 
 function ClubDetailView({
@@ -21,9 +20,7 @@ function ClubDetailView({
   onOpenDashboard,
   onAddMeeting,
   onOpenMeeting,
-  onAddMember,
-  onAddMembersBulk,
-  onEditMember,
+  onOpenMemberManagement,
   onBackToClubs,
 }) {
   return (
@@ -120,22 +117,9 @@ function ClubDetailView({
           <div className="club-section-title">
             <h2>클럽원</h2>
             {isAdmin ? (
-              <div className="club-member-add-actions">
-                <button
-                  className="club-button small"
-                  type="button"
-                  onClick={onAddMembersBulk}
-                >
-                  일괄 추가
-                </button>
-                <button
-                  className="club-button small accent"
-                  type="button"
-                  onClick={onAddMember}
-                >
-                  클럽원 추가
-                </button>
-              </div>
+              <button className="club-button small accent" type="button" onClick={onOpenMemberManagement}>
+                회원 관리
+              </button>
             ) : (
               <span>{members.length}명</span>
             )}
@@ -182,22 +166,6 @@ function ClubDetailView({
                   >
                     {genderLabel(member.gender)}
                   </span>
-                  <span
-                    className={`club-chip ${member.role === 'ADMIN' ? 'admin' : ''}`}
-                  >
-                    {roleLabel(member.role)}
-                  </span>
-                  {isAdmin && (
-                    <div className="club-row-actions">
-                      <button
-                        className="club-button small"
-                        type="button"
-                        onClick={() => onEditMember(member)}
-                      >
-                        수정
-                      </button>
-                    </div>
-                  )}
                 </div>
               ))}
           </div>

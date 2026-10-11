@@ -1,4 +1,4 @@
-import { roleLabel } from './clubUtils';
+import { isClubOperator, roleLabel } from './clubUtils';
 
 function ClubListView({ clubs, isLoading, onCreateClub, onOpenClub }) {
   return (
@@ -34,7 +34,7 @@ function ClubListView({ clubs, isLoading, onCreateClub, onOpenClub }) {
                 <div className="club-card-title">{club.name}</div>
                 <p className="club-card-copy club-description">{club.description}</p>
               </div>
-              <span className={`club-chip ${club.role === 'ADMIN' ? 'admin' : ''}`}>
+              <span className={`club-chip ${isClubOperator(club) ? 'admin' : ''}`}>
                 {roleLabel(club.role)}
               </span>
             </div>
@@ -42,11 +42,11 @@ function ClubListView({ clubs, isLoading, onCreateClub, onOpenClub }) {
               <span className="club-chip">{club.memberCount}명</span>
             </div>
             <button
-              className={`club-button full ${club.role === 'ADMIN' ? 'accent' : ''}`}
+              className={`club-button full ${isClubOperator(club) ? 'accent' : ''}`}
               type="button"
               onClick={() => onOpenClub(club)}
             >
-              {club.role === 'ADMIN' ? '관리' : '열기'}
+              {isClubOperator(club) ? '관리' : '열기'}
             </button>
           </article>
         ))}

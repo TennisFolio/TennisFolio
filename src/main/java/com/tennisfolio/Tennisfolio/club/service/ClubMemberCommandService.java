@@ -3,9 +3,10 @@ package com.tennisfolio.Tennisfolio.club.service;
 import com.tennisfolio.Tennisfolio.club.dto.ClubMemberCreateRequest;
 import com.tennisfolio.Tennisfolio.club.dto.ClubMemberBulkCreateRequest;
 import com.tennisfolio.Tennisfolio.club.dto.ClubMemberUpdateRequest;
+import com.tennisfolio.Tennisfolio.club.dto.ClubMemberStatusChangeRequest;
 import com.tennisfolio.Tennisfolio.club.entity.Club;
 import com.tennisfolio.Tennisfolio.club.entity.ClubMember;
-import com.tennisfolio.Tennisfolio.club.entity.ClubMemberRole;
+import com.tennisfolio.Tennisfolio.club.entity.ClubMemberStatus;
 import com.tennisfolio.Tennisfolio.club.entity.ClubSkillTier;
 import com.tennisfolio.Tennisfolio.club.repository.ClubMemberRepository;
 import com.tennisfolio.Tennisfolio.club.repository.ClubSkillTierRepository;
@@ -18,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -41,7 +43,7 @@ public class ClubMemberCommandService {
 
     @Transactional
     public void addMember(String clubPublicId, ClubMemberCreateRequest request, Long currentUserId) {
-        Club club = clubAccessService.requireAdmin(clubPublicId, currentUserId);
+        Club club = clubAccessService.requireOperator(clubPublicId, currentUserId);
         String name = requireName(request.getName());
         rejectDuplicateName(club, name);
         clubMemberRepository.save(createMember(club, request, name));
@@ -53,7 +55,7 @@ public class ClubMemberCommandService {
             ClubMemberBulkCreateRequest request,
             Long currentUserId
     ) {
-        Club club = clubAccessService.requireAdmin(clubPublicId, currentUserId);
+        Club club = clubAccessService.requireOperator(clubPublicId, currentUserId);
         List<ClubMember> members = createMembers(club, request);
         clubMemberRepository.saveAll(members);
     }
@@ -65,33 +67,49 @@ public class ClubMemberCommandService {
             ClubMemberUpdateRequest request,
             Long currentUserId
     ) {
-        Club club = clubAccessService.requireAdmin(clubPublicId, currentUserId);
+        Club club = clubAccessService.requireOperator(clubPublicId, currentUserId);
         ClubMember member = findActiveMember(club, memberId);
         String name = requireName(request.getName());
         rejectDuplicateNameExceptSelf(club, name, member.getId());
-        ClubMemberRole requestedRole = parseRole(request.getRole());
-        ensureAdminCanChange(member, requestedRole);
         ClubSkillTier skillTier = resolveSkillTier(club, request.getSkillTierId());
         member.update(
                 name,
                 parseGender(request.getGender()),
-                requestedRole,
                 skillTier,
                 request.getContactMemo(),
-                request.getMemo()
+                request.getMemo(),
+                request.getJoinedAt()
         );
     }
 
     @Transactional
     public void deleteMember(String clubPublicId, Long memberId, Long currentUserId) {
-        Club club = clubAccessService.requireAdmin(clubPublicId, currentUserId);
+        Club club = clubAccessService.requireOperator(clubPublicId, currentUserId);
         ClubMember member = findActiveMember(club, memberId);
-        ensureAdminCanChange(member, ClubMemberRole.MEMBER);
-        member.deactivate();
+        member.changeStatus(ClubMemberStatus.WITHDRAWN, LocalDate.now());
+    }
+
+    @Transactional
+    public void changeMemberStatus(
+            String clubPublicId,
+            Long memberId,
+            ClubMemberStatusChangeRequest request,
+            Long currentUserId
+    ) {
+        Club club = clubAccessService.requireOperator(clubPublicId, currentUserId);
+        ClubMember member = clubMemberRepository.findByClubAndId(club, memberId)
+                .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND));
+        ClubMemberStatus targetStatus;
+        try {
+            targetStatus = ClubMemberStatus.from(request.getMemberStatus());
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
+        member.changeStatus(targetStatus, resolveStatusDate(request));
     }
 
     private ClubMember findActiveMember(Club club, Long memberId) {
-        return clubMemberRepository.findByClubAndIdAndActiveTrue(club, memberId)
+        return clubMemberRepository.findByClubAndIdAndMemberStatus(club, memberId, ClubMemberStatus.ACTIVE)
                 .orElseThrow(() -> new NotFoundException(ExceptionCode.NOT_FOUND));
     }
 
@@ -127,14 +145,17 @@ public class ClubMemberCommandService {
         ClubSkillTier skillTier = resolveSkillTier(club, request.getSkillTierId());
         return new ClubMember(
                 club,
-                null,
                 name,
                 parseGender(request.getGender()),
-                parseRole(request.getRole()),
                 skillTier,
                 request.getContactMemo(),
-                request.getMemo()
+                request.getMemo(),
+                request.getJoinedAt()
         );
+    }
+
+    private LocalDate resolveStatusDate(ClubMemberStatusChangeRequest request) {
+        return request.getStatusDate() == null ? LocalDate.now() : request.getStatusDate();
     }
 
     private ClubSkillTier resolveSkillTier(Club club, Long skillTierId) {
@@ -146,27 +167,14 @@ public class ClubMemberCommandService {
     }
 
     private void rejectDuplicateName(Club club, String name) {
-        if (clubMemberRepository.existsByClubAndNameAndActiveTrue(club, name)) {
+        if (clubMemberRepository.existsByClubAndName(club, name)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "이미 같은 이름의 클럽원이 있습니다.");
         }
     }
 
     private void rejectDuplicateNameExceptSelf(Club club, String name, Long memberId) {
-        if (clubMemberRepository.existsByClubAndNameAndActiveTrueAndIdNot(club, name, memberId)) {
+        if (clubMemberRepository.existsByClubAndNameAndIdNot(club, name, memberId)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "이미 같은 이름의 클럽원이 있습니다.");
-        }
-    }
-
-    private void ensureAdminCanChange(ClubMember member, ClubMemberRole requestedRole) {
-        if (member.getRole() != ClubMemberRole.ADMIN || requestedRole == ClubMemberRole.ADMIN) {
-            return;
-        }
-        long activeAdminCount = clubMemberRepository.countByClubAndRoleAndActiveTrue(
-                member.getClub(),
-                ClubMemberRole.ADMIN
-        );
-        if (activeAdminCount <= 1) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "마지막 ADMIN은 삭제하거나 일반 멤버로 변경할 수 없습니다.");
         }
     }
 
@@ -185,11 +193,4 @@ public class ClubMemberCommandService {
         }
     }
 
-    private ClubMemberRole parseRole(String role) {
-        try {
-            return ClubMemberRole.valueOf(role);
-        } catch (RuntimeException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "클럽원 역할 값이 올바르지 않습니다.");
-        }
-    }
 }

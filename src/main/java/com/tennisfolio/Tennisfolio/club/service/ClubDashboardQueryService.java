@@ -42,7 +42,7 @@ public class ClubDashboardQueryService {
             ClubDashboardMemberFilter memberFilter,
             int page
     ) {
-        Club club = clubAccessService.requireAdmin(clubPublicId, currentUserId);
+        Club club = clubAccessService.requireOperator(clubPublicId, currentUserId);
         YearMonth requestedMonth = requireSelectableMonth(yearMonth);
         ClubDashboardPeriod period = new ClubDashboardPeriod(requestedMonth);
         ClubDashboardMonthlyData dashboardData = dashboardQueryRepository.findMonthlyDashboardData(

@@ -20,8 +20,50 @@ export const updateClub = (publicId, club) =>
 export const deleteClub = (publicId) =>
   apiRequestSilent.delete(`/api/clubs/${publicId}`);
 
+export const getClubAccounts = (publicId) =>
+  apiRequestSilent.get(`/api/clubs/${publicId}/accounts`);
+
+export const getClubAccount = (publicId, clubAccountId) =>
+  apiRequestSilent.get(`/api/clubs/${publicId}/accounts/${clubAccountId}`);
+
+export const updateClubAccountRole = (publicId, clubAccountId, role) =>
+  apiRequestSilent.patch(`/api/clubs/${publicId}/accounts/${clubAccountId}/role`, { role });
+
+export const removeClubAccount = (publicId, clubAccountId) =>
+  apiRequestSilent.delete(`/api/clubs/${publicId}/accounts/${clubAccountId}`);
+
+export const getMyClubAccount = (publicId) =>
+  apiRequestSilent.get(`/api/clubs/${publicId}/account`);
+
+export const leaveClub = (publicId) =>
+  apiRequestSilent.delete(`/api/clubs/${publicId}/account`);
+
+export const getClubAccountInvitation = (publicId) =>
+  apiRequestSilent.get(`/api/clubs/${publicId}/account-invitation`);
+
+export const issueClubAccountInvitation = (publicId) =>
+  apiRequestSilent.post(`/api/clubs/${publicId}/account-invitation`);
+
+export const closeClubAccountInvitation = (publicId) =>
+  apiRequestSilent.delete(`/api/clubs/${publicId}/account-invitation`);
+
+export const previewClubAccountInvitation = (token) =>
+  apiRequestSilent.get(`/api/club-account-invitations/${encodeURIComponent(token)}`);
+
+export const acceptClubAccountInvitation = (token) =>
+  apiRequestSilent.post(`/api/club-account-invitations/${encodeURIComponent(token)}/accept`);
+
 export const getClubMembers = (publicId, keyword = '') =>
   apiRequestSilent.get(`/api/clubs/${publicId}/members`, { keyword });
+
+export const getClubManagementMembers = (publicId, { memberStatus, keyword } = {}) =>
+  apiRequestSilent.get(`/api/clubs/${publicId}/members/management`, {
+    memberStatus,
+    keyword,
+  });
+
+export const getClubManagementMember = (publicId, memberId) =>
+  apiRequestSilent.get(`/api/clubs/${publicId}/members/management/${memberId}`);
 
 export const addClubMember = (publicId, member) =>
   apiRequestSilent.post(`/api/clubs/${publicId}/members`, member);
@@ -31,6 +73,12 @@ export const addClubMembers = (publicId, members) =>
 
 export const updateClubMember = (publicId, memberId, member) =>
   apiRequestSilent.patch(`/api/clubs/${publicId}/members/${memberId}`, member);
+
+export const updateClubMemberStatus = (publicId, memberId, memberStatus, statusDate) =>
+  apiRequestSilent.patch(`/api/clubs/${publicId}/members/${memberId}/status`, {
+    memberStatus,
+    ...(statusDate ? { statusDate } : {}),
+  });
 
 export const deleteClubMember = (publicId, memberId) =>
   apiRequestSilent.delete(`/api/clubs/${publicId}/members/${memberId}`);

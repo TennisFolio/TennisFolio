@@ -31,9 +31,13 @@ import ClubDetailPage from './page/club/ClubDetailPage.jsx';
 import ClubDashboardPage from './page/club/ClubDashboardPage.jsx';
 import ClubEditPage from './page/club/ClubEditPage.jsx';
 import ClubListPage from './page/club/ClubListPage.jsx';
-import ClubMemberCreatePage from './page/club/ClubMemberCreatePage.jsx';
 import ClubMemberBulkAddPage from './page/club/ClubMemberBulkAddPage.jsx';
-import ClubMemberEditPage from './page/club/ClubMemberEditPage.jsx';
+import ClubMemberManagementPage from './page/club/ClubMemberManagementPage.jsx';
+import ClubMemberDetailPage from './page/club/ClubMemberDetailPage.jsx';
+import ClubAccountManagementPage from './page/club/ClubAccountManagementPage.jsx';
+import ClubAccountDetailPage from './page/club/ClubAccountDetailPage.jsx';
+import ClubAccountPage from './page/club/ClubAccountPage.jsx';
+import ClubInvitationAcceptPage from './page/club/ClubInvitationAcceptPage.jsx';
 import Schedule from './page/Schedule.jsx';
 import NotFound from './page/NotFound.jsx';
 import { initializeAnalytics, trackPageView } from './utils/analytics';
@@ -124,20 +128,40 @@ function App() {
             element={<ClubDashboardPage currentUser={currentUser} />}
           />
           <Route
+            path="/clubs/:clubPublicId/dashboard/members"
+            element={<ClubMemberManagementPage currentUser={currentUser} />}
+          />
+          <Route
+            path="/clubs/:clubPublicId/dashboard/members/paste"
+            element={<ClubMemberBulkAddPage currentUser={currentUser} />}
+          />
+          <Route
+            path="/clubs/:clubPublicId/dashboard/members/:memberId"
+            element={<ClubMemberDetailPage currentUser={currentUser} />}
+          />
+          <Route
+            path="/clubs/:clubPublicId/dashboard/accounts"
+            element={<ClubAccountManagementPage currentUser={currentUser} />}
+          />
+          <Route
+            path="/clubs/:clubPublicId/dashboard/accounts/:clubAccountId"
+            element={<ClubAccountDetailPage currentUser={currentUser} />}
+          />
+          <Route
+            path="/clubs/:clubPublicId/dashboard/account"
+            element={<ClubAccountPage currentUser={currentUser} />}
+          />
+          <Route
+            path="/club-account-invitations/:token"
+            element={<ClubInvitationAcceptPage currentUser={currentUser} />}
+          />
+          <Route
             path="/clubs/:publicId/edit"
             element={<ClubEditPage currentUser={currentUser} />}
           />
           <Route
-            path="/clubs/:publicId/members/new"
-            element={<ClubMemberCreatePage currentUser={currentUser} />}
-          />
-          <Route
             path="/clubs/:publicId/members/bulk"
             element={<ClubMemberBulkAddPage currentUser={currentUser} />}
-          />
-          <Route
-            path="/clubs/:publicId/members/:memberId/edit"
-            element={<ClubMemberEditPage currentUser={currentUser} />}
           />
           <Route
             path="/clubs/:clubPublicId/meetings/new"

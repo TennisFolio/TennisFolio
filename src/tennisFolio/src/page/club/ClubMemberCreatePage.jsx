@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import ClubMemberEditorView from '../../components/club/ClubMemberEditorView';
+import { isClubOperator } from '../../components/club/clubUtils';
 import { addClubMember, getClub } from '../../utils/clubApi';
 import ClubAuthRequired from './ClubAuthRequired';
 import {
@@ -22,7 +23,7 @@ function ClubMemberCreatePage({ currentUser }) {
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
-  const isAdmin = selectedClub?.admin === true || selectedClub?.role === 'ADMIN';
+  const isAdmin = isClubOperator(selectedClub);
 
   const showNotice = (message) => {
     setNotice(message);

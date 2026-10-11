@@ -197,7 +197,7 @@ class CompetitionAdminAuthorizationServiceTest {
         Competition competition = ownedCompetition(1L, "public-id", 20L, Competition.CompetitionMode.CLUB_SESSION);
         Meeting meeting = clubMeeting(1L, 100L);
         when(meetingRepository.findByCompetitionIdAndDeletedAtIsNull(1L)).thenReturn(Optional.of(meeting));
-        when(clubAccessService.isActiveAdmin(100L, 10L)).thenReturn(true);
+        when(clubAccessService.isOperator(100L, 10L)).thenReturn(true);
 
         service.validateManagementAccess(competition, 10L, null);
 
@@ -226,7 +226,7 @@ class CompetitionAdminAuthorizationServiceTest {
         Competition competition = ownedCompetition(1L, "public-id", 20L, Competition.CompetitionMode.CLUB_SESSION);
         Meeting meeting = clubMeeting(1L, 100L);
         when(meetingRepository.findByCompetitionIdAndDeletedAtIsNull(1L)).thenReturn(Optional.of(meeting));
-        when(clubAccessService.isActiveAdmin(100L, 10L)).thenReturn(false);
+        when(clubAccessService.isOperator(100L, 10L)).thenReturn(false);
 
         ResponseStatusException exception = assertThrows(
                 ResponseStatusException.class,
@@ -243,7 +243,7 @@ class CompetitionAdminAuthorizationServiceTest {
         when(competitionRepository.findByPublicIdAndDeletedAtIsNullForUpdate("public-id"))
                 .thenReturn(Optional.of(competition));
         when(meetingRepository.findByCompetitionIdAndDeletedAtIsNull(1L)).thenReturn(Optional.of(meeting));
-        when(clubAccessService.isActiveAdmin(100L, 10L)).thenReturn(true);
+        when(clubAccessService.isOperator(100L, 10L)).thenReturn(true);
         when(tokenService.createToken("public-id")).thenReturn("fresh-token");
 
         String token = service.setAdminPassword("public-id", 10L, null, "1234");

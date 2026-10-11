@@ -3,7 +3,6 @@ package com.tennisfolio.Tennisfolio.club.service;
 import com.tennisfolio.Tennisfolio.club.dto.ClubSkillTierRequest;
 import com.tennisfolio.Tennisfolio.club.entity.Club;
 import com.tennisfolio.Tennisfolio.club.entity.ClubMember;
-import com.tennisfolio.Tennisfolio.club.entity.ClubMemberRole;
 import com.tennisfolio.Tennisfolio.club.entity.ClubSkillTier;
 import com.tennisfolio.Tennisfolio.meeting.domain.Gender;
 import com.tennisfolio.Tennisfolio.club.repository.ClubMemberRepository;
@@ -147,12 +146,12 @@ class ClubSkillTierServiceTest {
         ClubSkillTier skillTier = new ClubSkillTier(club, "상급", 1);
         ReflectionTestUtils.setField(skillTier, "id", 1L);
         ClubMember activeMember = new ClubMember(
-                club, null, "Alex Kim", Gender.MALE, ClubMemberRole.MEMBER, skillTier, null, null
+                club, "Alex Kim", Gender.MALE, skillTier, null, null
         );
         ClubMember inactiveMember = new ClubMember(
-                club, null, "Jamie Lee", Gender.FEMALE, ClubMemberRole.MEMBER, skillTier, null, null
+                club, "Jamie Lee", Gender.FEMALE, skillTier, null, null
         );
-        inactiveMember.deactivate();
+        inactiveMember.changeStatus(com.tennisfolio.Tennisfolio.club.entity.ClubMemberStatus.WITHDRAWN, java.time.LocalDate.now());
         when(clubSkillTierRepository.findByClubOrderByLevelDescIdAsc(club)).thenReturn(List.of(skillTier));
         when(clubMemberRepository.findBySkillTier(skillTier)).thenReturn(List.of(activeMember, inactiveMember));
 

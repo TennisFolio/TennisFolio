@@ -1,7 +1,7 @@
 package com.tennisfolio.Tennisfolio.club.dto;
 
 import com.tennisfolio.Tennisfolio.club.entity.Club;
-import com.tennisfolio.Tennisfolio.club.entity.ClubMember;
+import com.tennisfolio.Tennisfolio.club.entity.ClubAccount;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -14,13 +14,13 @@ public class ClubSummaryResponse {
     private String currentUserRole;
     private Long memberCount;
 
-    public static ClubSummaryResponse from(ClubMember currentMember, long memberCount) {
-        Club club = currentMember.getClub();
+    public static ClubSummaryResponse from(ClubAccount currentAccount, long memberCount) {
+        Club club = currentAccount.getClub();
         return new ClubSummaryResponse(
                 club.getPublicId(),
                 club.getName(),
                 club.getDescription(),
-                currentMember.getRole().name(),
+                currentAccount.getRole().name(),
                 memberCount
         );
     }

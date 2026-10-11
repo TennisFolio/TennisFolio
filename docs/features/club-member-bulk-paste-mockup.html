@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>클럽 회원 엑셀 붙여넣기 등록 목업</title>
+    <style>
+      @import url("../../src/tennisFolio/src/styles/competition-theme.css");
+      * { box-sizing: border-box; }
+      body { margin: 0; background: var(--competition-page-bg); color: var(--competition-text-strong); font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+      button, textarea { font: inherit; }
+      button { cursor: pointer; }
+      h1, h2, p { margin: 0; }
+
+      .dashboard { display: grid; grid-template-columns: 220px minmax(0, 1fr); min-height: 100dvh; }
+      .sidebar { display: grid; align-content: start; gap: 4px; padding: 28px 15px; background: var(--competition-text-strong); color: var(--competition-text-inverse); }
+      .brand { margin: 3px 10px 38px; font-size: 19px; font-weight: 900; }
+      .nav-label { margin: 0 10px 10px; color: var(--competition-text-muted); font-size: 11px; font-weight: 900; }
+      .nav-item { border: 0; border-radius: 8px; background: transparent; color: inherit; padding: 13px 12px; text-align: left; font-weight: 800; }
+      .nav-item.active { background: var(--competition-primary-muted); }
+      .nav-item.muted { color: var(--competition-text-muted); cursor: default; }
+      .nav-item small { font-size: 11px; }
+
+      .content { min-width: 0; padding: 0 34px 40px; }
+      .topbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 72px; margin: 0 -34px; border-bottom: 1px solid var(--competition-border); background: var(--competition-surface); padding: 0 34px; color: var(--competition-text-muted); font-size: 13px; font-weight: 800; }
+      .club-switcher { position: relative; width: 260px; border: 1px solid var(--competition-border-control); border-radius: 8px; background: var(--competition-surface); color: var(--competition-text-strong); padding: 11px 38px 11px 13px; text-align: left; }
+      .club-switcher::after { content: "⌄"; position: absolute; right: 14px; color: var(--competition-text-body); }
+      .club-switcher strong { font-size: 15px; }
+
+      .breadcrumb { display: inline-flex; margin-top: 27px; color: var(--competition-text-muted); font-size: 13px; font-weight: 800; text-decoration: none; }
+      .breadcrumb:hover { color: var(--competition-text-body); text-decoration: underline; }
+      .page-heading { display: flex; align-items: end; justify-content: space-between; gap: 18px; margin: 13px 0 22px; }
+      h1 { font-size: 25px; }
+      .page-heading p { margin-top: 7px; color: var(--competition-text-muted); font-size: 13px; font-weight: 700; }
+      .button { display: inline-flex; align-items: center; justify-content: center; min-height: 40px; border: 1px solid var(--competition-border-strong); border-radius: 8px; background: var(--competition-surface); color: var(--competition-text-body); padding: 0 13px; text-decoration: none; font-size: 13px; font-weight: 900; }
+      .button.primary { border-color: var(--competition-primary); background: var(--competition-primary); color: var(--competition-text-inverse); }
+      .button.primary:hover { background: var(--competition-primary-hover); }
+      .button.small { min-height: 33px; padding: 0 10px; font-size: 12px; }
+
+      .card { border: 1px solid var(--competition-border); border-radius: 12px; background: var(--competition-surface); padding: 18px; }
+      .input-card { display: grid; gap: 14px; }
+      .section-heading { display: flex; align-items: start; justify-content: space-between; gap: 16px; }
+      .section-heading h2 { font-size: 17px; }
+      .section-heading p { margin-top: 5px; color: var(--competition-text-muted); font-size: 12px; font-weight: 700; line-height: 1.5; }
+      .columns { display: flex; flex-wrap: wrap; gap: 6px; }
+      .column { display: inline-flex; align-items: center; min-height: 27px; border: 1px solid var(--competition-border); border-radius: 999px; background: var(--competition-surface-soft); color: var(--competition-text-body); padding: 0 9px; font-size: 11px; font-weight: 900; }
+      .paste-grid { overflow-x: auto; border: 1px solid var(--competition-border-control); border-radius: 8px; background: var(--competition-surface); }
+      .paste-grid table { min-width: 760px; }
+      .paste-grid th, .paste-grid td { padding: 0; border-right: 1px solid var(--competition-border); }
+      .paste-grid th:last-child, .paste-grid td:last-child { border-right: 0; }
+      .paste-grid th { padding: 10px 12px; background: var(--competition-surface-soft); }
+      .paste-grid td { height: 42px; }
+      .paste-grid [contenteditable="true"] { display: block; min-height: 42px; padding: 11px 12px; color: var(--competition-text-body); font-size: 13px; font-weight: 700; outline: 0; }
+      .paste-grid [contenteditable="true"]:focus { background: var(--competition-surface-accent); color: var(--competition-text-strong); }
+      .paste-grid .empty-cell { color: var(--competition-text-disabled); }
+      .input-actions { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+      .input-actions span { color: var(--competition-text-muted); font-size: 12px; font-weight: 800; }
+
+      .preview-card { margin-top: 14px; }
+      .preview-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 15px; }
+      .preview-head h2 { font-size: 17px; }
+      .ready { display: inline-flex; align-items: center; min-height: 27px; border: 1px solid var(--competition-ok-border); border-radius: 999px; background: var(--competition-ok-bg); color: var(--competition-ok); padding: 0 9px; font-size: 11px; font-weight: 900; }
+      .table-wrap { overflow-x: auto; }
+      table { width: 100%; border-collapse: collapse; white-space: nowrap; }
+      th, td { border-bottom: 1px solid var(--competition-border); padding: 13px 8px; text-align: left; }
+      th { color: var(--competition-text-muted); font-size: 11px; letter-spacing: .04em; }
+      td { color: var(--competition-text-body); font-size: 13px; font-weight: 700; }
+      td:first-child { color: var(--competition-text-strong); font-weight: 900; }
+      tr:last-child td { border-bottom: 0; }
+      .footer { display: flex; justify-content: flex-end; gap: 8px; margin-top: 18px; }
+
+      @media (max-width: 900px) {
+        .dashboard { display: block; }
+        .sidebar { display: none; }
+        .content { padding: 0 18px 32px; }
+        .topbar { margin: 0 -18px; padding: 0 18px; }
+        .topbar > span { display: none; }
+        .club-switcher { width: 100%; }
+        .page-heading { align-items: start; flex-direction: column; }
+      }
+
+      @media (max-width: 520px) {
+        .input-actions, .footer { align-items: stretch; flex-direction: column-reverse; }
+        .input-actions .button, .footer .button { width: 100%; }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="dashboard">
+      <aside class="sidebar" aria-label="대시보드 메뉴">
+        <div class="brand">Tennis<span>Folio</span></div>
+        <span class="nav-label">BACKOFFICE</span>
+        <button class="nav-item" type="button">대시보드</button>
+        <button class="nav-item active" type="button">회원 관리</button>
+        <span class="nav-item muted">모임 활동 <small>준비 중</small></span>
+        <span class="nav-item muted">참여 현황 <small>준비 중</small></span>
+      </aside>
+
+      <div class="content">
+        <header class="topbar">
+          <button class="club-switcher" type="button"><strong>테니스폴리오 일요 클럽</strong></button>
+          <span>클럽 ADMIN · 김테니스</span>
+        </header>
+
+        <a class="breadcrumb" href="club-member-management-mockup.html">← 회원 관리로 돌아가기</a>
+        <header class="page-heading">
+          <div>
+            <h1>엑셀 붙여넣기 등록</h1>
+            <p>엑셀에서 회원 행을 복사해 아래 입력란에 붙여넣으세요.</p>
+          </div>
+        </header>
+
+        <section class="card input-card">
+          <header class="section-heading">
+            <div>
+              <h2>회원 데이터 붙여넣기</h2>
+              <p>첫 번째 행부터 입력하면 됩니다.</p>
+            </div>
+          </header>
+          <div class="columns" aria-label="엑셀 열 순서">
+            <span class="column">이름</span>
+            <span class="column">성별</span>
+            <span class="column">역할</span>
+            <span class="column">티어</span>
+            <span class="column">가입일</span>
+            <span class="column">출생연도</span>
+          </div>
+          <div class="paste-grid" role="region" aria-label="엑셀 회원 데이터">
+            <table>
+              <thead>
+                <tr>
+                  <th>이름</th>
+                  <th>성별</th>
+                  <th>역할</th>
+                  <th>티어</th>
+                  <th>가입일</th>
+                  <th>출생연도</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><span contenteditable="true">김테니스</span></td>
+                  <td><span contenteditable="true">남</span></td>
+                  <td><span contenteditable="true">관리자</span></td>
+                  <td><span contenteditable="true">상급</span></td>
+                  <td><span contenteditable="true">2023-03-12</span></td>
+                  <td><span contenteditable="true">1988</span></td>
+                </tr>
+                <tr>
+                  <td><span contenteditable="true">박서브</span></td>
+                  <td><span contenteditable="true">여</span></td>
+                  <td><span contenteditable="true">회원</span></td>
+                  <td><span contenteditable="true">중상급</span></td>
+                  <td><span contenteditable="true">2024-06-01</span></td>
+                  <td><span contenteditable="true">1994</span></td>
+                </tr>
+                <tr>
+                  <td><span contenteditable="true">이포핸드</span></td>
+                  <td><span contenteditable="true">남</span></td>
+                  <td><span contenteditable="true">회원</span></td>
+                  <td><span contenteditable="true">중급</span></td>
+                  <td><span class="empty-cell" contenteditable="true">가입일</span></td>
+                  <td><span contenteditable="true">1990</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="input-actions">
+            <span>3행이 입력되었습니다.</span>
+            <button class="button" type="button">입력 내용 확인</button>
+          </div>
+        </section>
+
+        <section class="card preview-card">
+          <header class="preview-head">
+            <h2>등록 내용 확인</h2>
+            <span class="ready">3명 등록 가능</span>
+          </header>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>행</th>
+                  <th>이름</th>
+                  <th>성별</th>
+                  <th>역할</th>
+                  <th>티어</th>
+                  <th>가입일</th>
+                  <th>출생연도</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>1</td><td>김테니스</td><td>남</td><td>관리자</td><td>상급</td><td>2023-03-12</td><td>1988</td></tr>
+                <tr><td>2</td><td>박서브</td><td>여</td><td>회원</td><td>중상급</td><td>2024-06-01</td><td>1994</td></tr>
+                <tr><td>3</td><td>이포핸드</td><td>남</td><td>회원</td><td>중급</td><td>—</td><td>1990</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="footer">
+            <a class="button" href="club-member-management-mockup.html">취소</a>
+            <button class="button primary" type="button">3명 등록하기</button>
+          </div>
+        </section>
+      </div>
+    </main>
+  </body>
+</html>

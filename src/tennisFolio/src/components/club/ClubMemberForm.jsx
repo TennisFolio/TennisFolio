@@ -29,16 +29,6 @@ function ClubMemberForm({
             <option value="FEMALE">여성</option>
           </select>
         </label>
-        <label className="club-field">
-          <span>역할</span>
-          <select
-            value={form.role}
-            onChange={(event) => onChange({ ...form, role: event.target.value })}
-          >
-            <option value="MEMBER">클럽원</option>
-            <option value="ADMIN">관리자</option>
-          </select>
-        </label>
       </div>
       <label className="club-field">
         <span>등급</span>

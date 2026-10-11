@@ -14,6 +14,8 @@ function MeetingManageOperationsPanel({
   onSkillBalancedScheduleChange,
   sameGenderDoublesOnlyUnavailable,
   sameGenderDoublesOnlyUnavailableReason,
+  skillBalancedScheduleUnavailable,
+  skillBalancedScheduleUnavailableReason,
 }) {
   return (
     <section className="meeting-panel">
@@ -29,6 +31,8 @@ function MeetingManageOperationsPanel({
         onSkillBalancedScheduleChange={onSkillBalancedScheduleChange}
         sameGenderDoublesOnlyUnavailable={sameGenderDoublesOnlyUnavailable}
         sameGenderDoublesOnlyUnavailableReason={sameGenderDoublesOnlyUnavailableReason}
+        skillBalancedScheduleUnavailable={skillBalancedScheduleUnavailable}
+        skillBalancedScheduleUnavailableReason={skillBalancedScheduleUnavailableReason}
       />
       <MeetingAttendanceControlPanel
         status={meeting.status}

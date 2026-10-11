@@ -2,7 +2,6 @@ package com.tennisfolio.Tennisfolio.club.repository;
 
 import com.tennisfolio.Tennisfolio.club.entity.Club;
 import com.tennisfolio.Tennisfolio.club.entity.ClubMember;
-import com.tennisfolio.Tennisfolio.club.entity.ClubMemberRole;
 import com.tennisfolio.Tennisfolio.config.QuerydslConfig;
 import com.tennisfolio.Tennisfolio.meeting.domain.Gender;
 import org.junit.jupiter.api.Test;
@@ -51,10 +50,8 @@ class ClubRepositoryTest {
         ));
         ClubMember member = new ClubMember(
                 club,
-                10L,
                 "Kim Admin",
                 Gender.MALE,
-                ClubMemberRole.ADMIN,
                 null,
                 "open chat",
                 "creator"
@@ -64,14 +61,13 @@ class ClubRepositoryTest {
 
         ClubMember found = clubMemberRepository.findById(saved.getId()).orElseThrow();
         assertThat(found.getClub().getId()).isEqualTo(club.getId());
-        assertThat(found.getUserId()).isEqualTo(10L);
         assertThat(found.getName()).isEqualTo("Kim Admin");
         assertThat(found.getGender()).isEqualTo(Gender.MALE);
-        assertThat(found.getRole()).isEqualTo(ClubMemberRole.ADMIN);
         assertThat(found.getSkillTier()).isNull();
         assertThat(found.getContactMemo()).isEqualTo("open chat");
         assertThat(found.getMemo()).isEqualTo("creator");
-        assertThat(found.isActive()).isTrue();
+        assertThat(found.getMemberStatus())
+                .isEqualTo(com.tennisfolio.Tennisfolio.club.entity.ClubMemberStatus.ACTIVE);
     }
 
     @Test
@@ -83,32 +79,28 @@ class ClubRepositoryTest {
         ));
         ClubMember activeMember = clubMemberRepository.saveAndFlush(new ClubMember(
                 club,
-                null,
                 "Park Member",
                 Gender.FEMALE,
-                ClubMemberRole.MEMBER,
                 null,
                 null,
                 null
         ));
         ClubMember inactiveMember = clubMemberRepository.saveAndFlush(new ClubMember(
                 club,
-                null,
                 "Lee Former",
                 Gender.MALE,
-                ClubMemberRole.MEMBER,
                 null,
                 null,
                 null
         ));
-        inactiveMember.deactivate();
+        inactiveMember.changeStatus(com.tennisfolio.Tennisfolio.club.entity.ClubMemberStatus.WITHDRAWN, java.time.LocalDate.now());
         clubMemberRepository.saveAndFlush(inactiveMember);
 
         List<ClubMember> activeMembers =
-                clubMemberRepository.findByClubAndActiveTrueOrderByIdAsc(club);
+                clubMemberRepository.findByClubAndMemberStatusOrderByIdAsc(club, com.tennisfolio.Tennisfolio.club.entity.ClubMemberStatus.ACTIVE);
 
-        assertThat(clubMemberRepository.existsByClubAndNameAndActiveTrue(club, "Park Member")).isTrue();
-        assertThat(clubMemberRepository.existsByClubAndNameAndActiveTrue(club, "Lee Former")).isFalse();
+        assertThat(clubMemberRepository.existsByClubAndName(club, "Park Member")).isTrue();
+        assertThat(clubMemberRepository.existsByClubAndName(club, "Lee Former")).isTrue();
         assertThat(activeMembers)
                 .extracting(ClubMember::getId)
                 .containsExactly(activeMember.getId());

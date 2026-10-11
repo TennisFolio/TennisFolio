@@ -1,6 +1,5 @@
 ﻿import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { getCurrentUser } from '../utils/authApi';
 import {
   createMeetingCompetitionWithOptions,
   addManagedParticipant,
@@ -8,7 +7,6 @@ import {
   deleteAttendance,
   deleteMeetingCompetition,
   getPublicMeeting,
-  upsertAttendance,
   updateMeetingStatus,
 } from '../utils/meetingApi';
 import {
@@ -22,15 +20,10 @@ import {
 import MeetingConfirmModal from '../components/meeting/shared/MeetingConfirmModal';
 import MeetingManageOverviewPanel from '../components/meeting/manage/MeetingManageOverviewPanel';
 import MeetingManageOperationsPanel from '../components/meeting/manage/MeetingManageOperationsPanel';
-import MeetingOwnerAttendancePanel from '../components/meeting/manage/MeetingOwnerAttendancePanel';
 import MeetingParticipantAddPanel from '../components/meeting/manage/MeetingParticipantAddPanel';
 import MeetingParticipantEditPanel from '../components/meeting/manage/MeetingParticipantEditPanel';
 import MeetingRosterSections from '../components/meeting/shared/MeetingRosterSections';
-import {
-  findCurrentUserAttendance,
-  groupAttendances,
-  normalizeAttendances,
-} from '../components/meeting/shared/meetingAttendanceUtils';
+import { groupAttendances, normalizeAttendances } from '../components/meeting/shared/meetingAttendanceUtils';
 import { getSameGenderDoublesOnlyUnavailableReason } from '../hooks/competitionCreateFormConfig';
 import './Meeting.css';
 import MeetingToast from './MeetingToast';
@@ -39,8 +32,6 @@ function MeetingManage({ initialMeeting = null, initialNotice = null }) {
   const { clubPublicId, publicId } = useParams();
   const navigate = useNavigate();
   const [meeting, setMeeting] = useState(initialMeeting);
-  const [currentUser, setCurrentUser] = useState(null);
-  const [ownerStatus, setOwnerStatus] = useState('ATTENDING');
   const [isLoading, setIsLoading] = useState(true);
   const [attendeeToDelete, setAttendeeToDelete] = useState(null);
   const [participantToEdit, setParticipantToEdit] = useState(null);
@@ -57,15 +48,10 @@ function MeetingManage({ initialMeeting = null, initialNotice = null }) {
   const [participantAddOpen, setParticipantAddOpen] = useState(false);
 
   const attendances = useMemo(() => normalizeAttendances(meeting), [meeting]);
-  const ownerAttendance = useMemo(
-    () => findCurrentUserAttendance(currentUser, meeting, attendances),
-    [attendances, currentUser, meeting],
-  );
   const groupedAttendances = useMemo(
     () => groupAttendances(attendances),
     [attendances],
   );
-  const ownerName = meeting?.currentClubMemberName?.trim() || currentUser?.nickName?.trim() || '';
   const meetingEditDisabled = Boolean(meeting?.competitionCreated);
   const registeredClubMemberIds = useMemo(
     () => new Set(attendances.map((attendance) => attendance.clubMemberId).filter(Boolean)),
@@ -105,6 +91,22 @@ function MeetingManage({ initialMeeting = null, initialNotice = null }) {
   );
   const sameGenderDoublesOnlyUnavailable =
     sameGenderDoublesOnly && Boolean(sameGenderDoublesOnlyUnavailableReason);
+  const skillBalancedScheduleUnavailableReason = useMemo(() => {
+    const activeTierIds = new Set(clubSkillTiers.map((tier) => String(tier.id)));
+    const missingParticipantNames = attendances
+      .filter(
+        (attendance) =>
+          attendance.attendanceStatus === 'ATTENDING' &&
+          (!attendance.clubSkillTierId || !activeTierIds.has(String(attendance.clubSkillTierId))),
+      )
+      .map((attendance) => attendance.participantName);
+
+    return missingParticipantNames.length
+      ? `실력 등급이 설정되지 않은 참석자: ${missingParticipantNames.join(', ')}`
+      : '';
+  }, [attendances, clubSkillTiers]);
+  const skillBalancedScheduleUnavailable =
+    skillBalancedSchedule && Boolean(skillBalancedScheduleUnavailableReason);
 
   const loadMeeting = useCallback(
     () => {
@@ -130,8 +132,8 @@ function MeetingManage({ initialMeeting = null, initialNotice = null }) {
       ? getClubMeeting(clubPublicId, publicId)
       : getPublicMeeting(publicId);
 
-    Promise.all([meetingRequest, getCurrentUser()])
-      .then(([meetingResponse, userResponse]) => {
+    meetingRequest
+      .then((meetingResponse) => {
         if (cancelled) {
           return;
         }
@@ -142,7 +144,6 @@ function MeetingManage({ initialMeeting = null, initialNotice = null }) {
           return;
         }
         setMeeting(nextMeeting);
-        setCurrentUser(userResponse.data.data);
       })
       .catch((error) => {
         if (!cancelled) {
@@ -212,12 +213,6 @@ function MeetingManage({ initialMeeting = null, initialNotice = null }) {
     };
   }, [clubPublicId]);
 
-  useEffect(() => {
-    if (ownerAttendance?.attendanceStatus) {
-      setOwnerStatus(ownerAttendance.attendanceStatus);
-    }
-  }, [ownerAttendance]);
-
   const showNotice = (type, message) => {
     setNotice({ type, message });
   };
@@ -230,31 +225,6 @@ function MeetingManage({ initialMeeting = null, initialNotice = null }) {
     }
     await loadMeeting();
     showNotice('success', status === 'OPEN' ? '참석 체크를 다시 열었습니다.' : '참석 체크를 마감했습니다.');
-  };
-
-  const handleOwnerAttendance = async (status) => {
-    if (!ownerName) {
-      showNotice('error', '참가자 이름을 먼저 설정해주세요.');
-      return;
-    }
-
-    try {
-      setOwnerStatus(status);
-      await upsertAttendance(publicId, {
-        attendanceId: ownerAttendance?.id,
-        participantName: ownerName,
-        gender: meeting?.currentClubMemberGender || currentUser?.gender || ownerAttendance?.gender || 'MALE',
-        attendanceStatus: status,
-      });
-      await loadMeeting();
-      showNotice('success', '내 참석 상태를 저장했습니다.');
-    } catch (error) {
-      setOwnerStatus(ownerAttendance?.attendanceStatus || 'ATTENDING');
-      showNotice(
-        'error',
-        error.response?.data?.message || '내 참석 상태를 저장하지 못했습니다.',
-      );
-    }
   };
 
   const isGuestPromotion = (participant) => {
@@ -301,6 +271,10 @@ function MeetingManage({ initialMeeting = null, initialNotice = null }) {
   const handleCreateCompetition = async () => {
     if (sameGenderDoublesOnlyUnavailable) {
       showNotice('error', sameGenderDoublesOnlyUnavailableReason);
+      return;
+    }
+    if (skillBalancedScheduleUnavailable) {
+      showNotice('error', skillBalancedScheduleUnavailableReason);
       return;
     }
 
@@ -430,12 +404,8 @@ function MeetingManage({ initialMeeting = null, initialNotice = null }) {
           onSkillBalancedScheduleChange={setSkillBalancedSchedule}
           sameGenderDoublesOnlyUnavailable={sameGenderDoublesOnlyUnavailable}
           sameGenderDoublesOnlyUnavailableReason={sameGenderDoublesOnlyUnavailableReason}
-        />
-
-        <MeetingOwnerAttendancePanel
-          ownerName={ownerName}
-          ownerStatus={ownerStatus}
-          onStatusSelect={handleOwnerAttendance}
+          skillBalancedScheduleUnavailable={skillBalancedScheduleUnavailable}
+          skillBalancedScheduleUnavailableReason={skillBalancedScheduleUnavailableReason}
         />
 
         <button
