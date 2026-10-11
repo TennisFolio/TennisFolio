@@ -153,6 +153,9 @@ function MeetingPublic() {
       isParticipantLocked ? lockedParticipantName : nextForm.participantName
     ).trim();
     const ownerNickName = meeting?.ownerNickName?.trim();
+    const attendanceStatus = nextForm.attendanceId
+      ? nextForm.attendanceStatus
+      : 'ATTENDING';
 
     if (!participantName) {
       showNotice('error', '이름을 입력해주세요.');
@@ -169,7 +172,7 @@ function MeetingPublic() {
         attendanceId: nextForm.attendanceId || null,
         participantName,
         gender: nextForm.gender,
-        attendanceStatus: nextForm.attendanceStatus,
+        attendanceStatus,
       });
       const savedAttendance = response.data.data;
       rememberAttendance(publicId, savedAttendance || nextForm);
@@ -178,7 +181,7 @@ function MeetingPublic() {
         attendanceId: savedAttendance?.id ?? nextForm.attendanceId,
         participantName: savedAttendance?.participantName ?? participantName,
         gender: savedAttendance?.gender ?? nextForm.gender,
-        attendanceStatus: savedAttendance?.attendanceStatus ?? nextForm.attendanceStatus,
+        attendanceStatus: savedAttendance?.attendanceStatus ?? attendanceStatus,
       });
       setHasEntered(true);
       showNotice('success', '참석 상태를 저장했습니다.');
@@ -205,15 +208,6 @@ function MeetingPublic() {
 
   const handleSaveProfile = async () => {
     await saveAttendance(form);
-  };
-
-  const handleStatusClick = async (status) => {
-    const nextForm = { ...form, attendanceStatus: status };
-    setForm(nextForm);
-    const saved = await saveAttendance(nextForm);
-    if (!saved) {
-      setForm(form);
-    }
   };
 
   const handleCopyShareLink = async () => {
@@ -256,7 +250,7 @@ function MeetingPublic() {
         notice={notice}
         onCloseNotice={() => setNotice(null)}
         onFieldChange={updateField}
-        onStatusSelect={handleStatusClick}
+        onSaveProfile={handleSaveProfile}
         onAttendanceSelect={selectAttendance}
       />
     );
@@ -277,7 +271,6 @@ function MeetingPublic() {
         onFieldChange={updateField}
         onSaveProfile={handleSaveProfile}
         onEnterAsDifferentParticipant={handleEnterAsDifferentParticipant}
-        onStatusSelect={handleStatusClick}
       />
 
       <MeetingToast notice={notice} onClose={() => setNotice(null)} />

@@ -1,4 +1,3 @@
-import AttendanceStatusOptions from '../shared/AttendanceStatusOptions';
 import MeetingParticipantFields from '../shared/MeetingParticipantFields';
 
 function MeetingPublicAttendancePanel({
@@ -7,7 +6,6 @@ function MeetingPublicAttendancePanel({
   onFieldChange,
   onSaveProfile,
   onEnterAsDifferentParticipant,
-  onStatusSelect,
 }) {
   return (
     <section className="meeting-panel">
@@ -31,13 +29,6 @@ function MeetingPublicAttendancePanel({
           다른 이름으로 입장
         </button>
       )}
-      <div className="meeting-status-row">
-        <span className="meeting-muted">상태</span>
-        <AttendanceStatusOptions
-          selectedStatus={form.attendanceStatus}
-          onSelect={onStatusSelect}
-        />
-      </div>
     </section>
   );
 }

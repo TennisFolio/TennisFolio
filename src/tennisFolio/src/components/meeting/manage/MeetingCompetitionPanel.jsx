@@ -10,6 +10,8 @@ function MeetingCompetitionPanel({
   onSkillBalancedScheduleChange,
   sameGenderDoublesOnlyUnavailable,
   sameGenderDoublesOnlyUnavailableReason,
+  skillBalancedScheduleUnavailable,
+  skillBalancedScheduleUnavailableReason,
 }) {
   return (
     <div className="meeting-operation-primary">
@@ -72,7 +74,11 @@ function MeetingCompetitionPanel({
             )}
           </div>
           {isClubMeeting && (
-            <div className="meeting-same-gender-option">
+            <div
+              className={`meeting-same-gender-option ${
+                skillBalancedScheduleUnavailable ? 'disabled' : ''
+              }`}
+            >
               <button
                 type="button"
                 className={`meeting-same-gender-switch ${
@@ -89,13 +95,18 @@ function MeetingCompetitionPanel({
                   <strong>실력 기반 대진</strong>
                 </span>
               </button>
+              {skillBalancedScheduleUnavailable && (
+                <p className="meeting-same-gender-option-warning">
+                  {skillBalancedScheduleUnavailableReason}
+                </p>
+              )}
             </div>
           )}
         <button
           type="button"
           className="meeting-button primary full"
           onClick={onCreateCompetition}
-          disabled={sameGenderDoublesOnlyUnavailable}
+          disabled={sameGenderDoublesOnlyUnavailable || skillBalancedScheduleUnavailable}
         >
           참석자로 대진표 생성
         </button>

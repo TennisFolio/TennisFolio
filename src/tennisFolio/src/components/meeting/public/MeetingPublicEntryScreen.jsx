@@ -1,6 +1,5 @@
 import MeetingToast from '../../../page/MeetingToast';
 import AttendanceChip from '../shared/AttendanceChip';
-import AttendanceStatusOptions from '../shared/AttendanceStatusOptions';
 import CapacityChips from '../shared/CapacityChips';
 import MeetingParticipantFields from '../shared/MeetingParticipantFields';
 import { formatDate, formatTimeRange } from '../shared/meetingAttendanceUtils';
@@ -13,7 +12,7 @@ function MeetingPublicEntryScreen({
   notice,
   onCloseNotice,
   onFieldChange,
-  onStatusSelect,
+  onSaveProfile,
   onAttendanceSelect,
 }) {
   const entryGroups = [
@@ -62,11 +61,9 @@ function MeetingPublicEntryScreen({
             onGenderChange={(value) => onFieldChange('gender', value)}
           />
 
-          <AttendanceStatusOptions
-            selectedStatus={form.attendanceStatus}
-            buttonClassName="meeting-button full"
-            onSelect={onStatusSelect}
-          />
+          <button type="button" className="meeting-button full" onClick={onSaveProfile}>
+            참가 등록
+          </button>
         </div>
 
         {meeting.clubMeeting && (
@@ -75,9 +72,7 @@ function MeetingPublicEntryScreen({
           </p>
         )}
 
-        <p className="meeting-state-note">
-          참석 여부를 선택하면 참석 현황과 명단을 볼 수 있습니다.
-        </p>
+        <p className="meeting-state-note">참가 등록 후 참석 현황과 명단을 볼 수 있습니다.</p>
 
         <div className="meeting-entry-name-groups">
           {entryGroups.map((group) => (
