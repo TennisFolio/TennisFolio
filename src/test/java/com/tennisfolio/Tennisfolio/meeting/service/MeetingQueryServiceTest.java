@@ -39,7 +39,6 @@ class MeetingQueryServiceTest {
     void getMeeting_allowsGuestToReadClubMeeting() {
         Meeting meeting = org.mockito.Mockito.mock(Meeting.class);
         when(meetingRepository.findByPublicIdAndDeletedAtIsNull("meeting")).thenReturn(Optional.of(meeting));
-        when(meeting.isClubMeeting()).thenReturn(true);
         when(meeting.getClubId()).thenReturn(100L);
         when(meeting.getStatus()).thenReturn(MeetingStatus.OPEN);
 
