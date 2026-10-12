@@ -159,6 +159,10 @@ public class AuthController {
     ) {
         String sessionId = getCookie(request, "session_id");
         String refreshToken = getCookie(request, "refresh_token");
+        if (refreshToken == null || refreshToken.isBlank()
+                || sessionId == null || sessionId.isBlank()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
         ReissuedToken token = reIssueService.reIssue(refreshToken, sessionId);
 
         response.addCookie(createHttpOnlyCookie(
