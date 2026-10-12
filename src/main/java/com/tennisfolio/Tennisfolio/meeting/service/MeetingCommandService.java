@@ -5,9 +5,7 @@ import com.tennisfolio.Tennisfolio.exception.NotFoundException;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingCreateRequest;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingCreateResponse;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingDetailResponse;
-import com.tennisfolio.Tennisfolio.meeting.dto.MeetingStatusUpdateRequest;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingUpdateRequest;
-import com.tennisfolio.Tennisfolio.meeting.domain.MeetingStatus;
 import com.tennisfolio.Tennisfolio.meeting.entity.Meeting;
 import com.tennisfolio.Tennisfolio.meeting.repository.MeetingRepository;
 import org.springframework.http.HttpStatus;
@@ -124,31 +122,6 @@ public class MeetingCommandService {
     }
 
     @Transactional
-    public MeetingDetailResponse updateStatus(
-            String publicId,
-            MeetingStatusUpdateRequest request,
-            Long ownerUserId
-    ) {
-        Meeting meeting = findOwnedMeeting(publicId, ownerUserId);
-        MeetingStatus status = parseStatus(request.getStatus());
-        meeting.updateStatus(status);
-        return MeetingDetailResponse.from(meeting, ownerUserId);
-    }
-
-    @Transactional
-    public MeetingDetailResponse updateClubMeetingStatus(
-            String publicId,
-            Long clubId,
-            MeetingStatusUpdateRequest request,
-            Long currentUserId
-    ) {
-        Meeting meeting = findClubMeeting(publicId, clubId);
-        MeetingStatus status = parseStatus(request.getStatus());
-        meeting.updateStatus(status);
-        return MeetingDetailResponse.from(meeting, currentUserId);
-    }
-
-    @Transactional
     public void deleteMeeting(String publicId, Long ownerUserId) {
         Meeting meeting = findOwnedMeeting(publicId, ownerUserId);
         meeting.delete(LocalDateTime.now());
@@ -205,14 +178,6 @@ public class MeetingCommandService {
                     HttpStatus.BAD_REQUEST,
                     "전체 정원과 성별 정원은 함께 설정할 수 없습니다."
             );
-        }
-    }
-
-    private MeetingStatus parseStatus(String status) {
-        try {
-            return MeetingStatus.valueOf(status);
-        } catch (RuntimeException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "모임 상태 값이 올바르지 않습니다.");
         }
     }
 

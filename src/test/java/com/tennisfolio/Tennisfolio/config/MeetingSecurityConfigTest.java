@@ -1,8 +1,6 @@
 package com.tennisfolio.Tennisfolio.config;
 
 import com.tennisfolio.Tennisfolio.meeting.api.MeetingController;
-import com.tennisfolio.Tennisfolio.meeting.dto.MeetingAttendanceResponse;
-import com.tennisfolio.Tennisfolio.meeting.dto.MeetingAttendanceUpsertRequest;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingDetailResponse;
 import com.tennisfolio.Tennisfolio.meeting.service.MeetingAttendanceCommandService;
 import com.tennisfolio.Tennisfolio.meeting.service.MeetingCommandService;
@@ -27,7 +25,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -88,26 +85,6 @@ class MeetingSecurityConfigTest {
                 .thenReturn(detailResponse());
 
         mockMvc.perform(get("/api/meetings/meeting-public-id"))
-                .andExpect(status().isOk());
-    }
-
-    @Test
-    void publicAttendanceUpsertIsPermitAll() throws Exception {
-        when(attendanceCommandService.upsertAttendance(
-                eq("meeting-public-id"),
-                any(MeetingAttendanceUpsertRequest.class),
-                eq(null)
-        )).thenReturn(new MeetingAttendanceResponse(100L, "Alex Kim", "MALE", "ATTENDING"));
-
-        mockMvc.perform(post("/api/meetings/meeting-public-id/attendances")
-                        .contentType("application/json")
-                        .content("""
-                                {
-                                  "participantName": "Alex Kim",
-                                  "gender": "MALE",
-                                  "attendanceStatus": "ATTENDING"
-                                }
-                                """))
                 .andExpect(status().isOk());
     }
 

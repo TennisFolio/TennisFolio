@@ -4,10 +4,9 @@ import {
   createMeetingCompetitionWithOptions,
   addManagedParticipant,
   updateManagedParticipant,
-  deleteAttendance,
+  deleteManagedParticipant,
   deleteMeetingCompetition,
   getPublicMeeting,
-  updateMeetingStatus,
 } from '../utils/meetingApi';
 import {
   createClubMeetingCompetitionWithOptions,
@@ -15,7 +14,6 @@ import {
   getClub,
   getClubMembers,
   getClubMeeting,
-  updateClubMeetingStatus,
 } from '../utils/clubApi';
 import MeetingConfirmModal from '../components/meeting/shared/MeetingConfirmModal';
 import MeetingManageOverviewPanel from '../components/meeting/manage/MeetingManageOverviewPanel';
@@ -223,16 +221,6 @@ function MeetingManage({ initialMeeting = null, initialNotice = null }) {
     setNotice({ type, message });
   };
 
-  const handleStatus = async (status) => {
-    if (clubPublicId) {
-      await updateClubMeetingStatus(clubPublicId, publicId, status);
-    } else {
-      await updateMeetingStatus(publicId, status);
-    }
-    await loadMeeting();
-    showNotice('success', status === 'OPEN' ? '참석 체크를 다시 열었습니다.' : '참석 체크를 마감했습니다.');
-  };
-
   const isGuestPromotion = (participant) => {
     if (!participant.clubMemberId) {
       return false;
@@ -352,7 +340,7 @@ function MeetingManage({ initialMeeting = null, initialNotice = null }) {
     }
 
     try {
-      await deleteAttendance(publicId, attendeeToDelete.id);
+      await deleteManagedParticipant(publicId, attendeeToDelete.id);
       await loadMeeting();
       showNotice('success', `${attendeeToDelete.participantName} 참석 응답을 삭제했습니다.`);
       setAttendeeToDelete(null);
@@ -402,7 +390,6 @@ function MeetingManage({ initialMeeting = null, initialNotice = null }) {
           onOpenCompetition={() => navigate(`/competitions/${meeting.competitionPublicId}`)}
           onCreateCompetition={handleCreateCompetition}
           onAskDeleteCompetition={() => setCompetitionDeleteRequested(true)}
-          onChangeStatus={handleStatus}
           sameGenderDoublesOnly={sameGenderDoublesOnly}
           onSameGenderDoublesOnlyChange={setSameGenderDoublesOnly}
           isClubMeeting={Boolean(clubPublicId)}

@@ -8,7 +8,6 @@ import PlayerDetailModal from './components/common/PlayerDetailModal.jsx';
 import { default_oauth_provider } from './constants/urls.js';
 import { clearCompetitionAdminToken } from './utils/competitionEditToken';
 import { loginWithProvider, logout } from './utils/authApi';
-import { clearRememberedMeetingAttendances } from './utils/meetingAttendanceMemory';
 
 function getCurrentCompetitionPublicId(pathname) {
   const match = pathname.match(/^\/competitions\/([^/]+)/);
@@ -95,7 +94,6 @@ function Layout({ children, currentUser, onLogout }) {
           })
         );
       }
-      clearRememberedMeetingAttendances();
       setIsManageMenuOpen(false);
       setSheetMode(null);
       onLogout?.();

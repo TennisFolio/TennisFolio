@@ -3,7 +3,6 @@ package com.tennisfolio.Tennisfolio.meeting.service;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingCreateRequest;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingCreateResponse;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingDetailResponse;
-import com.tennisfolio.Tennisfolio.meeting.dto.MeetingStatusUpdateRequest;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingUpdateRequest;
 import com.tennisfolio.Tennisfolio.meeting.entity.Meeting;
 import com.tennisfolio.Tennisfolio.meeting.repository.MeetingRepository;
@@ -202,21 +201,6 @@ class MeetingCommandServiceTest {
     }
 
     @Test
-    void updateStatus_changesOwnerMeetingStatus() {
-        Meeting meeting = meeting(10L);
-        when(meetingRepository.findByPublicIdAndOwnerUserIdAndDeletedAtIsNull("meeting-public-id", 10L))
-                .thenReturn(Optional.of(meeting));
-
-        MeetingDetailResponse response = service.updateStatus(
-                "meeting-public-id",
-                new MeetingStatusUpdateRequest("CLOSED"),
-                10L
-        );
-
-        assertThat(response.getStatus()).isEqualTo("CLOSED");
-    }
-
-    @Test
     void updateClubMeeting_updatesMeetingByClubId() {
         Meeting meeting = meeting(10L);
         meeting.connectClub(100L);
@@ -247,24 +231,6 @@ class MeetingCommandServiceTest {
         service.deleteMeeting("meeting-public-id", 10L);
 
         assertThat(meeting.isDeleted()).isTrue();
-    }
-
-    @Test
-    void updateClubMeetingStatus_changesMeetingByClubId() {
-        Meeting meeting = meeting(10L);
-        meeting.connectClub(100L);
-        when(meetingRepository.findByPublicIdAndClubIdAndDeletedAtIsNull("meeting-public-id", 100L))
-                .thenReturn(Optional.of(meeting));
-
-        MeetingDetailResponse response = service.updateClubMeetingStatus(
-                "meeting-public-id",
-                100L,
-                new MeetingStatusUpdateRequest("CLOSED"),
-                20L
-        );
-
-        assertThat(response.getStatus()).isEqualTo("CLOSED");
-        assertThat(response.getOwnedByCurrentUser()).isFalse();
     }
 
     @Test

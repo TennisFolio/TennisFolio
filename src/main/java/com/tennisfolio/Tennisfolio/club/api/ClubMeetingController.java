@@ -8,7 +8,6 @@ import com.tennisfolio.Tennisfolio.meeting.dto.MeetingCompetitionCreateResponse;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingCreateRequest;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingCreateResponse;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingDetailResponse;
-import com.tennisfolio.Tennisfolio.meeting.dto.MeetingStatusUpdateRequest;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingSummaryResponse;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingUpdateRequest;
 import org.springframework.http.ResponseEntity;
@@ -87,22 +86,6 @@ public class ClubMeetingController {
             @RequestBody MeetingUpdateRequest request
     ) {
         MeetingDetailResponse response = clubMeetingCommandService.updateClubMeeting(
-                clubPublicId,
-                meetingPublicId,
-                request,
-                userId
-        );
-        return ResponseEntity.ok(ResponseDTO.success(response));
-    }
-
-    @PatchMapping("/{meetingPublicId}/status")
-    public ResponseEntity<ResponseDTO<MeetingDetailResponse>> updateClubMeetingStatus(
-            @AuthenticationPrincipal Long userId,
-            @PathVariable String clubPublicId,
-            @PathVariable String meetingPublicId,
-            @RequestBody MeetingStatusUpdateRequest request
-    ) {
-        MeetingDetailResponse response = clubMeetingCommandService.updateClubMeetingStatus(
                 clubPublicId,
                 meetingPublicId,
                 request,
