@@ -171,7 +171,7 @@ function MeetingUpdate() {
       }
       navigate(
         clubPublicId
-          ? `/clubs/${clubPublicId}/meetings/${publicId}`
+          ? `/clubs/${clubPublicId}/meetings/${publicId}/manage`
           : `/meetings/${publicId}`,
         {
           state: {
@@ -248,7 +248,7 @@ function MeetingUpdate() {
           onPrevious={() =>
             navigate(
               clubPublicId
-                ? `/clubs/${clubPublicId}/meetings/${publicId}`
+                ? `/clubs/${clubPublicId}/meetings/${publicId}/manage`
                 : `/meetings/${publicId}`,
             )
           }

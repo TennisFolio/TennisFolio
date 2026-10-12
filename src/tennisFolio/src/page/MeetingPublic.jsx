@@ -1,24 +1,12 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { getPublicMeeting, upsertAttendance } from '../utils/meetingApi';
-import { getCurrentUser } from '../utils/authApi';
-import MeetingPublicAttendancePanel from '../components/meeting/public/MeetingPublicAttendancePanel';
-import MeetingPublicEntryScreen from '../components/meeting/public/MeetingPublicEntryScreen';
+import { getPublicMeeting } from '../utils/meetingApi';
 import MeetingPublicOverviewPanel from '../components/meeting/public/MeetingPublicOverviewPanel';
 import MeetingRosterSections from '../components/meeting/shared/MeetingRosterSections';
 import {
-  emptyAttendance,
-  findCurrentUserAttendance,
-  getAttendanceForm,
-  getCurrentUserForm,
   groupAttendances,
   normalizeAttendances,
 } from '../components/meeting/shared/meetingAttendanceUtils';
-import {
-  findRememberedAttendance,
-  forgetRememberedAttendance,
-  rememberAttendance,
-} from '../components/meeting/public/meetingAttendanceStorage';
 import './Meeting.css';
 import MeetingManage from './MeetingManage';
 import MeetingToast from './MeetingToast';
@@ -29,11 +17,6 @@ function MeetingPublic() {
   const navigate = useNavigate();
   const initialNotice = location.state?.meetingNotice || null;
   const [meeting, setMeeting] = useState(null);
-  const [form, setForm] = useState(emptyAttendance);
-  const [currentUser, setCurrentUser] = useState(null);
-  const [hasEntered, setHasEntered] = useState(() =>
-    new URLSearchParams(window.location.search).has('entry'),
-  );
   const [isLoading, setIsLoading] = useState(true);
   const [notice, setNotice] = useState(initialNotice);
   const [errorMessage, setErrorMessage] = useState('');
@@ -45,56 +28,7 @@ function MeetingPublic() {
   );
 
   const loadMeeting = useCallback(
-    () =>
-      Promise.allSettled([getPublicMeeting(publicId), getCurrentUser()]).then(
-        ([meetingResult, currentUserResult]) => {
-          if (meetingResult.status === 'rejected') {
-            throw meetingResult.reason;
-          }
-
-          const nextMeeting = meetingResult.value.data.data;
-          const nextAttendances = normalizeAttendances(nextMeeting);
-          const currentUser =
-            currentUserResult.status === 'fulfilled'
-              ? currentUserResult.value.data.data
-              : null;
-          setCurrentUser(currentUser);
-          const rememberedAttendance = findRememberedAttendance(
-            publicId,
-            nextAttendances,
-          );
-          const currentUserAttendance = findCurrentUserAttendance(
-            currentUser,
-            nextMeeting,
-            nextAttendances,
-          );
-          const currentUserForm = getCurrentUserForm(currentUser, nextMeeting);
-
-          setMeeting(nextMeeting);
-
-          if (currentUserAttendance) {
-            setForm(getAttendanceForm(currentUserAttendance));
-            rememberAttendance(publicId, currentUserAttendance);
-            setHasEntered(true);
-            return;
-          }
-
-          if (currentUserForm) {
-            forgetRememberedAttendance(publicId);
-            setForm((current) => ({
-              ...currentUserForm,
-              attendanceStatus: current.attendanceStatus,
-            }));
-            setHasEntered(false);
-            return;
-          }
-
-          if (rememberedAttendance) {
-            setForm(getAttendanceForm(rememberedAttendance));
-            setHasEntered(true);
-          }
-        },
-      ),
+    () => getPublicMeeting(publicId).then((response) => setMeeting(response.data.data)),
     [publicId],
   );
 
@@ -124,90 +58,8 @@ function MeetingPublic() {
     }
   }, [initialNotice, navigate, publicId]);
 
-  const updateField = (field, value) => {
-    setForm((current) => ({ ...current, [field]: value }));
-    setNotice(null);
-  };
-
   const showNotice = (type, message) => {
     setNotice({ type, message });
-  };
-
-  const lockedParticipantName =
-    meeting?.currentClubMemberName?.trim() ||
-    currentUser?.nickName?.trim() ||
-    '';
-  const lockedParticipantGender =
-    meeting?.currentClubMemberGender || currentUser?.gender || emptyAttendance.gender;
-  const isParticipantLocked = Boolean(lockedParticipantName);
-
-  const selectAttendance = (attendance) => {
-    setForm(getAttendanceForm(attendance));
-    rememberAttendance(publicId, attendance);
-    setHasEntered(true);
-    showNotice('success', '선택한 응답을 아래에서 수정할 수 있습니다.');
-  };
-
-  const saveAttendance = async (nextForm) => {
-    const participantName = (
-      isParticipantLocked ? lockedParticipantName : nextForm.participantName
-    ).trim();
-    const ownerNickName = meeting?.ownerNickName?.trim();
-    const attendanceStatus = nextForm.attendanceId
-      ? nextForm.attendanceStatus
-      : 'ATTENDING';
-
-    if (!participantName) {
-      showNotice('error', '이름을 입력해주세요.');
-      return false;
-    }
-
-    if (ownerNickName && participantName === ownerNickName) {
-      showNotice('error', '모임장은 참석자로 선택할 수 없습니다.');
-      return false;
-    }
-
-    try {
-      const response = await upsertAttendance(publicId, {
-        attendanceId: nextForm.attendanceId || null,
-        participantName,
-        gender: nextForm.gender,
-        attendanceStatus,
-      });
-      const savedAttendance = response.data.data;
-      rememberAttendance(publicId, savedAttendance || nextForm);
-      await loadMeeting();
-      setForm({
-        attendanceId: savedAttendance?.id ?? nextForm.attendanceId,
-        participantName: savedAttendance?.participantName ?? participantName,
-        gender: savedAttendance?.gender ?? nextForm.gender,
-        attendanceStatus: savedAttendance?.attendanceStatus ?? attendanceStatus,
-      });
-      setHasEntered(true);
-      showNotice('success', '참석 상태를 저장했습니다.');
-      return true;
-    } catch (error) {
-      showNotice(
-        'error',
-        error.response?.data?.message || '참석 상태를 저장하지 못했습니다.',
-      );
-      return false;
-    }
-  };
-
-  const handleEnterAsDifferentParticipant = () => {
-    forgetRememberedAttendance(publicId);
-    setForm({
-      ...emptyAttendance,
-      participantName: isParticipantLocked ? lockedParticipantName : '',
-      gender: lockedParticipantGender,
-    });
-    setHasEntered(false);
-    setNotice(null);
-  };
-
-  const handleSaveProfile = async () => {
-    await saveAttendance(form);
   };
 
   const handleCopyShareLink = async () => {
@@ -240,22 +92,6 @@ function MeetingPublic() {
     return <MeetingManage initialMeeting={meeting} initialNotice={notice} />;
   }
 
-  if (!hasEntered) {
-    return (
-      <MeetingPublicEntryScreen
-        meeting={meeting}
-        attendances={attendances}
-        form={form}
-        isNameLocked={isParticipantLocked}
-        notice={notice}
-        onCloseNotice={() => setNotice(null)}
-        onFieldChange={updateField}
-        onSaveProfile={handleSaveProfile}
-        onAttendanceSelect={selectAttendance}
-      />
-    );
-  }
-
   return (
     <main className="meeting-page">
       <MeetingPublicOverviewPanel
@@ -263,14 +99,6 @@ function MeetingPublic() {
         attendances={attendances}
         onCopyShareLink={handleCopyShareLink}
         onOpenCompetition={() => navigate(`/competitions/${meeting.competitionPublicId}`)}
-      />
-
-      <MeetingPublicAttendancePanel
-        form={form}
-        isNameLocked={isParticipantLocked}
-        onFieldChange={updateField}
-        onSaveProfile={handleSaveProfile}
-        onEnterAsDifferentParticipant={handleEnterAsDifferentParticipant}
       />
 
       <MeetingToast notice={notice} onClose={() => setNotice(null)} />

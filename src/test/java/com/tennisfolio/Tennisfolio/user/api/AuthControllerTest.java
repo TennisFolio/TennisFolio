@@ -181,6 +181,17 @@ class AuthControllerTest {
     }
 
     @Test
+    void reIssue_rejectsRequestWithoutRefreshCookies() {
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        ResponseEntity<Void> result = authController.reIssue(request, response);
+
+        assertThat(result.getStatusCode().value()).isEqualTo(401);
+        verify(reIssueService, never()).reIssue(null, null);
+    }
+
+    @Test
     void logout_usesRefreshCookieAndClearsAllAuthCookies() {
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.getSession(true);

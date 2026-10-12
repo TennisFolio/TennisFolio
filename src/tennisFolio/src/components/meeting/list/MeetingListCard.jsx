@@ -1,14 +1,13 @@
-function formatDateTime(value) {
-  return value ? value.replace('T', ' ').slice(0, 16) : '';
-}
+import MeetingScheduleSummary from '../shared/MeetingScheduleSummary';
 
 function formatCount(value) {
   return Number.isFinite(Number(value)) ? Number(value) : 0;
 }
 
-function MeetingListCard({ meeting, onDelete, onManage, onShare }) {
+function MeetingListCard({ meeting, onOpen }) {
   return (
     <article className="meeting-card">
+      <MeetingScheduleSummary startAt={meeting.startAt} endAt={meeting.endAt} />
       <div className="meeting-card-title-row">
         <div>
           <h2>{meeting.title}</h2>
@@ -16,18 +15,9 @@ function MeetingListCard({ meeting, onDelete, onManage, onShare }) {
             {meeting.competitionCreated ? '경기표 생성됨' : meeting.status}
           </span>
         </div>
-        <button
-          type="button"
-          className="meeting-button danger small"
-          onClick={() => onDelete(meeting)}
-        >
-          삭제
-        </button>
       </div>
 
-      <div className="meeting-card-meta">
-        <span className="meeting-chip">{formatDateTime(meeting.startAt)}</span>
-        <span className="meeting-chip">{formatDateTime(meeting.endAt)}</span>
+      <div className="meeting-card-meta" aria-label="모임 부가 정보">
         <span className="meeting-chip">
           {formatCount(meeting.courtCount)}코트
         </span>
@@ -52,16 +42,9 @@ function MeetingListCard({ meeting, onDelete, onManage, onShare }) {
         <button
           type="button"
           className="meeting-button primary"
-          onClick={() => onManage(meeting.publicId)}
+          onClick={() => onOpen(meeting.publicId)}
         >
-          관리
-        </button>
-        <button
-          type="button"
-          className="meeting-button"
-          onClick={() => onShare(meeting.publicId)}
-        >
-          공유
+          상세 보기
         </button>
       </div>
     </article>

@@ -10,7 +10,7 @@ function MeetingListStates({ errorMessage, isEmpty, isLoading }) {
   if (isEmpty) {
     return (
       <section className="meeting-state">
-        아직 만든 모임이 없습니다. 첫 모임을 만들고 참석 링크를 공유해보세요.
+        아직 등록된 모임이 없습니다.
       </section>
     );
   }

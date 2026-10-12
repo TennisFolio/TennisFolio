@@ -64,6 +64,12 @@ function CompetitionManageRedirect() {
   );
 }
 
+function ClubMeetingPublicRedirect() {
+  const { publicId } = useParams();
+
+  return <Navigate to={`/meetings/${publicId}`} replace />;
+}
+
 function AnalyticsRouteTracker() {
   const location = useLocation();
 
@@ -168,12 +174,16 @@ function App() {
             element={<MeetingCreate />}
           />
           <Route
-            path="/clubs/:clubPublicId/meetings/:publicId"
+            path="/clubs/:clubPublicId/meetings/:publicId/manage"
             element={<MeetingManage />}
           />
           <Route
             path="/clubs/:clubPublicId/meetings/:publicId/edit"
             element={<MeetingUpdate />}
+          />
+          <Route
+            path="/clubs/:clubPublicId/meetings/:publicId"
+            element={<ClubMeetingPublicRedirect />}
           />
           <Route path="/meetings/new" element={<MeetingCreate />} />
           <Route path="/meetings/:publicId" element={<MeetingPublic />} />

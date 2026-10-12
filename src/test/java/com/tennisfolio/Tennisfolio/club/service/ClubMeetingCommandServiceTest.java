@@ -6,7 +6,6 @@ import com.tennisfolio.Tennisfolio.meeting.dto.MeetingCreateResponse;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingCompetitionCreateRequest;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingCompetitionCreateResponse;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingDetailResponse;
-import com.tennisfolio.Tennisfolio.meeting.dto.MeetingStatusUpdateRequest;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingUpdateRequest;
 import com.tennisfolio.Tennisfolio.meeting.service.MeetingCommandService;
 import com.tennisfolio.Tennisfolio.meeting.service.MeetingCompetitionCreateService;
@@ -71,19 +70,6 @@ class ClubMeetingCommandServiceTest {
 
         verify(meetingCommandService).updateClubMeeting("meeting-public-id", 100L, request, 20L);
         assertThat(response.getOwnedByCurrentUser()).isFalse();
-    }
-
-    @Test
-    void updateClubMeetingStatus_checksAdminAndUpdatesStatusForClub() {
-        Club club = club(100L);
-        MeetingStatusUpdateRequest request = new MeetingStatusUpdateRequest("CLOSED");
-        when(clubAccessService.requireOperator("club-public-id", 20L)).thenReturn(club);
-        when(meetingCommandService.updateClubMeetingStatus("meeting-public-id", 100L, request, 20L))
-                .thenReturn(detailResponse(false));
-
-        service.updateClubMeetingStatus("club-public-id", "meeting-public-id", request, 20L);
-
-        verify(meetingCommandService).updateClubMeetingStatus("meeting-public-id", 100L, request, 20L);
     }
 
     @Test

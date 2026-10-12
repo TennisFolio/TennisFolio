@@ -6,7 +6,6 @@ import com.tennisfolio.Tennisfolio.meeting.dto.MeetingCreateResponse;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingCompetitionCreateRequest;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingCompetitionCreateResponse;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingDetailResponse;
-import com.tennisfolio.Tennisfolio.meeting.dto.MeetingStatusUpdateRequest;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingSummaryResponse;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingUpdateRequest;
 import com.tennisfolio.Tennisfolio.meeting.service.MeetingAttendanceCommandService;
@@ -75,6 +74,19 @@ class MeetingControllerTest {
     }
 
     @Test
+    void getPublicMeetings_returnsAllMeetingsWithoutAuthentication() {
+        when(meetingQueryService.getPublicMeetings()).thenReturn(List.of());
+
+        ResponseEntity<ResponseDTO<List<MeetingSummaryResponse>>> response =
+                meetingController.getPublicMeetings();
+
+        verify(meetingQueryService).getPublicMeetings();
+        assertThat(response.getStatusCode().value()).isEqualTo(200);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getData()).isEmpty();
+    }
+
+    @Test
     void getMyMeetings_returnsCurrentUsersMeetings() {
         Long userId = 10L;
         when(meetingQueryService.getOwnedMeetings(10L))
@@ -113,18 +125,6 @@ class MeetingControllerTest {
         verify(meetingCommandService).updateMeeting("meeting-public-id", request, 10L);
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().getData().getOwnedByCurrentUser()).isTrue();
-    }
-
-    @Test
-    void updateMeetingStatus_passesOwnerUserIdToCommandService() {
-        Long userId = 10L;
-        MeetingStatusUpdateRequest request = new MeetingStatusUpdateRequest("CLOSED");
-        when(meetingCommandService.updateStatus("meeting-public-id", request, 10L))
-                .thenReturn(detailResponse("meeting-public-id", true));
-
-        meetingController.updateMeetingStatus(userId, "meeting-public-id", request);
-
-        verify(meetingCommandService).updateStatus("meeting-public-id", request, 10L);
     }
 
     @Test

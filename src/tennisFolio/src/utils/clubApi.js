@@ -98,12 +98,6 @@ export const updateClubMeeting = (publicId, meetingPublicId, meeting) =>
     meeting,
   );
 
-export const updateClubMeetingStatus = (publicId, meetingPublicId, status) =>
-  apiRequestSilent.patch(
-    `/api/clubs/${publicId}/meetings/${meetingPublicId}/status`,
-    { status },
-  );
-
 export const deleteClubMeeting = (publicId, meetingPublicId) =>
   apiRequestSilent.delete(`/api/clubs/${publicId}/meetings/${meetingPublicId}`);
 

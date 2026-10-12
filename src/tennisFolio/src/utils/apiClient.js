@@ -76,13 +76,15 @@ apiClient.interceptors.response.use(
     const isAuthRetryEndpoint =
       url.includes('/api/auth/reissue') || url.includes('/api/auth/reIssue');
     const isLogoutEndpoint = url.includes('/api/auth/logout');
+    const isCurrentUserEndpoint = url === '/api/auth/me';
 
     if (
       status === 401 &&
       originalRequest &&
       !originalRequest._authRetry &&
       !isAuthRetryEndpoint &&
-      !isLogoutEndpoint
+      !isLogoutEndpoint &&
+      !isCurrentUserEndpoint
     ) {
       originalRequest._authRetry = true;
       try {

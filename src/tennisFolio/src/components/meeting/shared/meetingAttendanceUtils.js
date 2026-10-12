@@ -113,6 +113,18 @@ export function formatTimeRange(startAt, endAt) {
   return `${formatTime(startAt)}-${formatTime(endAt)}`;
 }
 
+export function formatScheduleDate(startAt) {
+  if (!startAt) {
+    return '-';
+  }
+
+  return new Date(startAt).toLocaleDateString('ko-KR', {
+    month: 'long',
+    day: 'numeric',
+    weekday: 'short',
+  });
+}
+
 export function groupAttendances(attendances) {
   return {
     attendingMale: attendances.filter(

@@ -1,4 +1,3 @@
-import MeetingAttendanceControlPanel from './MeetingAttendanceControlPanel';
 import MeetingCompetitionPanel from './MeetingCompetitionPanel';
 
 function MeetingManageOperationsPanel({
@@ -6,7 +5,6 @@ function MeetingManageOperationsPanel({
   onOpenCompetition,
   onCreateCompetition,
   onAskDeleteCompetition,
-  onChangeStatus,
   sameGenderDoublesOnly,
   onSameGenderDoublesOnlyChange,
   isClubMeeting,
@@ -33,10 +31,6 @@ function MeetingManageOperationsPanel({
         sameGenderDoublesOnlyUnavailableReason={sameGenderDoublesOnlyUnavailableReason}
         skillBalancedScheduleUnavailable={skillBalancedScheduleUnavailable}
         skillBalancedScheduleUnavailableReason={skillBalancedScheduleUnavailableReason}
-      />
-      <MeetingAttendanceControlPanel
-        status={meeting.status}
-        onChangeStatus={onChangeStatus}
       />
     </section>
   );

@@ -8,7 +8,6 @@ import com.tennisfolio.Tennisfolio.meeting.dto.MeetingCompetitionCreateResponse;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingCreateRequest;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingCreateResponse;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingDetailResponse;
-import com.tennisfolio.Tennisfolio.meeting.dto.MeetingStatusUpdateRequest;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingSummaryResponse;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingUpdateRequest;
 import org.junit.jupiter.api.Test;
@@ -99,23 +98,6 @@ class ClubMeetingControllerTest {
 
         verify(clubMeetingCommandService).updateClubMeeting("club-public-id", "meeting-public-id", request, 20L);
         assertThat(response.getBody()).isNotNull();
-    }
-
-    @Test
-    void updateClubMeetingStatus_passesCurrentUserToCommandService() {
-        Long userId = 20L;
-        MeetingStatusUpdateRequest request = new MeetingStatusUpdateRequest("CLOSED");
-        when(clubMeetingCommandService.updateClubMeetingStatus("club-public-id", "meeting-public-id", request, 20L))
-                .thenReturn(detailResponse(false));
-
-        clubMeetingController.updateClubMeetingStatus(userId, "club-public-id", "meeting-public-id", request);
-
-        verify(clubMeetingCommandService).updateClubMeetingStatus(
-                "club-public-id",
-                "meeting-public-id",
-                request,
-                20L
-        );
     }
 
     @Test

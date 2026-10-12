@@ -182,7 +182,7 @@ function MeetingCreate() {
       const nextPublicId = response.data.data.publicId;
       navigate(
         clubPublicId
-          ? `/clubs/${clubPublicId}/meetings/${nextPublicId}`
+          ? `/clubs/${clubPublicId}/meetings/${nextPublicId}/manage`
           : `/meetings/${nextPublicId}`,
       );
     } catch (error) {

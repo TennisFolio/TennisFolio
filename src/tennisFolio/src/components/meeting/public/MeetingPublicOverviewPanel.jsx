@@ -1,6 +1,6 @@
 import AttendanceStatusSummary from '../shared/AttendanceStatusSummary';
 import CapacityChips from '../shared/CapacityChips';
-import { formatDate, formatTimeRange } from '../shared/meetingAttendanceUtils';
+import MeetingScheduleSummary from '../shared/MeetingScheduleSummary';
 
 function MeetingPublicOverviewPanel({
   meeting,
@@ -10,6 +10,7 @@ function MeetingPublicOverviewPanel({
 }) {
   return (
     <section className="meeting-panel">
+      <MeetingScheduleSummary startAt={meeting.startAt} endAt={meeting.endAt} />
       <div className="meeting-card-title-row">
         <div>
           <h1>{meeting.title}</h1>
@@ -20,11 +21,7 @@ function MeetingPublicOverviewPanel({
           )}
         </div>
       </div>
-      <div className="meeting-card-meta">
-        <span className="meeting-chip">{formatDate(meeting.startAt)}</span>
-        <span className="meeting-chip">
-          {formatTimeRange(meeting.startAt, meeting.endAt)}
-        </span>
+      <div className="meeting-card-meta" aria-label="모임 부가 정보">
         <span className="meeting-chip">{meeting.courtCount}코트</span>
         <span className="meeting-chip">{meeting.totalGames}경기</span>
       </div>

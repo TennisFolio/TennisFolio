@@ -4,6 +4,7 @@ import com.tennisfolio.Tennisfolio.club.repository.ClubRepository;
 import com.tennisfolio.Tennisfolio.club.repository.ClubSkillTierRepository;
 import com.tennisfolio.Tennisfolio.club.service.ClubAccessService;
 import com.tennisfolio.Tennisfolio.matching.repository.CompetitionRepository;
+import com.tennisfolio.Tennisfolio.meeting.domain.MeetingStatus;
 import com.tennisfolio.Tennisfolio.meeting.entity.Meeting;
 import com.tennisfolio.Tennisfolio.meeting.repository.MeetingAttendanceRepository;
 import com.tennisfolio.Tennisfolio.meeting.repository.MeetingRepository;
@@ -13,12 +14,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -33,16 +36,24 @@ class MeetingQueryServiceTest {
     @InjectMocks MeetingQueryService service;
 
     @Test
-    void getMeeting_rejectsNonOperatorForClubMeeting() {
+    void getMeeting_allowsGuestToReadClubMeeting() {
         Meeting meeting = org.mockito.Mockito.mock(Meeting.class);
         when(meetingRepository.findByPublicIdAndDeletedAtIsNull("meeting")).thenReturn(Optional.of(meeting));
         when(meeting.isClubMeeting()).thenReturn(true);
         when(meeting.getClubId()).thenReturn(100L);
-        when(clubAccessService.isOperator(100L, 10L)).thenReturn(false);
+        when(meeting.getStatus()).thenReturn(MeetingStatus.OPEN);
 
-        assertThatThrownBy(() -> service.getMeeting("meeting", 10L))
-                .isInstanceOf(ResponseStatusException.class)
-                .extracting("statusCode")
-                .isEqualTo(HttpStatus.FORBIDDEN);
+        assertThatCode(() -> service.getMeeting("meeting", null))
+                .doesNotThrowAnyException();
+        verifyNoInteractions(clubAccessService);
+    }
+
+    @Test
+    void getPublicMeetings_returnsAllActiveMeetingsInRepositoryOrder() {
+        when(meetingRepository.findByDeletedAtIsNullOrderByStartAtDescIdDesc()).thenReturn(List.of());
+
+        assertThat(service.getPublicMeetings()).isEmpty();
+
+        verify(meetingRepository).findByDeletedAtIsNullOrderByStartAtDescIdDesc();
     }
 }

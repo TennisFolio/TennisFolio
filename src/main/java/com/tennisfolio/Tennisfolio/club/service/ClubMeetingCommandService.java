@@ -6,7 +6,6 @@ import com.tennisfolio.Tennisfolio.meeting.dto.MeetingCompetitionCreateResponse;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingCreateRequest;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingCreateResponse;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingDetailResponse;
-import com.tennisfolio.Tennisfolio.meeting.dto.MeetingStatusUpdateRequest;
 import com.tennisfolio.Tennisfolio.meeting.dto.MeetingUpdateRequest;
 import com.tennisfolio.Tennisfolio.meeting.service.MeetingCommandService;
 import com.tennisfolio.Tennisfolio.meeting.service.MeetingCompetitionCreateService;
@@ -49,17 +48,6 @@ public class ClubMeetingCommandService {
     ) {
         Club club = clubAccessService.requireOperator(clubPublicId, currentUserId);
         return meetingCommandService.updateClubMeeting(meetingPublicId, club.getId(), request, currentUserId);
-    }
-
-    @Transactional
-    public MeetingDetailResponse updateClubMeetingStatus(
-            String clubPublicId,
-            String meetingPublicId,
-            MeetingStatusUpdateRequest request,
-            Long currentUserId
-    ) {
-        Club club = clubAccessService.requireOperator(clubPublicId, currentUserId);
-        return meetingCommandService.updateClubMeetingStatus(meetingPublicId, club.getId(), request, currentUserId);
     }
 
     @Transactional
