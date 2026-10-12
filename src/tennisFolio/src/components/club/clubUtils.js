@@ -21,19 +21,6 @@ export function formatMeetingDate(startAt) {
   return `${date.getMonth() + 1}월 ${date.getDate()}일`;
 }
 
-export function meetingStateLabel(meeting) {
-  if (meeting.competitionCreated) {
-    return '경기표 생성';
-  }
-  if (meeting.status === 'CLOSED') {
-    return '마감';
-  }
-  if (meeting.status === 'CANCELLED') {
-    return '취소';
-  }
-  return '경기표 전';
-}
-
 export function sortClubMembers(members = []) {
   return [...members].sort((first, second) => Number(first.id ?? 0) - Number(second.id ?? 0));
 }

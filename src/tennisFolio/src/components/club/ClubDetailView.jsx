@@ -1,7 +1,6 @@
 import {
   formatMeetingDate,
   genderLabel,
-  meetingStateLabel,
 } from './clubUtils';
 
 function ClubDetailView({
@@ -93,7 +92,8 @@ function ClubDetailView({
                       <div className="club-row-title">{meeting.title}</div>
                       <p className="club-row-sub">
                         {formatMeetingDate(meeting.startAt)} · 참석{' '}
-                        {meeting.attendingCount ?? 0} · {meetingStateLabel(meeting)}
+                        {meeting.attendingCount ?? 0}
+                        {meeting.competitionCreated && ' · 경기표 생성됨'}
                       </p>
                     </div>
                     <div className="club-row-actions">

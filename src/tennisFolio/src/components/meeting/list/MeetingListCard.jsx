@@ -1,6 +1,4 @@
-function formatDateTime(value) {
-  return value ? value.replace('T', ' ').slice(0, 16) : '';
-}
+import MeetingScheduleSummary from '../shared/MeetingScheduleSummary';
 
 function formatCount(value) {
   return Number.isFinite(Number(value)) ? Number(value) : 0;
@@ -9,6 +7,7 @@ function formatCount(value) {
 function MeetingListCard({ meeting, onOpen }) {
   return (
     <article className="meeting-card">
+      <MeetingScheduleSummary startAt={meeting.startAt} endAt={meeting.endAt} />
       <div className="meeting-card-title-row">
         <div>
           <h2>{meeting.title}</h2>
@@ -18,9 +17,7 @@ function MeetingListCard({ meeting, onOpen }) {
         </div>
       </div>
 
-      <div className="meeting-card-meta">
-        <span className="meeting-chip">{formatDateTime(meeting.startAt)}</span>
-        <span className="meeting-chip">{formatDateTime(meeting.endAt)}</span>
+      <div className="meeting-card-meta" aria-label="모임 부가 정보">
         <span className="meeting-chip">
           {formatCount(meeting.courtCount)}코트
         </span>

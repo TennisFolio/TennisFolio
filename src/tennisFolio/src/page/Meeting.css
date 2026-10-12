@@ -172,6 +172,33 @@
   gap: 6px;
 }
 
+.meeting-schedule {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 5px 10px;
+  border-left: 4px solid var(--competition-primary);
+  border-radius: 4px;
+  background: var(--competition-surface-soft);
+  padding: 10px 12px;
+}
+
+.meeting-schedule-date,
+.meeting-schedule-time {
+  color: var(--competition-text-strong);
+  font-weight: 900;
+}
+
+.meeting-schedule-date {
+  font-size: 18px;
+  line-height: 1.25;
+}
+
+.meeting-schedule-time {
+  font-size: 15px;
+  line-height: 1.35;
+}
+
 .meeting-card-actions {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
