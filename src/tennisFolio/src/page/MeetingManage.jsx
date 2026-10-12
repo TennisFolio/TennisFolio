@@ -147,8 +147,14 @@ function MeetingManage({ initialMeeting = null, initialNotice = null }) {
       })
       .catch((error) => {
         if (!cancelled) {
+          const status = error.response?.status;
+          if (clubPublicId && (status === 401 || status === 403)) {
+            navigate(`/meetings/${publicId}`, { replace: true });
+            return;
+          }
+
           setErrorMessage(
-            error.response?.status === 401
+            status === 401
               ? '로그인이 필요합니다.'
               : '관리 화면을 불러오지 못했습니다.',
           );
@@ -163,7 +169,7 @@ function MeetingManage({ initialMeeting = null, initialNotice = null }) {
     return () => {
       cancelled = true;
     };
-  }, [clubPublicId, publicId]);
+  }, [clubPublicId, navigate, publicId]);
 
   useEffect(() => {
     if (!clubPublicId) {

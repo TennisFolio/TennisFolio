@@ -136,7 +136,7 @@ function ClubDetailPage({ currentUser }) {
             onOpenMeeting={(meeting) =>
               navigate(
                 isAdmin
-                  ? `/clubs/${selectedClub.publicId}/meetings/${meeting.publicId}`
+                  ? `/clubs/${selectedClub.publicId}/meetings/${meeting.publicId}/manage`
                   : `/meetings/${meeting.publicId}`,
               )
             }
