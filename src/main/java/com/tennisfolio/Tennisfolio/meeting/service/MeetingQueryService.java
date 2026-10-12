@@ -127,6 +127,14 @@ public class MeetingQueryService {
     }
 
     @Transactional(readOnly = true)
+    public List<MeetingSummaryResponse> getPublicMeetings() {
+        return meetingRepository.findByDeletedAtIsNullOrderByStartAtDescIdDesc()
+                .stream()
+                .map(this::toSummaryResponse)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
     public List<MeetingSummaryResponse> getClubMeetings(Long clubId) {
         return findActiveClubMeetings(clubId)
                 .stream()

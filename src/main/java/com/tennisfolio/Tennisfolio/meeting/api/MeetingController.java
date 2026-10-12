@@ -61,6 +61,12 @@ public class MeetingController {
         return ResponseEntity.ok(ResponseDTO.success(response));
     }
 
+    @GetMapping("/meetings")
+    public ResponseEntity<ResponseDTO<List<MeetingSummaryResponse>>> getPublicMeetings() {
+        List<MeetingSummaryResponse> response = meetingQueryService.getPublicMeetings();
+        return ResponseEntity.ok(ResponseDTO.success(response));
+    }
+
     @GetMapping("/meetings/{publicId}")
     public ResponseEntity<ResponseDTO<MeetingDetailResponse>> getMeeting(
             @AuthenticationPrincipal Long userId,

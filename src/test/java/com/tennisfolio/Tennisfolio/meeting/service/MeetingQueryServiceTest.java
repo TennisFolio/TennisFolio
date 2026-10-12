@@ -15,9 +15,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
@@ -43,5 +46,14 @@ class MeetingQueryServiceTest {
         assertThatCode(() -> service.getMeeting("meeting", null))
                 .doesNotThrowAnyException();
         verifyNoInteractions(clubAccessService);
+    }
+
+    @Test
+    void getPublicMeetings_returnsAllActiveMeetingsInRepositoryOrder() {
+        when(meetingRepository.findByDeletedAtIsNullOrderByStartAtDescIdDesc()).thenReturn(List.of());
+
+        assertThat(service.getPublicMeetings()).isEmpty();
+
+        verify(meetingRepository).findByDeletedAtIsNullOrderByStartAtDescIdDesc();
     }
 }

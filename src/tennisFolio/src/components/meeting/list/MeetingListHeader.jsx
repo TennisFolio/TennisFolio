@@ -4,10 +4,10 @@ function MeetingListHeader({ count, showCount, onCreate }) {
       <div className="meeting-header-row">
         <div className="meeting-title-block">
           <div className="meeting-title-row">
-            <h1>모임 관리</h1>
+            <h1>모임</h1>
             {showCount && <span>{count}개</span>}
           </div>
-          <p>참석 체크 링크를 만들고 경기표 생성까지 이어갑니다.</p>
+          <p>모든 모임의 일정과 참가 현황을 확인할 수 있습니다.</p>
         </div>
         <button
           type="button"

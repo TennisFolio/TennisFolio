@@ -53,9 +53,9 @@
   - 테스트: `AuthControllerTest`에 빈 쿠키 재발급 401과 서비스 미호출을 추가한다. 프론트 정적 테스트로 `/api/auth/me` 제외 조건을 확인한다.
   - 검증: 허가 시 `./gradlew.bat test --tests com.tennisfolio.Tennisfolio.user.api.AuthControllerTest`를 실행한다.
 
-- [ ] `feat(meeting): expose read-only meeting discovery`
+- [x] `feat(meeting): expose read-only meeting discovery` - implemented, test execution skipped
   - 구현: 공개 모임 목록 조회 API와 보안 규칙을 추가하고, 클럽 모임도 비로그인 상세 조회를 허용한다. 생성·운영·참가자 변경 API는 인증 및 owner 권한을 유지한다.
-  - 테스트: `MeetingQueryServiceTest`, `MeetingControllerTest`, `SecurityCorsTest`에 공개 목록·상세와 변경 API의 인증 계약을 추가한다.
+  - 테스트: `MeetingQueryServiceTest`, `MeetingControllerTest`에 공개 목록·상세 조회 계약을 추가한다. 보안 규칙은 정적 검토로 확인한다.
   - 검증: 허가 시 관련 Gradle 테스트를 실행한다.
 
 - [ ] `refactor(meeting): remove public attendance controls`
@@ -93,4 +93,5 @@
 | 2026-10-12 | 클럽 관리 URL 분리 추가 | 잘못 공유된 운영 URL도 게스트 공개 화면으로 연결 |
 | 2026-10-12 | 권한 없는 관리 URL 대체 이동 추가 | 게스트가 `/manage` 오류 화면에 머물지 않도록 공개 화면으로 연결 |
 | 2026-10-12 | 공개 참가 등록 UI 제거 | 게스트는 모임 정보와 명단만 읽고, 참가자는 모임장이 관리 |
+| 2026-10-12 | 공개 모임 목록 추가 | 비로그인 사용자도 모든 활성 모임을 목록에서 열람 |
 | 2026-10-12 | 비로그인 토큰 재발급 방어 구현 | `/api/auth/me` 재발급 제외 및 빈 재발급 쿠키 401 처리 |

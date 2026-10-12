@@ -3,20 +3,16 @@ import MeetingListCard from './MeetingListCard';
 function MeetingListSection({
   meetings,
   hasMoreMeetings,
-  onDelete,
   onLoadMore,
-  onManage,
-  onShare,
+  onOpen,
 }) {
   return (
-    <section className="meeting-list" aria-label="모임 관리 목록">
+    <section className="meeting-list" aria-label="모임 목록">
       {meetings.map((meeting) => (
         <MeetingListCard
           key={meeting.publicId}
           meeting={meeting}
-          onDelete={onDelete}
-          onManage={onManage}
-          onShare={onShare}
+          onOpen={onOpen}
         />
       ))}
       {hasMoreMeetings && (

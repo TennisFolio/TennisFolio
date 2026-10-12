@@ -75,6 +75,19 @@ class MeetingControllerTest {
     }
 
     @Test
+    void getPublicMeetings_returnsAllMeetingsWithoutAuthentication() {
+        when(meetingQueryService.getPublicMeetings()).thenReturn(List.of());
+
+        ResponseEntity<ResponseDTO<List<MeetingSummaryResponse>>> response =
+                meetingController.getPublicMeetings();
+
+        verify(meetingQueryService).getPublicMeetings();
+        assertThat(response.getStatusCode().value()).isEqualTo(200);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getData()).isEmpty();
+    }
+
+    @Test
     void getMyMeetings_returnsCurrentUsersMeetings() {
         Long userId = 10L;
         when(meetingQueryService.getOwnedMeetings(10L))

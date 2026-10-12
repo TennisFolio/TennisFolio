@@ -5,6 +5,8 @@ export const isAuthenticationRequiredError = (error) =>
 
 export const getMyMeetings = () => apiRequestSilent.get('/api/me/meetings');
 
+export const getPublicMeetings = () => apiRequestSilent.get('/api/meetings');
+
 export const createMeeting = (meeting) =>
   apiRequestSilent.post('/api/meetings', meeting);
 
