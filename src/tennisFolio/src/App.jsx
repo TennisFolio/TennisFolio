@@ -186,6 +186,7 @@ function App() {
             element={<ClubMeetingPublicRedirect />}
           />
           <Route path="/meetings/new" element={<MeetingCreate />} />
+          <Route path="/meetings/:publicId/manage" element={<MeetingManage />} />
           <Route path="/meetings/:publicId" element={<MeetingPublic />} />
           <Route path="/meetings/:publicId/edit" element={<MeetingUpdate />} />
           <Route path="/competitions/:publicId" element={<CompetitionDetail />} />
