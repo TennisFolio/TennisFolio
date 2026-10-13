@@ -7,6 +7,7 @@ function MeetingPublicOverviewPanel({
   attendances,
   onCopyShareLink,
   onOpenCompetition,
+  onManageMeeting,
 }) {
   return (
     <section className="meeting-panel">
@@ -28,9 +29,14 @@ function MeetingPublicOverviewPanel({
       <CapacityChips meeting={meeting} attendances={attendances} />
       {meeting.note && <p className="meeting-note-box">{meeting.note}</p>}
       <AttendanceStatusSummary attendances={attendances} />
-      <button type="button" className="meeting-button full" onClick={onCopyShareLink}>
-        공유 링크 복사
-      </button>
+      <div className="meeting-manage-actions">
+        <button type="button" className="meeting-button full" onClick={onCopyShareLink}>
+          공유 링크 복사
+        </button>
+        <button type="button" className="meeting-button full" onClick={onManageMeeting}>
+          모임 관리
+        </button>
+      </div>
       {meeting.competitionPublicId && (
         <button
           type="button"

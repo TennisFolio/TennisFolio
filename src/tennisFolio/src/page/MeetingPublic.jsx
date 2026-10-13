@@ -8,7 +8,6 @@ import {
   normalizeAttendances,
 } from '../components/meeting/shared/meetingAttendanceUtils';
 import './Meeting.css';
-import MeetingManage from './MeetingManage';
 import MeetingToast from './MeetingToast';
 
 function MeetingPublic() {
@@ -88,10 +87,6 @@ function MeetingPublic() {
     );
   }
 
-  if (meeting.ownedByCurrentUser === true) {
-    return <MeetingManage initialMeeting={meeting} initialNotice={notice} />;
-  }
-
   return (
     <main className="meeting-page">
       <MeetingPublicOverviewPanel
@@ -99,6 +94,7 @@ function MeetingPublic() {
         attendances={attendances}
         onCopyShareLink={handleCopyShareLink}
         onOpenCompetition={() => navigate(`/competitions/${meeting.competitionPublicId}`)}
+        onManageMeeting={() => navigate(`/meetings/${publicId}/manage`)}
       />
 
       <MeetingToast notice={notice} onClose={() => setNotice(null)} />
