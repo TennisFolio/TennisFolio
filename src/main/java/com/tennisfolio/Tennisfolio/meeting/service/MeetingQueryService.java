@@ -128,7 +128,7 @@ public class MeetingQueryService {
 
     @Transactional(readOnly = true)
     public List<MeetingSummaryResponse> getPublicMeetings() {
-        return meetingRepository.findByDeletedAtIsNullOrderByStartAtDescIdDesc()
+        return meetingRepository.findByClubIdIsNullAndDeletedAtIsNullOrderByStartAtDescIdDesc()
                 .stream()
                 .map(this::toSummaryResponse)
                 .toList();

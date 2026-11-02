@@ -8,6 +8,18 @@ import { getClub, getClubMeetings, getClubMembers } from '../../utils/clubApi';
 import ClubAuthRequired from './ClubAuthRequired';
 import { errorMessage, normalizeClub, unwrapData } from './clubPageUtils';
 import '../Club.css';
+import '../Meeting.css';
+
+function currentMonthValue() {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+}
+
+function shiftMonth(monthValue, delta) {
+  const [year, month] = monthValue.split('-').map(Number);
+  const date = new Date(year, month - 1 + delta, 1);
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+}
 
 function ClubDetailPage({ currentUser }) {
   const navigate = useNavigate();
@@ -17,6 +29,7 @@ function ClubDetailPage({ currentUser }) {
   const [selectedClub, setSelectedClub] = useState(null);
   const [members, setMembers] = useState([]);
   const [meetings, setMeetings] = useState([]);
+  const [selectedMeetingMonth, setSelectedMeetingMonth] = useState(currentMonthValue);
   const [memberQuery, setMemberQuery] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -25,6 +38,10 @@ function ClubDetailPage({ currentUser }) {
 
   const isAdmin = isClubOperator(selectedClub);
   const sortedMembers = useMemo(() => sortClubMembers(members), [members]);
+  const visibleMeetings = useMemo(
+    () => meetings.filter((meeting) => meeting.startAt?.slice(0, 7) === selectedMeetingMonth),
+    [meetings, selectedMeetingMonth],
+  );
 
   useEffect(() => {
     if (!currentUser || !publicId) {
@@ -121,10 +138,18 @@ function ClubDetailPage({ currentUser }) {
             members={members}
             sortedMembers={sortedMembers}
             meetings={meetings}
+            visibleMeetings={visibleMeetings}
+            selectedMeetingMonth={selectedMeetingMonth}
             memberQuery={memberQuery}
             isMembersLoading={isMembersLoading}
             isMeetingsLoading={isMeetingsLoading}
             onChangeTab={setActiveTab}
+            onPreviousMeetingMonth={() =>
+              setSelectedMeetingMonth((monthValue) => shiftMonth(monthValue, -1))
+            }
+            onNextMeetingMonth={() =>
+              setSelectedMeetingMonth((monthValue) => shiftMonth(monthValue, 1))
+            }
             onChangeMemberQuery={setMemberQuery}
             onEditClub={() => navigate(`/clubs/${selectedClub.publicId}/edit`)}
             onOpenDashboard={() =>

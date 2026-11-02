@@ -59,7 +59,7 @@ public interface MeetingRepository extends JpaRepository<Meeting, Long> {
 
     List<Meeting> findByOwnerUserIdAndDeletedAtIsNullOrderByStartAtDescIdDesc(Long ownerUserId);
 
-    List<Meeting> findByDeletedAtIsNullOrderByStartAtDescIdDesc();
+    List<Meeting> findByClubIdIsNullAndDeletedAtIsNullOrderByStartAtDescIdDesc();
 
     List<Meeting> findByClubIdAndDeletedAtIsNullOrderByStartAtDescIdDesc(Long clubId);
 }

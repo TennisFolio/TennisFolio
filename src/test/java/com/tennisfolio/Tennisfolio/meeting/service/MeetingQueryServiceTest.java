@@ -48,11 +48,12 @@ class MeetingQueryServiceTest {
     }
 
     @Test
-    void getPublicMeetings_returnsAllActiveMeetingsInRepositoryOrder() {
-        when(meetingRepository.findByDeletedAtIsNullOrderByStartAtDescIdDesc()).thenReturn(List.of());
+    void getPublicMeetings_returnsOnlyIndependentMeetingsInRepositoryOrder() {
+        when(meetingRepository.findByClubIdIsNullAndDeletedAtIsNullOrderByStartAtDescIdDesc())
+                .thenReturn(List.of());
 
         assertThat(service.getPublicMeetings()).isEmpty();
 
-        verify(meetingRepository).findByDeletedAtIsNullOrderByStartAtDescIdDesc();
+        verify(meetingRepository).findByClubIdIsNullAndDeletedAtIsNullOrderByStartAtDescIdDesc();
     }
 }
