@@ -1,7 +1,10 @@
-import {
-  formatMeetingDate,
-  genderLabel,
-} from './clubUtils';
+import { genderLabel } from './clubUtils';
+import MeetingListSection from '../meeting/list/MeetingListSection';
+
+function formatMeetingMonth(monthValue) {
+  const [year, month] = monthValue.split('-').map(Number);
+  return `${year}년 ${month}월`;
+}
 
 function ClubDetailView({
   club,
@@ -9,11 +12,14 @@ function ClubDetailView({
   activeTab,
   members,
   sortedMembers,
-  meetings,
+  visibleMeetings,
+  selectedMeetingMonth,
   memberQuery,
   isMembersLoading,
   isMeetingsLoading,
   onChangeTab,
+  onPreviousMeetingMonth,
+  onNextMeetingMonth,
   onChangeMemberQuery,
   onEditClub,
   onOpenDashboard,
@@ -63,52 +69,56 @@ function ClubDetailView({
         <section className="club-section">
           <div className="club-section-title">
             <h2>모임</h2>
-            {isAdmin && (
-              <button
-                className="club-button small accent"
-                type="button"
-                onClick={onAddMeeting}
-              >
-                모임 추가
-              </button>
-            )}
+            <div className="club-meeting-actions">
+              <div className="club-dashboard-month-nav" aria-label="모임 월 이동">
+                <button type="button" aria-label="이전 달" onClick={onPreviousMeetingMonth}>
+                  ‹
+                </button>
+                <strong>{formatMeetingMonth(selectedMeetingMonth)}</strong>
+                <button type="button" aria-label="다음 달" onClick={onNextMeetingMonth}>
+                  ›
+                </button>
+              </div>
+              {isAdmin && (
+                <button
+                  className="club-button small accent"
+                  type="button"
+                  onClick={onAddMeeting}
+                >
+                  모임 추가
+                </button>
+              )}
+            </div>
           </div>
-          <div className="club-scroll-list club-meeting-list">
-            {isMeetingsLoading && (
+          {isMeetingsLoading && (
+            <div className="club-scroll-list club-meeting-list">
               <article className="club-row">
                 <p className="club-row-sub">모임 목록을 불러오는 중입니다.</p>
               </article>
-            )}
-            {!isMeetingsLoading && meetings.length === 0 && (
+            </div>
+          )}
+          {!isMeetingsLoading && visibleMeetings.length === 0 && (
+            <div className="club-scroll-list club-meeting-list">
               <article className="club-row">
-                <p className="club-row-sub">아직 등록된 모임이 없습니다.</p>
+                <p className="club-row-sub">
+                  {formatMeetingMonth(selectedMeetingMonth)}에 등록된 모임이 없습니다.
+                </p>
               </article>
-            )}
-            {!isMeetingsLoading &&
-              meetings.map((meeting) => (
-                <article className="club-row" key={meeting.publicId}>
-                  <div className="club-row-main">
-                    <div>
-                      <div className="club-row-title">{meeting.title}</div>
-                      <p className="club-row-sub">
-                        {formatMeetingDate(meeting.startAt)} · 참석{' '}
-                        {meeting.attendingCount ?? 0}
-                        {meeting.competitionCreated && ' · 경기표 생성됨'}
-                      </p>
-                    </div>
-                    <div className="club-row-actions">
-                      <button
-                        className="club-button small"
-                        type="button"
-                        onClick={() => onOpenMeeting(meeting)}
-                      >
-                        {isAdmin ? '관리' : '보기'}
-                      </button>
-                    </div>
-                  </div>
-                </article>
-              ))}
-          </div>
+            </div>
+          )}
+          {!isMeetingsLoading && visibleMeetings.length > 0 && (
+            <MeetingListSection
+              meetings={visibleMeetings}
+              hasMoreMeetings={false}
+              onLoadMore={() => {}}
+              onOpen={(meetingPublicId) => {
+                const meeting = visibleMeetings.find(({ publicId }) => publicId === meetingPublicId);
+                if (meeting) {
+                  onOpenMeeting(meeting);
+                }
+              }}
+            />
+          )}
         </section>
       )}
 

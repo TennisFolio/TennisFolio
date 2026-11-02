@@ -151,6 +151,12 @@
   font-weight: 900;
 }
 
+.club-meeting-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .club-card,
 .club-row {
   display: grid;
