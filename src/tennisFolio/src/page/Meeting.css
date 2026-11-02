@@ -913,6 +913,10 @@
   padding-top: 2px;
 }
 
+.meeting-manage-actions.single {
+  grid-template-columns: minmax(0, 1fr);
+}
+
 .meeting-operation-status {
   border: 1px solid var(--competition-border);
   border-radius: 8px;
