@@ -12,6 +12,7 @@ function MeetingCompetitionPanel({
   sameGenderDoublesOnlyUnavailableReason,
   skillBalancedScheduleUnavailable,
   skillBalancedScheduleUnavailableReason,
+  attendanceStatusCounts,
 }) {
   return (
     <div className="meeting-operation-primary">
@@ -19,7 +20,7 @@ function MeetingCompetitionPanel({
         <div>
           <h2>대진표 생성</h2>
           <p>
-            참석자 기준으로 대진표를 만들거나 생성된 대진표를 확인합니다.
+            참석으로 표시한 인원만 대진표에 포함됩니다.
           </p>
         </div>
       </div>
@@ -44,6 +45,12 @@ function MeetingCompetitionPanel({
         </>
       ) : (
         <>
+          <div className="meeting-competition-attendance-guide">
+            <strong>대진표 포함: 참석 {attendanceStatusCounts.ATTENDING}명</strong>
+            <span>
+              대기 {attendanceStatusCounts.WAITING}명 · 불참 {attendanceStatusCounts.NOT_ATTENDING}명은 포함되지 않습니다.
+            </span>
+          </div>
           <div
             className={`meeting-same-gender-option ${
               sameGenderDoublesOnlyUnavailable ? 'disabled' : ''
@@ -108,7 +115,7 @@ function MeetingCompetitionPanel({
           onClick={onCreateCompetition}
           disabled={sameGenderDoublesOnlyUnavailable || skillBalancedScheduleUnavailable}
         >
-          참석자로 대진표 생성
+          참석 {attendanceStatusCounts.ATTENDING}명으로 대진표 생성
         </button>
         </>
       )}

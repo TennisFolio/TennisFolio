@@ -61,7 +61,7 @@ function MeetingParticipantEditPanel({
       <div className="meeting-participant-add-head">
         <div>
           <h2 id="meeting-participant-edit-title">참가자 수정</h2>
-          <p>{isClubMember ? '클럽원은 참가 상태만 변경할 수 있습니다.' : '참가자 정보를 수정할 수 있습니다.'}</p>
+          <p>{isClubMember ? '총무가 클럽원의 이 모임 참석 상태만 변경할 수 있습니다.' : '참가자 정보를 수정할 수 있습니다.'}</p>
         </div>
         <button
           type="button"

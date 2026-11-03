@@ -805,6 +805,36 @@
   padding: 12px;
 }
 
+.meeting-competition-attendance-guide {
+  display: grid;
+  gap: 3px;
+  border: 1px solid var(--competition-ok-border);
+  border-radius: 8px;
+  background: var(--competition-ok-bg);
+  color: var(--competition-ok);
+  padding: 10px;
+}
+
+.meeting-competition-attendance-guide strong {
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.meeting-competition-attendance-guide span {
+  color: var(--competition-text-body);
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.45;
+}
+
+.meeting-participant-selection-guide {
+  margin: 0;
+  color: var(--competition-text-muted);
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.45;
+}
+
 .meeting-same-gender-option {
   display: grid;
   gap: 6px;

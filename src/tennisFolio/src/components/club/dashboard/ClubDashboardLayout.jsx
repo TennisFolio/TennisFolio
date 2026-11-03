@@ -9,7 +9,6 @@ function ClubDashboardLayout({ clubPublicId, currentUser, activeMenu, children }
   const [clubs, setClubs] = useState([]);
   const [error, setError] = useState('');
   const [isClubSwitcherOpen, setIsClubSwitcherOpen] = useState(false);
-  const [isDesktopNoticeVisible, setIsDesktopNoticeVisible] = useState(true);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const clubSwitcherRef = useRef(null);
   const selectedClub = useMemo(
@@ -86,8 +85,6 @@ function ClubDashboardLayout({ clubPublicId, currentUser, activeMenu, children }
         >
           {accountMenuLabel}
         </button>
-        <span className="club-dashboard-nav muted">모임 활동 <small>준비 중</small></span>
-        <span className="club-dashboard-nav muted">참여 현황 <small>준비 중</small></span>
       </aside>
 
       <div className="club-dashboard-content">
@@ -179,25 +176,8 @@ function ClubDashboardLayout({ clubPublicId, currentUser, activeMenu, children }
               >
                 {accountMenuLabel}
               </button>
-              <span className="muted">모임 활동 <small>준비 중</small></span>
-              <span className="muted">참여 현황 <small>준비 중</small></span>
             </nav>
           </div>
-        )}
-        {isDesktopNoticeVisible && (
-          <aside className="club-dashboard-desktop-notice" role="status">
-            <div>
-              <strong>PC 사용을 권장합니다.</strong>
-              <p>대시보드는 PC에서 더 편리합니다.</p>
-            </div>
-            <button
-              type="button"
-              aria-label="PC 사용 권장 안내 닫기"
-              onClick={() => setIsDesktopNoticeVisible(false)}
-            >
-              닫기
-            </button>
-          </aside>
         )}
         {error && <p className="club-notice danger">{error}</p>}
         {children}
