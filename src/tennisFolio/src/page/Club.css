@@ -417,6 +417,13 @@
 .club-bulk-preview-head { margin-bottom: 10px; }
 .club-bulk-preview-head h2 span { display: inline-block; border: 1px solid var(--competition-border); border-radius: 999px; background: var(--competition-surface-soft); color: var(--competition-text-body); padding: 2px 7px; font-size: 12px; }
 .club-bulk-preview-head p { margin: 0; color: var(--competition-text-muted); font-size: 12px; font-weight: 800; }
+.club-bulk-registration-summary { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 10px; }
+.club-bulk-registration-summary strong, .club-bulk-registration-summary span { border-radius: 999px; background: var(--competition-ok-bg); color: var(--competition-ok); padding: 6px 9px; font-size: 12px; font-weight: 900; }
+.club-bulk-registration-summary span { background: var(--competition-surface-soft); color: var(--competition-text-body); }
+.club-bulk-registration-summary span.has-error { background: var(--competition-danger-bg); color: var(--competition-danger); }
+.club-bulk-registration-rules { margin: 0 0 12px; border: 1px solid var(--competition-border); border-radius: 8px; background: var(--competition-surface-accent); color: var(--competition-text-body); padding: 12px 14px; font-size: 12px; font-weight: 800; line-height: 1.55; }
+.club-bulk-registration-rules strong { display: block; color: var(--competition-text-strong); margin-bottom: 5px; }
+.club-bulk-registration-rules ul { margin: 0; padding-left: 18px; }
 .club-bulk-error-row td { background: var(--competition-danger-bg); color: var(--competition-danger); }
 .club-bulk-empty { padding: 28px !important; color: var(--competition-text-muted); text-align: center !important; }
 .club-bulk-footer { justify-content: flex-end; }
