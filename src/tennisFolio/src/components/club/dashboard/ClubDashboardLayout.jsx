@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { getMyClubs } from '../../../utils/clubApi';
 import { isClubOperator } from '../clubUtils';
 import { errorMessage, normalizeClub, unwrapData } from '../../../page/club/clubPageUtils';
@@ -62,7 +62,9 @@ function ClubDashboardLayout({ clubPublicId, currentUser, activeMenu, children }
   return (
     <main className="club-dashboard-page">
       <aside className="club-dashboard-sidebar">
-        <div className="club-dashboard-brand">Tennis<span>Folio</span></div>
+        <Link className="club-dashboard-brand" to="/" aria-label="TennisFolio 홈으로 이동">
+          Tennis<span>Folio</span>
+        </Link>
         <span className="club-dashboard-nav-label">BACKOFFICE</span>
         <button
           className={`club-dashboard-nav ${activeMenu === 'dashboard' ? 'active' : ''}`}
@@ -142,7 +144,13 @@ function ClubDashboardLayout({ clubPublicId, currentUser, activeMenu, children }
           <div className="club-dashboard-mobile-menu-backdrop" onClick={() => setIsMobileMenuOpen(false)}>
             <nav id="club-dashboard-mobile-menu" className="club-dashboard-mobile-menu" aria-label="대시보드 메뉴" onClick={(event) => event.stopPropagation()}>
               <header className="club-dashboard-mobile-menu-header">
-                <strong>TennisFolio</strong>
+                <Link
+                  className="club-dashboard-mobile-brand"
+                  to="/"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  TennisFolio
+                </Link>
                 <button type="button" aria-label="대시보드 메뉴 닫기" onClick={() => setIsMobileMenuOpen(false)}>×</button>
               </header>
               <span className="club-dashboard-nav-label">BACKOFFICE</span>

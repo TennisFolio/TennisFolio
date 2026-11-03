@@ -8,8 +8,9 @@
 
 .club-dashboard-page { display: grid; grid-template-columns: 220px minmax(0, 1fr); min-height: 100dvh; background: var(--competition-page-bg); }
 .club-dashboard-sidebar { display: grid; align-content: start; gap: 3px; background: var(--competition-text-strong); color: var(--competition-text-inverse); padding: 28px 15px; }
-.club-dashboard-brand { margin: 3px 10px 38px; color: var(--competition-text-inverse); font-size: 19px; font-weight: 900; }
+.club-dashboard-brand { display: block; margin: 3px 10px 38px; color: var(--competition-text-inverse); font-size: 19px; font-weight: 900; text-decoration: none; }
 .club-dashboard-brand span { color: var(--competition-text-inverse); }
+.club-dashboard-mobile-brand { color: var(--competition-text-inverse); font-size: 19px; font-weight: 900; text-decoration: none; }
 .club-dashboard-nav-label { margin: 0 10px 10px; color: var(--competition-text-muted); font-size: 11px; font-weight: 900; }
 .club-dashboard-nav { border: 0; border-radius: 8px; background: transparent; color: inherit; padding: 13px 12px; font: inherit; text-align: left; }
 .club-dashboard-nav.active { background: var(--competition-primary-muted); font-weight: 900; }
