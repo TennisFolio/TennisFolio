@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Clock;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.YearMonth;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
@@ -38,22 +39,64 @@ public class ClubDashboardQueryService {
     public ClubDashboardResponse getDashboard(
             String clubPublicId,
             Long currentUserId,
-            YearMonth yearMonth,
+            YearMonth requestedMonth,
             ClubDashboardMemberFilter memberFilter,
             int page
     ) {
         Club club = clubAccessService.requireOperator(clubPublicId, currentUserId);
-        YearMonth requestedMonth = requireSelectableMonth(yearMonth);
-        ClubDashboardPeriod period = new ClubDashboardPeriod(requestedMonth);
-        ClubDashboardMonthlyData dashboardData = dashboardQueryRepository.findMonthlyDashboardData(
+        DashboardMonthSelection selection = selectDashboardMonth(club, requestedMonth, memberFilter, page);
+        return toResponse(selection.period(), selection.dashboardData(), selection.hasMeetingHistory());
+    }
+
+    private DashboardMonthSelection selectDashboardMonth(
+            Club club,
+            YearMonth requestedMonth,
+            ClubDashboardMemberFilter memberFilter,
+            int page
+    ) {
+        if (requestedMonth != null) {
+            return dashboardMonthSelection(club.getId(), requireSelectableMonth(requestedMonth), memberFilter, page, true);
+        }
+
+        YearMonth currentMonth = YearMonth.from(LocalDate.now(clock));
+        DashboardMonthSelection currentSelection = dashboardMonthSelection(
+                club.getId(), currentMonth, memberFilter, page, true
+        );
+        if (currentSelection.dashboardData().getMeetingCount() > 0) {
+            return currentSelection;
+        }
+
+        LocalDateTime latestMeetingStartAt = dashboardQueryRepository.findLatestActiveMeetingStartAt(
                 club.getId(),
+                currentSelection.period().getToDateTime()
+        );
+        if (latestMeetingStartAt == null) {
+            return new DashboardMonthSelection(currentSelection.period(), currentSelection.dashboardData(), false);
+        }
+
+        YearMonth latestMeetingMonth = YearMonth.from(latestMeetingStartAt);
+        return latestMeetingMonth.equals(currentMonth)
+                ? currentSelection
+                : dashboardMonthSelection(club.getId(), latestMeetingMonth, memberFilter, page, true);
+    }
+
+    private DashboardMonthSelection dashboardMonthSelection(
+            Long clubId,
+            YearMonth yearMonth,
+            ClubDashboardMemberFilter memberFilter,
+            int page,
+            boolean hasMeetingHistory
+    ) {
+        ClubDashboardPeriod period = new ClubDashboardPeriod(yearMonth);
+        ClubDashboardMonthlyData dashboardData = dashboardQueryRepository.findMonthlyDashboardData(
+                clubId,
                 period.getFromDateTime(),
                 period.getToDateTime(),
                 memberFilter,
                 page,
                 10
         );
-        return toResponse(period, dashboardData);
+        return new DashboardMonthSelection(period, dashboardData, hasMeetingHistory);
     }
 
     private YearMonth requireSelectableMonth(YearMonth yearMonth) {
@@ -66,7 +109,8 @@ public class ClubDashboardQueryService {
 
     private ClubDashboardResponse toResponse(
             ClubDashboardPeriod period,
-            ClubDashboardMonthlyData dashboardData
+            ClubDashboardMonthlyData dashboardData,
+            boolean hasMeetingHistory
     ) {
         return new ClubDashboardResponse(
                 period,
@@ -78,8 +122,16 @@ public class ClubDashboardQueryService {
                         dashboardData.getMembers()
                 ),
                 calculateMemberGuestRatio(dashboardData),
-                dashboardData.getMeetings()
+                dashboardData.getMeetings(),
+                hasMeetingHistory
         );
+    }
+
+    private record DashboardMonthSelection(
+            ClubDashboardPeriod period,
+            ClubDashboardMonthlyData dashboardData,
+            boolean hasMeetingHistory
+    ) {
     }
 
     private int calculateParticipationRate(ClubDashboardMonthlyData dashboardData) {

@@ -15,4 +15,5 @@ public class ClubDashboardResponse {
     private final ClubDashboardMemberParticipation memberParticipation;
     private final ClubDashboardMemberGuestRatio memberGuestRatio;
     private final List<ClubDashboardMonthlyMeeting> meetings;
+    private final boolean hasMeetingHistory;
 }

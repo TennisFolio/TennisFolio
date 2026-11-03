@@ -39,7 +39,8 @@ function ClubDashboardPage({ currentUser }) {
   const [isLoading, setIsLoading] = useState(true);
   const [memberFilter, setMemberFilter] = useState('all');
   const [memberPage, setMemberPage] = useState(0);
-  const selectedMonth = parseMonthValue(searchParams.get('month')) ?? parseMonthValue(currentMonthValue());
+  const requestedMonth = parseMonthValue(searchParams.get('month'));
+  const selectedMonth = requestedMonth ?? parseMonthValue(currentMonthValue());
   const currentMonth = currentMonthValue();
   const isNextMonthDisabled = selectedMonth.value >= currentMonth;
 
@@ -53,14 +54,28 @@ function ClubDashboardPage({ currentUser }) {
     setError('');
 
     getClubDashboard(clubPublicId, {
-      year: selectedMonth.year,
-      month: selectedMonth.month,
+      year: requestedMonth?.year,
+      month: requestedMonth?.month,
       memberFilter,
       page: memberPage,
     })
       .then((response) => {
         if (!cancelled) {
-          setDashboard(unwrapData(response, null));
+          const nextDashboard = unwrapData(response, null);
+          setDashboard(nextDashboard);
+          if (!requestedMonth && nextDashboard?.period && nextDashboard.hasMeetingHistory !== false) {
+            setSearchParams((currentParams) => {
+              if (currentParams.has('month')) {
+                return currentParams;
+              }
+              const nextParams = new URLSearchParams(currentParams);
+              nextParams.set(
+                'month',
+                `${nextDashboard.period.year}-${String(nextDashboard.period.month).padStart(2, '0')}`,
+              );
+              return nextParams;
+            }, { replace: true });
+          }
         }
       })
       .catch((requestError) => {
@@ -78,7 +93,7 @@ function ClubDashboardPage({ currentUser }) {
     return () => {
       cancelled = true;
     };
-  }, [clubPublicId, currentUser, memberFilter, memberPage, selectedMonth.month, selectedMonth.year]);
+  }, [clubPublicId, currentUser, memberFilter, memberPage, requestedMonth?.month, requestedMonth?.year, setSearchParams]);
 
   useEffect(() => loadDashboard(), [loadDashboard]);
 
@@ -121,6 +136,23 @@ function ClubDashboardPage({ currentUser }) {
             </ClubState>
           </div>
         ) : (
+          dashboard.hasMeetingHistory === false ? (
+            <div className="club-dashboard-error-state">
+              <ClubState
+                eyebrow="BACKOFFICE"
+                title="아직 모임 이력이 없습니다"
+                description="첫 모임을 만들면 월별 운영 현황과 회원 참여를 확인할 수 있습니다."
+              >
+                <button
+                  className="club-button primary"
+                  type="button"
+                  onClick={() => navigate(`/clubs/${clubPublicId}/meetings/new`)}
+                >
+                  모임 만들기
+                </button>
+              </ClubState>
+            </div>
+          ) : (
           <>
             <header className="club-dashboard-heading">
               <div>
@@ -150,6 +182,7 @@ function ClubDashboardPage({ currentUser }) {
               />
             </section>
           </>
+          )
         )}
     </ClubDashboardLayout>
   );

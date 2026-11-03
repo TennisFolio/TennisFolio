@@ -87,6 +87,20 @@ public class ClubDashboardQueryRepository {
         );
     }
 
+    public LocalDateTime findLatestActiveMeetingStartAt(Long clubId, LocalDateTime to) {
+        QMeeting meeting = QMeeting.meeting;
+        return queryFactory
+                .select(meeting.startAt.max())
+                .from(meeting)
+                .where(
+                        meeting.clubId.eq(clubId),
+                        meeting.deletedAt.isNull(),
+                        meeting.status.ne(MeetingStatus.CANCELLED),
+                        meeting.startAt.loe(to)
+                )
+                .fetchOne();
+    }
+
     private ClubDashboardMemberPage findMemberActivities(
             Long clubId,
             LocalDateTime from,
