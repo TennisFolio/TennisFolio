@@ -1,4 +1,6 @@
 function Footer() {
+  const currentYear = new Date().getFullYear();
+
   return (
     <footer className="footer">
       <div className="footer-inner">
@@ -14,7 +16,7 @@ function Footer() {
         </a>
         <p className="footer-contact">문의: 카카오 오픈채팅 · tennisfolio1029@gmail.com</p>
         <a href="/privacy">개인정보 처리방침</a>
-        <small>© 2025 TennisFolio</small>
+        <small>© {currentYear} TennisFolio</small>
       </div>
     </footer>
   );
