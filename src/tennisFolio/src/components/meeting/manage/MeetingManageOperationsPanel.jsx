@@ -14,6 +14,7 @@ function MeetingManageOperationsPanel({
   sameGenderDoublesOnlyUnavailableReason,
   skillBalancedScheduleUnavailable,
   skillBalancedScheduleUnavailableReason,
+  attendanceStatusCounts,
 }) {
   return (
     <section className="meeting-panel">
@@ -31,6 +32,7 @@ function MeetingManageOperationsPanel({
         sameGenderDoublesOnlyUnavailableReason={sameGenderDoublesOnlyUnavailableReason}
         skillBalancedScheduleUnavailable={skillBalancedScheduleUnavailable}
         skillBalancedScheduleUnavailableReason={skillBalancedScheduleUnavailableReason}
+        attendanceStatusCounts={attendanceStatusCounts}
       />
     </section>
   );

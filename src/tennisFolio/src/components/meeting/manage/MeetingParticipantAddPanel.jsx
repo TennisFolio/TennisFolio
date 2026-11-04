@@ -68,7 +68,11 @@ function MeetingParticipantAddPanel({
       <div className="meeting-participant-add-head">
         <div>
           <h2 id="meeting-participant-add-title">참가자 추가</h2>
-          <p>참석, 대기, 불참 상태로 바로 등록할 수 있습니다.</p>
+          <p>
+            {isClubMeeting
+              ? '총무가 클럽원을 선택하고 참석 상태를 직접 관리합니다.'
+              : '참석, 대기, 불참 상태로 바로 등록할 수 있습니다.'}
+          </p>
         </div>
         <button
           type="button"
@@ -165,6 +169,9 @@ function MeetingParticipantAddPanel({
           </>
         ) : (
           <>
+            <p className="meeting-participant-selection-guide">
+              클럽원 정보는 그대로 불러오며, 이 모임의 참석 상태만 선택합니다.
+            </p>
             <label className="meeting-field">
               <span>클럽원 검색</span>
               <input

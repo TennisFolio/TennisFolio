@@ -27,12 +27,14 @@ class ClubDashboardResponseTest {
                         MeetingStatus.OPEN,
                         14,
                         2
-                ))
+                )),
+                true
         );
 
         assertThat(response.getPeriod().getFrom()).isEqualTo(LocalDate.of(2026, 7, 13));
         assertThat(response.getMemberParticipation().getRate()).isEqualTo(73);
         assertThat(response.getMemberGuestRatio().getGuestRate()).isEqualTo(17);
+        assertThat(response.isHasMeetingHistory()).isTrue();
         assertThat(response.getMeetings().get(0).getGuestAttendanceCount()).isEqualTo(2);
     }
 }

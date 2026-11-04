@@ -147,6 +147,19 @@ class ClubControllerTest {
     }
 
     @Test
+    void getDashboard_passesNoMonthWhenYearAndMonthAreOmitted() {
+        when(clubDashboardQueryService.getDashboard(
+                "club-public-id", 10L, null, ClubDashboardMemberFilter.ALL, 0
+        )).thenReturn(dashboardResponse());
+
+        clubController.getDashboard(10L, "club-public-id", null, null, "all", 0);
+
+        verify(clubDashboardQueryService).getDashboard(
+                "club-public-id", 10L, null, ClubDashboardMemberFilter.ALL, 0
+        );
+    }
+
+    @Test
     void updateClub_passesCurrentUserToCommandService() {
         Long userId = 10L;
         ClubUpdateRequest request = new ClubUpdateRequest("Evening Tennis", "Outdoor club");
@@ -296,7 +309,8 @@ class ClubControllerTest {
                 8,
                 new ClubDashboardMemberParticipation(31, 73, new ClubDashboardMemberPage(List.of(), 0, 10, 0, 0)),
                 new ClubDashboardMemberGuestRatio(58, 12, 83, 17),
-                List.of()
+                List.of(),
+                true
         );
     }
 }

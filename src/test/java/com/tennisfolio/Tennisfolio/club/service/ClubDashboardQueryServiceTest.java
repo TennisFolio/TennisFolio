@@ -73,6 +73,56 @@ class ClubDashboardQueryServiceTest {
                 .isEqualTo(HttpStatus.BAD_REQUEST);
     }
 
+    @Test
+    void getDashboard_usesLatestMeetingMonthWhenCurrentMonthHasNoMeetings() {
+        ClubDashboardMonthlyData emptyData = monthlyData(0);
+        ClubDashboardMonthlyData latestData = monthlyData(2);
+        when(clubAccessService.requireOperator("club-public-id", 10L)).thenReturn(club());
+        when(dashboardQueryRepository.findMonthlyDashboardData(
+                eq(100L), eq(LocalDateTime.of(2026, 8, 1, 0, 0)),
+                eq(LocalDateTime.of(2026, 8, 31, 23, 59, 59, 999_999_999)),
+                eq(ClubDashboardMemberFilter.ALL), eq(0), eq(10)
+        )).thenReturn(emptyData);
+        when(dashboardQueryRepository.findLatestActiveMeetingStartAt(
+                eq(100L), eq(LocalDateTime.of(2026, 8, 31, 23, 59, 59, 999_999_999))
+        ))
+                .thenReturn(LocalDateTime.of(2026, 7, 31, 19, 0));
+        when(dashboardQueryRepository.findMonthlyDashboardData(
+                eq(100L), eq(LocalDateTime.of(2026, 7, 1, 0, 0)),
+                eq(LocalDateTime.of(2026, 7, 31, 23, 59, 59, 999_999_999)),
+                eq(ClubDashboardMemberFilter.ALL), eq(0), eq(10)
+        )).thenReturn(latestData);
+
+        var response = service.getDashboard("club-public-id", 10L, null, ClubDashboardMemberFilter.ALL, 0);
+
+        assertThat(response.getPeriod().getYear()).isEqualTo(2026);
+        assertThat(response.getPeriod().getMonth()).isEqualTo(7);
+        assertThat(response.isHasMeetingHistory()).isTrue();
+    }
+
+    @Test
+    void getDashboard_marksDashboardEmptyWhenNoMeetingHistoryExists() {
+        when(clubAccessService.requireOperator("club-public-id", 10L)).thenReturn(club());
+        when(dashboardQueryRepository.findMonthlyDashboardData(
+                eq(100L), eq(LocalDateTime.of(2026, 8, 1, 0, 0)),
+                eq(LocalDateTime.of(2026, 8, 31, 23, 59, 59, 999_999_999)),
+                eq(ClubDashboardMemberFilter.ALL), eq(0), eq(10)
+        )).thenReturn(monthlyData(0));
+        when(dashboardQueryRepository.findLatestActiveMeetingStartAt(
+                eq(100L), eq(LocalDateTime.of(2026, 8, 31, 23, 59, 59, 999_999_999))
+        )).thenReturn(null);
+
+        var response = service.getDashboard("club-public-id", 10L, null, ClubDashboardMemberFilter.ALL, 0);
+
+        assertThat(response.isHasMeetingHistory()).isFalse();
+    }
+
+    private static ClubDashboardMonthlyData monthlyData(long meetingCount) {
+        return new ClubDashboardMonthlyData(
+                10, meetingCount, 0, 0, 0, new ClubDashboardMemberPage(List.of(), 0, 10, 10, 1), List.of()
+        );
+    }
+
     private static Club club() {
         Club club = new Club("Morning Tennis", "Indoor club", 10L);
         ReflectionTestUtils.setField(club, "id", 100L);

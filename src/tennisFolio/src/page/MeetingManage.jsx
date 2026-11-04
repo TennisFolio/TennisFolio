@@ -50,6 +50,17 @@ function MeetingManage({ initialMeeting = null, initialNotice = null }) {
     () => groupAttendances(attendances),
     [attendances],
   );
+  const attendanceStatusCounts = useMemo(
+    () =>
+      attendances.reduce(
+        (counts, attendance) => ({
+          ...counts,
+          [attendance.attendanceStatus]: (counts[attendance.attendanceStatus] ?? 0) + 1,
+        }),
+        { ATTENDING: 0, WAITING: 0, NOT_ATTENDING: 0 },
+      ),
+    [attendances],
+  );
   const meetingEditDisabled = Boolean(meeting?.competitionCreated);
   const registeredClubMemberIds = useMemo(
     () => new Set(attendances.map((attendance) => attendance.clubMemberId).filter(Boolean)),
@@ -399,6 +410,7 @@ function MeetingManage({ initialMeeting = null, initialNotice = null }) {
           sameGenderDoublesOnlyUnavailableReason={sameGenderDoublesOnlyUnavailableReason}
           skillBalancedScheduleUnavailable={skillBalancedScheduleUnavailable}
           skillBalancedScheduleUnavailableReason={skillBalancedScheduleUnavailableReason}
+          attendanceStatusCounts={attendanceStatusCounts}
         />
 
         <button
@@ -411,9 +423,18 @@ function MeetingManage({ initialMeeting = null, initialNotice = null }) {
         </button>
 
         <div className="meeting-roster-guide">
-          <p className="meeting-participant-edit-hint">
-            참가자를 선택하면 정보를 수정할 수 있어요.
-          </p>
+          {clubPublicId ? (
+            <section className="meeting-operator-guide" aria-label="참석 관리 안내">
+              <div>
+                <strong>참석자 관리</strong>
+                <p>클럽원을 추가하고 참석 상태를 선택하세요. 참석자만 대진표에 포함됩니다.</p>
+              </div>
+            </section>
+          ) : (
+            <p className="meeting-participant-edit-hint">
+              참가자를 선택하면 정보를 수정할 수 있어요.
+            </p>
+          )}
         </div>
 
         <MeetingRosterSections

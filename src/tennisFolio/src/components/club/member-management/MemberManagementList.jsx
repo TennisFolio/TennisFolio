@@ -61,11 +61,11 @@ function MemberManagementList({ members, allMembers, memberStatus, keyword, isLo
               {!isLoading && members.length === 0 && <tr><td colSpan="5">표시할 회원이 없습니다.</td></tr>}
               {!isLoading && members.map((member) => (
                 <tr key={member.id}>
-                  <td>{member.name}</td>
-                  <td><span className={`club-chip ${member.gender === 'FEMALE' ? 'female' : 'male'}`}>{genderLabel(member.gender)}</span></td>
-                  <td>{member.skillTierName ?? '미정'}</td>
-                  <td><span className={`club-member-status ${member.memberStatus.toLowerCase()}`}>{statusLabels[member.memberStatus]}</span></td>
-                  <td><button className="club-button small" type="button" onClick={() => onOpenMember(member.id)}>{member.memberStatus === 'WITHDRAWN' ? '복구' : '수정'}</button></td>
+                  <td data-label="이름">{member.name}</td>
+                  <td data-label="성별"><span className={`club-chip ${member.gender === 'FEMALE' ? 'female' : 'male'}`}>{genderLabel(member.gender)}</span></td>
+                  <td data-label="티어">{member.skillTierName ?? '미정'}</td>
+                  <td data-label="상태"><span className={`club-member-status ${member.memberStatus.toLowerCase()}`}>{statusLabels[member.memberStatus]}</span></td>
+                  <td data-label="작업"><button className="club-button small" type="button" onClick={() => onOpenMember(member.id)}>{member.memberStatus === 'WITHDRAWN' ? '복구' : '수정'}</button></td>
                 </tr>
               ))}
             </tbody>

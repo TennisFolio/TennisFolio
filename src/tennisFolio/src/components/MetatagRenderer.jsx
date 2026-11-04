@@ -1,17 +1,17 @@
-import React from 'react'
 import { Helmet } from 'react-helmet-async';
+
 function MetatagRenderer() {
   return <Helmet>
-    <title>TennisFolio - 테니스 대회 정보</title>
-    <meta name="description" content="TennisFolio는 ATP 실시간 대회 정보를 제공합니다." />
-    <meta name="keywords" content="테니스, ATP, 랭킹, 뉴스, 통계" />
+    <title>TennisFolio | 테니스 복식 대진표와 모임 운영</title>
+    <meta name="description" content="TennisFolio에서 테니스 복식 대진표를 만들고 모임과 경기 일정을 관리하세요." />
+    <meta name="keywords" content="테니스, 복식, 대진표, 모임, 경기 일정" />
     <meta name="author" content="TennisFolio Team" />
-    <meta property="og:title" content="TennisFolio - 테니스 랭킹, 뉴스, 통계" />
-    <meta property="og:description" content="최신 ATP 테니스 랭킹과 경기를 확인하세요." />
-    <meta property="og:image" content="/path/to/image.jpg" />
-    <meta property="og:url" content="https://tennisfolio.net" />
+    <meta property="og:title" content="TennisFolio | 테니스 복식 대진표와 모임 운영" />
+    <meta property="og:description" content="테니스 복식 대진표를 만들고 모임과 경기 일정을 관리하세요." />
+    <meta property="og:image" content="https://tennisfolio.net/img/meta/tennisfolio-preview.png" />
+    <meta property="og:url" content="https://tennisfolio.net/" />
     <meta name="twitter:card" content="summary_large_image" />
   </Helmet>;
 }
 
-export default MetatagRenderer
+export default MetatagRenderer;

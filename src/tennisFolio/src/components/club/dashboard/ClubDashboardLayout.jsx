@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { getMyClubs } from '../../../utils/clubApi';
 import { isClubOperator } from '../clubUtils';
 import { errorMessage, normalizeClub, unwrapData } from '../../../page/club/clubPageUtils';
@@ -9,7 +9,6 @@ function ClubDashboardLayout({ clubPublicId, currentUser, activeMenu, children }
   const [clubs, setClubs] = useState([]);
   const [error, setError] = useState('');
   const [isClubSwitcherOpen, setIsClubSwitcherOpen] = useState(false);
-  const [isDesktopNoticeVisible, setIsDesktopNoticeVisible] = useState(true);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const clubSwitcherRef = useRef(null);
   const selectedClub = useMemo(
@@ -63,7 +62,9 @@ function ClubDashboardLayout({ clubPublicId, currentUser, activeMenu, children }
   return (
     <main className="club-dashboard-page">
       <aside className="club-dashboard-sidebar">
-        <div className="club-dashboard-brand">Tennis<span>Folio</span></div>
+        <Link className="club-dashboard-brand" to="/" aria-label="TennisFolio 홈으로 이동">
+          Tennis<span>Folio</span>
+        </Link>
         <span className="club-dashboard-nav-label">BACKOFFICE</span>
         <button
           className={`club-dashboard-nav ${activeMenu === 'dashboard' ? 'active' : ''}`}
@@ -86,8 +87,6 @@ function ClubDashboardLayout({ clubPublicId, currentUser, activeMenu, children }
         >
           {accountMenuLabel}
         </button>
-        <span className="club-dashboard-nav muted">모임 활동 <small>준비 중</small></span>
-        <span className="club-dashboard-nav muted">참여 현황 <small>준비 중</small></span>
       </aside>
 
       <div className="club-dashboard-content">
@@ -145,7 +144,13 @@ function ClubDashboardLayout({ clubPublicId, currentUser, activeMenu, children }
           <div className="club-dashboard-mobile-menu-backdrop" onClick={() => setIsMobileMenuOpen(false)}>
             <nav id="club-dashboard-mobile-menu" className="club-dashboard-mobile-menu" aria-label="대시보드 메뉴" onClick={(event) => event.stopPropagation()}>
               <header className="club-dashboard-mobile-menu-header">
-                <strong>TennisFolio</strong>
+                <Link
+                  className="club-dashboard-mobile-brand"
+                  to="/"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  TennisFolio
+                </Link>
                 <button type="button" aria-label="대시보드 메뉴 닫기" onClick={() => setIsMobileMenuOpen(false)}>×</button>
               </header>
               <span className="club-dashboard-nav-label">BACKOFFICE</span>
@@ -179,25 +184,8 @@ function ClubDashboardLayout({ clubPublicId, currentUser, activeMenu, children }
               >
                 {accountMenuLabel}
               </button>
-              <span className="muted">모임 활동 <small>준비 중</small></span>
-              <span className="muted">참여 현황 <small>준비 중</small></span>
             </nav>
           </div>
-        )}
-        {isDesktopNoticeVisible && (
-          <aside className="club-dashboard-desktop-notice" role="status">
-            <div>
-              <strong>PC 사용을 권장합니다.</strong>
-              <p>대시보드는 PC에서 더 편리합니다.</p>
-            </div>
-            <button
-              type="button"
-              aria-label="PC 사용 권장 안내 닫기"
-              onClick={() => setIsDesktopNoticeVisible(false)}
-            >
-              닫기
-            </button>
-          </aside>
         )}
         {error && <p className="club-notice danger">{error}</p>}
         {children}

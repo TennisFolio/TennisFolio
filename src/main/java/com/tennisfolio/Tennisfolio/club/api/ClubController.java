@@ -122,7 +122,7 @@ public class ClubController {
 
     private YearMonth resolveDashboardMonth(Integer year, Integer month) {
         if (year == null && month == null) {
-            return YearMonth.now();
+            return null;
         }
         if (year == null || month == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "year와 month를 함께 입력해주세요.");
