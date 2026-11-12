@@ -56,7 +56,7 @@ React 빌드 파일은 S3에 저장하고 CloudFront로 제공합니다. 브라�
 
 EC2의 Docker 환경에서 Spring Boot, Nginx, MariaDB, Redis, Prometheus, Grafana를 실행하고 있습니다. Redis는 경기 데이터 캐싱과 Refresh Token 저장에 사용합니다. Prometheus로 메트릭을 수집하고 Grafana에서 확인합니다.
 
-## 개발하면서 개선한 부분
+## 주요 개발 내용
 
 ### 경기 정보 조회 캐싱
 
@@ -90,5 +90,3 @@ EC2의 Docker 환경에서 Spring Boot, Nginx, MariaDB, Redis, Prometheus, Grafa
 - 남자복식, 여자복식, 혼합복식 등 경기 유형별 참가자 배정
 - 참가자 실력 등급을 고려한 경기 구성
 ---
-
-서비스: https://tennisfolio.net
